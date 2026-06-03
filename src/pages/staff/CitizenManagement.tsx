@@ -17,8 +17,10 @@ import {
   CheckCircle2,
   Check,
   XCircle,
+  MailCheck,
 } from "lucide-react";
 import { supabase, UserProfile } from "@/lib/supabase";
+import { adminConfirmUserEmail } from "@/lib/supabase-admin";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
@@ -52,6 +54,7 @@ export function StaffCitizenManagement() {
   const [activeTab, setActiveTab] = useState<"citizens" | "profile-changes">("citizens");
   const [pendingChanges, setPendingChanges] = useState<PendingProfileChange[]>([]);
   const [loadingChanges, setLoadingChanges] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const [newCitizen, setNewCitizen] = useState({
     firstName: "",
@@ -210,22 +213,80 @@ export function StaffCitizenManagement() {
 
   const handleVerify = async (citizenId: string) => {
     try {
+      // 1. Confirm auth email so citizen can log in immediately
+      const { error: confirmError } = await adminConfirmUserEmail({ userId: citizenId });
+      if (confirmError && !confirmError.includes("SERVICE_ROLE_KEY")) {
+        throw new Error(confirmError);
+      }
+
+      // 2. Mark profile as verified and active
       const { error } = await supabase
         .from("users")
-        .update({ is_verified: true })
+        .update({ is_verified: true, account_status: "active" })
         .eq("id", citizenId);
 
       if (error) throw error;
+
       setCitizens((prev) =>
-        prev.map((c) => (c.id === citizenId ? { ...c, is_verified: true } : c)),
+        prev.map((c) =>
+          c.id === citizenId ? { ...c, is_verified: true, account_status: "active" } : c,
+        ),
       );
       showToast(
-        lang === "sw" ? "Mwananchi amehakikiwa kikamilifu!" : "Citizen verified successfully!",
+        lang === "sw"
+          ? "Mwananchi amehakikiwa! Sasa anaweza kuingia mfumoni."
+          : "Citizen verified! They can now log in.",
         "success",
       );
     } catch (error: unknown) {
       const _e = error as { message?: string };
       showToast(_e.message ?? "An error occurred", "error");
+    }
+  };
+
+  // Confirm email only (without full verification) — for citizens who registered
+  // but never received or clicked the confirmation email
+  const handleConfirmEmail = async (citizen: UserProfile) => {
+    setConfirmingId(citizen.id);
+    try {
+      const { error } = await adminConfirmUserEmail({ userId: citizen.id });
+
+      if (error) {
+        if (error.includes("SERVICE_ROLE_KEY")) {
+          showToast(
+            lang === "sw"
+              ? "Hatua ya ziada: Ongeza VITE_SUPABASE_SERVICE_ROLE_KEY kwenye Vercel."
+              : "Add VITE_SUPABASE_SERVICE_ROLE_KEY to Vercel env vars to use this feature.",
+            "error",
+          );
+          return;
+        }
+        throw new Error(error);
+      }
+
+      // Also activate account so they can log in
+      await supabase
+        .from("users")
+        .update({ account_status: "active" })
+        .eq("id", citizen.id);
+
+      setCitizens((prev) =>
+        prev.map((c) =>
+          c.id === citizen.id ? { ...c, account_status: "active" } : c,
+        ),
+      );
+
+      showToast(
+        lang === "sw"
+          ? `Barua pepe ya ${citizen.first_name} imethibitishwa. Sasa anaweza kuingia.`
+          : `${citizen.first_name}'s email confirmed. They can now log in.`,
+        "success",
+      );
+    } catch (err: unknown) {
+      const _e = err as { message?: string };
+      showToast(_e.message ?? "Failed to confirm email", "error");
+    } finally {
+      setConfirmingId(null);
     }
   };
 
@@ -577,12 +638,27 @@ export function StaffCitizenManagement() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Confirm email button — always visible for unconfirmed citizens */}
+                          <button
+                            onClick={() => handleConfirmEmail(citizen)}
+                            disabled={confirmingId === citizen.id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                            title={lang === "sw" ? "Thibitisha barua pepe — mwananchi ataweza kuingia" : "Confirm email — unblocks login"}
+                          >
+                            {confirmingId === citizen.id ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <MailCheck size={13} />
+                            )}
+                            {lang === "sw" ? "Thibitisha Email" : "Confirm Email"}
+                          </button>
+
                           {!citizen.is_verified && (
                             <>
                               <button
                                 onClick={() => handleVerify(citizen.id)}
                                 className="p-2 hover:bg-emerald-50 rounded-lg transition-colors text-emerald-600"
-                                title={lang === "sw" ? "Thibitisha" : "Verify"}
+                                title={lang === "sw" ? "Hakiki akaunti" : "Verify account"}
                               >
                                 <Check size={18} />
                               </button>

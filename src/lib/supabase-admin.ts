@@ -84,3 +84,26 @@ export async function adminResetPassword(params: {
 
   return { error: error?.message ?? null };
 }
+
+/**
+ * Confirm a user's email in Supabase Auth so they can log in immediately.
+ * Used by staff to unblock citizens who never received the confirmation email.
+ */
+export async function adminConfirmUserEmail(params: {
+  userId: string;
+}): Promise<{ error: string | null }> {
+  const adminClient = getAdminClient();
+
+  if (!adminClient) {
+    return {
+      error:
+        "VITE_SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables.",
+    };
+  }
+
+  const { error } = await adminClient.auth.admin.updateUserById(params.userId, {
+    email_confirm: true,
+  });
+
+  return { error: error?.message ?? null };
+}
