@@ -2209,15 +2209,18 @@ export function Profile() {
                       </select>
                       <input
                         type="tel"
-                        value={formData.phone?.replace(/^\+\d+/, "").replace(/^0/, "") ?? ""}
+                        value={(() => {
+                          const p = formData.phone ?? "";
+                          const code = p.match(/^\+\d+/)?.[0] ?? "+255";
+                          return p.slice(code.length).replace(/^0/, "");
+                        })()}
                         onChange={(e) => {
-                          const digits = e.target.value.replace(/[^0-9]/, "");
+                          const digits = e.target.value.replace(/[^0-9]/g, "");
                           const code = formData.phone?.match(/^\+\d+/)?.[0] ?? "+255";
                           setFormData({ ...formData, phone: code + digits });
                         }}
-                        placeholder="712 345 678"
+                        placeholder="712345678"
                         className="flex-1 h-full px-3 bg-transparent outline-none text-sm text-stone-800"
-                        maxLength={9}
                       />
                     </div>
                     <p className="text-[10px] text-stone-400">
@@ -2261,15 +2264,18 @@ export function Profile() {
                       </select>
                       <input
                         type="tel"
-                        value={formData.alternative_phone?.replace(/^\+\d+/, "").replace(/^0/, "") ?? ""}
+                        value={(() => {
+                          const p = formData.alternative_phone ?? "";
+                          const code = p.match(/^\+\d+/)?.[0] ?? "+255";
+                          return p.slice(code.length).replace(/^0/, "");
+                        })()}
                         onChange={(e) => {
-                          const digits = e.target.value.replace(/[^0-9]/, "");
+                          const digits = e.target.value.replace(/[^0-9]/g, "");
                           const code = formData.alternative_phone?.match(/^\+\d+/)?.[0] ?? "+255";
                           setFormData({ ...formData, alternative_phone: code + digits });
                         }}
-                        placeholder="712 345 678"
+                        placeholder="712345678"
                         className="flex-1 h-full px-3 bg-transparent outline-none text-sm text-stone-800"
-                        maxLength={9}
                       />
                     </div>
                     {validationErrors.alternative_phone && (
