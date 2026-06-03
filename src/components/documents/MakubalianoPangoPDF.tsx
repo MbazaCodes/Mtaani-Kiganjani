@@ -200,8 +200,8 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
         </View>
         <Row label={sw ? "Aina" : "Type"} value={propLabel} />
         <Row label={sw ? "Anwani" : "Address"} value={fd.property_address ?? ""} />
-        {fd.num_rooms && <Row label={sw ? "Vyumba" : "Rooms"} value={fd.num_rooms ?? ""} />}
-        {fd.floor_level && <Row label={sw ? "Ghorofa" : "Floor"} value={fd.floor_level ?? ""} />}
+        {fd.num_rooms ? <Row label={sw ? "Vyumba" : "Rooms"} value={fd.num_rooms ?? ""} /> : <View/>}
+        {fd.floor_level ? <Row label={sw ? "Ghorofa" : "Floor"} value={fd.floor_level ?? ""} /> : <View/>}
         {utilLabels && (
           <Row label={sw ? "Huduma Zilizojumuishwa" : "Utilities Included"} value={utilLabels} />
         )}

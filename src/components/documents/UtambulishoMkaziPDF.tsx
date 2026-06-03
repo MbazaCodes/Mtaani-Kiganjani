@@ -87,7 +87,7 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
           <Text style={s.office}>
             OFISI YA RAIS — TAWALA ZA MIKOA NA SERIKALI ZA MITAA (TAMISEMI)
           </Text>
-          {fd.council && <Text style={s.council}>{String(fd.council)}</Text>}
+          {fd.council ? <Text style={s.council}>{String(fd.council)}</Text> : <View/>}
           <View style={s.divider} />
         </View>
 
@@ -157,7 +157,7 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
               <Text style={s.sectionTitle}>{L.purpose}</Text>
             </View>
             <Row label={L.purposeLabel} value={fd.purpose ?? ""} />
-            {fd.institution_name && <Row label={L.institution} value={fd.institution_name ?? ""} />}
+            {fd.institution_name ? <Row label={L.institution} value={fd.institution_name ?? ""} /> : <View/>}
           </>
         )}
 

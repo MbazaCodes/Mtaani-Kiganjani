@@ -183,7 +183,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
               <Row label={sw ? "Jina" : "Name"} value={formatFullName(user)} />
               <Row label="NIDA" value={user?.nida_number} />
               <Row label={sw ? "Raia ID" : "Cit. ID"} value={user?.citizen_id} />
-              {fd.seller_tin && <Row label="TIN" value={fd.seller_tin ?? ""} />}
+              {fd.seller_tin ? <Row label="TIN" value={fd.seller_tin ?? ""} /> : <View/>}
             </View>
           </View>
           <View style={s.colRight}>

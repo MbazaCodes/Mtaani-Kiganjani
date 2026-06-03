@@ -106,7 +106,7 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
         {/* Event banner */}
         <View style={ls.eventBanner}>
           <Text style={ls.bannerTitle}>{eventLabel || (sw ? "TUKIO" : "EVENT")}</Text>
-          {fd.event_name && <Text style={ls.bannerSub}>{String(fd.event_name)}</Text>}
+          {fd.event_name ? <Text style={ls.bannerSub}>{String(fd.event_name)}</Text> : <View/>}
         </View>
 
         {/* Guests box */}
@@ -148,7 +148,7 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
         </View>
         <Row label={sw ? "Mwasiliano" : "Contact Person"} value={fd.contact_person ?? ""} />
         <Row label={sw ? "Simu" : "Phone"} value={fd.contact_phone ?? ""} />
-        {fd.whatsapp_group && <Row label="WhatsApp" value={fd.whatsapp_group ?? ""} />}
+        {fd.whatsapp_group ? <Row label="WhatsApp" value={fd.whatsapp_group ?? ""} /> : <View/>}
 
         {/* Signatures */}
         <View style={s.signatureSection}>

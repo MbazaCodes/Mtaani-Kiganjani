@@ -138,7 +138,7 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
         </View>
         <Row label={sw ? "Mwakilishi" : "Representative"} value={fd.family_representative ?? ""} />
         <Row label={sw ? "Simu" : "Phone"} value={fd.representative_phone ?? ""} />
-        {fd.children_names && <Row label={sw ? "Watoto" : "Children"} value={fd.children_names ?? ""} />}
+        {fd.children_names ? <Row label={sw ? "Watoto" : "Children"} value={fd.children_names} /> : <View/>}
 
         {/* Stamp + signature */}
         <View style={s.signatureSection}>

@@ -148,7 +148,7 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         {/* Type banner */}
         <View style={[ls.banner, { backgroundColor: isDispute ? "#e11d48" : "#d97706" }]}>
           <Text style={ls.bannerTitle}>{typeLabel}</Text>
-          {fd.title && <Text style={ls.bannerSub}>{String(fd.title)}</Text>}
+          {fd.title ? <Text style={ls.bannerSub}>{String(fd.title)}</Text> : <View/>}
         </View>
 
         {/* Urgency badge */}

@@ -135,8 +135,8 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={[ls.recipientLine, { fontWeight: "bold" }]}>
             {firstInst.name || (sw ? "TAASISI HUSIKA" : "CONCERNED INSTITUTION")}
           </Text>
-          {firstInst.department && <Text style={ls.recipientLine}>{firstInst.department}</Text>}
-          {firstInst.address && <Text style={ls.recipientLine}>{firstInst.address}</Text>}
+          {firstInst.department ? <Text style={ls.recipientLine}>{String(firstInst.department ?? "")}</Text> : <View/>}
+          {firstInst.address ? <Text style={ls.recipientLine}>{String(firstInst.address ?? "")}</Text> : <View/>}
         </View>
 
         {/* Subject */}
