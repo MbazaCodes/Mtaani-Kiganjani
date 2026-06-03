@@ -93,5 +93,19 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1"
-  }
+  },
+  "version": "1.0.0",
+  "description": "",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://YOUR_USERNAME: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@github.com/MbazaCodes/mtaa-connect-spark.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MbazaCodes/mtaa-connect-spark/issues"
+  },
+  "homepage": "https://github.com/MbazaCodes/mtaa-connect-spark#readme"
 }
