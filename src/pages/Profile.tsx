@@ -287,6 +287,9 @@ interface FormData {
   disability_status: string;
   religious_affiliation: string;
   tribe: string;
+
+  // Profile photo
+  photo_url?: string;
 }
 
 // Constants
@@ -889,12 +892,17 @@ export function Profile() {
 
       if (error) throw error;
 
+      // Show immediately — don't wait for DB round-trip
+      setFormData((prev) => ({ ...prev, photo_url: base64data }));
+
       showToast(
         lang === "sw" ? "Picha imepakiwa kikamilifu!" : "Profile picture uploaded successfully!",
         "success",
       );
 
+      setIsProfileImageBroken(false);   // reset broken-image flag so new photo renders
       await fetchCompleteProfile();
+      await refreshProfile();           // update user.photo_url in AuthContext
     } catch (error) {
       console.error("Error uploading photo:", error);
       showToast(
@@ -1302,9 +1310,9 @@ export function Profile() {
                 whileHover={{ scale: 1.05 }}
                 className="w-32 h-32 rounded-full bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center text-4xl font-black overflow-hidden shadow-2xl"
               >
-                {user?.photo_url && !isProfileImageBroken ? (
+                {(formData.photo_url || user?.photo_url) && !isProfileImageBroken ? (
                   <img
-                    src={user.photo_url}
+                    src={formData.photo_url || user?.photo_url}
                     alt="Profile"
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
