@@ -139,7 +139,7 @@ export function Applications({
     if (!user) return;
     setProcessingId(app.id);
     try {
-      const serviceName = app.service_name || (app as any).services?.name || "";
+      const serviceName = app.service_name || app.service_name || (app as any).services?.name || "—" || "";
       const fd = (app.form_data || {}) as Record<string, unknown>;
       const isBuyer =
         serviceName.includes("Mauzo") && String(fd.buyer_nida || "") === user.nida_number;
@@ -177,8 +177,8 @@ export function Applications({
       .filter((app) => {
         const serviceName =
           lang === "sw"
-            ? (app as any).services?.name
-            : (app as any).services?.name_en || (app as any).services?.name;
+            ? app.service_name || (app as any).services?.name || ""
+            : (app as any).services?.name_en || app.service_name || (app as any).services?.name || "";
         const matchesSearch =
           serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           app.application_number.toLowerCase().includes(searchTerm.toLowerCase());
@@ -443,8 +443,8 @@ export function Applications({
                   <td className="px-3 sm:px-6 py-3 sm:py-4">
                     <p className="font-semibold text-stone-800">
                       {lang === "sw"
-                        ? (app as any).services?.name
-                        : (app as any).services?.name_en || (app as any).services?.name}
+                        ? app.service_name || (app as any).services?.name || "—"
+                        : (app as any).services?.name_en || app.service_name || (app as any).services?.name || "—"}
                     </p>
                   </td>
                   <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm text-stone-500 font-mono">
@@ -537,8 +537,8 @@ export function Applications({
                 <div>
                   <p className="font-bold text-stone-900">
                     {lang === "sw"
-                      ? (app as any).services?.name
-                      : (app as any).services?.name_en || (app as any).services?.name}
+                      ? app.service_name || (app as any).services?.name || "—"
+                      : (app as any).services?.name_en || app.service_name || (app as any).services?.name || "—"}
                   </p>
                   <p className="text-xs text-stone-500 font-mono mt-1">{app.application_number}</p>
                 </div>
