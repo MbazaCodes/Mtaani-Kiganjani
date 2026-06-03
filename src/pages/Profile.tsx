@@ -803,18 +803,33 @@ export function Profile() {
   const validatePhoneNumber = (phone: string): { isValid: boolean; message: string } => {
     if (!phone) return { isValid: true, message: "" };
 
-    const tzPhoneRegex = /^(?:(?:\+255|0)[67]\d{8})$/;
-    if (!tzPhoneRegex.test(phone)) {
+    // Strip spaces and dashes for validation
+    const clean = phone.replace(/[\s\-]/g, "");
+
+    // Tanzania: +2556XXXXXXXX, +2557XXXXXXXX, 06XXXXXXXX, 07XXXXXXXX (9 local digits after 0/+255)
+    const tzFull   = /^\+255[67]\d{8}$/;   // +255 6/7 + 8 digits = 13 chars
+    const tzLocal  = /^0[67]\d{8}$/;         // 0 6/7 + 8 digits   = 10 chars
+    const intl     = /^\+[1-9]\d{6,14}$/;   // any international number
+
+    if (!tzFull.test(clean) && !tzLocal.test(clean) && !intl.test(clean)) {
       return {
         isValid: false,
         message:
           lang === "sw"
-            ? "Namba ya simu sio sahihi. Tumia +255XXXXXXXXX au 0XXXXXXXXX"
-            : "Invalid phone number. Use +255XXXXXXXXX or 0XXXXXXXXX",
+            ? "Namba sio sahihi. Mfano: +255712345678 au 0712345678"
+            : "Invalid number. Example: +255712345678 or 0712345678",
       };
     }
 
     return { isValid: true, message: "" };
+  };
+
+  // Normalise phone to +255XXXXXXXXX before saving
+  const normalisePhone = (phone: string): string => {
+    if (!phone) return phone;
+    const clean = phone.replace(/[\s\-]/g, "");
+    if (/^0[67]\d{8}$/.test(clean)) return "+255" + clean.slice(1);
+    return clean;
   };
 
   // Handle refresh
@@ -1087,6 +1102,13 @@ export function Profile() {
       // Format NIDA number by removing dashes for storage
       const formattedNida = formData.nida_number.replace(/-/g, "");
 
+      // Normalise phone numbers to +255XXXXXXXXX format before saving
+      const normalisedFormData = {
+        ...formData,
+        phone: formData.phone ? normalisePhone(formData.phone) : formData.phone,
+        alternative_phone: formData.alternative_phone ? normalisePhone(formData.alternative_phone) : formData.alternative_phone,
+      };
+
       const sensitiveUpdates: { field: string; oldValue: string; newValue: string }[] = [];
       const directUpdates: Record<string, any> = {};
 
@@ -1098,7 +1120,7 @@ export function Profile() {
         .single();
 
       // Check which fields changed
-      for (const [field, newValue] of Object.entries(formData)) {
+      for (const [field, newValue] of Object.entries(normalisedFormData)) {
         // Skip fields that are not in the database
         if (!UPDATABLE_FIELDS.includes(field)) continue;
 
@@ -1107,7 +1129,7 @@ export function Profile() {
 
         if (compareValue !== oldValue) {
           if (SENSITIVE_FIELDS.includes(field)) {
-            sensitiveUpdates.push({ field, oldValue, newValue: compareValue });
+            sensitiveUpdates.push({ field, oldValue, newValue: String(compareValue) });
           } else {
             directUpdates[field] = compareValue;
           }
@@ -2159,17 +2181,48 @@ export function Profile() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
-                      {getFieldLabel("phone")} <span className="text-red-500">*</span>
+                      {getFieldLabel("phone")} {user?.role === "citizen" && <span className="text-red-500">*</span>}
                     </label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+255 XXX XXX XXX"
-                      className={`w-full h-12 px-4 bg-stone-50 border rounded-xl focus:ring-2 focus:ring-emerald-500 transition-all ${
-                        validationErrors.phone ? "border-red-300 bg-red-50" : "border-stone-200"
-                      }`}
-                    />
+                    <div className={`flex h-12 bg-stone-50 border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 transition-all ${
+                      validationErrors.phone ? "border-red-300 bg-red-50" : "border-stone-200"
+                    }`}>
+                      <select
+                        value={formData.phone?.startsWith("+255") || !formData.phone ? "+255" : formData.phone.startsWith("0") ? "+255" : formData.phone.match(/^\+\d+/)?.[0] ?? "+255"}
+                        onChange={(e) => {
+                          const code = e.target.value;
+                          const local = formData.phone?.replace(/^\+\d+\s*|^0/, "") ?? "";
+                          setFormData({ ...formData, phone: code + local });
+                        }}
+                        className="h-full px-2 bg-stone-100 border-r border-stone-200 text-sm font-bold text-stone-700 outline-none cursor-pointer"
+                        aria-label="Country code"
+                      >
+                        <option value="+255">🇹🇿 +255</option>
+                        <option value="+254">🇰🇪 +254</option>
+                        <option value="+256">🇺🇬 +256</option>
+                        <option value="+250">🇷🇼 +250</option>
+                        <option value="+243">🇨🇩 +243</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+966">🇸🇦 +966</option>
+                        <option value="+27">🇿🇦 +27</option>
+                      </select>
+                      <input
+                        type="tel"
+                        value={formData.phone?.replace(/^\+\d+/, "").replace(/^0/, "") ?? ""}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/[^0-9]/, "");
+                          const code = formData.phone?.match(/^\+\d+/)?.[0] ?? "+255";
+                          setFormData({ ...formData, phone: code + digits });
+                        }}
+                        placeholder="712 345 678"
+                        className="flex-1 h-full px-3 bg-transparent outline-none text-sm text-stone-800"
+                        maxLength={9}
+                      />
+                    </div>
+                    <p className="text-[10px] text-stone-400">
+                      {lang === "sw" ? "Ingiza namba kuanzia 6 au 7 (bila sufuri)" : "Enter number starting with 6 or 7 (no leading zero)"}
+                    </p>
                     {validationErrors.phone && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <AlertCircle size={12} />
@@ -2182,19 +2235,43 @@ export function Profile() {
                     <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
                       {getFieldLabel("alternative_phone")}
                     </label>
-                    <input
-                      type="tel"
-                      value={formData.alternative_phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, alternative_phone: e.target.value })
-                      }
-                      placeholder="+255 XXX XXX XXX"
-                      className={`w-full h-12 px-4 bg-stone-50 border rounded-xl focus:ring-2 focus:ring-emerald-500 transition-all ${
-                        validationErrors.alternative_phone
-                          ? "border-red-300 bg-red-50"
-                          : "border-stone-200"
-                      }`}
-                    />
+                    <div className={`flex h-12 bg-stone-50 border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 transition-all ${
+                      validationErrors.alternative_phone ? "border-red-300 bg-red-50" : "border-stone-200"
+                    }`}>
+                      <select
+                        value={formData.alternative_phone?.match(/^\+\d+/)?.[0] ?? "+255"}
+                        onChange={(e) => {
+                          const code = e.target.value;
+                          const local = formData.alternative_phone?.replace(/^\+\d+\s*|^0/, "") ?? "";
+                          setFormData({ ...formData, alternative_phone: code + local });
+                        }}
+                        className="h-full px-2 bg-stone-100 border-r border-stone-200 text-sm font-bold text-stone-700 outline-none cursor-pointer"
+                        aria-label="Alternative phone country code"
+                      >
+                        <option value="+255">🇹🇿 +255</option>
+                        <option value="+254">🇰🇪 +254</option>
+                        <option value="+256">🇺🇬 +256</option>
+                        <option value="+250">🇷🇼 +250</option>
+                        <option value="+243">🇨🇩 +243</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+966">🇸🇦 +966</option>
+                        <option value="+27">🇿🇦 +27</option>
+                      </select>
+                      <input
+                        type="tel"
+                        value={formData.alternative_phone?.replace(/^\+\d+/, "").replace(/^0/, "") ?? ""}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/[^0-9]/, "");
+                          const code = formData.alternative_phone?.match(/^\+\d+/)?.[0] ?? "+255";
+                          setFormData({ ...formData, alternative_phone: code + digits });
+                        }}
+                        placeholder="712 345 678"
+                        className="flex-1 h-full px-3 bg-transparent outline-none text-sm text-stone-800"
+                        maxLength={9}
+                      />
+                    </div>
                     {validationErrors.alternative_phone && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <AlertCircle size={12} />
