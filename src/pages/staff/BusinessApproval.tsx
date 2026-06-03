@@ -155,21 +155,10 @@ export const BusinessApproval: React.FC = () => {
   const fetchRegistrations = async () => {
     setLoading(true);
     try {
+      // business_registrations.user_id references auth.users — join via public.users separately
       let query = supabase
         .from("business_registrations")
-        .select(
-          `
-          *,
-          user:users!business_registrations_user_id_fkey(
-            first_name,
-            middle_name,
-            last_name,
-            citizen_id,
-            nida_number,
-            photo_url
-          )
-        `,
-        )
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (statusFilter !== "all") {
@@ -182,7 +171,21 @@ export const BusinessApproval: React.FC = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setRegistrations(data || []);
+
+      // Enrich with user profile from public.users (since business_registrations FK points to auth.users)
+      const enriched = await Promise.all(
+        (data || []).map(async (reg) => {
+          if (!reg.user_id) return reg;
+          const { data: userProfile } = await supabase
+            .from("users")
+            .select("first_name, middle_name, last_name, citizen_id, nida_number, photo_url")
+            .eq("id", reg.user_id)
+            .maybeSingle();
+          return { ...reg, user: userProfile ?? null };
+        }),
+      );
+
+      setRegistrations(enriched);
 
       // Calculate stats
       const allRegs = data || [];
