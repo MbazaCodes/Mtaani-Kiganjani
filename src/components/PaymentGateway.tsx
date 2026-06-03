@@ -12,6 +12,8 @@ import {
   Loader2,
   ChevronRight,
   ShieldCheck,
+  Download,
+  Share2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Language, useTranslation } from "@/lib/i18n";
@@ -20,6 +22,8 @@ import { formatCurrency, CurrencyCode } from "@/lib/currency";
 interface PaymentGatewayProps {
   amount: number;
   applicationId: string;
+  serviceName?: string;
+  applicationNumber?: string;
   onSuccess: (paymentData: PaymentResult) => void;
   onCancel: () => void;
   lang: Language;
@@ -33,6 +37,8 @@ type BankProvider = "nmb" | "crdb";
 export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   amount,
   applicationId,
+  serviceName,
+  applicationNumber,
   onSuccess,
   onCancel,
   lang,
@@ -434,14 +440,43 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                   </div>
                 )}
 
-                <div className="pt-4">
+                {/* Download + Share actions */}
+                <div className="space-y-3 w-full">
                   <button
                     onClick={() =>
                       onSuccess(paymentResult as unknown as import("@/types").PaymentResult)
                     }
-                    className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all"
+                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
                   >
-                    {lang === "sw" ? "Endelea" : "Continue"}
+                    <Download className="h-4 w-4" />
+                    {lang === "sw" ? "Pakua Cheti" : "Download Certificate"}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const shareData = {
+                        title: serviceName || (lang === "sw" ? "Hati Rasmi" : "Official Certificate"),
+                        text: lang === "sw"
+                          ? `Hati yangu rasmi ya ${serviceName} — Namba: ${applicationNumber}`
+                          : `My official ${serviceName} certificate — Ref: ${applicationNumber}`,
+                        url: `${window.location.origin}/verify?ref=${applicationNumber}`,
+                      };
+                      if (navigator.share && navigator.canShare?.(shareData)) {
+                        try { await navigator.share(shareData); } catch {}
+                      } else {
+                        await navigator.clipboard.writeText(shareData.url);
+                        alert(lang === "sw" ? "Kiungo kimekopwa!" : "Link copied!");
+                      }
+                    }}
+                    className="w-full py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    {lang === "sw" ? "Shiriki Cheti" : "Share Certificate"}
+                  </button>
+                  <button
+                    onClick={onCancel}
+                    className="w-full py-2 text-stone-400 hover:text-stone-600 text-sm transition-colors"
+                  >
+                    {lang === "sw" ? "Funga" : "Close"}
                   </button>
                 </div>
               </motion.div>

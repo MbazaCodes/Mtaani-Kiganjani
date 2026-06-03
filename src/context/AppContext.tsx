@@ -239,19 +239,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const handleInitiatePayment = useCallback(
     (app: Application) => {
-      const amount = getPaymentAmount(app);
-      if (!amount || amount <= 0) {
-        showToast(
-          lang === "sw"
-            ? "Kiasi cha malipo hakikupatikana."
-            : "No payment amount found for this application.",
-          "error",
-        );
-        return;
-      }
+      // For approved applications, always open payment gateway
+      // (fee may be 0 for free services — still show the confirmation flow)
       setPayingApplication(app);
     },
-    [getPaymentAmount, lang, showToast],
+    [],
   );
 
   const handlePaymentSuccess = useCallback(
@@ -275,8 +267,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               app.id === payingApplication.id
                 ? {
                     ...app,
-                    status: "paid",
+                    status: "issued",
                     paid_at: new Date().toISOString(),
+                    issued_at: new Date().toISOString(),
                     payment_data: paymentInfo,
                   }
                 : app,
@@ -292,7 +285,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { error } = await supabase
         .from("applications")
         .update({
-          status: "paid",
+          status: "issued",
+          issued_at: new Date().toISOString(),
           form_data: { ...(payingApplication.form_data ?? {}), payment_data: paymentInfo },
         })
         .eq("id", payingApplication.id);

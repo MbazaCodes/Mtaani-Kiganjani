@@ -99,6 +99,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           <PaymentGateway
             applicationId={payingApplication.id}
             amount={getPaymentAmount(payingApplication)}
+            serviceName={payingApplication.service_name}
+            applicationNumber={payingApplication.application_number}
             onSuccess={handlePaymentSuccess}
             onCancel={handleCancelPayment}
             lang={lang}

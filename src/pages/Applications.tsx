@@ -18,6 +18,7 @@ import {
   Receipt,
   CheckCircle2,
   AlertCircle,
+  Share2,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
@@ -338,6 +339,52 @@ export function Applications({
     );
   };
 
+
+  // ── Share Certificate ──────────────────────────────────────────────────────
+  const ShareCertificateButton = ({ app, lang }: { app: Application; lang: string }) => {
+    const [sharing, setSharing] = useState(false);
+
+    const handleShare = async () => {
+      setSharing(true);
+      try {
+        const shareData = {
+          title: app.service_name || (lang === "sw" ? "Hati Rasmi" : "Official Certificate"),
+          text: lang === "sw"
+            ? `Hati yangu rasmi ya ${app.service_name} — Namba: ${app.application_number}`
+            : `My official ${app.service_name} certificate — Ref: ${app.application_number}`,
+          url: `${window.location.origin}/verify?ref=${app.application_number}`,
+        };
+
+        if (navigator.share && navigator.canShare?.(shareData)) {
+          await navigator.share(shareData);
+        } else {
+          // Fallback: copy link to clipboard
+          await navigator.clipboard.writeText(shareData.url);
+          showToast(
+            lang === "sw" ? "Kiungo kimekopwa!" : "Link copied to clipboard!",
+            "success",
+          );
+        }
+      } catch (err) {
+        // User cancelled share — not an error
+      } finally {
+        setSharing(false);
+      }
+    };
+
+    return (
+      <button
+        onClick={(e) => { e.stopPropagation(); handleShare(); }}
+        disabled={sharing}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+        title={lang === "sw" ? "Shiriki Hati" : "Share Certificate"}
+      >
+        <Share2 size={13} />
+        {lang === "sw" ? "Shiriki" : "Share"}
+      </button>
+    );
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -503,27 +550,25 @@ export function Applications({
                     {(app.status === "submitted" || app.status === "pending_payment") &&
                     getPaymentAmount(app) > 0 ? (
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onPay(app);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); onPay(app); }}
                         className="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all"
                       >
                         {t("payNow")} ({formatCurrency(getPaymentAmount(app), displayCurrency)})
                       </button>
+                    ) : app.status === "approved" ? (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onPay(app); }}
+                        className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-all flex items-center gap-1.5"
+                      >
+                        <CreditCard size={13} />
+                        {lang === "sw" ? "Lipia & Pakua" : "Pay & Download"}
+                        {getPaymentAmount(app) > 0 && ` · ${formatCurrency(getPaymentAmount(app), displayCurrency)}`}
+                      </button>
                     ) : app.status === "issued" ? (
-                      <div className="flex items-center justify-end gap-3">
-                        <ReceiptDownloadLink app={app} />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPreviewApp(app);
-                          }}
-                          className="text-stone-600 text-sm font-bold hover:underline"
-                        >
-                          {t("preview")}
-                        </button>
+                      <div className="flex items-center justify-end gap-2 flex-wrap">
                         <CertificateDownloadLink app={app} />
+                        <ReceiptDownloadLink app={app} />
+                        <ShareCertificateButton app={app} lang={lang} />
                       </div>
                     ) : (
                       <button
@@ -571,28 +616,26 @@ export function Applications({
                 {(app.status === "submitted" || app.status === "pending_payment") &&
                 getPaymentAmount(app) > 0 ? (
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onPay(app);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); onPay(app); }}
                     className="w-full bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700"
                   >
                     {t("payNow")} ({formatCurrency(getPaymentAmount(app), displayCurrency)})
                   </button>
+                ) : app.status === "approved" ? (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onPay(app); }}
+                    className="w-full bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 flex items-center justify-center gap-2"
+                  >
+                    <CreditCard size={14} />
+                    {lang === "sw" ? "Lipia & Pakua" : "Pay & Download"}
+                    {getPaymentAmount(app) > 0 && ` · ${formatCurrency(getPaymentAmount(app), displayCurrency)}`}
+                  </button>
                 ) : app.status === "issued" ? (
                   <div className="space-y-2">
-                    <MobileReceiptDownloadLink app={app} />
+                    <MobileCertificateDownloadLink app={app} />
                     <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPreviewApp(app);
-                        }}
-                        className="flex-1 h-10 bg-stone-100 text-stone-600 rounded-xl text-xs font-bold"
-                      >
-                        {t("preview")}
-                      </button>
-                      <MobileCertificateDownloadLink app={app} />
+                      <MobileReceiptDownloadLink app={app} />
+                      <ShareCertificateButton app={app} lang={lang} />
                     </div>
                   </div>
                 ) : (
@@ -822,21 +865,26 @@ export function Applications({
 
               {/* Footer actions */}
               <div className="px-6 py-4 border-t border-stone-100 bg-stone-50 flex gap-3">
-                {selectedApp.status === "pending_payment" && (
+                {(selectedApp.status === "pending_payment" ||
+                  selectedApp.status === "approved") && (
                   <button
                     onClick={() => { onPay(selectedApp); setSelectedApp(null); }}
-                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all"
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
                   >
-                    {lang === "sw" ? "Lipia Sasa" : "Pay Now"}
+                    <CreditCard size={16} />
+                    {selectedApp.status === "approved"
+                      ? (lang === "sw" ? "Lipia & Pakua" : "Pay & Download")
+                      : (lang === "sw" ? "Lipia Sasa" : "Pay Now")}
                   </button>
                 )}
                 {selectedApp.status === "issued" && (
-                  <button
-                    onClick={() => { setPreviewApp(selectedApp); setSelectedApp(null); }}
-                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all"
-                  >
-                    {lang === "sw" ? "Angalia Hati" : "View Document"}
-                  </button>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <CertificateDownloadLink app={selectedApp} />
+                    <div className="flex gap-2">
+                      <ReceiptDownloadLink app={selectedApp} />
+                      <ShareCertificateButton app={selectedApp} lang={lang} />
+                    </div>
+                  </div>
                 )}
                 <button
                   onClick={() => setSelectedApp(null)}
