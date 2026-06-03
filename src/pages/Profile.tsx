@@ -1061,7 +1061,8 @@ export function Profile() {
       errors.last_name = lang === "sw" ? "Jina la mwisho linahitajika" : "Last name is required";
     }
 
-    if (!formData.phone) {
+    // Phone required for citizens only — staff/admin may not have one set at creation
+    if (!formData.phone && user?.role === "citizen") {
       errors.phone = lang === "sw" ? "Namba ya simu inahitajika" : "Phone number is required";
     }
 
