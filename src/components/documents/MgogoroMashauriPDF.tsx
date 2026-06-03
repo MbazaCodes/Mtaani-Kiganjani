@@ -180,11 +180,11 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
             {fd.respondent_in_system ? (
               <View style={s.twoCol}>
                 <View style={s.colLeft}>
-                  <Row label={sw ? "Jina" : "Name"} value={fd.respondent_name} />
+                  <Row label={sw ? "Jina" : "Name"} value={fd.respondent_name ?? ""} />
                   <Row label="NIDA" value={fd.respondent_nida || (fd as any).target_user_nida} />
                 </View>
                 <View style={s.colRight}>
-                  <Row label={sw ? "Simu" : "Phone"} value={fd.respondent_phone} />
+                  <Row label={sw ? "Simu" : "Phone"} value={fd.respondent_phone ?? ""} />
                   <Row
                     label={sw ? "Hali" : "Status"}
                     value={sw ? "Yupo kwenye mfumo ✓" : "In system ✓"}
@@ -198,10 +198,10 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
                   value={fd.respondent_name_manual || fd.respondent_name}
                 />
                 {fd.respondent_phone_manual && (
-                  <Row label={sw ? "Simu" : "Phone"} value={fd.respondent_phone_manual} />
+                  <Row label={sw ? "Simu" : "Phone"} value={fd.respondent_phone_manual ?? ""} />
                 )}
                 {fd.respondent_address_manual && (
-                  <Row label={sw ? "Anwani" : "Address"} value={fd.respondent_address_manual} />
+                  <Row label={sw ? "Anwani" : "Address"} value={fd.respondent_address_manual ?? ""} />
                 )}
                 <Row
                   label={sw ? "Hali" : "Status"}
@@ -218,13 +218,13 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>{sw ? "ENEO LA TATIZO" : "ISSUE LOCATION"}</Text>
             </View>
-            <Row label={sw ? "Mahali" : "Location"} value={fd.issue_location} />
+            <Row label={sw ? "Mahali" : "Location"} value={fd.issue_location ?? ""} />
             <View style={s.twoCol}>
               <View style={s.colLeft}>
-                <Row label={sw ? "Kata" : "Ward"} value={fd.issue_ward} />
+                <Row label={sw ? "Kata" : "Ward"} value={fd.issue_ward ?? ""} />
               </View>
               <View style={s.colRight}>
-                <Row label={sw ? "Wilaya" : "District"} value={fd.issue_district} />
+                <Row label={sw ? "Wilaya" : "District"} value={fd.issue_district ?? ""} />
               </View>
             </View>
           </>
@@ -234,9 +234,9 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{sw ? "MAELEZO YA SHAURI" : "CASE DETAILS"}</Text>
         </View>
-        <Row label={sw ? "Kichwa" : "Title"} value={fd.title} />
+        <Row label={sw ? "Kichwa" : "Title"} value={fd.title ?? ""} />
         {fd.incident_date && (
-          <Row label={sw ? "Tarehe ya Tukio" : "Incident Date"} value={fd.incident_date} />
+          <Row label={sw ? "Tarehe ya Tukio" : "Incident Date"} value={fd.incident_date ?? ""} />
         )}
         {isDispute && resolution && (
           <Row

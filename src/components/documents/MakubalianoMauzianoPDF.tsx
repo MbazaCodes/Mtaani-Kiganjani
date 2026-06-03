@@ -154,8 +154,8 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           {isRental && fd.payment_period && (
             <Text style={{ fontSize: 8, color: "#92400e", marginTop: 3 }}>
               {sw
-                ? `Muda wa Pango: ${fd.payment_period} miezi`
-                : `Rental Period: ${fd.payment_period} months`}
+                ? `Muda wa Pango: ${fd.payment_period ?? ""} miezi`
+                : `Rental Period: ${fd.payment_period ?? ""} months`}
             </Text>
           )}
         </View>
@@ -183,7 +183,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
               <Row label={sw ? "Jina" : "Name"} value={formatFullName(user)} />
               <Row label="NIDA" value={user?.nida_number} />
               <Row label={sw ? "Raia ID" : "Cit. ID"} value={user?.citizen_id} />
-              {fd.seller_tin && <Row label="TIN" value={fd.seller_tin} />}
+              {fd.seller_tin && <Row label="TIN" value={fd.seller_tin ?? ""} />}
             </View>
           </View>
           <View style={s.colRight}>
@@ -194,7 +194,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
                 value={fd.second_party_name || fd.buyer_name || fd.tenant_name}
               />
               <Row label="NIDA" value={fd.buyer_nida || fd.tenant_nida || fd.target_user_nida} />
-              <Row label={sw ? "Raia ID" : "Cit. ID"} value={fd.second_party_citizen_id} />
+              <Row label={sw ? "Raia ID" : "Cit. ID"} value={fd.second_party_citizen_id ?? ""} />
             </View>
           </View>
         </View>

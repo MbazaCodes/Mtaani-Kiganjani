@@ -128,8 +128,8 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
                     : user?.sex
               }
             />
-            <Row label={L.marital} value={fd.marital_status} />
-            <Row label={L.occupation} value={fd.occupation} />
+            <Row label={L.marital} value={fd.marital_status ?? ""} />
+            <Row label={L.occupation} value={fd.occupation ?? ""} />
           </View>
         </View>
 
@@ -145,8 +145,8 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
             <Row label={L.street} value={user?.street} />
           </View>
           <View style={s.colRight}>
-            <Row label={L.neighborhood} value={fd.neighborhood} />
-            <Row label={L.houseNo} value={fd.house_number} />
+            <Row label={L.neighborhood} value={fd.neighborhood ?? ""} />
+            <Row label={L.houseNo} value={fd.house_number ?? ""} />
           </View>
         </View>
 
@@ -156,8 +156,8 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>{L.purpose}</Text>
             </View>
-            <Row label={L.purposeLabel} value={fd.purpose} />
-            {fd.institution_name && <Row label={L.institution} value={fd.institution_name} />}
+            <Row label={L.purposeLabel} value={fd.purpose ?? ""} />
+            {fd.institution_name && <Row label={L.institution} value={fd.institution_name ?? ""} />}
           </>
         )}
 

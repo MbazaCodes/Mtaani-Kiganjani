@@ -188,9 +188,9 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
           </View>
           <View style={[s.colRight, ls.partyBox]}>
             <Text style={ls.partyLabel}>{sw ? "MPANGAJI" : "TENANT"}</Text>
-            <Row label={sw ? "Jina" : "Name"} value={fd.tenant_name} />
-            <Row label="NIDA" value={fd.tenant_nida} />
-            <Row label={sw ? "Simu" : "Phone"} value={fd.tenant_phone} />
+            <Row label={sw ? "Jina" : "Name"} value={fd.tenant_name ?? ""} />
+            <Row label="NIDA" value={fd.tenant_nida ?? ""} />
+            <Row label={sw ? "Simu" : "Phone"} value={fd.tenant_phone ?? ""} />
           </View>
         </View>
 
@@ -199,9 +199,9 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={s.sectionTitle}>{sw ? "TAARIFA ZA NYUMBA" : "PROPERTY DETAILS"}</Text>
         </View>
         <Row label={sw ? "Aina" : "Type"} value={propLabel} />
-        <Row label={sw ? "Anwani" : "Address"} value={fd.property_address} />
-        {fd.num_rooms && <Row label={sw ? "Vyumba" : "Rooms"} value={fd.num_rooms} />}
-        {fd.floor_level && <Row label={sw ? "Ghorofa" : "Floor"} value={fd.floor_level} />}
+        <Row label={sw ? "Anwani" : "Address"} value={fd.property_address ?? ""} />
+        {fd.num_rooms && <Row label={sw ? "Vyumba" : "Rooms"} value={fd.num_rooms ?? ""} />}
+        {fd.floor_level && <Row label={sw ? "Ghorofa" : "Floor"} value={fd.floor_level ?? ""} />}
         {utilLabels && (
           <Row label={sw ? "Huduma Zilizojumuishwa" : "Utilities Included"} value={utilLabels} />
         )}
@@ -220,11 +220,11 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
               label={sw ? "Amana" : "Deposit"}
               value={formatCurrency(Number(fd.deposit_amount || 0))}
             />
-            <Row label={sw ? "Siku ya Kulipa" : "Payment Day"} value={fd.payment_day} />
+            <Row label={sw ? "Siku ya Kulipa" : "Payment Day"} value={fd.payment_day ?? ""} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Mzunguko" : "Frequency"} value={fd.payment_frequency} />
-            <Row label={sw ? "Tarehe ya Kuanza" : "Lease Start"} value={fd.lease_start} />
+            <Row label={sw ? "Mzunguko" : "Frequency"} value={fd.payment_frequency ?? ""} />
+            <Row label={sw ? "Tarehe ya Kuanza" : "Lease Start"} value={fd.lease_start ?? ""} />
             <Row label={sw ? "Muda" : "Duration"} value={durationLabel} />
           </View>
         </View>

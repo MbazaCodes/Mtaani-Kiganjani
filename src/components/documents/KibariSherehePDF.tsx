@@ -135,10 +135,10 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
               label={sw ? "Tarehe ya Kuanza" : "Start Date"}
               value={fd.start_date ? formatDate(String(fd.start_date)) : undefined}
             />
-            <Row label={sw ? "Muda wa Kuanza" : "Start Time"} value={fd.start_time} />
+            <Row label={sw ? "Muda wa Kuanza" : "Start Time"} value={fd.start_time ?? ""} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Eneo la Tukio" : "Venue"} value={fd.venue} />
+            <Row label={sw ? "Eneo la Tukio" : "Venue"} value={fd.venue ?? ""} />
           </View>
         </View>
 
@@ -146,9 +146,9 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{L.organiser}</Text>
         </View>
-        <Row label={sw ? "Mwasiliano" : "Contact Person"} value={fd.contact_person} />
-        <Row label={sw ? "Simu" : "Phone"} value={fd.contact_phone} />
-        {fd.whatsapp_group && <Row label="WhatsApp" value={fd.whatsapp_group} />}
+        <Row label={sw ? "Mwasiliano" : "Contact Person"} value={fd.contact_person ?? ""} />
+        <Row label={sw ? "Simu" : "Phone"} value={fd.contact_phone ?? ""} />
+        {fd.whatsapp_group && <Row label="WhatsApp" value={fd.whatsapp_group ?? ""} />}
 
         {/* Signatures */}
         <View style={s.signatureSection}>

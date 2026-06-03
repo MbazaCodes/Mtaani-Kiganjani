@@ -95,7 +95,7 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
         <Text style={ls.lifespan}>
           {fd.date_of_birth ? formatDate(String(fd.date_of_birth)) : "?"} —{" "}
           {fd.date_of_death ? formatDate(String(fd.date_of_death)) : "?"}
-          {fd.age_at_death ? `  (${fd.age_at_death} ${sw ? "miaka" : "yrs"})` : ""}
+          {fd.age_at_death ? `  (${fd.age_at_death ?? ""} ${sw ? "miaka" : "yrs"})` : ""}
         </Text>
 
         {/* Deceased Info */}
@@ -104,13 +104,13 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
         </View>
         <View style={s.twoCol}>
           <View style={s.colLeft}>
-            <Row label={sw ? "Jina la Baba" : "Father's Name"} value={fd.fathers_name} />
-            <Row label={sw ? "Jina la Mama" : "Mother's Name"} value={fd.mothers_name} />
-            <Row label={sw ? "Mume / Mke" : "Spouse"} value={fd.surviving_spouse} />
+            <Row label={sw ? "Jina la Baba" : "Father's Name"} value={fd.fathers_name ?? ""} />
+            <Row label={sw ? "Jina la Mama" : "Mother's Name"} value={fd.mothers_name ?? ""} />
+            <Row label={sw ? "Mume / Mke" : "Spouse"} value={fd.surviving_spouse ?? ""} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Mahali Alipokufia" : "Place of Death"} value={fd.place_of_death} />
-            <Row label={sw ? "Maiti Ipo" : "Body Location"} value={fd.body_location} />
+            <Row label={sw ? "Mahali Alipokufia" : "Place of Death"} value={fd.place_of_death ?? ""} />
+            <Row label={sw ? "Maiti Ipo" : "Body Location"} value={fd.body_location ?? ""} />
           </View>
         </View>
 
@@ -124,11 +124,11 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
               label={sw ? "Tarehe ya Mazishi" : "Funeral Date"}
               value={fd.service_date ? formatDate(String(fd.service_date)) : undefined}
             />
-            <Row label={sw ? "Muda" : "Time"} value={fd.service_time} />
-            <Row label={sw ? "Mahali pa Ibada" : "Service Venue"} value={fd.service_location} />
+            <Row label={sw ? "Muda" : "Time"} value={fd.service_time ?? ""} />
+            <Row label={sw ? "Mahali pa Ibada" : "Service Venue"} value={fd.service_location ?? ""} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Mahali pa Kuzikwa" : "Burial Site"} value={fd.burial_location} />
+            <Row label={sw ? "Mahali pa Kuzikwa" : "Burial Site"} value={fd.burial_location ?? ""} />
           </View>
         </View>
 
@@ -136,9 +136,9 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{L.contact}</Text>
         </View>
-        <Row label={sw ? "Mwakilishi" : "Representative"} value={fd.family_representative} />
-        <Row label={sw ? "Simu" : "Phone"} value={fd.representative_phone} />
-        {fd.children_names && <Row label={sw ? "Watoto" : "Children"} value={fd.children_names} />}
+        <Row label={sw ? "Mwakilishi" : "Representative"} value={fd.family_representative ?? ""} />
+        <Row label={sw ? "Simu" : "Phone"} value={fd.representative_phone ?? ""} />
+        {fd.children_names && <Row label={sw ? "Watoto" : "Children"} value={fd.children_names ?? ""} />}
 
         {/* Stamp + signature */}
         <View style={s.signatureSection}>

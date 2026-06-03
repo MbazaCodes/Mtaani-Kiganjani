@@ -144,7 +144,7 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
         />
         <Row label={sw ? "Simu" : "Phone"} value={fd.owner_phone || user?.phone} />
         <Row label="NIDA" value={user?.nida_number} />
-        <Row label={sw ? "Hali ya Umiliki" : "Ownership"} value={fd.property_ownership} />
+        <Row label={sw ? "Hali ya Umiliki" : "Ownership"} value={fd.property_ownership ?? ""} />
 
         {/* Property section */}
         <View style={s.sectionHeader}>
@@ -152,14 +152,14 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
         </View>
         <View style={s.twoCol}>
           <View style={s.colLeft}>
-            <Row label={sw ? "Mkoa" : "Region"} value={fd.property_region} />
-            <Row label={sw ? "Wilaya" : "District"} value={fd.property_district} />
-            <Row label={sw ? "Kata" : "Ward"} value={fd.property_ward} />
+            <Row label={sw ? "Mkoa" : "Region"} value={fd.property_region ?? ""} />
+            <Row label={sw ? "Wilaya" : "District"} value={fd.property_district ?? ""} />
+            <Row label={sw ? "Kata" : "Ward"} value={fd.property_ward ?? ""} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Mtaa" : "Street"} value={fd.property_street} />
-            <Row label={sw ? "Namba ya Nyumba" : "House No."} value={fd.house_number} />
-            <Row label="Plot" value={fd.plot_number} />
+            <Row label={sw ? "Mtaa" : "Street"} value={fd.property_street ?? ""} />
+            <Row label={sw ? "Namba ya Nyumba" : "House No."} value={fd.house_number ?? ""} />
+            <Row label="Plot" value={fd.plot_number ?? ""} />
           </View>
         </View>
 
@@ -170,9 +170,9 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
         <Row label={sw ? "Aina ya Ujenzi" : "Type"} value={constructionLabel} />
         <Row label={sw ? "Nyenzo Kuu" : "Primary Material"} value={materialLabel} />
         {fd.construction_dimensions && (
-          <Row label={sw ? "Kipimo" : "Dimensions"} value={fd.construction_dimensions} />
+          <Row label={sw ? "Kipimo" : "Dimensions"} value={fd.construction_dimensions ?? ""} />
         )}
-        <Row label={sw ? "Maelezo" : "Description"} value={fd.construction_description} />
+        <Row label={sw ? "Maelezo" : "Description"} value={fd.construction_description ?? ""} />
 
         {/* Timeline & contractor */}
         <View style={s.sectionHeader}>
@@ -180,12 +180,12 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
         </View>
         <View style={s.twoCol}>
           <View style={s.colLeft}>
-            <Row label={sw ? "Tarehe ya Kuanza" : "Start Date"} value={fd.start_date} />
-            <Row label={sw ? "Tarehe ya Kukamilika" : "Completion Date"} value={fd.end_date} />
+            <Row label={sw ? "Tarehe ya Kuanza" : "Start Date"} value={fd.start_date ?? ""} />
+            <Row label={sw ? "Tarehe ya Kukamilika" : "Completion Date"} value={fd.end_date ?? ""} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Fundi" : "Contractor"} value={fd.contractor_name} />
-            <Row label={sw ? "Simu ya Fundi" : "Contractor Phone"} value={fd.contractor_phone} />
+            <Row label={sw ? "Fundi" : "Contractor"} value={fd.contractor_name ?? ""} />
+            <Row label={sw ? "Simu ya Fundi" : "Contractor Phone"} value={fd.contractor_phone ?? ""} />
           </View>
         </View>
 

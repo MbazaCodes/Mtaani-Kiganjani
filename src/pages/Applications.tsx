@@ -215,50 +215,67 @@ export function Applications({
 
   // Helper component for PDF download links (to avoid type issues)
   const ReceiptDownloadLink = ({ app }: { app: Application }) => {
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => setIsClient(true), []);
-    if (!isClient) return <span className="text-amber-600 text-sm font-bold">Loading...</span>;
+    const [ready, setReady] = useState(false);
+    if (!ready) {
+      return (
+        <button
+          onClick={() => setReady(true)}
+          className="text-amber-600 text-sm font-bold hover:underline cursor-pointer"
+        >
+          {t("receipt")}
+        </button>
+      );
+    }
+    const paymentData = {
+      transaction_id: String(app.form_data?.payment_data?.transaction_id || `TXN-${app.id.slice(0, 8).toUpperCase()}`),
+      amount: getPaymentAmount(app),
+      payment_method: String(app.form_data?.payment_data?.payment_method || "M-Pesa"),
+      paid_at: String(app.form_data?.payment_data?.paid_at || new Date().toISOString()),
+    };
     return (
       <PDFDownloadLinkCompat
-        document={
-          <ReceiptPDF
-            application={app}
-            paymentData={{
-              transaction_id:
-                app.form_data?.payment_data?.transaction_id ||
-                `TXN-${app.id.slice(0, 8).toUpperCase()}`,
-              amount: getPaymentAmount(app),
-              payment_method: app.form_data?.payment_data?.payment_method || "M-Pesa",
-              paid_at: app.form_data?.payment_data?.paid_at || new Date().toISOString(),
-            }}
-            lang={lang}
-          />
-        }
+        document={<ReceiptPDF application={app} paymentData={paymentData} lang={lang} />}
         fileName={`Receipt_${app.application_number}.pdf`}
       >
-        {({ loading }: { loading: boolean }) => (
-          <span className="text-amber-600 text-sm font-bold hover:underline cursor-pointer">
-            {loading ? "..." : t("receipt")}
-          </span>
-        )}
+        {({ loading, error }: { loading: boolean; error: Error | null }) =>
+          error ? (
+            <span className="text-red-500 text-xs">Error</span>
+          ) : (
+            <span className="text-amber-600 text-sm font-bold hover:underline cursor-pointer">
+              {loading ? "..." : t("receipt")}
+            </span>
+          )
+        }
       </PDFDownloadLinkCompat>
     );
   };
 
   const CertificateDownloadLink = ({ app }: { app: Application }) => {
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => setIsClient(true), []);
-    if (!isClient) return <span className="text-emerald-600 text-sm font-bold">Loading...</span>;
+    const [ready, setReady] = useState(false);
+    if (!ready) {
+      return (
+        <button
+          onClick={() => setReady(true)}
+          className="text-emerald-600 text-sm font-bold hover:underline cursor-pointer"
+        >
+          {t("download")}
+        </button>
+      );
+    }
     return (
       <PDFDownloadLinkCompat
         document={<DocumentRenderer application={app} service={(app as any).services} />}
         fileName={`Certificate_${app.application_number}.pdf`}
       >
-        {({ loading }: { loading: boolean }) => (
-          <span className="text-emerald-600 text-sm font-bold hover:underline cursor-pointer">
-            {loading ? "..." : t("download")}
-          </span>
-        )}
+        {({ loading, error }: { loading: boolean; error: Error | null }) =>
+          error ? (
+            <span className="text-red-500 text-xs">PDF Error</span>
+          ) : (
+            <span className="text-emerald-600 text-sm font-bold hover:underline cursor-pointer">
+              {loading ? "..." : t("download")}
+            </span>
+          )
+        }
       </PDFDownloadLinkCompat>
     );
   };

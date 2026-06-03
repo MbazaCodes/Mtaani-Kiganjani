@@ -22,15 +22,27 @@ export const ReceiptPDF: React.FC<{
         <View style={styles.section}>
           <View style={styles.row}>
             <Text>Application Number:</Text>
-            <Text>{application.application_number}</Text>
+            <Text>{String(application.application_number ?? "")}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text>Service:</Text>
+            <Text>{String(application.service_name ?? "")}</Text>
           </View>
           <View style={styles.row}>
             <Text>Transaction ID:</Text>
-            <Text>{paymentData.transaction_id}</Text>
+            <Text>{String(paymentData.transaction_id ?? "")}</Text>
           </View>
           <View style={styles.row}>
             <Text>Amount:</Text>
-            <Text>{paymentData.amount} TZS</Text>
+            <Text>{String(paymentData.amount ?? 0)} TZS</Text>
+          </View>
+          <View style={styles.row}>
+            <Text>Payment Method:</Text>
+            <Text>{String(paymentData.payment_method ?? "")}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text>Date:</Text>
+            <Text>{paymentData.paid_at ? new Date(paymentData.paid_at).toLocaleDateString() : ""}</Text>
           </View>
         </View>
       </Page>
