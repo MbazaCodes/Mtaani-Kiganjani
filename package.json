@@ -1,5 +1,5 @@
 {
-  "name": "tanstack_start_ts",
+  "name": "mtaani-kiganjani",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -91,7 +91,7 @@
     "vite": "^7.3.1"
   },
   "version": "1.0.0",
-  "description": "",
+  "description": "E-Serikali Mtaa - Tanzania Local Government Services Portal",
   "main": "eslint.config.js",
   "keywords": [],
   "author": "",
