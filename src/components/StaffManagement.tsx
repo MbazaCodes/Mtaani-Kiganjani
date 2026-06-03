@@ -37,6 +37,7 @@ import { Language, useTranslation } from "@/lib/i18n";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { INITIAL_SERVICES } from "@/constants/services";
+import { adminCreateUser, adminResetPassword } from "@/lib/supabase-admin";
 
 interface StaffManagementProps {
   lang: Language;
@@ -287,63 +288,58 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
       // Use the password from the form (admin can customize)
       const tempPassword = newStaff.password || generatePassword();
 
-      // Save admin session — signUp can swap the current session if email
-      // confirmation is disabled in Supabase settings
-      const { data: adminSession } = await supabase.auth.getSession();
-
-      // Create Auth User
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Use the admin API to create a confirmed user (no email confirmation needed)
+      const { userId, error: createError } = await adminCreateUser({
         email: newStaff.email,
         password: tempPassword,
-        options: {
-          data: {
-            role: newStaff.role,
-            office_id: officeId,
-          },
-          emailRedirectTo: undefined,
-        },
+        role: newStaff.role,
+        officeId,
       });
 
-      // Restore admin session if it was swapped
-      if (adminSession?.session) {
-        await supabase.auth.setSession({
-          access_token: adminSession.session.access_token,
-          refresh_token: adminSession.session.refresh_token,
-        });
-      }
-
-      if (authError) {
-        // If email already registered in auth but not in users table
-        if (authError.message.includes("already registered")) {
+      if (createError) {
+        // Fallback: if service role key not configured, inform admin
+        if (createError.includes("VITE_SUPABASE_SERVICE_ROLE_KEY")) {
           showToast(
             lang === "sw"
-              ? "Barua pepe hii tayari imesajiliwa. Mtumishi anaweza kuingia na nywila yake."
-              : "This email is already registered. Staff can login with their password.",
+              ? "Hatua ya ziada inahitajika: Ongeza VITE_SUPABASE_SERVICE_ROLE_KEY kwenye mipangilio ya Vercel."
+              : "Extra step needed: Add VITE_SUPABASE_SERVICE_ROLE_KEY to your Vercel environment variables.",
+            "error",
+          );
+          return;
+        }
+        if (createError.includes("already registered") || createError.includes("already been registered")) {
+          showToast(
+            lang === "sw"
+              ? "Barua pepe hii tayari imesajiliwa."
+              : "This email is already registered.",
             "info",
           );
           setShowAddModal(false);
           resetForm();
           return;
         }
-        throw authError;
+        throw new Error(createError);
       }
 
-      if (authData.user) {
-        // Generate first name from email (temporary)
-        const firstName = newStaff.email.split("@")[0].split(".")[0] || "Staff";
-        const lastName = newStaff.email.split("@")[0].split(".")[1] || "Member";
+      if (userId) {
+        // Generate first name from email (temporary — staff updates profile on first login)
+        const emailLocal = newStaff.email.split("@")[0];
+        const parts = emailLocal.split(/[._-]/);
+        const firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : "Staff";
+        const lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : "Member";
 
-        // Create Profile
+        // Create Profile — is_verified: false so staff is forced to change password on first login
         const { error: profileError } = await supabase.from("users").insert({
-          id: authData.user.id,
-          first_name: firstName.charAt(0).toUpperCase() + firstName.slice(1),
-          last_name: lastName.charAt(0).toUpperCase() + lastName.slice(1),
+          id: userId,
+          first_name: firstName,
+          last_name: lastName,
           email: newStaff.email,
           role: newStaff.role,
           office_id: officeId,
           assigned_region: selectedRegion,
           assigned_district: officeLevel === "district" ? selectedDistrict : null,
-          is_verified: true,
+          is_verified: false,      // forces password change on first login
+          account_status: "pending",
           gender: "M",
           nationality: "Tanzanian",
         });
@@ -354,8 +350,8 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
         setCreatedTempPassword(tempPassword);
         showToast(
           lang === "sw"
-            ? `Mtumishi amesajiliwa! Wajibu: ${newStaff.role}. Nywila ya muda: ${tempPassword}`
-            : `Staff created with role: ${newStaff.role}. Temp password: ${tempPassword}`,
+            ? `Mtumishi amesajiliwa! Wajibu: ${newStaff.role}. Nywila ya muda imewekwa.`
+            : `Staff created! Role: ${newStaff.role}. They can log in immediately.`,
           "success",
         );
 
@@ -537,31 +533,34 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
 
     setResetting(true);
     try {
-      // Admin password reset via Supabase admin API
-      // Falls back to marking account as unverified so staff must change on next login
-      const { error } = await supabase.functions.invoke("admin-reset-password", {
-        body: { userId: selectedStaff.id, newPassword: resetPwd },
+      const { error: resetError } = await adminResetPassword({
+        userId: selectedStaff.id,
+        newPassword: resetPwd,
       });
 
-      if (error) {
-        // If edge function not available, mark account so staff must reset themselves
-        await supabase
-          .from("users")
-          .update({ is_verified: false, account_status: "pending" })
-          .eq("id", selectedStaff.id);
-
-        showToast(
-          lang === "sw"
-            ? "Akaunti imewekwa kusubiri. Mtumishi atabadilisha nywila anapoingia."
-            : "Account set to pending. Staff will change password on next login.",
-          "info",
-        );
-      } else {
-        showToast(
-          lang === "sw" ? "Nywila imebadilishwa kikamilifu!" : "Password reset successfully!",
-          "success",
-        );
+      if (resetError) {
+        if (resetError.includes("VITE_SUPABASE_SERVICE_ROLE_KEY")) {
+          showToast(
+            lang === "sw"
+              ? "Hatua ya ziada: Ongeza VITE_SUPABASE_SERVICE_ROLE_KEY kwenye Vercel."
+              : "Extra step: Add VITE_SUPABASE_SERVICE_ROLE_KEY to Vercel env vars.",
+            "error",
+          );
+          return;
+        }
+        throw new Error(resetError);
       }
+
+      // Mark account as pending so staff is forced to change password on next login
+      await supabase
+        .from("users")
+        .update({ is_verified: false, account_status: "pending" })
+        .eq("id", selectedStaff.id);
+
+      showToast(
+        lang === "sw" ? "Nywila imebadilishwa! Mtumishi atabadilisha anapoingia." : "Password reset! Staff will be prompted to change it on next login.",
+        "success",
+      );
 
       setResetDone(true);
       fetchStaff();
