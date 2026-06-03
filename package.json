@@ -4,12 +4,12 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "vite",
     "build": "vite build",
-    "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -44,8 +44,6 @@
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-router": "^1.168.25",
-    "@tanstack/react-start": "^1.167.50",
-    "@tanstack/router-plugin": "^1.167.28",
     "@types/qrcode": "^1.5.6",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
@@ -77,7 +75,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@lovable.dev/vite-tanstack-config": "^2.1.1",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
@@ -88,7 +85,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
-    "nitro": "3.0.260429-beta",
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
@@ -97,15 +93,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "eslint.config.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://YOUR_USERNAME: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@github.com/MbazaCodes/mtaa-connect-spark.git"
-  },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/MbazaCodes/mtaa-connect-spark/issues"
-  },
-  "homepage": "https://github.com/MbazaCodes/mtaa-connect-spark#readme"
+  "license": "ISC"
 }

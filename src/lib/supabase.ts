@@ -2,7 +2,7 @@ import type { Session as SupabaseSession, SupabaseClient } from "@supabase/supab
 import type { AnyFormData, PaymentData, FormField, ApplicationStatus } from "@/types";
 import { supabase as cloudSupabase } from "@/integrations/supabase/client";
 
-// Use the Lovable Cloud client (auto-generated, always configured).
+// Supabase client
 // Cast to untyped client so the existing app code (which queries custom
 // tables not yet present in generated Database types) keeps compiling.
 export const supabase = cloudSupabase as unknown as SupabaseClient;
