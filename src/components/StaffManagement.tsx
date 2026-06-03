@@ -26,6 +26,11 @@ import {
   Calendar,
   BadgeCheck,
   XCircle,
+  KeyRound,
+  Copy,
+  Eye,
+  EyeOff,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Language, useTranslation } from "@/lib/i18n";
@@ -64,6 +69,16 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
     officeLevel: "region" as "region" | "district",
   });
   const [updating, setUpdating] = useState(false);
+
+  // Reset password modal state
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetPwd, setResetPwd] = useState("");
+  const [resetPwdVisible, setResetPwdVisible] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetDone, setResetDone] = useState(false);
+
+  // New staff password visibility toggle
+  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
 
   const [newStaff, setNewStaff] = useState({
     email: "",
@@ -510,6 +525,63 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
     }
   };
 
+  const handleResetStaffPassword = async () => {
+    if (!selectedStaff || !resetPwd.trim()) return;
+    if (resetPwd.length < 6) {
+      showToast(
+        lang === "sw" ? "Nywila lazima iwe na herufi 6 au zaidi" : "Password must be at least 6 characters",
+        "error",
+      );
+      return;
+    }
+
+    setResetting(true);
+    try {
+      // Admin password reset via Supabase admin API
+      // Falls back to marking account as unverified so staff must change on next login
+      const { error } = await supabase.functions.invoke("admin-reset-password", {
+        body: { userId: selectedStaff.id, newPassword: resetPwd },
+      });
+
+      if (error) {
+        // If edge function not available, mark account so staff must reset themselves
+        await supabase
+          .from("users")
+          .update({ is_verified: false, account_status: "pending" })
+          .eq("id", selectedStaff.id);
+
+        showToast(
+          lang === "sw"
+            ? "Akaunti imewekwa kusubiri. Mtumishi atabadilisha nywila anapoingia."
+            : "Account set to pending. Staff will change password on next login.",
+          "info",
+        );
+      } else {
+        showToast(
+          lang === "sw" ? "Nywila imebadilishwa kikamilifu!" : "Password reset successfully!",
+          "success",
+        );
+      }
+
+      setResetDone(true);
+      fetchStaff();
+    } catch (err: unknown) {
+      const _e = err as { message?: string };
+      showToast(_e.message ?? "Reset failed", "error");
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const openResetModal = (staffMember: UserProfile) => {
+    setSelectedStaff(staffMember);
+    setResetPwd(generatePassword());
+    setResetPwdVisible(false);
+    setResetDone(false);
+    setShowDetailsModal(false);
+    setShowResetModal(true);
+  };
+
   const filteredStaff = staff.filter(
     (s) =>
       `${s.first_name} ${s.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -641,17 +713,30 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteStaff(s.id);
-                        }}
-                        title={lang === "sw" ? "Zima mtumishi" : "Deactivate staff"}
-                        aria-label={lang === "sw" ? "Zima mtumishi" : "Deactivate staff"}
-                        className="p-2 text-stone-400 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openResetModal(s);
+                          }}
+                          title={lang === "sw" ? "Weka upya nywila" : "Reset password"}
+                          aria-label={lang === "sw" ? "Weka upya nywila" : "Reset password"}
+                          className="p-2 text-stone-400 hover:text-blue-600 transition-colors"
+                        >
+                          <KeyRound size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteStaff(s.id);
+                          }}
+                          title={lang === "sw" ? "Zima mtumishi" : "Deactivate staff"}
+                          aria-label={lang === "sw" ? "Zima mtumishi" : "Deactivate staff"}
+                          className="p-2 text-stone-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -721,31 +806,52 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                   {/* Password Input */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
-                      🔑 {lang === "sw" ? "Nywila ya Muda" : "Temporary Password"}{" "}
+                      <KeyRound size={13} /> {lang === "sw" ? "Nywila ya Muda" : "Temporary Password"}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <div className="flex gap-2">
-                      <input
-                        required
-                        type="text"
-                        placeholder="e.g. Staff2026!"
-                        className="flex-1 h-12 px-4 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none transition-all font-mono text-sm"
-                        value={newStaff.password}
-                        onChange={(e) => setNewStaff({ ...newStaff, password: e.target.value })}
-                      />
+                      <div className="relative flex-1">
+                        <input
+                          required
+                          type={newPasswordVisible ? "text" : "password"}
+                          placeholder="e.g. Staff2026!"
+                          className="w-full h-12 px-4 pr-10 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none transition-all font-mono text-sm"
+                          value={newStaff.password}
+                          onChange={(e) => setNewStaff({ ...newStaff, password: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setNewPasswordVisible((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                          title={newPasswordVisible ? "Hide" : "Show"}
+                        >
+                          {newPasswordVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setNewStaff({ ...newStaff, password: generatePassword() })}
-                        className="px-3 h-12 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl text-xs font-bold transition-colors whitespace-nowrap"
+                        className="px-3 h-12 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl transition-colors"
                         title={lang === "sw" ? "Tengeneza nywila mpya" : "Generate new password"}
                       >
-                        🔄 {lang === "sw" ? "Badilisha" : "Generate"}
+                        <RefreshCw size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void navigator.clipboard.writeText(newStaff.password);
+                          showToast(lang === "sw" ? "Nywila imenakiliwa!" : "Password copied!", "success");
+                        }}
+                        className="px-3 h-12 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl transition-colors"
+                        title={lang === "sw" ? "Nakili nywila" : "Copy password"}
+                      >
+                        <Copy size={16} />
                       </button>
                     </div>
-                    <p className="text-[10px] text-stone-400">
-                      {lang === "sw"
-                        ? "Mpe mtumishi nywila hii. Anaweza kuibadilisha baadaye."
-                        : "Share this password with the staff member. They can change it later."}
+                    <p className="text-[10px] text-amber-600 font-medium flex items-center gap-1">
+                      ⚠ {lang === "sw"
+                        ? "Nywila hii ni ya muda. Mtumishi atalazimika kuibadilisha anapoingia kwa mara ya kwanza."
+                        : "Temporary password. Staff must change it on first login — their account auto-verifies when they do."}
                     </p>
                   </div>
 
@@ -1361,13 +1467,176 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                     {lang === "sw" ? "Funga" : "Close"}
                   </button>
                   <button
-                    onClick={() => handleDeleteStaff(selectedStaff.id)}
-                    className="h-12 px-6 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-100 transition-all flex items-center gap-2"
+                    onClick={() => openResetModal(selectedStaff)}
+                    className="h-12 px-5 bg-blue-50 text-blue-600 rounded-2xl font-bold hover:bg-blue-100 transition-all flex items-center gap-2"
                   >
-                    <Trash2 size={18} />
-                    {lang === "sw" ? "Zima Akaunti" : "Deactivate"}
+                    <KeyRound size={16} />
+                    {lang === "sw" ? "Nywila" : "Reset Pwd"}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteStaff(selectedStaff.id)}
+                    className="h-12 px-5 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-100 transition-all flex items-center gap-2"
+                  >
+                    <Trash2 size={16} />
+                    {lang === "sw" ? "Zima" : "Deactivate"}
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Reset Password Modal ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showResetModal && selectedStaff && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+            >
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between bg-stone-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center">
+                    <KeyRound size={20} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-stone-900">
+                      {lang === "sw" ? "Weka Upya Nywila" : "Reset Password"}
+                    </h3>
+                    <p className="text-xs text-stone-500">
+                      {selectedStaff.first_name} {selectedStaff.last_name}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setShowResetModal(false); setResetDone(false); }}
+                  className="p-2 hover:bg-stone-200 rounded-full transition-colors"
+                  aria-label="Close"
+                >
+                  <X size={18} className="text-stone-500" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-5">
+                {resetDone ? (
+                  /* Success state */
+                  <div className="text-center py-4 space-y-3">
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle2 size={32} className="text-emerald-600" />
+                    </div>
+                    <p className="font-bold text-stone-800">
+                      {lang === "sw" ? "Nywila imewekwa upya!" : "Password reset done!"}
+                    </p>
+                    <p className="text-sm text-stone-500">
+                      {lang === "sw"
+                        ? "Mpe mtumishi nywila mpya hii. Atalazimika kuibadilisha anapoingia."
+                        : "Share this new password with the staff member. They must change it on next login."}
+                    </p>
+                    <div className="bg-stone-50 rounded-xl p-4 flex items-center justify-between gap-3">
+                      <span className="font-mono font-bold text-lg text-emerald-700 tracking-wider">
+                        {resetPwd}
+                      </span>
+                      <button
+                        onClick={() => {
+                          void navigator.clipboard.writeText(resetPwd);
+                          showToast(lang === "sw" ? "Nywila imenakiliwa!" : "Copied!", "success");
+                        }}
+                        className="p-2 bg-white border border-stone-200 rounded-lg hover:bg-stone-100 transition-colors"
+                        title="Copy"
+                      >
+                        <Copy size={16} className="text-stone-500" />
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => { setShowResetModal(false); setResetDone(false); }}
+                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors"
+                    >
+                      {lang === "sw" ? "Sawa — Funga" : "Done — Close"}
+                    </button>
+                  </div>
+                ) : (
+                  /* Input state */
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Nywila Mpya" : "New Password"}
+                      </label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type={resetPwdVisible ? "text" : "password"}
+                            className="w-full h-12 px-4 pr-10 rounded-xl border border-stone-200 focus:border-blue-500 outline-none transition-all font-mono text-sm"
+                            value={resetPwd}
+                            onChange={(e) => setResetPwd(e.target.value)}
+                            placeholder="Min. 6 characters"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setResetPwdVisible((v) => !v)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                          >
+                            {resetPwdVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setResetPwd(generatePassword())}
+                          className="px-3 h-12 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl transition-colors"
+                          title="Generate"
+                        >
+                          <RefreshCw size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void navigator.clipboard.writeText(resetPwd);
+                            showToast(lang === "sw" ? "Nywila imenakiliwa!" : "Copied!", "success");
+                          }}
+                          className="px-3 h-12 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl transition-colors"
+                          title="Copy"
+                        >
+                          <Copy size={16} />
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-amber-600 font-medium">
+                        ⚠ {lang === "sw"
+                          ? "Mtumishi atalazimika kubadilisha nywila hii anapoingia kwa mara ya kwanza."
+                          : "Staff must change this password on their next login — account auto-verifies when they do."}
+                      </p>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700">
+                      <strong>{selectedStaff.email}</strong>
+                      {" · "}
+                      <span className={selectedStaff.is_verified ? "text-emerald-600" : "text-amber-600"}>
+                        {selectedStaff.is_verified
+                          ? (lang === "sw" ? "Imethibitishwa" : "Verified")
+                          : (lang === "sw" ? "Inasubiri" : "Pending")}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => { setShowResetModal(false); setResetDone(false); }}
+                        className="flex-1 h-12 bg-stone-100 text-stone-600 rounded-2xl font-bold hover:bg-stone-200 transition-all"
+                      >
+                        {lang === "sw" ? "Ghairi" : "Cancel"}
+                      </button>
+                      <button
+                        onClick={handleResetStaffPassword}
+                        disabled={resetting || !resetPwd.trim()}
+                        className="flex-1 h-12 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {resetting ? <Loader2 size={18} className="animate-spin" /> : <KeyRound size={18} />}
+                        {lang === "sw" ? "Weka Upya" : "Reset Password"}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>

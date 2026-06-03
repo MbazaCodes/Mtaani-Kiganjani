@@ -233,11 +233,176 @@ const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) =
 );
 
 // ─── Main router ───────────────────────────────────────────────────────────────
+
+// ─── Force password change for new staff accounts ─────────────────────────────
+function ForcePasswordChange() {
+  const { user, refreshProfile, signOut } = useAuth();
+  const { lang } = useLanguage();
+  const [newPwd, setNewPwd] = React.useState('');
+  const [confirmPwd, setConfirmPwd] = React.useState('');
+  const [showPwd, setShowPwd] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  const { supabase: _supabase } = {} as { supabase: unknown }; // use import directly
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (newPwd.length < 6) {
+      setError(lang === 'sw' ? 'Nywila lazima iwe na herufi 6 au zaidi' : 'Password must be at least 6 characters');
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      setError(lang === 'sw' ? 'Nywila hazifanani' : 'Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Update password in Supabase Auth
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const supabaseKey = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY) as string;
+      const sb = createClient(supabaseUrl, supabaseKey);
+
+      const { error: pwdError } = await sb.auth.updateUser({ password: newPwd });
+      if (pwdError) throw pwdError;
+
+      // Mark account as verified
+      if (user?.id) {
+        await sb.from('users').update({ is_verified: true, account_status: 'active' }).eq('id', user.id);
+      }
+
+      // Refresh profile so the gate lifts
+      await refreshProfile();
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      setError(e.message ?? 'Failed to update password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-emerald-600 px-8 py-7 text-center">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <span className="text-3xl">🔐</span>
+          </div>
+          <h1 className="text-xl font-black text-white">
+            {lang === 'sw' ? 'Badilisha Nywila Yako' : 'Change Your Password'}
+          </h1>
+          <p className="text-emerald-100 text-sm mt-1">
+            {lang === 'sw'
+              ? 'Karibu! Lazima ubadilishe nywila yako ya muda kabla ya kuendelea.'
+              : 'Welcome! You must change your temporary password before continuing.'}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-8 space-y-5">
+          {/* Account info */}
+          <div className="bg-stone-50 rounded-xl p-3 text-sm text-stone-600 flex items-center gap-2">
+            <span className="text-base">👤</span>
+            <span><strong>{user?.first_name} {user?.last_name}</strong> · {user?.email}</span>
+          </div>
+
+          {/* New password */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+              {lang === 'sw' ? 'Nywila Mpya' : 'New Password'}
+            </label>
+            <div className="relative">
+              <input
+                required
+                type={showPwd ? 'text' : 'password'}
+                className="w-full h-12 px-4 pr-10 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none transition-all"
+                value={newPwd}
+                onChange={(e) => { setNewPwd(e.target.value); setError(''); }}
+                placeholder={lang === 'sw' ? 'Angalau herufi 6' : 'At least 6 characters'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 text-xs font-bold"
+              >
+                {showPwd ? '🙈' : '👁'}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm password */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+              {lang === 'sw' ? 'Thibitisha Nywila' : 'Confirm Password'}
+            </label>
+            <input
+              required
+              type={showPwd ? 'text' : 'password'}
+              className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none transition-all"
+              value={confirmPwd}
+              onChange={(e) => { setConfirmPwd(e.target.value); setError(''); }}
+              placeholder={lang === 'sw' ? 'Rudia nywila mpya' : 'Repeat new password'}
+            />
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
+          {/* Strength hint */}
+          {newPwd && (
+            <p className={`text-xs font-medium ${newPwd.length >= 8 && /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd) ? 'text-emerald-600' : 'text-amber-600'}`}>
+              {newPwd.length >= 8 && /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd)
+                ? (lang === 'sw' ? '✓ Nywila imara' : '✓ Strong password')
+                : (lang === 'sw' ? '⚠ Ongeza namba na herufi kubwa kwa usalama zaidi' : '⚠ Add numbers & uppercase for a stronger password')}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !newPwd || !confirmPwd}
+            className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-black text-base transition-all flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <><span className="animate-spin">⏳</span> {lang === 'sw' ? 'Inabadilisha...' : 'Updating...'}</>
+            ) : (
+              lang === 'sw' ? '✓ Badilisha na Ingia' : '✓ Change Password & Continue'
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={signOut}
+            className="w-full text-sm text-stone-400 hover:text-stone-600 transition-colors py-1"
+          >
+            {lang === 'sw' ? 'Toka mfumoni' : 'Sign out instead'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const { isLoading } = useAuth();
+  const { isLoading, user } = useAuth();
   const { lang } = useLanguage();
 
   if (isLoading) return <LoadingScreen />;
+
+  // New staff/admin accounts must change their temporary password before accessing the system
+  const needsPasswordChange =
+    user &&
+    (user.role === 'staff' || user.role === 'admin') &&
+    user.is_verified === false;
+
+  if (needsPasswordChange) return <ForcePasswordChange />;
 
   return (
     <BrowserRouter>
