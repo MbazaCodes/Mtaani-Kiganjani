@@ -1,5 +1,4 @@
-
-export type Language = 'sw' | 'en';
+export type Language = "sw" | "en";
 
 export const translations = {
   sw: {
@@ -7,7 +6,8 @@ export const translations = {
     tagline: "Serikali ya Mtaa Kidijitali",
     heroTitle: "Huduma za Serikali",
     heroSubtitle: "Mkononi Mwako",
-    heroDesc: "Pata huduma zote za serikali ya mtaa kwa urahisi kupitia simu yako — haraka, salama, na kwa uhakika.",
+    heroDesc:
+      "Pata huduma zote za serikali ya mtaa kwa urahisi kupitia simu yako — haraka, salama, na kwa uhakika.",
     startNow: "Anza Sasa",
     viewServices: "Tazama Huduma",
     login: "Ingia",
@@ -55,7 +55,8 @@ export const translations = {
     staffManagement: "Usimamizi wa Watumishi",
     applicationReview: "Uhakiki wa Maombi",
     diasporaTitle: "Kwa Watanzania Waishio Nje ya Nchi (Diaspora)",
-    diasporaEncouragement: "Sasa unaweza kuomba barua za utambulisho, vyeti vya mkazi, na huduma nyingine za mtaa ukiwa popote duniani. E-Mtaa inakuunganisha na nyumbani.",
+    diasporaEncouragement:
+      "Sasa unaweza kuomba barua za utambulisho, vyeti vya mkazi, na huduma nyingine za mtaa ukiwa popote duniani. E-Mtaa inakuunganisha na nyumbani.",
     diasporaAction: "Jisajili kama Diaspora",
   },
   en: {
@@ -63,7 +64,8 @@ export const translations = {
     tagline: "Digital Local Government",
     heroTitle: "Government Services",
     heroSubtitle: "In Your Hands",
-    heroDesc: "Access all local government services easily through your phone — fast, secure, and reliable.",
+    heroDesc:
+      "Access all local government services easily through your phone — fast, secure, and reliable.",
     startNow: "Start Now",
     viewServices: "View Services",
     login: "Login",
@@ -111,9 +113,10 @@ export const translations = {
     staffManagement: "Staff Management",
     applicationReview: "Application Review",
     diasporaTitle: "For Tanzanians Living Abroad (Diaspora)",
-    diasporaEncouragement: "You can now apply for introduction letters, resident certificates, and other local services from anywhere in the world. E-Mtaa connects you back home.",
+    diasporaEncouragement:
+      "You can now apply for introduction letters, resident certificates, and other local services from anywhere in the world. E-Mtaa connects you back home.",
     diasporaAction: "Register as Diaspora",
-  }
+  },
 };
 
 export const useTranslation = (lang: Language) => {

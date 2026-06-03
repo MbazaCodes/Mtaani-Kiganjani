@@ -1,88 +1,118 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Migogoro na Mashauri — Dispute / Community Issue Report
  * Dual-purpose: citizen dispute (court-style) or community issue report.
  */
-import React from 'react';
-import { Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer';
-import { DocumentPDFProps, commonStyles as s, generateQRCodeUrl, formatFullName, formatDate, formatCurrency } from './types';
-import { TANZANIA_LOGO_BASE64 } from '@/constants/logo';
+import React from "react";
+import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
+import {
+  DocumentPDFProps,
+  commonStyles as s,
+  generateQRCodeUrl,
+  formatFullName,
+  formatDate,
+  formatCurrency,
+} from "./types";
+import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
-  banner:      { paddingVertical: 10, paddingHorizontal: 14, marginBottom: 14, alignItems: 'center' },
-  bannerTitle: { color: '#ffffff', fontSize: 13, fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 2 },
-  bannerSub:   { color: '#fecaca', fontSize: 9, fontStyle: 'italic' },
-  partyBox:    { borderWidth: 1, borderRadius: 4, padding: 8, marginVertical: 4 },
-  partyLabel:  { fontSize: 7.5, fontWeight: 'bold', marginBottom: 3, textTransform: 'uppercase' },
-  urgencyBadge:{ paddingVertical: 3, paddingHorizontal: 10, alignSelf: 'center', marginVertical: 8 },
-  urgencyText: { fontSize: 10, fontWeight: 'bold', color: '#ffffff' },
-  descBox:     { backgroundColor: '#fafaf8', borderWidth: 0.5, borderColor: '#d6d3d1', padding: 10, marginVertical: 8, minHeight: 60 },
-  descText:    { fontSize: 9, lineHeight: 1.6, color: '#0f0f0f' },
+  banner: { paddingVertical: 10, paddingHorizontal: 14, marginBottom: 14, alignItems: "center" },
+  bannerTitle: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    marginBottom: 2,
+  },
+  bannerSub: { color: "#fecaca", fontSize: 9, fontStyle: "italic" },
+  partyBox: { borderWidth: 1, borderRadius: 4, padding: 8, marginVertical: 4 },
+  partyLabel: { fontSize: 7.5, fontWeight: "bold", marginBottom: 3, textTransform: "uppercase" },
+  urgencyBadge: {
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    alignSelf: "center",
+    marginVertical: 8,
+  },
+  urgencyText: { fontSize: 10, fontWeight: "bold", color: "#ffffff" },
+  descBox: {
+    backgroundColor: "#fafaf8",
+    borderWidth: 0.5,
+    borderColor: "#d6d3d1",
+    padding: 10,
+    marginVertical: 8,
+    minHeight: 60,
+  },
+  descText: { fontSize: 9, lineHeight: 1.6, color: "#0f0f0f" },
 });
 
 const DISPUTE_LABELS: Record<string, { sw: string; en: string }> = {
-  ARDHI:    { sw: 'Mgogoro wa Ardhi',           en: 'Land Dispute' },
-  MIPAKA:   { sw: 'Mipaka ya Ardhi',            en: 'Boundary Dispute' },
-  URITHI:   { sw: 'Mali na Urithi',             en: 'Property / Inheritance' },
-  NDOA:     { sw: 'Masuala ya Ndoa',             en: 'Marriage Issues' },
-  WATOTO:   { sw: 'Watoto / Malezi',             en: 'Children / Custody' },
-  FAMILIA:  { sw: 'Ndugu / Familia',             en: 'Family Relations' },
-  BIASHARA: { sw: 'Mgogoro wa Biashara',         en: 'Business Dispute' },
-  MKOPO:    { sw: 'Mkopo / Madeni',              en: 'Debt / Loan' },
-  KELELE:   { sw: 'Kelele za Majirani',          en: 'Noise from Neighbours' },
-  UGOMVI:   { sw: 'Ugomvi wa Kibinafsi',         en: 'Personal Conflict' },
-  MAUZO:    { sw: 'Mauzo / Ununuzi',             en: 'Sale / Purchase Disagreement' },
-  PANGO:    { sw: 'Pango',                       en: 'Rental Dispute' },
-  NYINGINE: { sw: 'Nyingine',                    en: 'Other' },
+  ARDHI: { sw: "Mgogoro wa Ardhi", en: "Land Dispute" },
+  MIPAKA: { sw: "Mipaka ya Ardhi", en: "Boundary Dispute" },
+  URITHI: { sw: "Mali na Urithi", en: "Property / Inheritance" },
+  NDOA: { sw: "Masuala ya Ndoa", en: "Marriage Issues" },
+  WATOTO: { sw: "Watoto / Malezi", en: "Children / Custody" },
+  FAMILIA: { sw: "Ndugu / Familia", en: "Family Relations" },
+  BIASHARA: { sw: "Mgogoro wa Biashara", en: "Business Dispute" },
+  MKOPO: { sw: "Mkopo / Madeni", en: "Debt / Loan" },
+  KELELE: { sw: "Kelele za Majirani", en: "Noise from Neighbours" },
+  UGOMVI: { sw: "Ugomvi wa Kibinafsi", en: "Personal Conflict" },
+  MAUZO: { sw: "Mauzo / Ununuzi", en: "Sale / Purchase Disagreement" },
+  PANGO: { sw: "Pango", en: "Rental Dispute" },
+  NYINGINE: { sw: "Nyingine", en: "Other" },
 };
 
 const ISSUE_LABELS: Record<string, { sw: string; en: string }> = {
-  USAFI:         { sw: 'Usafi wa Mazingira',      en: 'Environmental Sanitation' },
-  TAKA:          { sw: 'Taka Zisizoinuliwa',       en: 'Uncollected Garbage' },
-  BARABARA:      { sw: 'Barabara Mbovu',           en: 'Damaged Road' },
-  MIFEREJI:      { sw: 'Mifereji ya Maji',         en: 'Drainage Blockage' },
-  MAJI:          { sw: 'Maji Safi',                en: 'Water Supply Problem' },
-  UMEME:         { sw: 'Umeme wa Barabara',        en: 'Street Lighting' },
-  UJENZI_HARAMU: { sw: 'Ujenzi Haramu',            en: 'Illegal Construction' },
-  UHALIFU:       { sw: 'Tendo la Uhalifu',         en: 'Criminal Activity' },
-  WANYAMA:       { sw: 'Wanyama Wapotevu',         en: 'Stray Animals' },
-  UCHAFUZI:      { sw: 'Uchafuzi wa Hewa/Maji',   en: 'Pollution' },
-  HATARI:        { sw: 'Sehemu ya Hatari',         en: 'Safety Hazard' },
-  NYINGINE:      { sw: 'Nyingine',                 en: 'Other' },
+  USAFI: { sw: "Usafi wa Mazingira", en: "Environmental Sanitation" },
+  TAKA: { sw: "Taka Zisizoinuliwa", en: "Uncollected Garbage" },
+  BARABARA: { sw: "Barabara Mbovu", en: "Damaged Road" },
+  MIFEREJI: { sw: "Mifereji ya Maji", en: "Drainage Blockage" },
+  MAJI: { sw: "Maji Safi", en: "Water Supply Problem" },
+  UMEME: { sw: "Umeme wa Barabara", en: "Street Lighting" },
+  UJENZI_HARAMU: { sw: "Ujenzi Haramu", en: "Illegal Construction" },
+  UHALIFU: { sw: "Tendo la Uhalifu", en: "Criminal Activity" },
+  WANYAMA: { sw: "Wanyama Wapotevu", en: "Stray Animals" },
+  UCHAFUZI: { sw: "Uchafuzi wa Hewa/Maji", en: "Pollution" },
+  HATARI: { sw: "Sehemu ya Hatari", en: "Safety Hazard" },
+  NYINGINE: { sw: "Nyingine", en: "Other" },
 };
 
 const RESOLUTION_LABELS: Record<string, { sw: string; en: string }> = {
-  MEDIATION: { sw: 'Mapatanisho ya Kirafiki', en: 'Friendly Mediation' },
-  TRIBUNAL:  { sw: 'Mahakama ya Mtaa',        en: 'Local Tribunal' },
-  COURT:     { sw: 'Mahakama Kuu',            en: 'Formal Court' },
-  ADVICE:    { sw: 'Ushauri Tu',              en: 'Advice Only' },
+  MEDIATION: { sw: "Mapatanisho ya Kirafiki", en: "Friendly Mediation" },
+  TRIBUNAL: { sw: "Mahakama ya Mtaa", en: "Local Tribunal" },
+  COURT: { sw: "Mahakama Kuu", en: "Formal Court" },
+  ADVICE: { sw: "Ushauri Tu", en: "Advice Only" },
 };
 
 const URGENCY_COLORS: Record<string, { bg: string; sw: string; en: string }> = {
-  NORMAL:    { bg: '#78716c', sw: 'KAWAIDA',  en: 'NORMAL' },
-  URGENT:    { bg: '#d97706', sw: 'HARAKA',   en: 'URGENT' },
-  EMERGENCY: { bg: '#dc2626', sw: 'DHARURA',  en: 'EMERGENCY' },
+  NORMAL: { bg: "#78716c", sw: "KAWAIDA", en: "NORMAL" },
+  URGENT: { bg: "#d97706", sw: "HARAKA", en: "URGENT" },
+  EMERGENCY: { bg: "#dc2626", sw: "DHARURA", en: "EMERGENCY" },
 };
 
-export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({ application, lang, qrDataUrl }) => {
+export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
+  application,
+  lang,
+  qrDataUrl,
+}) => {
   const user = (application as any).users;
-  const fd   = (application.form_data || {}) as Record<string, unknown>;
-  const qr   = qrDataUrl || generateQRCodeUrl(application, 'DS');
-  const sw   = lang === 'sw';
+  const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const qr = qrDataUrl || generateQRCodeUrl(application, "DS");
+  const sw = lang === "sw";
 
-  const isDispute = fd.mode === 'CITIZEN_DISPUTE';
-  const typeKey   = String(isDispute ? fd.dispute_type : fd.issue_type || '');
+  const isDispute = fd.mode === "CITIZEN_DISPUTE";
+  const typeKey = String(isDispute ? fd.dispute_type : fd.issue_type || "");
   const typeLabel = isDispute
-    ? (DISPUTE_LABELS[typeKey]?.[sw ? 'sw' : 'en'] || typeKey)
-    : (ISSUE_LABELS[typeKey]?.[sw ? 'sw' : 'en'] || typeKey);
-  const urgency   = String(fd.urgency || 'NORMAL');
-  const urgMeta   = URGENCY_COLORS[urgency] || URGENCY_COLORS.NORMAL;
-  const resolution = RESOLUTION_LABELS[String(fd.resolution_preference || '')]?.[sw ? 'sw' : 'en'] || '';
+    ? DISPUTE_LABELS[typeKey]?.[sw ? "sw" : "en"] || typeKey
+    : ISSUE_LABELS[typeKey]?.[sw ? "sw" : "en"] || typeKey;
+  const urgency = String(fd.urgency || "NORMAL");
+  const urgMeta = URGENCY_COLORS[urgency] || URGENCY_COLORS.NORMAL;
+  const resolution =
+    RESOLUTION_LABELS[String(fd.resolution_preference || "")]?.[sw ? "sw" : "en"] || "";
 
-  const Row = ({ label, value }: { label: string; value?: unknown }) => (
+  const Row = ({ label, value }: { label: string; value?: string | undefined }) => (
     <View style={s.infoRow}>
       <Text style={s.infoLabel}>{label}:</Text>
-      <Text style={s.infoValue}>{String(value || 'N/A')}</Text>
+      <Text style={s.infoValue}>{String(value || "N/A")}</Text>
     </View>
   );
 
@@ -103,14 +133,20 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({ application, la
         <View style={s.titleBlock}>
           <Text style={s.title}>
             {isDispute
-              ? (sw ? 'TAARIFA YA MGOGORO WA RAIA' : 'CITIZEN DISPUTE REPORT')
-              : (sw ? 'RIPOTI YA TATIZO LA KIJAMII' : 'COMMUNITY ISSUE REPORT')}
+              ? sw
+                ? "TAARIFA YA MGOGORO WA RAIA"
+                : "CITIZEN DISPUTE REPORT"
+              : sw
+                ? "RIPOTI YA TATIZO LA KIJAMII"
+                : "COMMUNITY ISSUE REPORT"}
           </Text>
-          <View style={s.appNumberBadge}><Text style={s.appNumberText}>{application.application_number}</Text></View>
+          <View style={s.appNumberBadge}>
+            <Text style={s.appNumberText}>{application.application_number}</Text>
+          </View>
         </View>
 
         {/* Type banner */}
-        <View style={[ls.banner, { backgroundColor: isDispute ? '#e11d48' : '#d97706' }]}>
+        <View style={[ls.banner, { backgroundColor: isDispute ? "#e11d48" : "#d97706" }]}>
           <Text style={ls.bannerTitle}>{typeLabel}</Text>
           {fd.title && <Text style={ls.bannerSub}>{String(fd.title)}</Text>}
         </View>
@@ -122,16 +158,16 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({ application, la
 
         {/* Complainant */}
         <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>{sw ? 'MLALAMIKAJI' : 'COMPLAINANT'}</Text>
+          <Text style={s.sectionTitle}>{sw ? "MLALAMIKAJI" : "COMPLAINANT"}</Text>
         </View>
         <View style={s.twoCol}>
           <View style={s.colLeft}>
-            <Row label={sw ? 'Jina' : 'Name'} value={formatFullName(user)} />
+            <Row label={sw ? "Jina" : "Name"} value={formatFullName(user)} />
             <Row label="NIDA" value={user?.nida_number} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? 'Simu' : 'Phone'} value={user?.phone} />
-            <Row label={sw ? 'Kata' : 'Ward'} value={user?.ward} />
+            <Row label={sw ? "Simu" : "Phone"} value={user?.phone} />
+            <Row label={sw ? "Kata" : "Ward"} value={user?.ward} />
           </View>
         </View>
 
@@ -139,25 +175,38 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({ application, la
         {isDispute && (
           <>
             <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{sw ? 'MLALAMIKIWA' : 'RESPONDENT'}</Text>
+              <Text style={s.sectionTitle}>{sw ? "MLALAMIKIWA" : "RESPONDENT"}</Text>
             </View>
             {fd.respondent_in_system ? (
               <View style={s.twoCol}>
                 <View style={s.colLeft}>
-                  <Row label={sw ? 'Jina' : 'Name'} value={fd.respondent_name} />
+                  <Row label={sw ? "Jina" : "Name"} value={fd.respondent_name} />
                   <Row label="NIDA" value={fd.respondent_nida || (fd as any).target_user_nida} />
                 </View>
                 <View style={s.colRight}>
-                  <Row label={sw ? 'Simu' : 'Phone'} value={fd.respondent_phone} />
-                  <Row label={sw ? 'Hali' : 'Status'} value={sw ? 'Yupo kwenye mfumo ✓' : 'In system ✓'} />
+                  <Row label={sw ? "Simu" : "Phone"} value={fd.respondent_phone} />
+                  <Row
+                    label={sw ? "Hali" : "Status"}
+                    value={sw ? "Yupo kwenye mfumo ✓" : "In system ✓"}
+                  />
                 </View>
               </View>
             ) : (
               <>
-                <Row label={sw ? 'Jina' : 'Name'} value={fd.respondent_name_manual || fd.respondent_name} />
-                {fd.respondent_phone_manual && <Row label={sw ? 'Simu' : 'Phone'} value={fd.respondent_phone_manual} />}
-                {fd.respondent_address_manual && <Row label={sw ? 'Anwani' : 'Address'} value={fd.respondent_address_manual} />}
-                <Row label={sw ? 'Hali' : 'Status'} value={sw ? 'Hayupo kwenye mfumo' : 'Not in system'} />
+                <Row
+                  label={sw ? "Jina" : "Name"}
+                  value={fd.respondent_name_manual || fd.respondent_name}
+                />
+                {fd.respondent_phone_manual && (
+                  <Row label={sw ? "Simu" : "Phone"} value={fd.respondent_phone_manual} />
+                )}
+                {fd.respondent_address_manual && (
+                  <Row label={sw ? "Anwani" : "Address"} value={fd.respondent_address_manual} />
+                )}
+                <Row
+                  label={sw ? "Hali" : "Status"}
+                  value={sw ? "Hayupo kwenye mfumo" : "Not in system"}
+                />
               </>
             )}
           </>
@@ -167,37 +216,58 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({ application, la
         {!isDispute && (
           <>
             <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{sw ? 'ENEO LA TATIZO' : 'ISSUE LOCATION'}</Text>
+              <Text style={s.sectionTitle}>{sw ? "ENEO LA TATIZO" : "ISSUE LOCATION"}</Text>
             </View>
-            <Row label={sw ? 'Mahali' : 'Location'} value={fd.issue_location} />
+            <Row label={sw ? "Mahali" : "Location"} value={fd.issue_location} />
             <View style={s.twoCol}>
-              <View style={s.colLeft}><Row label={sw ? 'Kata' : 'Ward'} value={fd.issue_ward} /></View>
-              <View style={s.colRight}><Row label={sw ? 'Wilaya' : 'District'} value={fd.issue_district} /></View>
+              <View style={s.colLeft}>
+                <Row label={sw ? "Kata" : "Ward"} value={fd.issue_ward} />
+              </View>
+              <View style={s.colRight}>
+                <Row label={sw ? "Wilaya" : "District"} value={fd.issue_district} />
+              </View>
             </View>
           </>
         )}
 
         {/* Case details */}
         <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>{sw ? 'MAELEZO YA SHAURI' : 'CASE DETAILS'}</Text>
+          <Text style={s.sectionTitle}>{sw ? "MAELEZO YA SHAURI" : "CASE DETAILS"}</Text>
         </View>
-        <Row label={sw ? 'Kichwa' : 'Title'} value={fd.title} />
-        {fd.incident_date && <Row label={sw ? 'Tarehe ya Tukio' : 'Incident Date'} value={fd.incident_date} />}
-        {isDispute && resolution && <Row label={sw ? 'Suluhisho Linalopendekezwa' : 'Preferred Resolution'} value={resolution} />}
+        <Row label={sw ? "Kichwa" : "Title"} value={fd.title} />
+        {fd.incident_date && (
+          <Row label={sw ? "Tarehe ya Tukio" : "Incident Date"} value={fd.incident_date} />
+        )}
+        {isDispute && resolution && (
+          <Row
+            label={sw ? "Suluhisho Linalopendekezwa" : "Preferred Resolution"}
+            value={resolution}
+          />
+        )}
 
         {/* Description box */}
         <View style={ls.descBox}>
-          <Text style={ls.descText}>{String(fd.description || '')}</Text>
+          <Text style={ls.descText}>{String(fd.description || "")}</Text>
         </View>
 
         {/* Witnesses (citizen dispute only) */}
         {isDispute && (fd.witness1_name || fd.witness2_name) && (
           <>
             <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>{sw ? 'MASHAHIDI' : 'WITNESSES'}</Text>
+              <Text style={s.sectionTitle}>{sw ? "MASHAHIDI" : "WITNESSES"}</Text>
             </View>
-            {fd.witness1_name && <Row label={`${sw ? 'Shahidi' : 'Witness'} 1`} value={`${fd.witness1_name} · ${fd.witness1_phone || ''}`} />}
-            {fd.witness2_name && <Row label={`${sw ? 'Shahidi' : 'Witness'} 2`} value={`${fd.witness2_name} · ${fd.witness2_phone || ''}`} />}
+            {fd.witness1_name && (
+              <Row
+                label={`${sw ? "Shahidi" : "Witness"} 1`}
+                value={`${fd.witness1_name} · ${fd.witness1_phone || ""}`}
+              />
+            )}
+            {fd.witness2_name && (
+              <Row
+                label={`${sw ? "Shahidi" : "Witness"} 2`}
+                value={`${fd.witness2_name} · ${fd.witness2_phone || ""}`}
+              />
+            )}
           </>
         )}
 
@@ -216,20 +286,26 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({ application, la
         <View style={s.signatureSection}>
           <View style={s.signatureBox}>
             <View style={s.signatureLine} />
-            <Text style={s.signatureName}>{sw ? 'MLALAMIKAJI' : 'COMPLAINANT'}</Text>
+            <Text style={s.signatureName}>{sw ? "MLALAMIKAJI" : "COMPLAINANT"}</Text>
             <Text style={s.signatureTitle}>{formatFullName(user)}</Text>
           </View>
           <View style={s.signatureBox}>
-            <View style={s.stampBox}><Text style={s.stampText}>{sw ? 'MUHURI WA OFISI' : 'OFFICE SEAL'}</Text></View>
+            <View style={s.stampBox}>
+              <Text style={s.stampText}>{sw ? "MUHURI WA OFISI" : "OFFICE SEAL"}</Text>
+            </View>
             <View style={s.signatureLine} />
-            <Text style={s.signatureName}>{sw ? 'AFISA MTENDAJI WA KATA' : 'WARD EXECUTIVE OFFICER'}</Text>
+            <Text style={s.signatureName}>
+              {sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
+            </Text>
           </View>
         </View>
 
         {/* QR code */}
         <View style={s.qrSection}>
-          <View style={s.qrBorder}><Image src={qr} style={s.qrCode} /></View>
-          <Text style={s.qrLabel}>{sw ? 'Changanua kuthibitisha' : 'Scan to verify'}</Text>
+          <View style={s.qrBorder}>
+            <Image src={qr} style={s.qrCode} />
+          </View>
+          <Text style={s.qrLabel}>{sw ? "Changanua kuthibitisha" : "Scan to verify"}</Text>
           <Text style={s.qrRef}>{application.application_number}</Text>
         </View>
 
@@ -237,8 +313,12 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({ application, la
         <View style={s.footer}>
           <Text style={s.footerText}>
             {isDispute
-              ? (sw ? 'Shauri hili lipo chini ya uchunguzi. Pande zote zitaitwa.' : 'This case is under investigation. Both parties will be summoned.')
-              : (sw ? 'Ripoti hii imesajiliwa rasmi. Ofisi itashughulikia.' : 'This report has been officially registered. The office will follow up.')}
+              ? sw
+                ? "Shauri hili lipo chini ya uchunguzi. Pande zote zitaitwa."
+                : "This case is under investigation. Both parties will be summoned."
+              : sw
+                ? "Ripoti hii imesajiliwa rasmi. Ofisi itashughulikia."
+                : "This report has been officially registered. The office will follow up."}
           </Text>
           <Text style={s.metadata}>{`FILED: ${formatDate(application.created_at)} | E-MTAA`}</Text>
         </View>

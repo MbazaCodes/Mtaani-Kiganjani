@@ -7,8 +7,7 @@ export const Route = createFileRoute("/")({
       { title: "E-Serikali Mtaa - Huduma za Serikali za Mtaa Tanzania" },
       {
         name: "description",
-        content:
-          "E-Serikali Mtaa - Mfumo wa Huduma za Serikali za Mtaa Tanzania.",
+        content: "E-Serikali Mtaa - Mfumo wa Huduma za Serikali za Mtaa Tanzania.",
       },
     ],
   }),

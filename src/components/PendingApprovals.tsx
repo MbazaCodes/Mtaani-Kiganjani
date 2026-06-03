@@ -1,19 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import type { AnyFormData } from '@/types';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/context/AuthContext';
-import { Users, CheckCircle, XCircle, Eye, Loader2, Clock, User, MapPin, DollarSign, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/lib/currency';
+import React, { useState, useEffect } from "react";
+import type { AnyFormData } from "@/types";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
+import {
+  Users,
+  CheckCircle,
+  XCircle,
+  Eye,
+  Loader2,
+  Clock,
+  User,
+  MapPin,
+  DollarSign,
+  AlertCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 // Safe form_data field accessor for JSX rendering
-const fd = (data: Record<string, unknown>, key: string): string => String(data?.[key] ?? '');
-
+const fd = (data: Record<string, unknown>, key: string): string => String(data?.[key] ?? "");
 
 interface PendingApproval {
   id: string;
   application_number: string;
   service_name: string;
-  form_data: Record<string, unknown>;  // dynamic fields accessed via cast
+  form_data: Record<string, unknown>; // dynamic fields accessed via cast
   user_id: string;
   created_at: string;
   submitter?: {
@@ -24,16 +34,16 @@ interface PendingApproval {
 }
 
 interface PendingApprovalsProps {
-  lang?: 'sw' | 'en';
+  lang?: "sw" | "en";
 }
 
-export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' }) => {
+export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = "sw" }) => {
   const { user } = useAuth();
   const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedApproval, setSelectedApproval] = useState<PendingApproval | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
 
   useEffect(() => {
@@ -47,21 +57,23 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
 
     try {
       setLoading(true);
-      
+
       // Find applications where this user is the target_user_id and status is pending
       const { data, error } = await supabase
-        .from('applications')
-        .select(`
+        .from("applications")
+        .select(
+          `
           id,
           application_number,
           service_name,
           form_data,
           user_id,
           created_at
-        `)
-        .eq('target_user_id', user.id)
-        .eq('agreement_status', 'pending')
-        .order('created_at', { ascending: false });
+        `,
+        )
+        .eq("target_user_id", user.id)
+        .eq("agreement_status", "pending")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
@@ -69,21 +81,21 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
       const approvalsWithSubmitters = await Promise.all(
         (data || []).map(async (app) => {
           const { data: submitterData } = await supabase
-            .from('users')
-            .select('first_name, last_name, phone')
-            .eq('id', app.user_id)
+            .from("users")
+            .select("first_name, last_name, phone")
+            .eq("id", app.user_id)
             .single();
-          
+
           return {
             ...app,
-            submitter: submitterData || undefined
+            submitter: submitterData || undefined,
           };
-        })
+        }),
       );
 
       setPendingApprovals(approvalsWithSubmitters);
     } catch (err) {
-      console.error('Error fetching pending approvals:', err);
+      console.error("Error fetching pending approvals:", err);
     } finally {
       setLoading(false);
     }
@@ -94,39 +106,40 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
 
     try {
       setProcessing(true);
-      
+
       const { error } = await supabase
-        .from('applications')
+        .from("applications")
         .update({
-          agreement_status: 'approved',
+          agreement_status: "approved",
           approved_by_target: user.id,
           approved_by_target_at: new Date().toISOString(),
           is_confirmed: true,
           confirmation_data: {
             confirmed_by: user.id,
             confirmed_at: new Date().toISOString(),
-            role: approval.form_data?.target_user_role || 'COUNTER_PARTY'
-          }
+            role: approval.form_data?.target_user_role || "COUNTER_PARTY",
+          },
         })
-        .eq('id', approval.id);
+        .eq("id", approval.id);
 
       if (error) throw error;
 
       // Create notification for the submitter
-      await supabase.from('notifications').insert({
+      await supabase.from("notifications").insert({
         user_id: approval.user_id,
-        title: lang === 'sw' ? 'Makubaliano Yameidhinishwa' : 'Agreement Approved',
-        message: lang === 'sw' 
-          ? `Makubaliano yako (${approval.application_number}) yameidhinishwa na upande mwingine.`
-          : `Your agreement (${approval.application_number}) has been approved by the other party.`,
-        type: 'success'
+        title: lang === "sw" ? "Makubaliano Yameidhinishwa" : "Agreement Approved",
+        message:
+          lang === "sw"
+            ? `Makubaliano yako (${approval.application_number}) yameidhinishwa na upande mwingine.`
+            : `Your agreement (${approval.application_number}) has been approved by the other party.`,
+        type: "success",
       });
 
       // Refresh the list
       fetchPendingApprovals();
       setSelectedApproval(null);
     } catch (err) {
-      console.error('Error approving:', err);
+      console.error("Error approving:", err);
     } finally {
       setProcessing(false);
     }
@@ -137,36 +150,37 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
 
     try {
       setProcessing(true);
-      
+
       const { error } = await supabase
-        .from('applications')
+        .from("applications")
         .update({
-          agreement_status: 'rejected',
+          agreement_status: "rejected",
           approved_by_target: user.id,
           approved_by_target_at: new Date().toISOString(),
-          target_rejection_reason: rejectionReason.trim()
+          target_rejection_reason: rejectionReason.trim(),
         })
-        .eq('id', approval.id);
+        .eq("id", approval.id);
 
       if (error) throw error;
 
       // Create notification for the submitter
-      await supabase.from('notifications').insert({
+      await supabase.from("notifications").insert({
         user_id: approval.user_id,
-        title: lang === 'sw' ? 'Makubaliano Yamekataliwa' : 'Agreement Rejected',
-        message: lang === 'sw' 
-          ? `Makubaliano yako (${approval.application_number}) yamekataliwa. Sababu: ${rejectionReason}`
-          : `Your agreement (${approval.application_number}) has been rejected. Reason: ${rejectionReason}`,
-        type: 'error'
+        title: lang === "sw" ? "Makubaliano Yamekataliwa" : "Agreement Rejected",
+        message:
+          lang === "sw"
+            ? `Makubaliano yako (${approval.application_number}) yamekataliwa. Sababu: ${rejectionReason}`
+            : `Your agreement (${approval.application_number}) has been rejected. Reason: ${rejectionReason}`,
+        type: "error",
       });
 
       // Refresh and close modals
       fetchPendingApprovals();
       setSelectedApproval(null);
       setShowRejectModal(false);
-      setRejectionReason('');
+      setRejectionReason("");
     } catch (err) {
-      console.error('Error rejecting:', err);
+      console.error("Error rejecting:", err);
     } finally {
       setProcessing(false);
     }
@@ -195,10 +209,12 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
         </div>
         <div>
           <h3 className="font-bold text-lg">
-            {lang === 'sw' ? 'Makubaliano Yanasubiri Idhini Yako' : 'Agreements Awaiting Your Approval'}
+            {lang === "sw"
+              ? "Makubaliano Yanasubiri Idhini Yako"
+              : "Agreements Awaiting Your Approval"}
           </h3>
           <p className="text-amber-100 text-sm">
-            {lang === 'sw' 
+            {lang === "sw"
               ? `Una makubaliano ${pendingApprovals.length} yanayosubiri kuidhinishwa`
               : `You have ${pendingApprovals.length} agreement(s) pending approval`}
           </p>
@@ -208,7 +224,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
       {/* List */}
       <div className="p-4 space-y-3">
         {pendingApprovals.map((approval) => (
-          <div 
+          <div
             key={approval.id}
             className="bg-white rounded-xl border border-amber-200 p-4 hover:shadow-md transition-all"
           >
@@ -216,9 +232,11 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-lg">
-                    {approval.service_name?.includes('PANGISHA') ? 'PANGISHA' : 'MAUZIANO'}
+                    {approval.service_name?.includes("PANGISHA") ? "PANGISHA" : "MAUZIANO"}
                   </span>
-                  <span className="text-sm font-mono text-stone-500">#{approval.application_number}</span>
+                  <span className="text-sm font-mono text-stone-500">
+                    #{approval.application_number}
+                  </span>
                 </div>
 
                 {/* Submitter info */}
@@ -230,7 +248,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      {new Date(approval.created_at).toLocaleDateString('sw-TZ')}
+                      {new Date(approval.created_at).toLocaleDateString("sw-TZ")}
                     </span>
                   </div>
                 )}
@@ -263,7 +281,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
                 <button
                   onClick={() => setSelectedApproval(approval)}
                   className="p-2 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors"
-                  title={lang === 'sw' ? 'Angalia zaidi' : 'View details'}
+                  title={lang === "sw" ? "Angalia zaidi" : "View details"}
                 >
                   <Eye className="h-5 w-5 text-stone-600" />
                 </button>
@@ -271,7 +289,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
                   onClick={() => handleApprove(approval)}
                   disabled={processing}
                   className="p-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-600 rounded-lg transition-colors"
-                  title={lang === 'sw' ? 'Idhinisha' : 'Approve'}
+                  title={lang === "sw" ? "Idhinisha" : "Approve"}
                 >
                   <CheckCircle className="h-5 w-5" />
                 </button>
@@ -282,7 +300,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
                   }}
                   disabled={processing}
                   className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
-                  title={lang === 'sw' ? 'Kataa' : 'Reject'}
+                  title={lang === "sw" ? "Kataa" : "Reject"}
                 >
                   <XCircle className="h-5 w-5" />
                 </button>
@@ -298,12 +316,12 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-stone-200 flex items-center justify-between">
               <h3 className="text-xl font-bold text-stone-800">
-                {lang === 'sw' ? 'Maelezo ya Makubaliano' : 'Agreement Details'}
+                {lang === "sw" ? "Maelezo ya Makubaliano" : "Agreement Details"}
               </h3>
-              <button 
+              <button
                 onClick={() => setSelectedApproval(null)}
                 className="p-2 hover:bg-stone-100 rounded-lg"
-                aria-label={lang === 'sw' ? 'Funga' : 'Close'}
+                aria-label={lang === "sw" ? "Funga" : "Close"}
               >
                 <XCircle className="h-5 w-5 text-stone-500" />
               </button>
@@ -312,28 +330,38 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
             <div className="p-6 space-y-4">
               {/* Application info */}
               <div className="bg-stone-50 rounded-xl p-4 space-y-2">
-                <p><span className="font-semibold">Application #:</span> {selectedApproval.application_number}</p>
-                <p><span className="font-semibold">{lang === 'sw' ? 'Huduma:' : 'Service:'}</span> {selectedApproval.service_name}</p>
-                <p><span className="font-semibold">{lang === 'sw' ? 'Tarehe:' : 'Date:'}</span> {new Date(selectedApproval.created_at).toLocaleString('sw-TZ')}</p>
+                <p>
+                  <span className="font-semibold">Application #:</span>{" "}
+                  {selectedApproval.application_number}
+                </p>
+                <p>
+                  <span className="font-semibold">{lang === "sw" ? "Huduma:" : "Service:"}</span>{" "}
+                  {selectedApproval.service_name}
+                </p>
+                <p>
+                  <span className="font-semibold">{lang === "sw" ? "Tarehe:" : "Date:"}</span>{" "}
+                  {new Date(selectedApproval.created_at).toLocaleString("sw-TZ")}
+                </p>
               </div>
 
               {/* Form data */}
               <div className="space-y-3">
                 <h4 className="font-bold text-stone-700">
-                  {lang === 'sw' ? 'Taarifa za Makubaliano' : 'Agreement Information'}
+                  {lang === "sw" ? "Taarifa za Makubaliano" : "Agreement Information"}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {Object.entries(selectedApproval.form_data || {}).map(([key, value]) => {
                     // Skip internal fields
-                    if (['target_user_id', 'send_for_approval', 'agreement_accepted'].includes(key)) return null;
-                    if (key.startsWith('section_')) return null;
-                    if (typeof value === 'object') return null;
-                    
+                    if (["target_user_id", "send_for_approval", "agreement_accepted"].includes(key))
+                      return null;
+                    if (key.startsWith("section_")) return null;
+                    if (typeof value === "object") return null;
+
                     return (
                       <div key={key} className="bg-stone-50 rounded-lg p-3">
-                        <p className="text-xs text-stone-500 uppercase">{key.replace(/_/g, ' ')}</p>
+                        <p className="text-xs text-stone-500 uppercase">{key.replace(/_/g, " ")}</p>
                         <p className="font-medium text-stone-800">
-                          {typeof value === 'number' ? formatCurrency(value) : String(value)}
+                          {typeof value === "number" ? formatCurrency(value) : String(value)}
                         </p>
                       </div>
                     );
@@ -345,9 +373,11 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
               {Boolean(selectedApproval.form_data?.approval_note) && (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <p className="text-sm font-semibold text-blue-700 mb-1">
-                    {lang === 'sw' ? 'Ujumbe kutoka kwa mtumaji:' : 'Message from submitter:'}
+                    {lang === "sw" ? "Ujumbe kutoka kwa mtumaji:" : "Message from submitter:"}
                   </p>
-                  <p className="text-blue-800">{String(selectedApproval.form_data.approval_note ?? "")}</p>
+                  <p className="text-blue-800">
+                    {String(selectedApproval.form_data.approval_note ?? "")}
+                  </p>
                 </div>
               )}
             </div>
@@ -358,8 +388,12 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
                 disabled={processing}
                 className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {processing ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle className="h-5 w-5" />}
-                {lang === 'sw' ? 'Idhinisha Makubaliano' : 'Approve Agreement'}
+                {processing ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-5 w-5" />
+                )}
+                {lang === "sw" ? "Idhinisha Makubaliano" : "Approve Agreement"}
               </button>
               <button
                 onClick={() => setShowRejectModal(true)}
@@ -367,7 +401,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
                 className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <XCircle className="h-5 w-5" />
-                {lang === 'sw' ? 'Kataa' : 'Reject'}
+                {lang === "sw" ? "Kataa" : "Reject"}
               </button>
             </div>
           </div>
@@ -382,21 +416,21 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
               <div className="flex items-center gap-3 text-red-600">
                 <AlertCircle className="h-6 w-6" />
                 <h3 className="text-xl font-bold">
-                  {lang === 'sw' ? 'Kataa Makubaliano' : 'Reject Agreement'}
+                  {lang === "sw" ? "Kataa Makubaliano" : "Reject Agreement"}
                 </h3>
               </div>
             </div>
 
             <div className="p-6 space-y-4">
               <p className="text-stone-600">
-                {lang === 'sw' 
-                  ? 'Tafadhali eleza sababu ya kukataa makubaliano haya:'
-                  : 'Please explain why you are rejecting this agreement:'}
+                {lang === "sw"
+                  ? "Tafadhali eleza sababu ya kukataa makubaliano haya:"
+                  : "Please explain why you are rejecting this agreement:"}
               </p>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder={lang === 'sw' ? 'Andika sababu hapa...' : 'Enter reason here...'}
+                placeholder={lang === "sw" ? "Andika sababu hapa..." : "Enter reason here..."}
                 className="w-full p-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none min-h-30"
                 required
               />
@@ -406,19 +440,23 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = 'sw' 
               <button
                 onClick={() => {
                   setShowRejectModal(false);
-                  setRejectionReason('');
+                  setRejectionReason("");
                 }}
                 className="flex-1 py-3 bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold rounded-xl"
               >
-                {lang === 'sw' ? 'Ghairi' : 'Cancel'}
+                {lang === "sw" ? "Ghairi" : "Cancel"}
               </button>
               <button
                 onClick={() => handleReject(selectedApproval)}
                 disabled={processing || !rejectionReason.trim()}
                 className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {processing ? <Loader2 className="h-5 w-5 animate-spin" /> : <XCircle className="h-5 w-5" />}
-                {lang === 'sw' ? 'Thibitisha Kukataa' : 'Confirm Rejection'}
+                {processing ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <XCircle className="h-5 w-5" />
+                )}
+                {lang === "sw" ? "Thibitisha Kukataa" : "Confirm Rejection"}
               </button>
             </div>
           </div>

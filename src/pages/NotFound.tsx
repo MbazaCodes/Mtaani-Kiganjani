@@ -1,12 +1,13 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Home, ArrowLeft, Search, HelpCircle } from 'lucide-react';
-import { useLanguage } from '@/context/LanguageContext';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Home, ArrowLeft, Search, HelpCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function NotFound() {
   const navigate = useNavigate();
-  const onNavigate = (view: 'dashboard' | 'services') => navigate(view === 'dashboard' ? '/dashboard' : '/services');
+  const onNavigate = (view: "dashboard" | "services") =>
+    navigate(view === "dashboard" ? "/dashboard" : "/services");
   const { lang } = useLanguage();
 
   return (
@@ -20,7 +21,7 @@ export function NotFound() {
         {/* 404 Illustration */}
         <div className="mb-8">
           <div className="relative inline-block">
-            <motion.div 
+            <motion.div
               className="text-[150px] font-black text-emerald-100 leading-none"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
@@ -28,7 +29,7 @@ export function NotFound() {
             >
               404
             </motion.div>
-            <motion.div 
+            <motion.div
               className="absolute inset-0 flex items-center justify-center"
               initial={{ rotate: -10 }}
               animate={{ rotate: 0 }}
@@ -43,12 +44,12 @@ export function NotFound() {
 
         {/* Message */}
         <h1 className="text-3xl font-bold text-stone-800 mb-3">
-          {lang === 'sw' ? 'Ukurasa Haujapatikana' : 'Page Not Found'}
+          {lang === "sw" ? "Ukurasa Haujapatikana" : "Page Not Found"}
         </h1>
         <p className="text-stone-500 mb-8 max-w-sm mx-auto">
-          {lang === 'sw' 
-            ? 'Samahani, ukurasa unaoutafuta haupo au umehamishiwa mahali pengine.'
-            : 'Sorry, the page you are looking for does not exist or has been moved.'}
+          {lang === "sw"
+            ? "Samahani, ukurasa unaoutafuta haupo au umehamishiwa mahali pengine."
+            : "Sorry, the page you are looking for does not exist or has been moved."}
         </p>
 
         {/* Action Buttons */}
@@ -56,21 +57,21 @@ export function NotFound() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onNavigate('dashboard')}
+            onClick={() => onNavigate("dashboard")}
             className="inline-flex items-center justify-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
           >
             <Home size={20} />
-            {lang === 'sw' ? 'Rudi Nyumbani' : 'Go Home'}
+            {lang === "sw" ? "Rudi Nyumbani" : "Go Home"}
           </motion.button>
-          
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onNavigate('services')}
+            onClick={() => onNavigate("services")}
             className="inline-flex items-center justify-center gap-2 bg-white text-stone-700 px-6 py-3 rounded-xl font-bold hover:bg-stone-50 transition-colors border border-stone-200"
           >
             <ArrowLeft size={20} />
-            {lang === 'sw' ? 'Angalia Huduma' : 'Browse Services'}
+            {lang === "sw" ? "Angalia Huduma" : "Browse Services"}
           </motion.button>
         </div>
 
@@ -78,9 +79,9 @@ export function NotFound() {
         <div className="mt-8 pt-6 border-t border-stone-200">
           <p className="text-sm text-stone-400 flex items-center justify-center gap-2">
             <HelpCircle size={16} />
-            {lang === 'sw' 
-              ? 'Unahitaji msaada? Wasiliana na msaada wa wateja.'
-              : 'Need help? Contact customer support.'}
+            {lang === "sw"
+              ? "Unahitaji msaada? Wasiliana na msaada wa wateja."
+              : "Need help? Contact customer support."}
           </p>
         </div>
       </motion.div>

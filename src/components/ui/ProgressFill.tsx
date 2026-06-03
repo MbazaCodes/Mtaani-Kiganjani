@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from "react";
 
 interface ProgressFillProps {
   progress: number;
@@ -10,7 +10,7 @@ interface ProgressFillProps {
  * avoiding the need for a `style` prop on the JSX element.
  * This is required because Tailwind JIT cannot generate dynamic `w-[X%]` classes at build time.
  */
-export function ProgressFill({ progress, className = '' }: ProgressFillProps) {
+export function ProgressFill({ progress, className = "" }: ProgressFillProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {

@@ -1,12 +1,12 @@
-import React from 'react';
-import type { ViewName } from '@/types';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Plus, 
-  FileText, 
-  Search, 
-  Shield, 
+import React from "react";
+import type { ViewName } from "@/types";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  LayoutDashboard,
+  Plus,
+  FileText,
+  Search,
+  Shield,
   User,
   Users,
   Building2,
@@ -17,11 +17,11 @@ import {
   Activity,
   X,
   LogOut,
-  Bell
-} from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
-import { cn } from '@/lib/utils';
+  Bell,
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { cn } from "@/lib/utils";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -36,127 +36,132 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
 
   const menuItems = [
     {
-      id: 'dashboard',
+      id: "dashboard",
       icon: <LayoutDashboard size={20} />,
-      label: lang === 'sw' ? 'Dashibodi' : 'Dashboard',
-      roles: ['citizen', 'staff', 'admin'],
-      view: user?.role === 'admin' ? 'admin_dashboard' : user?.role === 'staff' ? 'staff_dashboard' : 'dashboard'
+      label: lang === "sw" ? "Dashibodi" : "Dashboard",
+      roles: ["citizen", "staff", "admin"],
+      view:
+        user?.role === "admin"
+          ? "admin_dashboard"
+          : user?.role === "staff"
+            ? "staff_dashboard"
+            : "dashboard",
     },
     {
-      id: 'services',
+      id: "services",
       icon: <Plus size={20} />,
-      label: lang === 'sw' ? 'Omba' : 'Apply',
-      roles: ['citizen'],
-      view: 'services'
+      label: lang === "sw" ? "Omba" : "Apply",
+      roles: ["citizen"],
+      view: "services",
     },
     {
-      id: 'agreement',
+      id: "agreement",
       icon: <FileText size={20} />,
-      label: lang === 'sw' ? 'Makubaliano' : 'Agreement',
-      roles: ['citizen'],
-      view: 'agreement'
+      label: lang === "sw" ? "Makubaliano" : "Agreement",
+      roles: ["citizen"],
+      view: "agreement",
     },
     {
-      id: 'applications',
+      id: "applications",
       icon: <FileText size={20} />,
-      label: lang === 'sw' ? 'Maombi Yangu' : 'My Applications',
-      roles: ['citizen'],
-      view: 'applications'
+      label: lang === "sw" ? "Maombi Yangu" : "My Applications",
+      roles: ["citizen"],
+      view: "applications",
     },
     {
-      id: 'notifications',
+      id: "notifications",
       icon: <Bell size={20} />,
-      label: lang === 'sw' ? 'Arifa' : 'Notifications',
-      roles: ['citizen', 'staff', 'admin'],
-      view: 'notifications'
+      label: lang === "sw" ? "Arifa" : "Notifications",
+      roles: ["citizen", "staff", "admin"],
+      view: "notifications",
     },
     {
-      id: 'staff_management',
+      id: "staff_management",
       icon: <Shield size={20} />,
-      label: lang === 'sw' ? 'Usimamizi wa Watumishi' : 'Staff Management',
-      roles: ['admin'],
-      view: 'staff_management'
+      label: lang === "sw" ? "Usimamizi wa Watumishi" : "Staff Management",
+      roles: ["admin"],
+      view: "staff_management",
     },
     {
-      id: 'office_management',
+      id: "office_management",
       icon: <Building2 size={20} />,
-      label: lang === 'sw' ? 'Usimamizi wa Ofisi' : 'Office Management',
-      roles: ['admin'],
-      view: 'office_management'
+      label: lang === "sw" ? "Usimamizi wa Ofisi" : "Office Management",
+      roles: ["admin"],
+      view: "office_management",
     },
     {
-      id: 'location_management',
+      id: "location_management",
       icon: <MapPin size={20} />,
-      label: lang === 'sw' ? 'Usimamizi wa Maeneo' : 'Location Management',
-      roles: ['admin'],
-      view: 'location_management'
+      label: lang === "sw" ? "Usimamizi wa Maeneo" : "Location Management",
+      roles: ["admin"],
+      view: "location_management",
     },
     {
-      id: 'service_management',
+      id: "service_management",
       icon: <Settings size={20} />,
-      label: lang === 'sw' ? 'Usimamizi wa Huduma' : 'Service Management',
-      roles: ['admin'],
-      view: 'service_management'
+      label: lang === "sw" ? "Usimamizi wa Huduma" : "Service Management",
+      roles: ["admin"],
+      view: "service_management",
     },
     {
-      id: 'admin_logs',
+      id: "admin_logs",
       icon: <Activity size={20} />,
-      label: lang === 'sw' ? 'Kumbukumbu' : 'Activity Logs',
-      roles: ['admin'],
-      view: 'admin_logs'
+      label: lang === "sw" ? "Kumbukumbu" : "Activity Logs",
+      roles: ["admin"],
+      view: "admin_logs",
     },
     {
-      id: 'application_review',
+      id: "application_review",
       icon: <Search size={20} />,
-      label: lang === 'sw' ? 'Uhakiki wa Maombi' : 'Application Review',
-      roles: ['staff', 'admin'],
-      view: 'application_review'
+      label: lang === "sw" ? "Uhakiki wa Maombi" : "Application Review",
+      roles: ["staff", "admin"],
+      view: "application_review",
     },
     {
-      id: 'customer_support',
+      id: "customer_support",
       icon: <HelpCircle size={20} />,
-      label: lang === 'sw' ? 'Huduma kwa Wateja' : 'Customer Support',
-      roles: ['staff', 'admin'],
-      view: 'customer_support'
+      label: lang === "sw" ? "Huduma kwa Wateja" : "Customer Support",
+      roles: ["staff", "admin"],
+      view: "customer_support",
     },
     {
-      id: 'manual_verification',
+      id: "manual_verification",
       icon: <UserCheck size={20} />,
-      label: lang === 'sw' ? 'Uhakiki wa Mwongozo' : 'Manual Verification',
-      roles: ['staff', 'admin'],
-      view: 'manual_verification'
+      label: lang === "sw" ? "Uhakiki wa Mwongozo" : "Manual Verification",
+      roles: ["staff", "admin"],
+      view: "manual_verification",
     },
     {
-      id: 'business_approval',
+      id: "business_approval",
       icon: <Building2 size={20} />,
-      label: lang === 'sw' ? 'Idhini ya Biashara' : 'Business Approval',
-      roles: ['staff', 'admin'],
-      view: 'business_approval'
+      label: lang === "sw" ? "Idhini ya Biashara" : "Business Approval",
+      roles: ["staff", "admin"],
+      view: "business_approval",
     },
     {
-      id: 'verify_documents',
+      id: "verify_documents",
       icon: <Search size={20} />,
-      label: lang === 'sw' ? 'Hakiki Hati' : 'Verify Document',
-      roles: ['citizen', 'staff', 'admin'],
-      view: 'verify_documents'
+      label: lang === "sw" ? "Hakiki Hati" : "Verify Document",
+      roles: ["citizen", "staff", "admin"],
+      view: "verify_documents",
     },
     {
-      id: 'profile',
+      id: "profile",
       icon: <User size={20} />,
-      label: lang === 'sw' ? 'Wasifu' : 'Profile',
-      roles: ['citizen', 'staff', 'admin'],
-      view: 'profile'
-    }
+      label: lang === "sw" ? "Wasifu" : "Profile",
+      roles: ["citizen", "staff", "admin"],
+      view: "profile",
+    },
   ];
 
-  const filteredItems = menuItems.filter(item => item.roles.includes(user?.role || ''));
+  const filteredItems = menuItems.filter((item) => item.roles.includes(user?.role || ""));
 
   return (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-100 lg:hidden">
           {/* Backdrop */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -165,11 +170,11 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
           />
 
           {/* Drawer */}
-          <motion.div 
-            initial={{ x: '-100%' }}
+          <motion.div
+            initial={{ x: "-100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="absolute left-0 top-0 bottom-0 w-70 bg-white shadow-2xl flex flex-col"
           >
             <div className="p-6 border-b border-stone-100 flex items-center justify-between">
@@ -181,10 +186,10 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
                   Menu
                 </span>
               </div>
-              <button 
-                onClick={onClose} 
+              <button
+                onClick={onClose}
                 className="p-2 hover:bg-stone-100 rounded-full transition-colors text-stone-400"
-                aria-label={lang === 'sw' ? 'Funga menyu' : 'Close menu'}
+                aria-label={lang === "sw" ? "Funga menyu" : "Close menu"}
               >
                 <X size={20} />
               </button>
@@ -195,14 +200,14 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
                 <button
                   key={item.id}
                   onClick={() => {
-                    setView(item.view as import('@/types').ViewName);
+                    setView(item.view as import("@/types").ViewName);
                     onClose();
                   }}
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all",
-                    currentView === item.view 
-                      ? "bg-emerald-50 text-emerald-600" 
-                      : "text-stone-500 hover:bg-stone-50 hover:text-stone-900"
+                    currentView === item.view
+                      ? "bg-emerald-50 text-emerald-600"
+                      : "text-stone-500 hover:bg-stone-50 hover:text-stone-900",
                   )}
                 >
                   {item.icon}
@@ -217,11 +222,13 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
                   {user?.first_name?.[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-stone-900 truncate">{user?.first_name} {user?.last_name}</p>
+                  <p className="text-sm font-bold text-stone-900 truncate">
+                    {user?.first_name} {user?.last_name}
+                  </p>
                   <p className="text-xs text-stone-500 capitalize truncate">{user?.role}</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   signOut();
                   onClose();
@@ -229,7 +236,7 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-500 hover:bg-red-50 transition-all"
               >
                 <LogOut size={20} />
-                <span className="text-sm">{lang === 'sw' ? 'Ondoka' : 'Sign Out'}</span>
+                <span className="text-sm">{lang === "sw" ? "Ondoka" : "Sign Out"}</span>
               </button>
             </div>
           </motion.div>

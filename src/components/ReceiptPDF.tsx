@@ -1,18 +1,20 @@
-import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
-import { Application } from '@/lib/supabase';
-import type { PaymentData } from '@/types';
+import React from "react";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Application } from "@/lib/supabase";
+import type { PaymentData } from "@/types";
 
 const styles = StyleSheet.create({
   page: { padding: 30 },
-  title: { fontSize: 18, marginBottom: 20, textAlign: 'center' },
+  title: { fontSize: 18, marginBottom: 20, textAlign: "center" },
   section: { marginBottom: 10 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }
+  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 5 },
 });
 
-export const ReceiptPDF: React.FC<{ application: Application; paymentData: PaymentData; lang: string }> = ({ 
-  application, paymentData, lang 
-}) => {
+export const ReceiptPDF: React.FC<{
+  application: Application;
+  paymentData: PaymentData;
+  lang: string;
+}> = ({ application, paymentData, lang }) => {
   return (
     <Document>
       <Page size="A4" style={styles.page}>

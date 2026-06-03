@@ -1,80 +1,139 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Makubaliano ya Pango — Rental Agreement
  * Two-party agreement: Landlord + Tenant + Witnesses + Office.
  */
-import React from 'react';
-import { Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer';
-import { DocumentPDFProps, commonStyles as s, generateQRCodeUrl, formatFullName, formatDate, formatCurrency } from './types';
-import { TANZANIA_LOGO_BASE64 } from '@/constants/logo';
+import React from "react";
+import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
+import {
+  DocumentPDFProps,
+  commonStyles as s,
+  generateQRCodeUrl,
+  formatFullName,
+  formatDate,
+  formatCurrency,
+} from "./types";
+import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
-  banner: { backgroundColor: '#0d9488', paddingVertical: 10, paddingHorizontal: 14, marginBottom: 14, alignItems: 'center' },
-  bannerTitle: { color: '#ffffff', fontSize: 13, fontWeight: 'bold', textTransform: 'uppercase' },
-  partyBox: { borderWidth: 1, borderColor: '#0d9488', borderRadius: 4, padding: 8, marginVertical: 4 },
-  partyLabel: { fontSize: 7.5, color: '#0d9488', fontWeight: 'bold', marginBottom: 3, textTransform: 'uppercase' },
-  rentSummary: { backgroundColor: '#ccfbf1', borderWidth: 2, borderColor: '#0d9488', padding: 10, marginVertical: 10, alignItems: 'center' },
-  rentAmount: { fontSize: 18, fontWeight: 'bold', color: '#115e59' },
-  rentLabel:  { fontSize: 8, color: '#0f766e' },
-  fourSigGrid: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 22, marginBottom: 6, flexWrap: 'wrap' },
-  fourSigBox:  { width: '48%', marginBottom: 12, alignItems: 'center' },
-  fourSigLine: { borderBottomWidth: 1, borderBottomColor: '#78716c', marginBottom: 4, width: '100%' },
-  fourSigName: { fontSize: 8.5, fontWeight: 'bold', textTransform: 'uppercase', textAlign: 'center', marginBottom: 1 },
-  fourSigSub:  { fontSize: 7.5, color: '#78716c', textAlign: 'center' },
+  banner: {
+    backgroundColor: "#0d9488",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 14,
+    alignItems: "center",
+  },
+  bannerTitle: { color: "#ffffff", fontSize: 13, fontWeight: "bold", textTransform: "uppercase" },
+  partyBox: {
+    borderWidth: 1,
+    borderColor: "#0d9488",
+    borderRadius: 4,
+    padding: 8,
+    marginVertical: 4,
+  },
+  partyLabel: {
+    fontSize: 7.5,
+    color: "#0d9488",
+    fontWeight: "bold",
+    marginBottom: 3,
+    textTransform: "uppercase",
+  },
+  rentSummary: {
+    backgroundColor: "#ccfbf1",
+    borderWidth: 2,
+    borderColor: "#0d9488",
+    padding: 10,
+    marginVertical: 10,
+    alignItems: "center",
+  },
+  rentAmount: { fontSize: 18, fontWeight: "bold", color: "#115e59" },
+  rentLabel: { fontSize: 8, color: "#0f766e" },
+  fourSigGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 22,
+    marginBottom: 6,
+    flexWrap: "wrap",
+  },
+  fourSigBox: { width: "48%", marginBottom: 12, alignItems: "center" },
+  fourSigLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#78716c",
+    marginBottom: 4,
+    width: "100%",
+  },
+  fourSigName: {
+    fontSize: 8.5,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    textAlign: "center",
+    marginBottom: 1,
+  },
+  fourSigSub: { fontSize: 7.5, color: "#78716c", textAlign: "center" },
 });
 
 const PROPERTY_LABELS: Record<string, { sw: string; en: string }> = {
-  FULL_HOUSE: { sw: 'Nyumba Nzima',     en: 'Full House' },
-  ROOMS:      { sw: 'Vyumba',           en: 'Rooms / Bedsitter' },
-  APARTMENT:  { sw: 'Apartment',        en: 'Apartment' },
-  COMMERCIAL: { sw: 'Eneo la Biashara', en: 'Commercial Space' },
-  WAREHOUSE:  { sw: 'Ghala',            en: 'Warehouse' },
-  LAND:       { sw: 'Shamba / Kiwanja', en: 'Land / Plot' },
-  OTHER:      { sw: 'Nyingine',         en: 'Other' },
+  FULL_HOUSE: { sw: "Nyumba Nzima", en: "Full House" },
+  ROOMS: { sw: "Vyumba", en: "Rooms / Bedsitter" },
+  APARTMENT: { sw: "Apartment", en: "Apartment" },
+  COMMERCIAL: { sw: "Eneo la Biashara", en: "Commercial Space" },
+  WAREHOUSE: { sw: "Ghala", en: "Warehouse" },
+  LAND: { sw: "Shamba / Kiwanja", en: "Land / Plot" },
+  OTHER: { sw: "Nyingine", en: "Other" },
 };
 
 const DURATION_LABELS: Record<string, { sw: string; en: string }> = {
-  '6M':  { sw: 'Miezi 6',    en: '6 Months' },
-  '1Y':  { sw: 'Mwaka 1',    en: '1 Year' },
-  '2Y':  { sw: 'Miaka 2',    en: '2 Years' },
-  '3Y':  { sw: 'Miaka 3',    en: '3 Years' },
-  OPEN:  { sw: 'Wazi',       en: 'Open-Ended' },
+  "6M": { sw: "Miezi 6", en: "6 Months" },
+  "1Y": { sw: "Mwaka 1", en: "1 Year" },
+  "2Y": { sw: "Miaka 2", en: "2 Years" },
+  "3Y": { sw: "Miaka 3", en: "3 Years" },
+  OPEN: { sw: "Wazi", en: "Open-Ended" },
 };
 
 const NOTICE_LABELS: Record<string, { sw: string; en: string }> = {
-  '14D': { sw: 'Siku 14',  en: '14 Days' },
-  '30D': { sw: 'Siku 30',  en: '30 Days' },
-  '60D': { sw: 'Siku 60',  en: '60 Days' },
+  "14D": { sw: "Siku 14", en: "14 Days" },
+  "30D": { sw: "Siku 30", en: "30 Days" },
+  "60D": { sw: "Siku 60", en: "60 Days" },
 };
 
 const UTILITY_LABELS: Record<string, { sw: string; en: string }> = {
-  water:       { sw: 'Maji',   en: 'Water' },
-  electricity: { sw: 'Umeme',  en: 'Electricity' },
-  wifi:        { sw: 'Wifi',   en: 'Wifi' },
-  security:    { sw: 'Usalama',en: 'Security' },
-  garbage:     { sw: 'Taka',   en: 'Garbage' },
+  water: { sw: "Maji", en: "Water" },
+  electricity: { sw: "Umeme", en: "Electricity" },
+  wifi: { sw: "Wifi", en: "Wifi" },
+  security: { sw: "Usalama", en: "Security" },
+  garbage: { sw: "Taka", en: "Garbage" },
 };
 
-export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({ application, lang, qrDataUrl }) => {
-  const fd  = (application.form_data || {}) as Record<string, unknown>;
-  const qr  = qrDataUrl || generateQRCodeUrl(application, 'RA');
-  const sw  = lang === 'sw';
+export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
+  application,
+  lang,
+  qrDataUrl,
+}) => {
+  const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const qr = qrDataUrl || generateQRCodeUrl(application, "RA");
+  const sw = lang === "sw";
 
-  const Row = ({ label, value }: { label: string; value?: unknown }) => (
+  const Row = ({ label, value }: { label: string; value?: string | undefined }) => (
     <View style={s.infoRow}>
       <Text style={s.infoLabel}>{label}:</Text>
-      <Text style={s.infoValue}>{String(value || 'N/A')}</Text>
+      <Text style={s.infoValue}>{String(value || "N/A")}</Text>
     </View>
   );
 
-  const propType = String(fd.property_type || '');
-  const propLabel = PROPERTY_LABELS[propType] ? PROPERTY_LABELS[propType][sw ? 'sw' : 'en'] : propType;
-  const duration = String(fd.lease_duration || '');
-  const durationLabel = DURATION_LABELS[duration] ? DURATION_LABELS[duration][sw ? 'sw' : 'en'] : duration;
-  const notice = String(fd.notice_period || '');
-  const noticeLabel = NOTICE_LABELS[notice] ? NOTICE_LABELS[notice][sw ? 'sw' : 'en'] : notice;
-  const utilities = Array.isArray(fd.included_utilities) ? fd.included_utilities as string[] : [];
-  const utilLabels = utilities.map(u => UTILITY_LABELS[u] ? UTILITY_LABELS[u][sw ? 'sw' : 'en'] : u).join(', ');
+  const propType = String(fd.property_type || "");
+  const propLabel = PROPERTY_LABELS[propType]
+    ? PROPERTY_LABELS[propType][sw ? "sw" : "en"]
+    : propType;
+  const duration = String(fd.lease_duration || "");
+  const durationLabel = DURATION_LABELS[duration]
+    ? DURATION_LABELS[duration][sw ? "sw" : "en"]
+    : duration;
+  const notice = String(fd.notice_period || "");
+  const noticeLabel = NOTICE_LABELS[notice] ? NOTICE_LABELS[notice][sw ? "sw" : "en"] : notice;
+  const utilities = Array.isArray(fd.included_utilities) ? (fd.included_utilities as string[]) : [];
+  const utilLabels = utilities
+    .map((u) => (UTILITY_LABELS[u] ? UTILITY_LABELS[u][sw ? "sw" : "en"] : u))
+    .join(", ");
 
   return (
     <Document>
@@ -91,67 +150,95 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({ application, l
 
         {/* Title */}
         <View style={s.titleBlock}>
-          <Text style={s.title}>{sw ? 'MAKUBALIANO YA PANGO' : 'RENTAL AGREEMENT'}</Text>
-          <View style={s.appNumberBadge}><Text style={s.appNumberText}>{application.application_number}</Text></View>
+          <Text style={s.title}>{sw ? "MAKUBALIANO YA PANGO" : "RENTAL AGREEMENT"}</Text>
+          <View style={s.appNumberBadge}>
+            <Text style={s.appNumberText}>{application.application_number}</Text>
+          </View>
         </View>
 
         {/* Property banner */}
         <View style={ls.banner}>
-          <Text style={ls.bannerTitle}>{propLabel || (sw ? 'MALI YA KUKODISHWA' : 'PROPERTY')}</Text>
+          <Text style={ls.bannerTitle}>
+            {propLabel || (sw ? "MALI YA KUKODISHWA" : "PROPERTY")}
+          </Text>
         </View>
 
         {/* Rent summary */}
         <View style={ls.rentSummary}>
           <Text style={ls.rentAmount}>{formatCurrency(Number(fd.monthly_rent || 0))}/mwezi</Text>
           <Text style={ls.rentLabel}>
-            {sw ? 'KODI YA KILA MWEZI' : 'MONTHLY RENT'} · {sw ? 'Muda:' : 'Duration:'} {durationLabel}
+            {sw ? "KODI YA KILA MWEZI" : "MONTHLY RENT"} · {sw ? "Muda:" : "Duration:"}{" "}
+            {durationLabel}
           </Text>
         </View>
 
         {/* Parties side-by-side */}
         <View style={s.twoCol}>
           <View style={[s.colLeft, ls.partyBox]}>
-            <Text style={ls.partyLabel}>{sw ? 'MPANGISHAJI' : 'LANDLORD'}</Text>
-            <Row label={sw ? 'Jina' : 'Name'} value={(fd as any).landlord_name || `${(fd as any).first_name || ''} ${(fd as any).last_name || ''}`.trim()} />
+            <Text style={ls.partyLabel}>{sw ? "MPANGISHAJI" : "LANDLORD"}</Text>
+            <Row
+              label={sw ? "Jina" : "Name"}
+              value={
+                (fd as any).landlord_name ||
+                `${(fd as any).first_name || ""} ${(fd as any).last_name || ""}`.trim()
+              }
+            />
             <Row label="NIDA" value={(fd as any).landlord_nida} />
-            <Row label={sw ? 'Simu' : 'Phone'} value={(fd as any).landlord_phone} />
+            <Row label={sw ? "Simu" : "Phone"} value={(fd as any).landlord_phone} />
           </View>
           <View style={[s.colRight, ls.partyBox]}>
-            <Text style={ls.partyLabel}>{sw ? 'MPANGAJI' : 'TENANT'}</Text>
-            <Row label={sw ? 'Jina' : 'Name'} value={fd.tenant_name} />
+            <Text style={ls.partyLabel}>{sw ? "MPANGAJI" : "TENANT"}</Text>
+            <Row label={sw ? "Jina" : "Name"} value={fd.tenant_name} />
             <Row label="NIDA" value={fd.tenant_nida} />
-            <Row label={sw ? 'Simu' : 'Phone'} value={fd.tenant_phone} />
+            <Row label={sw ? "Simu" : "Phone"} value={fd.tenant_phone} />
           </View>
         </View>
 
         {/* Property details */}
-        <View style={s.sectionHeader}><Text style={s.sectionTitle}>{sw ? 'TAARIFA ZA NYUMBA' : 'PROPERTY DETAILS'}</Text></View>
-        <Row label={sw ? 'Aina' : 'Type'} value={propLabel} />
-        <Row label={sw ? 'Anwani' : 'Address'} value={fd.property_address} />
-        {fd.num_rooms && <Row label={sw ? 'Vyumba' : 'Rooms'} value={fd.num_rooms} />}
-        {fd.floor_level && <Row label={sw ? 'Ghorofa' : 'Floor'} value={fd.floor_level} />}
-        {utilLabels && <Row label={sw ? 'Huduma Zilizojumuishwa' : 'Utilities Included'} value={utilLabels} />}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>{sw ? "TAARIFA ZA NYUMBA" : "PROPERTY DETAILS"}</Text>
+        </View>
+        <Row label={sw ? "Aina" : "Type"} value={propLabel} />
+        <Row label={sw ? "Anwani" : "Address"} value={fd.property_address} />
+        {fd.num_rooms && <Row label={sw ? "Vyumba" : "Rooms"} value={fd.num_rooms} />}
+        {fd.floor_level && <Row label={sw ? "Ghorofa" : "Floor"} value={fd.floor_level} />}
+        {utilLabels && (
+          <Row label={sw ? "Huduma Zilizojumuishwa" : "Utilities Included"} value={utilLabels} />
+        )}
 
         {/* Financial terms */}
-        <View style={s.sectionHeader}><Text style={s.sectionTitle}>{sw ? 'MASHARTI YA KIFEDHA' : 'FINANCIAL TERMS'}</Text></View>
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>{sw ? "MASHARTI YA KIFEDHA" : "FINANCIAL TERMS"}</Text>
+        </View>
         <View style={s.twoCol}>
           <View style={s.colLeft}>
-            <Row label={sw ? 'Kodi ya Mwezi' : 'Monthly Rent'} value={formatCurrency(Number(fd.monthly_rent || 0))} />
-            <Row label={sw ? 'Amana' : 'Deposit'} value={formatCurrency(Number(fd.deposit_amount || 0))} />
-            <Row label={sw ? 'Siku ya Kulipa' : 'Payment Day'} value={fd.payment_day} />
+            <Row
+              label={sw ? "Kodi ya Mwezi" : "Monthly Rent"}
+              value={formatCurrency(Number(fd.monthly_rent || 0))}
+            />
+            <Row
+              label={sw ? "Amana" : "Deposit"}
+              value={formatCurrency(Number(fd.deposit_amount || 0))}
+            />
+            <Row label={sw ? "Siku ya Kulipa" : "Payment Day"} value={fd.payment_day} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? 'Mzunguko' : 'Frequency'} value={fd.payment_frequency} />
-            <Row label={sw ? 'Tarehe ya Kuanza' : 'Lease Start'} value={fd.lease_start} />
-            <Row label={sw ? 'Muda' : 'Duration'} value={durationLabel} />
+            <Row label={sw ? "Mzunguko" : "Frequency"} value={fd.payment_frequency} />
+            <Row label={sw ? "Tarehe ya Kuanza" : "Lease Start"} value={fd.lease_start} />
+            <Row label={sw ? "Muda" : "Duration"} value={durationLabel} />
           </View>
         </View>
-        <Row label={sw ? 'Kipindi cha Taarifa ya Kutoka' : 'Notice Period to Vacate'} value={noticeLabel} />
+        <Row
+          label={sw ? "Kipindi cha Taarifa ya Kutoka" : "Notice Period to Vacate"}
+          value={noticeLabel}
+        />
 
         {/* House rules */}
         {fd.house_rules && (
           <>
-            <View style={s.sectionHeader}><Text style={s.sectionTitle}>{sw ? 'KANUNI ZA NYUMBA' : 'HOUSE RULES'}</Text></View>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>{sw ? "KANUNI ZA NYUMBA" : "HOUSE RULES"}</Text>
+            </View>
             <Text style={[s.body, { fontSize: 8.5 }]}>{String(fd.house_rules)}</Text>
           </>
         )}
@@ -159,7 +246,9 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({ application, l
         {/* Special conditions */}
         {fd.special_conditions && (
           <>
-            <View style={s.sectionHeader}><Text style={s.sectionTitle}>{sw ? 'MASHARTI MAALUM' : 'SPECIAL CONDITIONS'}</Text></View>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>{sw ? "MASHARTI MAALUM" : "SPECIAL CONDITIONS"}</Text>
+            </View>
             <Text style={[s.body, { fontSize: 8.5 }]}>{String(fd.special_conditions)}</Text>
           </>
         )}
@@ -168,35 +257,41 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({ application, l
         <View style={ls.fourSigGrid}>
           <View style={ls.fourSigBox}>
             <View style={ls.fourSigLine} />
-            <Text style={ls.fourSigName}>{sw ? 'MPANGISHAJI' : 'LANDLORD'}</Text>
-            <Text style={ls.fourSigSub}>{String((fd as any).landlord_name || '')}</Text>
+            <Text style={ls.fourSigName}>{sw ? "MPANGISHAJI" : "LANDLORD"}</Text>
+            <Text style={ls.fourSigSub}>{String((fd as any).landlord_name || "")}</Text>
           </View>
           <View style={ls.fourSigBox}>
             <View style={ls.fourSigLine} />
-            <Text style={ls.fourSigName}>{sw ? 'MPANGAJI' : 'TENANT'}</Text>
-            <Text style={ls.fourSigSub}>{String(fd.tenant_name || '')}</Text>
+            <Text style={ls.fourSigName}>{sw ? "MPANGAJI" : "TENANT"}</Text>
+            <Text style={ls.fourSigSub}>{String(fd.tenant_name || "")}</Text>
           </View>
           <View style={ls.fourSigBox}>
             <View style={ls.fourSigLine} />
-            <Text style={ls.fourSigName}>{sw ? 'SHAHIDI 1' : 'WITNESS 1'}</Text>
-            <Text style={ls.fourSigSub}>{String(fd.witness1_name || '')}</Text>
+            <Text style={ls.fourSigName}>{sw ? "SHAHIDI 1" : "WITNESS 1"}</Text>
+            <Text style={ls.fourSigSub}>{String(fd.witness1_name || "")}</Text>
           </View>
           <View style={ls.fourSigBox}>
             <View style={ls.fourSigLine} />
-            <Text style={ls.fourSigName}>{sw ? 'SHAHIDI 2' : 'WITNESS 2'}</Text>
-            <Text style={ls.fourSigSub}>{String(fd.witness2_name || '')}</Text>
+            <Text style={ls.fourSigName}>{sw ? "SHAHIDI 2" : "WITNESS 2"}</Text>
+            <Text style={ls.fourSigSub}>{String(fd.witness2_name || "")}</Text>
           </View>
-          <View style={[ls.fourSigBox, { width: '100%' }]}>
-            <View style={s.stampBox}><Text style={s.stampText}>{sw ? 'MUHURI WA OFISI' : 'OFFICE SEAL'}</Text></View>
+          <View style={[ls.fourSigBox, { width: "100%" }]}>
+            <View style={s.stampBox}>
+              <Text style={s.stampText}>{sw ? "MUHURI WA OFISI" : "OFFICE SEAL"}</Text>
+            </View>
             <View style={ls.fourSigLine} />
-            <Text style={ls.fourSigName}>{sw ? 'AFISA MTENDAJI WA KATA' : 'WARD EXECUTIVE OFFICER'}</Text>
+            <Text style={ls.fourSigName}>
+              {sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
+            </Text>
           </View>
         </View>
 
         {/* QR code */}
         <View style={s.qrSection}>
-          <View style={s.qrBorder}><Image src={qr} style={s.qrCode} /></View>
-          <Text style={s.qrLabel}>{sw ? 'Changanua kuthibitisha' : 'Scan to verify'}</Text>
+          <View style={s.qrBorder}>
+            <Image src={qr} style={s.qrCode} />
+          </View>
+          <Text style={s.qrLabel}>{sw ? "Changanua kuthibitisha" : "Scan to verify"}</Text>
           <Text style={s.qrRef}>{application.application_number}</Text>
         </View>
 
@@ -204,8 +299,8 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({ application, l
         <View style={s.footer}>
           <Text style={s.footerText}>
             {sw
-              ? 'Mkataba huu unalindwa kisheria. Nakala moja kwa kila upande.'
-              : 'This agreement is legally binding. One copy per party.'}
+              ? "Mkataba huu unalindwa kisheria. Nakala moja kwa kila upande."
+              : "This agreement is legally binding. One copy per party."}
           </Text>
           <Text style={s.metadata}>{`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}</Text>
         </View>

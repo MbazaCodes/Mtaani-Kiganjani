@@ -1,14 +1,18 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, UserProfile, Session } from '@/lib/supabase';
-import type { SignUpUserData, SupabaseError } from '@/types';
-import { IS_SUPABASE_CONFIGURED } from '@/lib/config';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase, UserProfile, Session } from "@/lib/supabase";
+import type { SignUpUserData, SupabaseError } from "@/types";
+import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
 
 interface AuthContextType {
   user: UserProfile | null;
   session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: SupabaseError | null }>;
-  signUp: (email: string, password: string, userData: SignUpUserData) => Promise<{ error: unknown; user: unknown }>;
+  signUp: (
+    email: string,
+    password: string,
+    userData: SignUpUserData,
+  ) => Promise<{ error: unknown; user: unknown }>;
   signOut: () => Promise<void>;
   updateUser: (data: Partial<UserProfile>) => Promise<{ error: SupabaseError | null }>;
   fetchUserProfile: (userId: string) => Promise<UserProfile | null>;
@@ -39,28 +43,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const isSupabaseConfigured = IS_SUPABASE_CONFIGURED;
 
-  const buildFallbackUser = (sessionUser: { id: string; email?: string; user_metadata?: Record<string, string> }): UserProfile => ({
+  const buildFallbackUser = (sessionUser: {
+    id: string;
+    email?: string;
+    user_metadata?: Record<string, string>;
+  }): UserProfile => ({
     id: sessionUser.id,
-    email: sessionUser.email || '',
-    first_name: sessionUser.user_metadata?.first_name || 'User',
-    middle_name: sessionUser.user_metadata?.middle_name || '',
-    last_name: sessionUser.user_metadata?.last_name || '',
-    phone: sessionUser.user_metadata?.phone || '',
-    role: (sessionUser.user_metadata?.role as 'citizen' | 'staff' | 'admin') || 'citizen',
+    email: sessionUser.email || "",
+    first_name: sessionUser.user_metadata?.first_name || "User",
+    middle_name: sessionUser.user_metadata?.middle_name || "",
+    last_name: sessionUser.user_metadata?.last_name || "",
+    phone: sessionUser.user_metadata?.phone || "",
+    role: (sessionUser.user_metadata?.role as "citizen" | "staff" | "admin") || "citizen",
     is_verified: false,
-    account_status: 'active',
+    account_status: "active",
   });
 
   const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
       const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
+        .from("users")
+        .select("*")
+        .eq("id", userId)
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching user profile:', {
+        console.error("Error fetching user profile:", {
           code: (error as any).code,
           message: error.message,
           details: (error as any).details,
@@ -76,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return data as UserProfile;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error("Error fetching user profile:", error);
       return null;
     }
   };
@@ -106,7 +114,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         const sessionPromise = supabase.auth.getSession();
-        const { data: { session: currentSession } } = await Promise.race([sessionPromise, timeoutPromise]);
+        const {
+          data: { session: currentSession },
+        } = await Promise.race([sessionPromise, timeoutPromise]);
 
         if (!isMounted) return;
 
@@ -131,7 +141,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession: Session | null) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession: Session | null) => {
       setSession(newSession);
       if (newSession?.user) {
         setUser(buildFallbackUser(newSession.user));
@@ -174,7 +186,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await Promise.race([
         supabase.auth.signOut(),
-        new Promise<void>((_, reject) => setTimeout(() => reject(new Error('signOut timeout')), 5000))
+        new Promise<void>((_, reject) =>
+          setTimeout(() => reject(new Error("signOut timeout")), 5000),
+        ),
       ]);
     } catch {
       // Ignore — local state already cleared, user is logged out in the UI
@@ -187,7 +201,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, signIn, signUp, signOut, updateUser, fetchUserProfile, refreshProfile }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        isLoading,
+        signIn,
+        signUp,
+        signOut,
+        updateUser,
+        fetchUserProfile,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -195,6 +221,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };

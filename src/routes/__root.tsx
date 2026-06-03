@@ -78,17 +78,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Mtaa Kiganjani" },
-      { name: "description", content: "Tanzania Digital Mtaa Connect is a web application for local government services." },
+      {
+        name: "description",
+        content:
+          "Tanzania Digital Mtaa Connect is a web application for local government services.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Mtaa Kiganjani" },
-      { property: "og:description", content: "Tanzania Digital Mtaa Connect is a web application for local government services." },
+      {
+        property: "og:description",
+        content:
+          "Tanzania Digital Mtaa Connect is a web application for local government services.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Mtaa Kiganjani" },
-      { name: "twitter:description", content: "Tanzania Digital Mtaa Connect is a web application for local government services." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c9828241-9737-4fe7-a862-6e8c7516814b/id-preview-c1a75051--fd34869b-2d22-4962-bda0-179305e03257.lovable.app-1780345897822.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c9828241-9737-4fe7-a862-6e8c7516814b/id-preview-c1a75051--fd34869b-2d22-4962-bda0-179305e03257.lovable.app-1780345897822.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Tanzania Digital Mtaa Connect is a web application for local government services.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c9828241-9737-4fe7-a862-6e8c7516814b/id-preview-c1a75051--fd34869b-2d22-4962-bda0-179305e03257.lovable.app-1780345897822.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c9828241-9737-4fe7-a862-6e8c7516814b/id-preview-c1a75051--fd34869b-2d22-4962-bda0-179305e03257.lovable.app-1780345897822.png",
+      },
     ],
     links: [
       {

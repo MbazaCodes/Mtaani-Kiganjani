@@ -4,21 +4,35 @@
  * Shows: welcome card with business badges, stat cards, quick
  * actions, pending agreements banner, recent applications.
  */
-import React, { useState, useEffect } from 'react';
-import type { ViewName } from '@/types';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import type { ViewName } from "@/types";
+import { motion } from "framer-motion";
 import {
-  FileText, Clock, CheckCircle, CheckCircle2, AlertCircle,
-  Building2, RefreshCw, ArrowRight, Bell, Briefcase, Plus,
-  DollarSign, Scale, ShieldCheck, Eye, Loader2, Star
-} from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
-import { StatCard } from '@/components/ui/StatCard';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { Application } from '@/lib/supabase';
-import { countUnreadNotifications } from '@/lib/notifications';
-import { supabase } from '@/lib/supabase';
+  FileText,
+  Clock,
+  CheckCircle,
+  CheckCircle2,
+  AlertCircle,
+  Building2,
+  RefreshCw,
+  ArrowRight,
+  Bell,
+  Briefcase,
+  Plus,
+  DollarSign,
+  Scale,
+  ShieldCheck,
+  Eye,
+  Loader2,
+  Star,
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { StatCard } from "@/components/ui/StatCard";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Application } from "@/lib/supabase";
+import { countUnreadNotifications } from "@/lib/notifications";
+import { supabase } from "@/lib/supabase";
 
 interface DashboardProps {
   applications: Application[];
@@ -29,7 +43,7 @@ interface DashboardProps {
 export function Dashboard({ applications, setView, onRefresh }: DashboardProps) {
   const { user } = useAuth();
   const { lang } = useLanguage();
-  const L = (sw: string, en: string) => (lang === 'sw' ? sw : en);
+  const L = (sw: string, en: string) => (lang === "sw" ? sw : en);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingAgreements, setPendingAgreements] = useState(0);
@@ -39,10 +53,10 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
     countUnreadNotifications(user.id).then(setUnreadCount);
     // Count pending agreement notifications
     supabase
-      .from('agreement_notifications')
-      .select('id', { count: 'exact', head: true })
-      .eq('recipient_id', user.id)
-      .eq('is_actioned', false)
+      .from("agreement_notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("recipient_id", user.id)
+      .eq("is_actioned", false)
       .then(({ count }) => setPendingAgreements(count || 0));
   }, [user?.id]);
 
@@ -58,11 +72,15 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   };
 
   // Stats
-  const total    = applications.length;
-  const pending  = applications.filter(a => ['submitted', 'pending_review', 'pending_payment', 'paid', 'verified'].includes(a.status)).length;
-  const approved = applications.filter(a => a.status === 'approved' || a.status === 'issued').length;
-  const rejected = applications.filter(a => a.status === 'rejected').length;
-  const recent   = applications.slice(0, 5);
+  const total = applications.length;
+  const pending = applications.filter((a) =>
+    ["submitted", "pending_review", "pending_payment", "paid", "verified"].includes(a.status),
+  ).length;
+  const approved = applications.filter(
+    (a) => a.status === "approved" || a.status === "issued",
+  ).length;
+  const rejected = applications.filter((a) => a.status === "rejected").length;
+  const recent = applications.slice(0, 5);
 
   const hasBizRole = !!(user?.seller_id || user?.landlord_id || user?.broker_id);
 
@@ -74,12 +92,12 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
     >
       {/* Welcome Card */}
       <div className="bg-gradient-to-br from-stone-800 via-stone-700 to-emerald-900 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZyIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCBmaWxsPSJ1cmwoI2cpIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIvPjwvc3ZnPg==')] opacity-50"/>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZyIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCBmaWxsPSJ1cmwoI2cpIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIvPjwvc3ZnPg==')] opacity-50" />
         <div className="relative z-10">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-stone-300 text-sm font-medium mb-1">
-                {L('Karibu', 'Welcome back')},
+                {L("Karibu", "Welcome back")},
               </p>
               <h1 className="text-xl sm:text-2xl font-black mb-2">
                 {user?.first_name} {user?.last_name}
@@ -87,29 +105,32 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
               <div className="flex flex-wrap gap-1.5">
                 {user?.is_verified && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/30 text-emerald-200 backdrop-blur-sm">
-                    <ShieldCheck size={10}/> {L('Raia Aliyethibitishwa', 'Verified Citizen')}
+                    <ShieldCheck size={10} /> {L("Raia Aliyethibitishwa", "Verified Citizen")}
                   </span>
                 )}
                 {user?.seller_id && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-blue-500/30 text-blue-200 backdrop-blur-sm">
-                    🏪 {L('Muuzaji', 'Seller')}
+                    🏪 {L("Muuzaji", "Seller")}
                   </span>
                 )}
                 {user?.landlord_id && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-teal-500/30 text-teal-200 backdrop-blur-sm">
-                    🔑 {L('Mpangishaji', 'Landlord')}
+                    🔑 {L("Mpangishaji", "Landlord")}
                   </span>
                 )}
                 {user?.broker_id && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-purple-500/30 text-purple-200 backdrop-blur-sm">
-                    👥 {L('Dalali', 'Broker')}
+                    👥 {L("Dalali", "Broker")}
                   </span>
                 )}
               </div>
             </div>
-            <button onClick={handleRefresh} disabled={isRefreshing}
-              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50">
-              <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''}/>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
@@ -120,51 +141,57 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
         <motion.button
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          onClick={() => setView('notifications')}
+          onClick={() => setView("notifications")}
           className="w-full bg-violet-50 border-2 border-violet-300 rounded-2xl p-4 flex items-center gap-3 text-left hover:bg-violet-100 transition-all"
         >
           <div className="w-10 h-10 rounded-xl bg-violet-200 flex items-center justify-center shrink-0 animate-pulse">
-            <Scale size={20} className="text-violet-700"/>
+            <Scale size={20} className="text-violet-700" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-black text-violet-800 text-sm">
-              {pendingAgreements} {L('Makubaliano Yanasubiri Kukubaliwa Kwako', 'Agreement(s) Awaiting Your Acceptance')}
+              {pendingAgreements}{" "}
+              {L(
+                "Makubaliano Yanasubiri Kukubaliwa Kwako",
+                "Agreement(s) Awaiting Your Acceptance",
+              )}
             </p>
             <p className="text-xs text-violet-600">
-              {L('Bonyeza hapa kufungua na kukubali au kukataa', 'Tap here to open and accept or reject')}
+              {L(
+                "Bonyeza hapa kufungua na kukubali au kukataa",
+                "Tap here to open and accept or reject",
+              )}
             </p>
           </div>
-          <ArrowRight size={18} className="text-violet-400 shrink-0"/>
+          <ArrowRight size={18} className="text-violet-400 shrink-0" />
         </motion.button>
       )}
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
-          icon={<FileText className="text-blue-500" size={20}/>}
-          label={L('Jumla', 'Total')}
+          icon={<FileText className="text-blue-500" size={20} />}
+          label={L("Jumla", "Total")}
           value={String(total)}
-          description={L('Maombi yote', 'All applications')}
+          description={L("Maombi yote", "All applications")}
         />
         <StatCard
-          icon={<Clock className="text-amber-500" size={20}/>}
-          label={L('Inaendelea', 'In Progress')}
+          icon={<Clock className="text-amber-500" size={20} />}
+          label={L("Inaendelea", "In Progress")}
           value={String(pending)}
-          description={L('Zinasubiri', 'Pending action')}
+          description={L("Zinasubiri", "Pending action")}
         />
         <StatCard
-          icon={<CheckCircle className="text-emerald-500" size={20}/>}
-          label={L('Imekamilika', 'Completed')}
+          icon={<CheckCircle className="text-emerald-500" size={20} />}
+          label={L("Imekamilika", "Completed")}
           value={String(approved)}
-          description={L('Zimeidhinishwa', 'Approved/Issued')}
+          description={L("Zimeidhinishwa", "Approved/Issued")}
         />
-        <button onClick={() => setView('notifications')}
-          className="text-left">
+        <button onClick={() => setView("notifications")} className="text-left">
           <StatCard
-            icon={<Bell className="text-rose-500" size={20}/>}
-            label={L('Arifa', 'Notifications')}
+            icon={<Bell className="text-rose-500" size={20} />}
+            label={L("Arifa", "Notifications")}
             value={String(unreadCount)}
-            description={L('Hazijasomwa', 'Unread')}
+            description={L("Hazijasomwa", "Unread")}
           />
         </button>
       </div>
@@ -172,18 +199,48 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { icon: Plus,       color: 'emerald', sw: 'Omba Huduma',      en: 'Apply for Service',  view: 'services' as ViewName },
-          { icon: FileText,   color: 'blue',    sw: 'Maombi Yangu',     en: 'My Applications',    view: 'applications' as ViewName },
-          { icon: Briefcase,  color: 'stone',   sw: 'Lango la Biashara',en: 'Business Portal',    view: 'agreement' as ViewName },
-          { icon: Bell,       color: 'rose',    sw: 'Arifa Zangu',      en: 'My Notifications',   view: 'notifications' as ViewName },
-        ].map(action => {
+          {
+            icon: Plus,
+            color: "emerald",
+            sw: "Omba Huduma",
+            en: "Apply for Service",
+            view: "services" as ViewName,
+          },
+          {
+            icon: FileText,
+            color: "blue",
+            sw: "Maombi Yangu",
+            en: "My Applications",
+            view: "applications" as ViewName,
+          },
+          {
+            icon: Briefcase,
+            color: "stone",
+            sw: "Lango la Biashara",
+            en: "Business Portal",
+            view: "agreement" as ViewName,
+          },
+          {
+            icon: Bell,
+            color: "rose",
+            sw: "Arifa Zangu",
+            en: "My Notifications",
+            view: "notifications" as ViewName,
+          },
+        ].map((action) => {
           const Icon = action.icon;
           return (
-            <button key={action.view} onClick={() => setView(action.view)}
-              className={`p-4 bg-${action.color}-50 hover:bg-${action.color}-100 border border-${action.color}-200 rounded-2xl transition-all text-left group`}>
-              <Icon size={22} className={`text-${action.color}-600 mb-2 group-hover:scale-110 transition-transform`}/>
+            <button
+              key={action.view}
+              onClick={() => setView(action.view)}
+              className={`p-4 bg-${action.color}-50 hover:bg-${action.color}-100 border border-${action.color}-200 rounded-2xl transition-all text-left group`}
+            >
+              <Icon
+                size={22}
+                className={`text-${action.color}-600 mb-2 group-hover:scale-110 transition-transform`}
+              />
               <p className={`text-sm font-bold text-${action.color}-800`}>
-                {lang === 'sw' ? action.sw : action.en}
+                {lang === "sw" ? action.sw : action.en}
               </p>
             </button>
           );
@@ -192,21 +249,25 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
 
       {/* Business Role CTA (if no business role yet) */}
       {!hasBizRole && user?.is_verified && (
-        <button onClick={() => setView('agreement')}
-          className="w-full bg-gradient-to-r from-stone-50 to-amber-50 border-2 border-dashed border-stone-300 hover:border-amber-400 rounded-2xl p-5 flex items-center gap-4 text-left transition-all group">
+        <button
+          onClick={() => setView("agreement")}
+          className="w-full bg-gradient-to-r from-stone-50 to-amber-50 border-2 border-dashed border-stone-300 hover:border-amber-400 rounded-2xl p-5 flex items-center gap-4 text-left transition-all group"
+        >
           <div className="w-12 h-12 rounded-2xl bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center shrink-0 transition-colors">
-            <Star size={24} className="text-amber-600"/>
+            <Star size={24} className="text-amber-600" />
           </div>
           <div className="flex-1">
             <p className="font-black text-stone-800">
-              {L('Kuwa Muuzaji, Mpangishaji, au Dalali', 'Become a Seller, Landlord, or Broker')}
+              {L("Kuwa Muuzaji, Mpangishaji, au Dalali", "Become a Seller, Landlord, or Broker")}
             </p>
             <p className="text-xs text-stone-500 mt-0.5">
-              {L('Jisajili kufanya biashara kupitia mfumo na kutumia huduma za Makubaliano ya Mauzo na Pango.',
-                 'Register to do business through the system and use Sales and Rental Agreement services.')}
+              {L(
+                "Jisajili kufanya biashara kupitia mfumo na kutumia huduma za Makubaliano ya Mauzo na Pango.",
+                "Register to do business through the system and use Sales and Rental Agreement services.",
+              )}
             </p>
           </div>
-          <ArrowRight size={18} className="text-stone-400 group-hover:text-amber-600 shrink-0"/>
+          <ArrowRight size={18} className="text-stone-400 group-hover:text-amber-600 shrink-0" />
         </button>
       )}
 
@@ -214,43 +275,52 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
       <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
         <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
           <h2 className="font-black text-stone-900 text-sm">
-            {L('Maombi ya Hivi Karibuni', 'Recent Applications')}
+            {L("Maombi ya Hivi Karibuni", "Recent Applications")}
           </h2>
           {total > 5 && (
-            <button onClick={() => setView('applications')}
-              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
-              {L('Ona Yote', 'View All')} <ArrowRight size={12}/>
+            <button
+              onClick={() => setView("applications")}
+              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+            >
+              {L("Ona Yote", "View All")} <ArrowRight size={12} />
             </button>
           )}
         </div>
         {recent.length === 0 ? (
           <div className="p-8 text-center">
-            <FileText size={32} className="mx-auto text-stone-300 mb-3"/>
+            <FileText size={32} className="mx-auto text-stone-300 mb-3" />
             <p className="font-bold text-stone-600 text-sm">
-              {L('Bado huna maombi yoyote', 'No applications yet')}
+              {L("Bado huna maombi yoyote", "No applications yet")}
             </p>
             <p className="text-xs text-stone-400 mt-1">
               {L('Bonyeza "Omba Huduma" kuanza', 'Click "Apply for Service" to get started')}
             </p>
-            <button onClick={() => setView('services')}
-              className="mt-4 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm inline-flex items-center gap-1.5">
-              <Plus size={14}/> {L('Omba Sasa', 'Apply Now')}
+            <button
+              onClick={() => setView("services")}
+              className="mt-4 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm inline-flex items-center gap-1.5"
+            >
+              <Plus size={14} /> {L("Omba Sasa", "Apply Now")}
             </button>
           </div>
         ) : (
           <div className="divide-y divide-stone-50">
-            {recent.map(app => {
+            {recent.map((app) => {
               const icons: Record<string, string> = {
-                'Utambulisho wa Mkazi': '🪪', 'Kibari cha Mazishi': '🕊',
-                'Kibari cha Sherehe': '🎉', 'Kibari cha Ujezi Mdogo': '🏗',
-                'Barua ya Utambulisho': '📝', 'Makubaliano ya Mauzo': '🤝',
-                'Makubaliano ya Pango': '🔑', 'Malipo na Michango': '💰',
-                'Migogoro na Mashauri': '⚖',
+                "Utambulisho wa Mkazi": "🪪",
+                "Kibari cha Mazishi": "🕊",
+                "Kibari cha Sherehe": "🎉",
+                "Kibari cha Ujezi Mdogo": "🏗",
+                "Barua ya Utambulisho": "📝",
+                "Makubaliano ya Mauzo": "🤝",
+                "Makubaliano ya Pango": "🔑",
+                "Malipo na Michango": "💰",
+                "Migogoro na Mashauri": "⚖",
               };
-              const icon = icons[app.service_name] || '📋';
+              const icon = icons[app.service_name] || "📋";
               return (
-                <div key={app.id}
-                  onClick={() => setView('applications')}
+                <div
+                  key={app.id}
+                  onClick={() => setView("applications")}
                   className="px-5 py-3.5 hover:bg-stone-50 cursor-pointer transition-colors flex items-center gap-3"
                 >
                   <div className="w-9 h-9 rounded-xl bg-stone-100 flex items-center justify-center text-base shrink-0">
@@ -261,9 +331,12 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
                     <p className="text-xs text-stone-400 font-mono">{app.application_number}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <StatusBadge status={app.status} lang={lang}/>
+                    <StatusBadge status={app.status} lang={lang} />
                     <p className="text-[10px] text-stone-400 mt-1">
-                      {new Date(app.created_at).toLocaleDateString(lang === 'sw' ? 'sw-TZ' : 'en-US', { day: 'numeric', month: 'short' })}
+                      {new Date(app.created_at).toLocaleDateString(
+                        lang === "sw" ? "sw-TZ" : "en-US",
+                        { day: "numeric", month: "short" },
+                      )}
                     </p>
                   </div>
                 </div>

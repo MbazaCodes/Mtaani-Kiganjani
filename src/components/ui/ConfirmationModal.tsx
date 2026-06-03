@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { AlertCircle, X } from 'lucide-react';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertCircle, X } from "lucide-react";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface ConfirmationModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  type?: 'danger' | 'info' | 'success';
+  type?: "danger" | "info" | "success";
 }
 
 export function ConfirmationModal({
@@ -19,9 +19,9 @@ export function ConfirmationModal({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  type = 'info'
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  type = "info",
 }: ConfirmationModalProps) {
   return (
     <AnimatePresence>
@@ -41,14 +41,22 @@ export function ConfirmationModal({
             className="relative w-full max-w-md bg-white rounded-4xl shadow-2xl overflow-hidden p-8"
           >
             <div className="flex items-center justify-between mb-6">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                type === 'danger' ? 'bg-red-50 text-red-600' :
-                type === 'success' ? 'bg-emerald-50 text-emerald-600' :
-                'bg-blue-50 text-blue-600'
-              }`}>
+              <div
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                  type === "danger"
+                    ? "bg-red-50 text-red-600"
+                    : type === "success"
+                      ? "bg-emerald-50 text-emerald-600"
+                      : "bg-blue-50 text-blue-600"
+                }`}
+              >
                 <AlertCircle size={24} />
               </div>
-              <button onClick={onClose} aria-label="Close" className="p-2 hover:bg-stone-100 rounded-full transition-colors text-stone-400">
+              <button
+                onClick={onClose}
+                aria-label="Close"
+                className="p-2 hover:bg-stone-100 rounded-full transition-colors text-stone-400"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -69,9 +77,11 @@ export function ConfirmationModal({
                   onClose();
                 }}
                 className={`flex-1 h-14 text-white rounded-2xl font-bold transition-all shadow-lg ${
-                  type === 'danger' ? 'bg-red-600 hover:bg-red-700 shadow-red-200' :
-                  type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' :
-                  'bg-stone-900 hover:bg-black shadow-stone-200'
+                  type === "danger"
+                    ? "bg-red-600 hover:bg-red-700 shadow-red-200"
+                    : type === "success"
+                      ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                      : "bg-stone-900 hover:bg-black shadow-stone-200"
                 }`}
               >
                 {confirmText}

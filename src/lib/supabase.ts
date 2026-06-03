@@ -1,6 +1,6 @@
-import type { Session as SupabaseSession, SupabaseClient } from '@supabase/supabase-js';
-import type { AnyFormData, PaymentData, FormField, ApplicationStatus } from '@/types';
-import { supabase as cloudSupabase } from '@/integrations/supabase/client';
+import type { Session as SupabaseSession, SupabaseClient } from "@supabase/supabase-js";
+import type { AnyFormData, PaymentData, FormField, ApplicationStatus } from "@/types";
+import { supabase as cloudSupabase } from "@/integrations/supabase/client";
 
 // Use the Lovable Cloud client (auto-generated, always configured).
 // Cast to untyped client so the existing app code (which queries custom
@@ -9,7 +9,6 @@ export const supabase = cloudSupabase as unknown as SupabaseClient;
 
 // Re-export Session type
 export type Session = SupabaseSession;
-
 
 export interface Service {
   id: string;
@@ -23,7 +22,7 @@ export interface Service {
   validity_months?: number;
   document_template?: Record<string, unknown>;
   extra_address_fee?: number;
-  active?: boolean;  // matches DB column name
+  active?: boolean; // matches DB column name
   created_at: string;
 }
 
@@ -36,17 +35,17 @@ export interface UserProfile {
   nida_number?: string;
   phone?: string;
   photo_url?: string;
-  role: 'citizen' | 'staff' | 'admin';
+  role: "citizen" | "staff" | "admin";
   is_verified: boolean;
   is_diaspora?: boolean;
   account_status: string;
-  
+
   // Location fields
   region?: string;
   district?: string;
   ward?: string;
   street?: string;
-  
+
   // Personal info
   birth_date?: string;
   date_of_birth?: string;
@@ -60,22 +59,22 @@ export interface UserProfile {
   place_of_birth?: string;
   birth_region?: string;
   birth_district?: string;
-  
+
   // Contact
   alternative_phone?: string;
   email_address?: string;
   alternative_email?: string;
-  
+
   // Address details
   house_number?: string;
   postal_code?: string;
   landmark?: string;
-  
+
   // Emergency contact
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   emergency_contact_relation?: string;
-  
+
   // Identity
   id_type?: string;
   id_number?: string;
@@ -86,14 +85,14 @@ export interface UserProfile {
   seller_id?: string;
   landlord_id?: string;
   broker_id?: string;
-  
+
   // Diaspora
   country_of_residence?: string;
   city_of_residence?: string;
   diaspora_region?: string;
   diaspora_district?: string;
   diaspora_ward?: string;
-  
+
   // Staff fields
   assigned_region?: string;
   assigned_district?: string;
@@ -102,18 +101,18 @@ export interface UserProfile {
   department?: string;
   position?: string;
   employment_date?: string;
-  
+
   // Additional
   blood_group?: string;
   disability_status?: string;
   religious_affiliation?: string;
   tribe?: string;
-  
+
   // Local officials
   mtaa_executive_officer?: string;
   ward_councillor?: string;
   ward_chairperson?: string;
-  
+
   // Metadata
   last_login?: string;
   email_verified?: boolean;
@@ -158,7 +157,7 @@ export interface Application {
   verified_at?: string;
 }
 
-export type UserRole = 'citizen' | 'staff' | 'admin';
+export type UserRole = "citizen" | "staff" | "admin";
 
 export type User = UserProfile;
 

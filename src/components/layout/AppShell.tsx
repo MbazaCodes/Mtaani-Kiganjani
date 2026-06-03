@@ -1,52 +1,52 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import { AlertCircle } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { MobileNav } from '@/components/layout/MobileNav';
-import { PaymentGateway } from '@/components/PaymentGateway';
-import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
-import { useAppContext } from '@/context/AppContext';
-import { IS_SUPABASE_CONFIGURED } from '@/lib/config';
-import { getCurrencyForUser, type CurrencyCode } from '@/lib/currency';
-import type { ViewName } from '@/types';
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { AlertCircle } from "lucide-react";
+import { Header } from "@/components/layout/Header";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileNav } from "@/components/layout/MobileNav";
+import { PaymentGateway } from "@/components/PaymentGateway";
+import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useAppContext } from "@/context/AppContext";
+import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { getCurrencyForUser, type CurrencyCode } from "@/lib/currency";
+import type { ViewName } from "@/types";
 
 /** Maps ViewName → URL path */
 export const VIEW_PATHS: Record<ViewName, string> = {
-  dashboard:           '/dashboard',
-  services:            '/services',
-  apply:               '/apply',
-  applications:        '/applications',
-  notifications:       '/notifications',
-  profile:             '/profile',
-  verify_documents:    '/verify-docs',
-  agreement:            '/agreement',
-  staff_dashboard:     '/staff',
-  customer_support:    '/staff/support',
-  manual_verification: '/staff/verification',
-  application_review:  '/staff/review',
-  staff_management:    '/admin/staff',
-  business_approval:   '/staff/business',
-  admin_dashboard:     '/admin',
-  office_management:   '/admin/offices',
-  location_management: '/admin/locations',
-  service_management:  '/admin/services',
-  admin_logs:          '/admin/logs',
-  citizen_management:  '/citizens',
+  dashboard: "/dashboard",
+  services: "/services",
+  apply: "/apply",
+  applications: "/applications",
+  notifications: "/notifications",
+  profile: "/profile",
+  verify_documents: "/verify-docs",
+  agreement: "/agreement",
+  staff_dashboard: "/staff",
+  customer_support: "/staff/support",
+  manual_verification: "/staff/verification",
+  application_review: "/staff/review",
+  staff_management: "/admin/staff",
+  business_approval: "/staff/business",
+  admin_dashboard: "/admin",
+  office_management: "/admin/offices",
+  location_management: "/admin/locations",
+  service_management: "/admin/services",
+  admin_logs: "/admin/logs",
+  citizen_management: "/citizens",
 };
 
 /** Maps URL path → ViewName (reverse of VIEW_PATHS) */
 export const PATH_VIEWS: Record<string, ViewName> = Object.fromEntries(
-  Object.entries(VIEW_PATHS).map(([k, v]) => [v, k as ViewName])
+  Object.entries(VIEW_PATHS).map(([k, v]) => [v, k as ViewName]),
 );
 
 /** Hook that gives setView/currentView using the router */
 export const useRouterView = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const currentView: ViewName = PATH_VIEWS[location.pathname] ?? 'dashboard';
+  const currentView: ViewName = PATH_VIEWS[location.pathname] ?? "dashboard";
   const setView = (view: ViewName) => navigate(VIEW_PATHS[view]);
   return { currentView, setView };
 };
@@ -58,7 +58,8 @@ interface AppShellProps {
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { user } = useAuth();
   const { lang, currency: currencyString } = useLanguage();
-  const { payingApplication, handlePaymentSuccess, handleCancelPayment, getPaymentAmount } = useAppContext();
+  const { payingApplication, handlePaymentSuccess, handleCancelPayment, getPaymentAmount } =
+    useAppContext();
   const { currentView, setView } = useRouterView();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
@@ -72,9 +73,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         <div className="bg-amber-50 border-b border-amber-200 px-6 py-3 flex items-center justify-center gap-3 text-amber-800 text-sm font-medium animate-fade-in">
           <AlertCircle size={18} className="text-amber-600 shrink-0" />
           <p>
-            {lang === 'sw'
-              ? 'Supabase haijasanidiwa. Tafadhali weka VITE_SUPABASE_URL na VITE_SUPABASE_ANON_KEY kwenye .env'
-              : 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env'}
+            {lang === "sw"
+              ? "Supabase haijasanidiwa. Tafadhali weka VITE_SUPABASE_URL na VITE_SUPABASE_ANON_KEY kwenye .env"
+              : "Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env"}
           </p>
         </div>
       )}
@@ -90,9 +91,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar currentView={currentView} setView={setView} />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">{children}</main>
       </div>
 
       <AnimatePresence>

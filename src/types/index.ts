@@ -6,42 +6,42 @@
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 export type ViewName =
-  | 'dashboard'
-  | 'services'
-  | 'agreement'
-  | 'apply'
-  | 'applications'
-  | 'notifications'
-  | 'profile'
-  | 'verify_documents'
+  | "dashboard"
+  | "services"
+  | "agreement"
+  | "apply"
+  | "applications"
+  | "notifications"
+  | "profile"
+  | "verify_documents"
   // Staff
-  | 'staff_dashboard'
-  | 'customer_support'
-  | 'manual_verification'
-  | 'application_review'
-  | 'staff_management'
-  | 'business_approval'
+  | "staff_dashboard"
+  | "customer_support"
+  | "manual_verification"
+  | "application_review"
+  | "staff_management"
+  | "business_approval"
   // Admin
-  | 'admin_dashboard'
-  | 'office_management'
-  | 'location_management'
-  | 'service_management'
-  | 'admin_logs'
-  | 'citizen_management';
+  | "admin_dashboard"
+  | "office_management"
+  | "location_management"
+  | "service_management"
+  | "admin_logs"
+  | "citizen_management";
 
 // ─── Application status ────────────────────────────────────────────────────────
 
 export type ApplicationStatus =
-  | 'submitted'
-  | 'pending_review'
-  | 'pending_payment'
-  | 'paid'
-  | 'verified'
-  | 'approved'
-  | 'issued'
-  | 'returned'
-  | 'rejected'
-  | 'refunded';
+  | "submitted"
+  | "pending_review"
+  | "pending_payment"
+  | "paid"
+  | "verified"
+  | "approved"
+  | "issued"
+  | "returned"
+  | "rejected"
+  | "refunded";
 
 // ─── Payment ───────────────────────────────────────────────────────────────────
 
@@ -66,24 +66,24 @@ export interface FormFieldOption {
 export interface FormFieldShowIf {
   field: string;
   value?: string;
-  values?: string[];  // for multi-value showIf conditions
+  values?: string[]; // for multi-value showIf conditions
 }
 
 export interface FormField {
   name: string;
   label: string;
   type:
-    | 'text'
-    | 'number'
-    | 'date'
-    | 'select'
-    | 'textarea'
-    | 'file'
-    | 'header'
-    | 'phone'
-    | 'email'
-    | 'checkbox'
-    | 'citizen_id_lookup';
+    | "text"
+    | "number"
+    | "date"
+    | "select"
+    | "textarea"
+    | "file"
+    | "header"
+    | "phone"
+    | "email"
+    | "checkbox"
+    | "citizen_id_lookup";
   required?: boolean;
   placeholder?: string;
   options?: FormFieldOption[];
@@ -103,8 +103,8 @@ export interface BaseFormData {
   target_user_nida?: string;
   second_party_user_id?: string;
   second_party_name?: string;
-  submitter_role?: 'LANDLORD' | 'TENANT' | 'SELLER' | 'BUYER';
-  send_for_approval?: 'YES' | 'NO';
+  submitter_role?: "LANDLORD" | "TENANT" | "SELLER" | "BUYER";
+  send_for_approval?: "YES" | "NO";
   asset_type?: string;
 }
 
@@ -112,11 +112,11 @@ export interface BaseFormData {
 export interface UtambulishoFormData extends BaseFormData {
   council: string;
   occupation: string;
-  marital_status: 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED';
+  marital_status: "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED";
   neighborhood: string;
   house_number?: string;
-  housing_status: 'RENTING' | 'OWNER' | 'OTHER';
-  has_children: 'YES' | 'NO';
+  housing_status: "RENTING" | "OWNER" | "OTHER";
+  has_children: "YES" | "NO";
   number_of_children?: number;
   spouse_1_name?: string;
   spouse_1_nida?: string;
@@ -142,7 +142,8 @@ export interface AgreementFormData extends BaseFormData {
  * Includes an index signature so service-specific fields (event_type, deceased_full_name,
  * council, occupation, etc.) don't require explicit typing in every PDF component.
  */
-export type AnyFormData = (UtambulishoFormData | AgreementFormData | BaseFormData) & Record<string, unknown>;
+export type AnyFormData = (UtambulishoFormData | AgreementFormData | BaseFormData) &
+  Record<string, unknown>;
 
 // ─── Draft ─────────────────────────────────────────────────────────────────────
 
@@ -153,7 +154,7 @@ export interface ApplicationDraft {
   service_name: string;
   form_data: AnyFormData;
   saved_at: string;
-  last_saved?: string;   // timestamp of last auto-save
+  last_saved?: string; // timestamp of last auto-save
   current_step?: number; // which form step was active when draft was saved
 }
 
@@ -171,7 +172,7 @@ export interface SignUpUserData {
   district?: string;
   ward?: string;
   street?: string;
-  role?: 'citizen' | 'staff' | 'admin';
+  role?: "citizen" | "staff" | "admin";
   is_diaspora?: boolean;
   country_of_residence?: string;
   passport_number?: string;

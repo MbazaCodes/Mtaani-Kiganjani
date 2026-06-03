@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { LogOut, Menu, Loader2, Bell } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useLanguage } from '../../context/LanguageContext';
-import { cn, TanzanianBranding } from '../../lib/utils';
-import { TANZANIA_LOGO_URL } from '@/constants/services';
-import { countUnreadNotifications } from '@/lib/notifications';
-import { useRouterView } from './AppShell';
+import React, { useState, useEffect } from "react";
+import { LogOut, Menu, Loader2, Bell } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { cn, TanzanianBranding } from "../../lib/utils";
+import { TANZANIA_LOGO_URL } from "@/constants/services";
+import { countUnreadNotifications } from "@/lib/notifications";
+import { useRouterView } from "./AppShell";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -28,7 +28,10 @@ export function Header({ onMenuClick }: HeaderProps) {
     };
     tick();
     const interval = setInterval(tick, 30000);
-    return () => { cancelled = true; clearInterval(interval); };
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [user?.id]);
 
   const handleSignOut = async () => {
@@ -74,12 +77,18 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
-        <div className="flex items-center gap-1 sm:gap-2 bg-stone-100 rounded-full p-1 mr-1 sm:mr-2" role="group" aria-label="Language selector">
+        <div
+          className="flex items-center gap-1 sm:gap-2 bg-stone-100 rounded-full p-1 mr-1 sm:mr-2"
+          role="group"
+          aria-label="Language selector"
+        >
           <button
-            onClick={() => setLang('sw')}
+            onClick={() => setLang("sw")}
             className={cn(
               "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
-              lang === 'sw' ? "bg-white shadow-sm text-primary" : "text-stone-500 hover:bg-stone-200"
+              lang === "sw"
+                ? "bg-white shadow-sm text-primary"
+                : "text-stone-500 hover:bg-stone-200",
             )}
             aria-label="Switch to Swahili"
             title="Kiswahili"
@@ -88,10 +97,12 @@ export function Header({ onMenuClick }: HeaderProps) {
             SW
           </button>
           <button
-            onClick={() => setLang('en')}
+            onClick={() => setLang("en")}
             className={cn(
               "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
-              lang === 'en' ? "bg-white shadow-sm text-primary" : "text-stone-500 hover:bg-stone-200"
+              lang === "en"
+                ? "bg-white shadow-sm text-primary"
+                : "text-stone-500 hover:bg-stone-200",
             )}
             aria-label="Switch to English"
             title="English"
@@ -104,16 +115,16 @@ export function Header({ onMenuClick }: HeaderProps) {
         {/* Notification Bell */}
         {user && (
           <button
-            onClick={() => setView('notifications')}
+            onClick={() => setView("notifications")}
             className="relative p-2 text-stone-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
             aria-label="Notifications"
-            title={lang === 'sw' ? 'Arifa zako' : 'Your notifications'}
+            title={lang === "sw" ? "Arifa zako" : "Your notifications"}
             type="button"
           >
             <Bell size={20} aria-hidden="true" />
             {unreadCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow ring-2 ring-white">
-                {unreadCount > 99 ? '99+' : unreadCount}
+                {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}
           </button>
@@ -125,20 +136,22 @@ export function Header({ onMenuClick }: HeaderProps) {
               {user.first_name} {user.last_name}
             </p>
             <p className="text-xs text-stone-500 capitalize flex items-center gap-1.5 justify-end flex-wrap">
-              <span>{user.role} {user.is_diaspora && '(Diaspora)'}</span>
+              <span>
+                {user.role} {user.is_diaspora && "(Diaspora)"}
+              </span>
               {user.seller_id && (
                 <span className="text-[9px] bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
-                  ✓ {lang === 'sw' ? 'Muuzaji' : 'Seller'}
+                  ✓ {lang === "sw" ? "Muuzaji" : "Seller"}
                 </span>
               )}
               {user.landlord_id && (
                 <span className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
-                  ✓ {lang === 'sw' ? 'Mpangishaji' : 'Landlord'}
+                  ✓ {lang === "sw" ? "Mpangishaji" : "Landlord"}
                 </span>
               )}
               {user.broker_id && (
                 <span className="text-[9px] bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
-                  ✓ {lang === 'sw' ? 'Dalali' : 'Broker'}
+                  ✓ {lang === "sw" ? "Dalali" : "Broker"}
                 </span>
               )}
             </p>
@@ -153,7 +166,11 @@ export function Header({ onMenuClick }: HeaderProps) {
           title="Sign out of your account"
           type="button"
         >
-          {signingOut ? <Loader2 size={20} className="animate-spin" aria-hidden="true" /> : <LogOut size={20} aria-hidden="true" />}
+          {signingOut ? (
+            <Loader2 size={20} className="animate-spin" aria-hidden="true" />
+          ) : (
+            <LogOut size={20} aria-hidden="true" />
+          )}
         </button>
       </div>
     </header>
