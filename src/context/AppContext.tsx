@@ -132,11 +132,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           targetUserRole = formData.asset_type.includes("PANGO") ? "TENANT" : "BUYER";
         }
 
+        // Use service_id only if it's a real UUID (hardcoded services have ids like "1","2")
+        const isRealUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+          .test(selectedService.id ?? "");
+
         const { error, data: insertedApp } = await supabase
           .from("applications")
           .insert({
             user_id: user.id,
-            service_id: selectedService.id,
+            service_id: isRealUuid ? selectedService.id : null,
             service_name: selectedService.name ?? selectedService.name_en,
             application_number: applicationNumber,
             form_data: formData,

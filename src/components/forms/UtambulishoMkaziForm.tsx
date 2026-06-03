@@ -291,17 +291,27 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
     data_confirmed: false,
   });
 
-  // ─── Address cascades ───────────────────────────────────────────────────
-  const regions = TANZANIA_ADDRESS_DATA.map((r) => r.name);
-  const districts = vals.region
-    ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.region)?.districts.map((d) => d.name) || []
-    : [];
-  const wards =
-    vals.region && vals.district
-      ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.region)?.districts.find(
-          (d) => d.name === vals.district,
-        )?.wards || []
-      : [];
+  // ─── Address cascades (memoised — TANZANIA_ADDRESS_DATA is 4000+ lines) ──
+  const regions = React.useMemo(
+    () => TANZANIA_ADDRESS_DATA.map((r) => r.name),
+    [],
+  );
+  const districts = React.useMemo(
+    () =>
+      vals.region
+        ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.region)?.districts.map((d) => d.name) ?? []
+        : [],
+    [vals.region],
+  );
+  const wards = React.useMemo(
+    () =>
+      vals.region && vals.district
+        ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.region)?.districts.find(
+            (d) => d.name === vals.district,
+          )?.wards ?? []
+        : [],
+    [vals.region, vals.district],
+  );
 
   // ─── Helpers ────────────────────────────────────────────────────────────
   const set = (key: keyof FormValues, value: string | boolean) =>

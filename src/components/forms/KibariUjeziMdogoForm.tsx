@@ -144,8 +144,8 @@ export const KibariUjeziMdogoForm: React.FC<FormProps> = ({
   const docRef = useRef<HTMLInputElement>(null);
   const [docErr, setDocErr] = useState("");
 
-  // Address cascade
-  const regions = TANZANIA_ADDRESS_DATA.map((r) => r.name);
+  // Address cascade (memoised)
+  const regions = React.useMemo(() => TANZANIA_ADDRESS_DATA.map((r) => r.name), []);
   const [vals, setVals] = useState<FormValues>({
     property_ownership: "",
     property_region: userProfile?.region || "",
@@ -176,17 +176,22 @@ export const KibariUjeziMdogoForm: React.FC<FormProps> = ({
     data_confirmed: false,
   });
 
-  const districts = vals.property_region
-    ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.map(
-        (d) => d.name,
-      ) || []
-    : [];
-  const wards =
-    vals.property_region && vals.property_district
+  const districts = React.useMemo(
+    () => vals.property_region
+      ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.map(
+          (d) => d.name,
+        ) ?? []
+      : [],
+    [vals.property_region],
+  );
+  const wards = React.useMemo(
+    () => vals.property_region && vals.property_district
       ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.find(
           (d) => d.name === vals.property_district,
-        )?.wards || []
-      : [];
+        )?.wards ?? []
+      : [],
+    [vals.property_region, vals.property_district],
+  );
 
   // ─── Steps ───────────────────────────────────────────────────────────────
   const STEPS: { key: Step; label: string; sw: string }[] = [
