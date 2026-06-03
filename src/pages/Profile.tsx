@@ -339,8 +339,7 @@ const UPDATABLE_FIELDS = [
   "occupation",
   "education_level",
   "alternative_phone",
-  "email_address",
-  "alternative_email",
+  // email_address and alternative_email columns not in current schema
   "house_number",
   "postal_code",
   "landmark",
@@ -2209,11 +2208,11 @@ export function Profile() {
                       </select>
                       <input
                         type="tel"
-                        value={(() => {
-                          const p = formData.phone ?? "";
-                          const code = p.match(/^\+\d+/)?.[0] ?? "+255";
-                          return p.slice(code.length).replace(/^0/, "");
-                        })()}
+                        value={
+                          formData.phone
+                            ? formData.phone.replace(/^\+\d{1,4}/, "").replace(/^0/, "")
+                            : ""
+                        }
                         onChange={(e) => {
                           const digits = e.target.value.replace(/[^0-9]/g, "");
                           const code = formData.phone?.match(/^\+\d+/)?.[0] ?? "+255";
@@ -2264,11 +2263,11 @@ export function Profile() {
                       </select>
                       <input
                         type="tel"
-                        value={(() => {
-                          const p = formData.alternative_phone ?? "";
-                          const code = p.match(/^\+\d+/)?.[0] ?? "+255";
-                          return p.slice(code.length).replace(/^0/, "");
-                        })()}
+                        value={
+                          formData.alternative_phone
+                            ? formData.alternative_phone.replace(/^\+\d{1,4}/, "").replace(/^0/, "")
+                            : ""
+                        }
                         onChange={(e) => {
                           const digits = e.target.value.replace(/[^0-9]/g, "");
                           const code = formData.alternative_phone?.match(/^\+\d+/)?.[0] ?? "+255";
