@@ -151,24 +151,24 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         <View style={ls.priceBox}>
           <Text style={ls.priceLabel}>{L.priceLabel}</Text>
           <Text style={ls.priceAmt}>{formatCurrency(price)}</Text>
-          {isRental && fd.payment_period && (
+          {isRental && fd.payment_period ? (
             <Text style={{ fontSize: 8, color: "#92400e", marginTop: 3 }}>
               {sw
                 ? `Muda wa Pango: ${fd.payment_period ?? ""} miezi`
                 : `Rental Period: ${fd.payment_period ?? ""} months`}
             </Text>
-          )}
+          ) : <View/>}
         </View>
 
         {/* Asset description */}
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{L.assetDetails}</Text>
         </View>
-        {fd.asset_description && (
+        {fd.asset_description ? (
           <Text style={{ fontSize: 9, color: "#1c1917", marginBottom: 10, lineHeight: 1.5 }}>
             {String(fd.asset_description)}
           </Text>
-        )}
+        ) : <View/>}
 
         {/* Parties */}
         <View style={s.sectionHeader}>

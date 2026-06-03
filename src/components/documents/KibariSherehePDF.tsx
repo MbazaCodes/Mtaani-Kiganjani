@@ -110,12 +110,12 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
         </View>
 
         {/* Guests box */}
-        {fd.expected_guests && (
+        {fd.expected_guests ? (
           <View style={ls.guestsBox}>
             <Text style={ls.guestsNum}>{String(fd.expected_guests)}</Text>
             <Text style={ls.guestsLabel}>{sw ? "WAGENI WANAOTARAJIWA" : "EXPECTED GUESTS"}</Text>
           </View>
-        )}
+        ) : <View/>}
 
         {/* Applicant info */}
         <View style={s.sectionHeader}>

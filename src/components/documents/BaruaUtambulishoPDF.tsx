@@ -185,18 +185,18 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
               <Text style={s.infoLabel}>{sw ? "Jina Kamili:" : "Full Name:"}</Text>
               <Text style={s.infoValue}>{subjectName}</Text>
             </View>
-            {isSelf && (
+            {isSelf ? (
               <View style={s.infoRow}>
                 <Text style={s.infoLabel}>NIDA:</Text>
                 <Text style={s.infoValue}>{user?.nida_number || "N/A"}</Text>
               </View>
-            )}
-            {isSelf && (
+            ) : <View/>}
+            {isSelf ? (
               <View style={s.infoRow}>
                 <Text style={s.infoLabel}>{sw ? "Simu:" : "Phone:"}</Text>
                 <Text style={s.infoValue}>{user?.phone || "N/A"}</Text>
               </View>
-            )}
+            ) : <View/>}
           </View>
           <View style={s.colRight}>
             <View style={s.infoRow}>
@@ -215,7 +215,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* Multi-institution notice */}
-        {institutions.length > 1 && (
+        {institutions.length > 1 ? (
           <View style={ls.multiNotice}>
             <Text style={ls.multiText}>
               {sw
@@ -223,7 +223,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
                 : `Note: This request covered ${institutions.length} institutions. A separate letter is available for each: ${institutions.map((i: any) => i.name).join(", ")}.`}
             </Text>
           </View>
-        )}
+        ) : <View/>}
 
         {/* Signature section */}
         <Text style={ls.signoff}>{sw ? "Wenu Mwaminifu," : "Yours faithfully,"}</Text>

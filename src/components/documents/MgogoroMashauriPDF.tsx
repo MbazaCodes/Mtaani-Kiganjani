@@ -172,8 +172,8 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* Respondent (citizen dispute only) */}
-        {isDispute && (
-          <>
+        {isDispute ? (
+          <View>
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>{sw ? "MLALAMIKIWA" : "RESPONDENT"}</Text>
             </View>
@@ -192,29 +192,29 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
                 </View>
               </View>
             ) : (
-              <>
+              <View>
                 <Row
                   label={sw ? "Jina" : "Name"}
                   value={fd.respondent_name_manual || fd.respondent_name}
                 />
-                {fd.respondent_phone_manual && (
+                {fd.respondent_phone_manual ? (
                   <Row label={sw ? "Simu" : "Phone"} value={fd.respondent_phone_manual ?? ""} />
-                )}
-                {fd.respondent_address_manual && (
+                ) : <View/>}
+                {fd.respondent_address_manual ? (
                   <Row label={sw ? "Anwani" : "Address"} value={fd.respondent_address_manual ?? ""} />
-                )}
+                ) : <View/>}
                 <Row
                   label={sw ? "Hali" : "Status"}
                   value={sw ? "Hayupo kwenye mfumo" : "Not in system"}
                 />
-              </>
+              </View>
             )}
-          </>
-        )}
+          </View>
+        ) : <View/>}
 
         {/* Community issue location */}
-        {!isDispute && (
-          <>
+        {!isDispute ? (
+          <View>
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>{sw ? "ENEO LA TATIZO" : "ISSUE LOCATION"}</Text>
             </View>
@@ -227,23 +227,23 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
                 <Row label={sw ? "Wilaya" : "District"} value={fd.issue_district ?? ""} />
               </View>
             </View>
-          </>
-        )}
+          </View>
+        ) : <View/>}
 
         {/* Case details */}
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{sw ? "MAELEZO YA SHAURI" : "CASE DETAILS"}</Text>
         </View>
         <Row label={sw ? "Kichwa" : "Title"} value={fd.title ?? ""} />
-        {fd.incident_date && (
+        {fd.incident_date ? (
           <Row label={sw ? "Tarehe ya Tukio" : "Incident Date"} value={fd.incident_date ?? ""} />
-        )}
-        {isDispute && resolution && (
+        ) : <View/>}
+        {isDispute && resolution ? (
           <Row
             label={sw ? "Suluhisho Linalopendekezwa" : "Preferred Resolution"}
             value={resolution}
           />
-        )}
+        ) : <View/>}
 
         {/* Description box */}
         <View style={ls.descBox}>
@@ -251,28 +251,28 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* Witnesses (citizen dispute only) */}
-        {isDispute && (fd.witness1_name || fd.witness2_name) && (
-          <>
+        {(isDispute && (fd.witness1_name || fd.witness2_name)) ? (
+          <View>
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>{sw ? "MASHAHIDI" : "WITNESSES"}</Text>
             </View>
-            {fd.witness1_name && (
+            {fd.witness1_name ? (
               <Row
                 label={`${sw ? "Shahidi" : "Witness"} 1`}
                 value={`${fd.witness1_name} · ${fd.witness1_phone || ""}`}
               />
-            )}
-            {fd.witness2_name && (
+            ) : <View/>}
+            {fd.witness2_name ? (
               <Row
                 label={`${sw ? "Shahidi" : "Witness"} 2`}
                 value={`${fd.witness2_name} · ${fd.witness2_phone || ""}`}
               />
-            )}
-          </>
-        )}
+            ) : <View/>}
+          </View>
+        ) : <View/>}
 
         {/* Fee (dispute only) */}
-        {isDispute && (
+        {isDispute ? (
           <View style={s.noticeBox}>
             <Text style={s.noticeText}>
               {sw
@@ -280,7 +280,7 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
                 : `Mediation fee: TZS 5,000. Pay at the office when scheduling the mediation date.`}
             </Text>
           </View>
-        )}
+        ) : <View/>}
 
         {/* Signature section */}
         <View style={s.signatureSection}>
