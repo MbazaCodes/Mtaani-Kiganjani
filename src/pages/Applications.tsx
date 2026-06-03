@@ -437,15 +437,16 @@ export function Applications({
               {displayApplications.map((app) => (
                 <tr
                   key={app.id}
-                  className="hover:bg-stone-50 transition-colors cursor-pointer"
+                  className="hover:bg-stone-50 transition-colors cursor-pointer group"
                   onClick={() => setSelectedApp(app)}
                 >
                   <td className="px-3 sm:px-6 py-3 sm:py-4">
-                    <p className="font-semibold text-stone-800">
+                    <p className="font-semibold text-emerald-700 hover:underline flex items-center gap-1.5 group-hover:text-emerald-800">
                       {lang === "sw"
                         ? app.service_name || (app as any).services?.name || "—"
                         : (app as any).services?.name_en || app.service_name || (app as any).services?.name || "—"}
                     </p>
+                    <p className="text-[10px] text-stone-400 mt-0.5">{lang === "sw" ? "Bonyeza kuona maelezo" : "Click to view details"}</p>
                   </td>
                   <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm text-stone-500 font-mono">
                     {app.application_number}
@@ -660,6 +661,177 @@ export function Applications({
         )}
       </div>
 
+
+      {/* ── Application Detail Panel ──────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedApp && (
+          <div className="fixed inset-0 z-50 flex">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex-1 bg-black/40 backdrop-blur-sm"
+              onClick={() => setSelectedApp(null)}
+            />
+            {/* Slide-over panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="w-full max-w-xl bg-white shadow-2xl flex flex-col overflow-hidden"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between px-6 py-5 border-b border-stone-100 bg-stone-50">
+                <div>
+                  <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">
+                    {lang === "sw" ? "Maombi" : "Application"}
+                  </p>
+                  <h2 className="text-lg font-black text-stone-900">
+                    {selectedApp.service_name || (selectedApp as any).services?.name || "—"}
+                  </h2>
+                  <p className="text-xs text-stone-500 font-mono mt-0.5">
+                    {selectedApp.application_number}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedApp(null)}
+                  className="p-2 hover:bg-stone-200 rounded-full transition-colors mt-1"
+                  aria-label="Close"
+                >
+                  <X size={18} className="text-stone-500" />
+                </button>
+              </div>
+
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+
+                {/* Status + dates */}
+                <div className="bg-stone-50 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                      {lang === "sw" ? "Hali" : "Status"}
+                    </span>
+                    <StatusBadge status={selectedApp.status} lang={lang} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Tarehe ya Kuwasilisha" : "Submitted"}</p>
+                      <p className="font-semibold text-stone-700">{new Date(selectedApp.created_at).toLocaleDateString(lang === "sw" ? "sw-TZ" : "en-US", { day: "numeric", month: "short", year: "numeric" })}</p>
+                    </div>
+                    {selectedApp.approved_at && (
+                      <div>
+                        <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Tarehe ya Kuidhinishwa" : "Approved"}</p>
+                        <p className="font-semibold text-emerald-600">{new Date(selectedApp.approved_at).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                    {(selectedApp as any).paid_at && (
+                      <div>
+                        <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Tarehe ya Malipo" : "Paid"}</p>
+                        <p className="font-semibold text-emerald-600">{new Date((selectedApp as any).paid_at).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                    {selectedApp.issued_at && (
+                      <div>
+                        <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Tarehe ya Kutolewa" : "Issued"}</p>
+                        <p className="font-semibold text-emerald-600">{new Date(selectedApp.issued_at).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                    {selectedApp.region && (
+                      <div>
+                        <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Eneo" : "Location"}</p>
+                        <p className="font-semibold text-stone-700">{[selectedApp.ward, selectedApp.district, selectedApp.region].filter(Boolean).join(", ")}</p>
+                      </div>
+                    )}
+                  </div>
+                  {selectedApp.feedback && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-2">
+                      <p className="text-xs font-bold text-amber-700 mb-1">{lang === "sw" ? "Maoni ya Ofisi" : "Office Feedback"}</p>
+                      <p className="text-sm text-amber-800">{selectedApp.feedback}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment info */}
+                {selectedApp.payment_data && (
+                  <div className="bg-emerald-50 rounded-2xl p-4 space-y-2">
+                    <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                      {lang === "sw" ? "Malipo" : "Payment"}
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-xs text-emerald-600">{lang === "sw" ? "Kiasi" : "Amount"}</p>
+                        <p className="font-black text-emerald-800">
+                          TZS {Number(selectedApp.payment_data.amount ?? 0).toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-emerald-600">{lang === "sw" ? "Njia ya Malipo" : "Method"}</p>
+                        <p className="font-semibold text-emerald-800 capitalize">{selectedApp.payment_data.payment_method || "—"}</p>
+                      </div>
+                      {selectedApp.payment_data.transaction_id && (
+                        <div className="col-span-2">
+                          <p className="text-xs text-emerald-600">{lang === "sw" ? "Namba ya Muamala" : "Transaction ID"}</p>
+                          <p className="font-mono text-xs text-emerald-800">{selectedApp.payment_data.transaction_id}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Form data */}
+                <div>
+                  <p className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-3">
+                    {lang === "sw" ? "Taarifa za Fomu" : "Form Details"}
+                  </p>
+                  <div className="space-y-2">
+                    {Object.entries(selectedApp.form_data || {})
+                      .filter(([k]) => !["service_name","application_reference","terms_accepted","data_confirmed","document_types","children"].includes(k))
+                      .map(([key, val]) => {
+                        if (val === null || val === undefined || val === "") return null;
+                        const label = key.replace(/_/g, " ").replace(/\w/g, c => c.toUpperCase());
+                        const display = typeof val === "boolean" ? (val ? "✓ Yes" : "✗ No") : Array.isArray(val) ? val.join(", ") : typeof val === "object" ? JSON.stringify(val) : String(val);
+                        return (
+                          <div key={key} className="flex justify-between items-start gap-4 py-2 border-b border-stone-50">
+                            <span className="text-xs text-stone-400 font-medium shrink-0 w-40">{label}</span>
+                            <span className="text-sm text-stone-700 font-semibold text-right break-all">{display}</span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer actions */}
+              <div className="px-6 py-4 border-t border-stone-100 bg-stone-50 flex gap-3">
+                {selectedApp.status === "pending_payment" && (
+                  <button
+                    onClick={() => { onPay(selectedApp); setSelectedApp(null); }}
+                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all"
+                  >
+                    {lang === "sw" ? "Lipia Sasa" : "Pay Now"}
+                  </button>
+                )}
+                {selectedApp.status === "issued" && (
+                  <button
+                    onClick={() => { setPreviewApp(selectedApp); setSelectedApp(null); }}
+                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all"
+                  >
+                    {lang === "sw" ? "Angalia Hati" : "View Document"}
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedApp(null)}
+                  className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-bold text-sm transition-all"
+                >
+                  {lang === "sw" ? "Funga" : "Close"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       {previewApp && (
         <DocumentPreview
           application={previewApp}
