@@ -4,10 +4,10 @@
  * and pre-generates QR codes before rendering.
  */
 import React, { useState, useEffect } from "react";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { Application, Service } from "@/lib/supabase";
 import { generateQRDataUrl } from "@/lib/qr";
-import { X, Download, ExternalLink, Loader2 } from "lucide-react";
+import { X, Download, Loader2 } from "lucide-react";
 
 // PDF components
 import { UtambulishoMkaziPDF } from "./documents/UtambulishoMkaziPDF";
@@ -127,73 +127,100 @@ export const DocumentRenderer: React.FC<{
   );
 };
 
-// ── Full modal preview ───────────────────────────────────────────────────────
+// ── Document download modal (preview removed — PDFViewer causes crashes) ────
 export const DocumentPreview: React.FC<{
   application: Application;
   service: Service;
   lang?: "sw" | "en";
   onClose: () => void;
-}> = ({ application, service, lang = "sw", onClose }) => {
+}> = ({ application, lang = "sw", onClose }) => {
   const { Component, code, filenamePrefix } = resolvePDF(application);
   const qrDataUrl = useQRCode(application, code);
   const filename = `${filenamePrefix}-${application.application_number}.pdf`;
+  const [ready, setReady] = React.useState(false);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col"
-        style={{ height: "90vh" }}
-      >
-        {/* Modal header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-stone-100">
           <div>
             <h2 className="text-lg font-bold text-stone-900">
-              {lang === "sw" ? "Hakiki Hati" : "Document Preview"}
+              {lang === "sw" ? "Pakua Hati" : "Download Document"}
             </h2>
-            <p className="text-xs text-stone-500 font-mono">{application.application_number}</p>
+            <p className="text-xs text-stone-500 font-mono mt-0.5">
+              {application.application_number}
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            {qrDataUrl && (
-              <PDFDownloadLink
-                document={<Component application={application} lang={lang} qrDataUrl={qrDataUrl} />}
-                fileName={filename}
-              >
-                {({ loading }) => (
-                  <button
-                    disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold rounded-xl disabled:opacity-60"
-                  >
-                    {loading ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      <Download size={14} />
-                    )}
-                    {lang === "sw" ? "Pakua" : "Download"}
-                  </button>
-                )}
-              </PDFDownloadLink>
-            )}
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-stone-100 rounded-xl text-stone-500 transition-colors"
-            >
-              <X size={20} />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-stone-100 rounded-xl text-stone-500 transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        {/* PDF viewer */}
-        <div className="flex-1 overflow-hidden rounded-b-2xl">
-          {!qrDataUrl ? (
-            <div className="h-full flex items-center justify-center text-stone-400">
-              <Loader2 size={28} className="animate-spin mr-3" />
-              <span>{lang === "sw" ? "Inaandaa QR code…" : "Preparing QR code…"}</span>
+        {/* Body */}
+        <div className="px-6 py-6 space-y-4">
+          <div className="bg-emerald-50 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+              <Download size={20} className="text-emerald-600" />
             </div>
+            <div>
+              <p className="font-bold text-stone-800 text-sm">
+                {application.service_name || (lang === "sw" ? "Hati Rasmi" : "Official Document")}
+              </p>
+              <p className="text-xs text-stone-500 mt-0.5">
+                {lang === "sw" ? "PDF · Imethibitishwa na QR Code" : "PDF · QR Code verified"}
+              </p>
+            </div>
+          </div>
+
+          {!qrDataUrl ? (
+            <div className="flex items-center justify-center gap-3 py-4 text-stone-400">
+              <Loader2 size={20} className="animate-spin" />
+              <span className="text-sm">{lang === "sw" ? "Inaandaa hati…" : "Preparing document…"}</span>
+            </div>
+          ) : !ready ? (
+            <button
+              onClick={() => setReady(true)}
+              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+            >
+              <Download size={18} />
+              {lang === "sw" ? "Bonyeza Kupakua PDF" : "Click to Download PDF"}
+            </button>
           ) : (
-            <PDFViewer width="100%" height="100%" style={{ border: "none" }}>
-              <Component application={application} lang={lang} qrDataUrl={qrDataUrl} />
-            </PDFViewer>
+            <PDFDownloadLink
+              document={<Component application={application} lang={lang} qrDataUrl={qrDataUrl} />}
+              fileName={filename}
+            >
+              {({ loading, error }) =>
+                error ? (
+                  <div className="text-center py-3 text-red-500 text-sm font-medium">
+                    {lang === "sw" ? "Hitilafu ya hati. Jaribu tena." : "Document error. Please try again."}
+                  </div>
+                ) : (
+                  <button
+                    disabled={loading}
+                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-200 disabled:text-stone-400 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <><Loader2 size={16} className="animate-spin" /> {lang === "sw" ? "Inaandaa…" : "Preparing…"}</>
+                    ) : (
+                      <><Download size={16} /> {lang === "sw" ? "Pakua Sasa" : "Download Now"}</>
+                    )}
+                  </button>
+                )
+              }
+            </PDFDownloadLink>
           )}
+
+          <button
+            onClick={onClose}
+            className="w-full py-3 text-stone-500 hover:text-stone-700 text-sm font-medium transition-colors"
+          >
+            {lang === "sw" ? "Funga" : "Close"}
+          </button>
         </div>
       </div>
     </div>
