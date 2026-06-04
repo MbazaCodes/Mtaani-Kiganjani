@@ -24,5 +24,19 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // shadcn/ui components and React context files intentionally co-locate a
+    // component with its variants constant or its consumer hook. This is the
+    // standard pattern for these files and only affects HMR fast-refresh in dev.
+    files: [
+      "src/components/ui/**/*.{ts,tsx}",
+      "src/context/**/*.{ts,tsx}",
+      "src/components/layout/AppShell.tsx",
+      "src/components/forms/FormShell.tsx",
+    ],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
   eslintPluginPrettier,
 );
