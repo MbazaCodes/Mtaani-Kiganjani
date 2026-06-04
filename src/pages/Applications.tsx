@@ -28,7 +28,8 @@ import type { ApplicationDraft } from "../types";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import { ApplicationProgressBar } from "../components/ui/ApplicationProgressBar";
 import { formatCurrency, getCurrencyForUser } from "../lib/currency";
-import { DocumentRenderer, DocumentPreview } from "../components/DocumentRenderer";
+import { DocumentPreview, CertificatePDFDocument } from "../components/DocumentRenderer";
+import { generateQRDataUrl } from "@/lib/qr";
 import { ReceiptPDF } from "../components/ReceiptPDF";
 
 interface ApplicationsProps {
@@ -252,28 +253,42 @@ export function Applications({
   };
 
   const CertificateDownloadLink = ({ app }: { app: Application }) => {
-    const [ready, setReady] = useState(false);
-    if (!ready) {
+    const [qrUrl, setQrUrl] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const handleClick = async () => {
+      if (qrUrl) return; // already generated
+      setLoading(true);
+      try {
+        const url = await generateQRDataUrl(app, "DOC");
+        setQrUrl(url);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!qrUrl) {
       return (
         <button
-          onClick={() => setReady(true)}
-          className="text-emerald-600 text-sm font-bold hover:underline cursor-pointer"
+          onClick={handleClick}
+          disabled={loading}
+          className="text-emerald-600 text-sm font-bold hover:underline cursor-pointer disabled:opacity-50"
         >
-          {t("download")}
+          {loading ? "..." : t("download")}
         </button>
       );
     }
     return (
       <PDFDownloadLinkCompat
-        document={<DocumentRenderer application={app} service={(app as any).services} />}
+        document={<CertificatePDFDocument application={app} lang={lang} qrDataUrl={qrUrl} />}
         fileName={`Certificate_${app.application_number}.pdf`}
       >
-        {({ loading, error }: { loading: boolean; error: Error | null }) =>
+        {({ loading: pdfLoading, error }: { loading: boolean; error: Error | null }) =>
           error ? (
             <span className="text-red-500 text-xs">PDF Error</span>
           ) : (
             <span className="text-emerald-600 text-sm font-bold hover:underline cursor-pointer">
-              {loading ? "..." : t("download")}
+              {pdfLoading ? "..." : t("download")}
             </span>
           )
         }
@@ -310,31 +325,51 @@ export function Applications({
         className="w-full h-10 bg-amber-50 text-amber-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2"
       >
         {({ loading }: { loading: boolean }) => (
-          <>
+          <span className="flex items-center justify-center gap-2 w-full">
             <Receipt size={14} />
             {loading ? "..." : lang === "sw" ? "Pakua Risiti" : "Download Receipt"}
-          </>
+          </span>
         )}
       </PDFDownloadLinkCompat>
     );
   };
 
   const MobileCertificateDownloadLink = ({ app }: { app: Application }) => {
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => setIsClient(true), []);
-    if (!isClient)
+    const [qrUrl, setQrUrl] = useState<string | null>(null);
+    const [generating, setGenerating] = useState(false);
+
+    const handleClick = async () => {
+      if (qrUrl) return;
+      setGenerating(true);
+      try {
+        const url = await generateQRDataUrl(app, "DOC");
+        setQrUrl(url);
+      } finally {
+        setGenerating(false);
+      }
+    };
+
+    if (!qrUrl) {
       return (
-        <div className="flex-1 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-          Loading...
-        </div>
+        <button
+          onClick={handleClick}
+          disabled={generating}
+          className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg font-bold text-sm disabled:opacity-50"
+        >
+          {generating ? "..." : t("download")}
+        </button>
       );
+    }
     return (
       <PDFDownloadLinkCompat
-        document={<DocumentRenderer application={app} service={(app as any).services} />}
+        document={<CertificatePDFDocument application={app} lang={lang} qrDataUrl={qrUrl} />}
         fileName={`Certificate_${app.application_number}.pdf`}
-        className="flex-1 h-10 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold flex items-center justify-center"
       >
-        {({ loading }: { loading: boolean }) => (loading ? "..." : t("downloadDocument"))}
+        {({ loading: pdfLoading }: { loading: boolean }) => (
+          <span className="flex-1 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-bold text-sm flex items-center justify-center">
+            {pdfLoading ? "..." : t("download")}
+          </span>
+        )}
       </PDFDownloadLinkCompat>
     );
   };

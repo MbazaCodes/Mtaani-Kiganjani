@@ -77,13 +77,25 @@ function resolvePDF(application: Application): PDFFactory {
 
 // ── Hook: pre-generate QR data URL ──────────────────────────────────────────
 function useQRCode(application: Application | null, code: string) {
-  const [qr, setQr] = useState("");
+  const [qr, setQr] = useState<string | null>(null);
   useEffect(() => {
     if (!application) return;
     generateQRDataUrl(application, code).then(setQr);
   }, [application?.id, code]);
   return qr;
 }
+
+
+// ── Pure react-pdf document (use this as the `document=` prop for PDFDownloadLink) ──
+// CertificatePDFDocument accepts a pre-generated qrDataUrl so it has no async work
+export const CertificatePDFDocument: React.FC<{
+  application: Application;
+  lang?: "sw" | "en";
+  qrDataUrl: string;
+}> = ({ application, lang = "sw", qrDataUrl }) => {
+  const { Component } = resolvePDF(application);
+  return <Component application={application} lang={lang} qrDataUrl={qrDataUrl} />;
+};
 
 // ── Inline download button ───────────────────────────────────────────────────
 export const DocumentRenderer: React.FC<{
