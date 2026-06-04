@@ -292,23 +292,22 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
   });
 
   // ─── Address cascades (memoised — TANZANIA_ADDRESS_DATA is 4000+ lines) ──
-  const regions = React.useMemo(
-    () => TANZANIA_ADDRESS_DATA.map((r) => r.name),
-    [],
-  );
+  const regions = React.useMemo(() => TANZANIA_ADDRESS_DATA.map((r) => r.name), []);
   const districts = React.useMemo(
     () =>
       vals.region
-        ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.region)?.districts.map((d) => d.name) ?? []
+        ? (TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.region)?.districts.map(
+            (d) => d.name,
+          ) ?? [])
         : [],
     [vals.region],
   );
   const wards = React.useMemo(
     () =>
       vals.region && vals.district
-        ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.region)?.districts.find(
+        ? (TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.region)?.districts.find(
             (d) => d.name === vals.district,
-          )?.wards ?? []
+          )?.wards ?? [])
         : [],
     [vals.region, vals.district],
   );
@@ -1012,10 +1011,7 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
                     [L("Simu", "Phone"), userProfile.phone || "—"],
                     ["Email", userProfile.email || "—"],
                     [L("Jinsia", "Gender"), userProfile.gender || "—"],
-                    [
-                      L("Tarehe ya Kuzaliwa", "Date of Birth"),
-                      userProfile?.date_of_birth || "—",
-                    ],
+                    [L("Tarehe ya Kuzaliwa", "Date of Birth"), userProfile?.date_of_birth || "—"],
                   ].map(([lbl, val]) => (
                     <div key={String(lbl)} className="bg-white rounded-lg px-3 py-2">
                       <p className="text-[9px] text-stone-400 uppercase tracking-wide">{lbl}</p>

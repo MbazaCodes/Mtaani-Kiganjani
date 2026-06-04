@@ -200,11 +200,21 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
         </View>
         <Row label={sw ? "Aina" : "Type"} value={propLabel} />
         <Row label={sw ? "Anwani" : "Address"} value={fd.property_address ?? ""} />
-        {fd.num_rooms ? <Row label={sw ? "Vyumba" : "Rooms"} value={fd.num_rooms ?? ""} /> : <View/>}
-        {fd.floor_level ? <Row label={sw ? "Ghorofa" : "Floor"} value={fd.floor_level ?? ""} /> : <View/>}
+        {fd.num_rooms ? (
+          <Row label={sw ? "Vyumba" : "Rooms"} value={fd.num_rooms ?? ""} />
+        ) : (
+          <View />
+        )}
+        {fd.floor_level ? (
+          <Row label={sw ? "Ghorofa" : "Floor"} value={fd.floor_level ?? ""} />
+        ) : (
+          <View />
+        )}
         {utilLabels ? (
           <Row label={sw ? "Huduma Zilizojumuishwa" : "Utilities Included"} value={utilLabels} />
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Financial terms */}
         <View style={s.sectionHeader}>
@@ -241,7 +251,9 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
             </View>
             <Text style={[s.body, { fontSize: 8.5 }]}>{String(fd.house_rules)}</Text>
           </View>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Special conditions */}
         {fd.special_conditions ? (
@@ -251,7 +263,9 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
             </View>
             <Text style={[s.body, { fontSize: 8.5 }]}>{String(fd.special_conditions)}</Text>
           </View>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Signature grid: Landlord, Tenant, 2 Witnesses, Office */}
         <View style={ls.fourSigGrid}>

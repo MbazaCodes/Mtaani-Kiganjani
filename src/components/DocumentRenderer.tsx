@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * DocumentRenderer — routes to the correct PDF component based on service_id/name
  * and pre-generates QR codes before rendering.
@@ -84,7 +83,6 @@ function useQRCode(application: Application | null, code: string) {
   }, [application?.id, code]);
   return qr;
 }
-
 
 // ── Pure react-pdf document (use this as the `document=` prop for PDFDownloadLink) ──
 // CertificatePDFDocument accepts a pre-generated qrDataUrl so it has no async work
@@ -191,7 +189,9 @@ export const DocumentPreview: React.FC<{
           {!qrDataUrl ? (
             <div className="flex items-center justify-center gap-3 py-4 text-stone-400">
               <Loader2 size={20} className="animate-spin" />
-              <span className="text-sm">{lang === "sw" ? "Inaandaa hati…" : "Preparing document…"}</span>
+              <span className="text-sm">
+                {lang === "sw" ? "Inaandaa hati…" : "Preparing document…"}
+              </span>
             </div>
           ) : !ready ? (
             <button
@@ -209,7 +209,9 @@ export const DocumentPreview: React.FC<{
               {({ loading, error }) =>
                 error ? (
                   <div className="text-center py-3 text-red-500 text-sm font-medium">
-                    {lang === "sw" ? "Hitilafu ya hati. Jaribu tena." : "Document error. Please try again."}
+                    {lang === "sw"
+                      ? "Hitilafu ya hati. Jaribu tena."
+                      : "Document error. Please try again."}
                   </div>
                 ) : (
                   <button
@@ -217,9 +219,14 @@ export const DocumentPreview: React.FC<{
                     className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-200 disabled:text-stone-400 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
                   >
                     {loading ? (
-                      <><Loader2 size={16} className="animate-spin" /> {lang === "sw" ? "Inaandaa…" : "Preparing…"}</>
+                      <>
+                        <Loader2 size={16} className="animate-spin" />{" "}
+                        {lang === "sw" ? "Inaandaa…" : "Preparing…"}
+                      </>
                     ) : (
-                      <><Download size={16} /> {lang === "sw" ? "Pakua Sasa" : "Download Now"}</>
+                      <>
+                        <Download size={16} /> {lang === "sw" ? "Pakua Sasa" : "Download Now"}
+                      </>
                     )}
                   </button>
                 )

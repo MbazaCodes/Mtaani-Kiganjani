@@ -148,7 +148,7 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         {/* Type banner */}
         <View style={[ls.banner, { backgroundColor: isDispute ? "#e11d48" : "#d97706" }]}>
           <Text style={ls.bannerTitle}>{typeLabel}</Text>
-          {fd.title ? <Text style={ls.bannerSub}>{String(fd.title)}</Text> : <View/>}
+          {fd.title ? <Text style={ls.bannerSub}>{String(fd.title)}</Text> : <View />}
         </View>
 
         {/* Urgency badge */}
@@ -199,10 +199,17 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
                 />
                 {fd.respondent_phone_manual ? (
                   <Row label={sw ? "Simu" : "Phone"} value={fd.respondent_phone_manual ?? ""} />
-                ) : <View/>}
+                ) : (
+                  <View />
+                )}
                 {fd.respondent_address_manual ? (
-                  <Row label={sw ? "Anwani" : "Address"} value={fd.respondent_address_manual ?? ""} />
-                ) : <View/>}
+                  <Row
+                    label={sw ? "Anwani" : "Address"}
+                    value={fd.respondent_address_manual ?? ""}
+                  />
+                ) : (
+                  <View />
+                )}
                 <Row
                   label={sw ? "Hali" : "Status"}
                   value={sw ? "Hayupo kwenye mfumo" : "Not in system"}
@@ -210,7 +217,9 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
               </View>
             )}
           </View>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Community issue location */}
         {!isDispute ? (
@@ -228,7 +237,9 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
               </View>
             </View>
           </View>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Case details */}
         <View style={s.sectionHeader}>
@@ -237,13 +248,17 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         <Row label={sw ? "Kichwa" : "Title"} value={fd.title ?? ""} />
         {fd.incident_date ? (
           <Row label={sw ? "Tarehe ya Tukio" : "Incident Date"} value={fd.incident_date ?? ""} />
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
         {isDispute && resolution ? (
           <Row
             label={sw ? "Suluhisho Linalopendekezwa" : "Preferred Resolution"}
             value={resolution}
           />
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Description box */}
         <View style={ls.descBox}>
@@ -251,7 +266,7 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* Witnesses (citizen dispute only) */}
-        {(isDispute && (fd.witness1_name || fd.witness2_name)) ? (
+        {isDispute && (fd.witness1_name || fd.witness2_name) ? (
           <View>
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>{sw ? "MASHAHIDI" : "WITNESSES"}</Text>
@@ -261,15 +276,21 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
                 label={`${sw ? "Shahidi" : "Witness"} 1`}
                 value={`${fd.witness1_name} · ${fd.witness1_phone || ""}`}
               />
-            ) : <View/>}
+            ) : (
+              <View />
+            )}
             {fd.witness2_name ? (
               <Row
                 label={`${sw ? "Shahidi" : "Witness"} 2`}
                 value={`${fd.witness2_name} · ${fd.witness2_phone || ""}`}
               />
-            ) : <View/>}
+            ) : (
+              <View />
+            )}
           </View>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Fee (dispute only) */}
         {isDispute ? (
@@ -280,7 +301,9 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
                 : `Mediation fee: TZS 5,000. Pay at the office when scheduling the mediation date.`}
             </Text>
           </View>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Signature section */}
         <View style={s.signatureSection}>

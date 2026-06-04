@@ -135,8 +135,16 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={[ls.recipientLine, { fontWeight: "bold" }]}>
             {firstInst.name || (sw ? "TAASISI HUSIKA" : "CONCERNED INSTITUTION")}
           </Text>
-          {firstInst.department ? <Text style={ls.recipientLine}>{String(firstInst.department ?? "")}</Text> : <View/>}
-          {firstInst.address ? <Text style={ls.recipientLine}>{String(firstInst.address ?? "")}</Text> : <View/>}
+          {firstInst.department ? (
+            <Text style={ls.recipientLine}>{String(firstInst.department ?? "")}</Text>
+          ) : (
+            <View />
+          )}
+          {firstInst.address ? (
+            <Text style={ls.recipientLine}>{String(firstInst.address ?? "")}</Text>
+          ) : (
+            <View />
+          )}
         </View>
 
         {/* Subject */}
@@ -190,13 +198,17 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
                 <Text style={s.infoLabel}>NIDA:</Text>
                 <Text style={s.infoValue}>{user?.nida_number || "N/A"}</Text>
               </View>
-            ) : <View/>}
+            ) : (
+              <View />
+            )}
             {isSelf ? (
               <View style={s.infoRow}>
                 <Text style={s.infoLabel}>{sw ? "Simu:" : "Phone:"}</Text>
                 <Text style={s.infoValue}>{user?.phone || "N/A"}</Text>
               </View>
-            ) : <View/>}
+            ) : (
+              <View />
+            )}
           </View>
           <View style={s.colRight}>
             <View style={s.infoRow}>
@@ -223,7 +235,9 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
                 : `Note: This request covered ${institutions.length} institutions. A separate letter is available for each: ${institutions.map((i: any) => i.name).join(", ")}.`}
             </Text>
           </View>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Signature section */}
         <Text style={ls.signoff}>{sw ? "Wenu Mwaminifu," : "Yours faithfully,"}</Text>

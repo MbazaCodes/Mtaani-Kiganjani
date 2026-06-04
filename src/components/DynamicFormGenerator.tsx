@@ -1265,7 +1265,9 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
                 }}
               />
               {errors[field.name] && (
-                <span className="text-xs text-red-500">{(errors[field.name] as { message?: string }).message}</span>
+                <span className="text-xs text-red-500">
+                  {(errors[field.name] as { message?: string }).message}
+                </span>
               )}
             </div>
           );

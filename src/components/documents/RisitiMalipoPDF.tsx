@@ -60,7 +60,10 @@ const PAYMENT_METHODS: Record<string, { sw: string; en: string }> = {
 export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang, qrDataUrl }) => {
   const user = (application as any).users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
-  const pd = (fd.payment_data || application.payment_data || {}) as Record<string, string | undefined>;
+  const pd = (fd.payment_data || application.payment_data || {}) as Record<
+    string,
+    string | undefined
+  >;
   const qr = qrDataUrl || generateQRCodeUrl(application, "RCP");
   const sw = lang === "sw";
 

@@ -140,7 +140,9 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
             <Text style={ls.guestsNum}>{String(fd.expected_guests)}</Text>
             <Text style={ls.guestsLabel}>{sw ? "WAGENI WANAOTARAJIWA" : "EXPECTED GUESTS"}</Text>
           </View>
-        ) : <View />}
+        ) : (
+          <View />
+        )}
 
         {/* Applicant info */}
         <View style={s.sectionHeader}>
@@ -161,7 +163,10 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
               value={fd.start_date ? formatDate(String(fd.start_date)) : undefined}
             />
             <Row label={sw ? "Muda wa Kuanza" : "Start Time"} value={fd.start_time} />
-            <Row label={sw ? "Tarehe ya Mwisho" : "End Date"} value={fd.end_date ? formatDate(String(fd.end_date)) : undefined} />
+            <Row
+              label={sw ? "Tarehe ya Mwisho" : "End Date"}
+              value={fd.end_date ? formatDate(String(fd.end_date)) : undefined}
+            />
           </View>
           <View style={s.colRight}>
             <Row label={sw ? "Jina la Ukumbi" : "Venue Name"} value={fd.venue_name} />
@@ -178,7 +183,9 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
         <Row label={sw ? "Simu ya Msimamizi" : "Organiser Phone"} value={fd.organizer_phone} />
         {fd.second_contact_name ? (
           <Row label={sw ? "Msimamizi 2" : "2nd Contact"} value={fd.second_contact_name} />
-        ) : <View />}
+        ) : (
+          <View />
+        )}
 
         {/* Signatures */}
         <View style={[s.signatureSection, { marginTop: 20 }]}>

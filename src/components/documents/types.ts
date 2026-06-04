@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Shared types, styles and helpers for all E-Mtaa PDF documents.
  * Layout follows Tanzanian local government document conventions:

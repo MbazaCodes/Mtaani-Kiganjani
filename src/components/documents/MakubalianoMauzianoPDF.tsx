@@ -157,7 +157,9 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
                 ? `Muda wa Pango: ${fd.payment_period ?? ""} miezi`
                 : `Rental Period: ${fd.payment_period ?? ""} months`}
             </Text>
-          ) : <View/>}
+          ) : (
+            <View />
+          )}
         </View>
 
         {/* Asset description */}
@@ -168,7 +170,9 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={{ fontSize: 9, color: "#1c1917", marginBottom: 10, lineHeight: 1.5 }}>
             {String(fd.asset_description)}
           </Text>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Parties */}
         <View style={s.sectionHeader}>
@@ -183,7 +187,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
               <Row label={sw ? "Jina" : "Name"} value={formatFullName(user)} />
               <Row label="NIDA" value={user?.nida_number} />
               <Row label={sw ? "Raia ID" : "Cit. ID"} value={user?.citizen_id} />
-              {fd.seller_tin ? <Row label="TIN" value={fd.seller_tin ?? ""} /> : <View/>}
+              {fd.seller_tin ? <Row label="TIN" value={fd.seller_tin ?? ""} /> : <View />}
             </View>
           </View>
           <View style={s.colRight}>

@@ -265,15 +265,10 @@ export function StaffCitizenManagement() {
       }
 
       // Also activate account so they can log in
-      await supabase
-        .from("users")
-        .update({ account_status: "active" })
-        .eq("id", citizen.id);
+      await supabase.from("users").update({ account_status: "active" }).eq("id", citizen.id);
 
       setCitizens((prev) =>
-        prev.map((c) =>
-          c.id === citizen.id ? { ...c, account_status: "active" } : c,
-        ),
+        prev.map((c) => (c.id === citizen.id ? { ...c, account_status: "active" } : c)),
       );
 
       showToast(
@@ -643,7 +638,11 @@ export function StaffCitizenManagement() {
                             onClick={() => handleConfirmEmail(citizen)}
                             disabled={confirmingId === citizen.id}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
-                            title={lang === "sw" ? "Thibitisha barua pepe — mwananchi ataweza kuingia" : "Confirm email — unblocks login"}
+                            title={
+                              lang === "sw"
+                                ? "Thibitisha barua pepe — mwananchi ataweza kuingia"
+                                : "Confirm email — unblocks login"
+                            }
                           >
                             {confirmingId === citizen.id ? (
                               <Loader2 size={13} className="animate-spin" />

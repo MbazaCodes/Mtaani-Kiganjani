@@ -123,7 +123,9 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
           </Text>
           {fd.construction_dimensions ? (
             <Text style={ls.bannerSub}>{String(fd.construction_dimensions)}</Text>
-          ) : <View/>}
+          ) : (
+            <View />
+          )}
         </View>
 
         {/* Cost summary */}
@@ -132,7 +134,9 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
             <Text style={ls.costAmount}>{formatCurrency(Number(fd.estimated_cost))}</Text>
             <Text style={ls.costLabel}>{sw ? "GHARAMA INAYOKADIRIWA" : "ESTIMATED COST"}</Text>
           </View>
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
 
         {/* Owner section */}
         <View style={s.sectionHeader}>
@@ -171,7 +175,9 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
         <Row label={sw ? "Nyenzo Kuu" : "Primary Material"} value={materialLabel} />
         {fd.construction_dimensions ? (
           <Row label={sw ? "Kipimo" : "Dimensions"} value={fd.construction_dimensions ?? ""} />
-        ) : <View/>}
+        ) : (
+          <View />
+        )}
         <Row label={sw ? "Maelezo" : "Description"} value={fd.construction_description ?? ""} />
 
         {/* Timeline & contractor */}
@@ -181,11 +187,17 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
         <View style={s.twoCol}>
           <View style={s.colLeft}>
             <Row label={sw ? "Tarehe ya Kuanza" : "Start Date"} value={fd.start_date ?? ""} />
-            <Row label={sw ? "Tarehe ya Kukamilika" : "Completion Date"} value={fd.end_date ?? ""} />
+            <Row
+              label={sw ? "Tarehe ya Kukamilika" : "Completion Date"}
+              value={fd.end_date ?? ""}
+            />
           </View>
           <View style={s.colRight}>
             <Row label={sw ? "Fundi" : "Contractor"} value={fd.contractor_name ?? ""} />
-            <Row label={sw ? "Simu ya Fundi" : "Contractor Phone"} value={fd.contractor_phone ?? ""} />
+            <Row
+              label={sw ? "Simu ya Fundi" : "Contractor Phone"}
+              value={fd.contractor_phone ?? ""}
+            />
           </View>
         </View>
 

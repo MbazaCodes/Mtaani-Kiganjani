@@ -454,14 +454,18 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                   <button
                     onClick={async () => {
                       const shareData = {
-                        title: serviceName || (lang === "sw" ? "Hati Rasmi" : "Official Certificate"),
-                        text: lang === "sw"
-                          ? `Hati yangu rasmi ya ${serviceName} — Namba: ${applicationNumber}`
-                          : `My official ${serviceName} certificate — Ref: ${applicationNumber}`,
+                        title:
+                          serviceName || (lang === "sw" ? "Hati Rasmi" : "Official Certificate"),
+                        text:
+                          lang === "sw"
+                            ? `Hati yangu rasmi ya ${serviceName} — Namba: ${applicationNumber}`
+                            : `My official ${serviceName} certificate — Ref: ${applicationNumber}`,
                         url: `${window.location.origin}/verify?ref=${applicationNumber}`,
                       };
                       if (navigator.share && navigator.canShare?.(shareData)) {
-                        try { await navigator.share(shareData); } catch {}
+                        try {
+                          await navigator.share(shareData);
+                        } catch {}
                       } else {
                         await navigator.clipboard.writeText(shareData.url);
                         alert(lang === "sw" ? "Kiungo kimekopwa!" : "Link copied!");

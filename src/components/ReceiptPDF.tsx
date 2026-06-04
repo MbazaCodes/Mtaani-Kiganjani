@@ -42,7 +42,9 @@ export const ReceiptPDF: React.FC<{
           </View>
           <View style={styles.row}>
             <Text>Date:</Text>
-            <Text>{paymentData.paid_at ? new Date(paymentData.paid_at).toLocaleDateString() : ""}</Text>
+            <Text>
+              {paymentData.paid_at ? new Date(paymentData.paid_at).toLocaleDateString() : ""}
+            </Text>
           </View>
         </View>
       </Page>

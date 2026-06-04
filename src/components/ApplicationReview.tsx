@@ -873,7 +873,10 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex justify-between items-center">
                     <span className="text-xs font-bold text-emerald-800">{L("Ada:", "Fee:")}</span>
                     <span className="text-lg font-black text-emerald-700">
-                      TSh {((selected.form_data as Record<string, unknown>)?.total_fee as number).toLocaleString()}
+                      TSh{" "}
+                      {(
+                        (selected.form_data as Record<string, unknown>)?.total_fee as number
+                      ).toLocaleString()}
                     </span>
                   </div>
                 )}

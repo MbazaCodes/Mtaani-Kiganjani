@@ -809,9 +809,9 @@ export function Profile() {
     const clean = phone.replace(/[\s\-]/g, "");
 
     // Tanzania: +2556XXXXXXXX, +2557XXXXXXXX, 06XXXXXXXX, 07XXXXXXXX (9 local digits after 0/+255)
-    const tzFull   = /^\+255[67]\d{8}$/;   // +255 6/7 + 8 digits = 13 chars
-    const tzLocal  = /^0[67]\d{8}$/;         // 0 6/7 + 8 digits   = 10 chars
-    const intl     = /^\+[1-9]\d{6,14}$/;   // any international number
+    const tzFull = /^\+255[67]\d{8}$/; // +255 6/7 + 8 digits = 13 chars
+    const tzLocal = /^0[67]\d{8}$/; // 0 6/7 + 8 digits   = 10 chars
+    const intl = /^\+[1-9]\d{6,14}$/; // any international number
 
     if (!tzFull.test(clean) && !tzLocal.test(clean) && !intl.test(clean)) {
       return {
@@ -900,9 +900,9 @@ export function Profile() {
         "success",
       );
 
-      setIsProfileImageBroken(false);   // reset broken-image flag so new photo renders
+      setIsProfileImageBroken(false); // reset broken-image flag so new photo renders
       await fetchCompleteProfile();
-      await refreshProfile();           // update user.photo_url in AuthContext
+      await refreshProfile(); // update user.photo_url in AuthContext
     } catch (error) {
       console.error("Error uploading photo:", error);
       showToast(
@@ -1113,7 +1113,9 @@ export function Profile() {
       const normalisedFormData = {
         ...formData,
         phone: formData.phone ? normalisePhone(formData.phone) : formData.phone,
-        alternative_phone: formData.alternative_phone ? normalisePhone(formData.alternative_phone) : formData.alternative_phone,
+        alternative_phone: formData.alternative_phone
+          ? normalisePhone(formData.alternative_phone)
+          : formData.alternative_phone,
       };
 
       const sensitiveUpdates: { field: string; oldValue: string; newValue: string }[] = [];
@@ -2188,13 +2190,22 @@ export function Profile() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
-                      {getFieldLabel("phone")} {user?.role === "citizen" && <span className="text-red-500">*</span>}
+                      {getFieldLabel("phone")}{" "}
+                      {user?.role === "citizen" && <span className="text-red-500">*</span>}
                     </label>
-                    <div className={`flex h-12 bg-stone-50 border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 transition-all ${
-                      validationErrors.phone ? "border-red-300 bg-red-50" : "border-stone-200"
-                    }`}>
+                    <div
+                      className={`flex h-12 bg-stone-50 border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 transition-all ${
+                        validationErrors.phone ? "border-red-300 bg-red-50" : "border-stone-200"
+                      }`}
+                    >
                       <select
-                        value={formData.phone?.startsWith("+255") || !formData.phone ? "+255" : formData.phone.startsWith("0") ? "+255" : formData.phone.match(/^\+\d+/)?.[0] ?? "+255"}
+                        value={
+                          formData.phone?.startsWith("+255") || !formData.phone
+                            ? "+255"
+                            : formData.phone.startsWith("0")
+                              ? "+255"
+                              : (formData.phone.match(/^\+\d+/)?.[0] ?? "+255")
+                        }
                         onChange={(e) => {
                           const code = e.target.value;
                           const local = formData.phone?.replace(/^\+\d+\s*|^0/, "") ?? "";
@@ -2231,7 +2242,9 @@ export function Profile() {
                       />
                     </div>
                     <p className="text-[10px] text-stone-400">
-                      {lang === "sw" ? "Ingiza namba kuanzia 6 au 7 (bila sufuri)" : "Enter number starting with 6 or 7 (no leading zero)"}
+                      {lang === "sw"
+                        ? "Ingiza namba kuanzia 6 au 7 (bila sufuri)"
+                        : "Enter number starting with 6 or 7 (no leading zero)"}
                     </p>
                     {validationErrors.phone && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
@@ -2245,14 +2258,19 @@ export function Profile() {
                     <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
                       {getFieldLabel("alternative_phone")}
                     </label>
-                    <div className={`flex h-12 bg-stone-50 border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 transition-all ${
-                      validationErrors.alternative_phone ? "border-red-300 bg-red-50" : "border-stone-200"
-                    }`}>
+                    <div
+                      className={`flex h-12 bg-stone-50 border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 transition-all ${
+                        validationErrors.alternative_phone
+                          ? "border-red-300 bg-red-50"
+                          : "border-stone-200"
+                      }`}
+                    >
                       <select
                         value={formData.alternative_phone?.match(/^\+\d+/)?.[0] ?? "+255"}
                         onChange={(e) => {
                           const code = e.target.value;
-                          const local = formData.alternative_phone?.replace(/^\+\d+\s*|^0/, "") ?? "";
+                          const local =
+                            formData.alternative_phone?.replace(/^\+\d+\s*|^0/, "") ?? "";
                           setFormData({ ...formData, alternative_phone: code + local });
                         }}
                         className="h-full px-2 bg-stone-100 border-r border-stone-200 text-sm font-bold text-stone-700 outline-none cursor-pointer"

@@ -141,7 +141,8 @@ export function Applications({
     if (!user) return;
     setProcessingId(app.id);
     try {
-      const serviceName = app.service_name || app.service_name || (app as any).services?.name || "—" || "";
+      const serviceName =
+        app.service_name || app.service_name || (app as any).services?.name || "—" || "";
       const fd = (app.form_data || {}) as Record<string, unknown>;
       const isBuyer =
         serviceName.includes("Mauzo") && String(fd.buyer_nida || "") === user.nida_number;
@@ -180,7 +181,10 @@ export function Applications({
         const serviceName =
           lang === "sw"
             ? app.service_name || (app as any).services?.name || ""
-            : (app as any).services?.name_en || app.service_name || (app as any).services?.name || "";
+            : (app as any).services?.name_en ||
+              app.service_name ||
+              (app as any).services?.name ||
+              "";
         const matchesSearch =
           serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           app.application_number.toLowerCase().includes(searchTerm.toLowerCase());
@@ -229,7 +233,9 @@ export function Applications({
       );
     }
     const paymentData = {
-      transaction_id: String(app.form_data?.payment_data?.transaction_id || `TXN-${app.id.slice(0, 8).toUpperCase()}`),
+      transaction_id: String(
+        app.form_data?.payment_data?.transaction_id || `TXN-${app.id.slice(0, 8).toUpperCase()}`,
+      ),
       amount: getPaymentAmount(app),
       payment_method: String(app.form_data?.payment_data?.payment_method || "M-Pesa"),
       paid_at: String(app.form_data?.payment_data?.paid_at || new Date().toISOString()),
@@ -374,7 +380,6 @@ export function Applications({
     );
   };
 
-
   // ── Share Certificate ──────────────────────────────────────────────────────
   const ShareCertificateButton = ({ app, lang }: { app: Application; lang: string }) => {
     const [sharing, setSharing] = useState(false);
@@ -384,9 +389,10 @@ export function Applications({
       try {
         const shareData = {
           title: app.service_name || (lang === "sw" ? "Hati Rasmi" : "Official Certificate"),
-          text: lang === "sw"
-            ? `Hati yangu rasmi ya ${app.service_name} — Namba: ${app.application_number}`
-            : `My official ${app.service_name} certificate — Ref: ${app.application_number}`,
+          text:
+            lang === "sw"
+              ? `Hati yangu rasmi ya ${app.service_name} — Namba: ${app.application_number}`
+              : `My official ${app.service_name} certificate — Ref: ${app.application_number}`,
           url: `${window.location.origin}/verify?ref=${app.application_number}`,
         };
 
@@ -395,10 +401,7 @@ export function Applications({
         } else {
           // Fallback: copy link to clipboard
           await navigator.clipboard.writeText(shareData.url);
-          showToast(
-            lang === "sw" ? "Kiungo kimekopwa!" : "Link copied to clipboard!",
-            "success",
-          );
+          showToast(lang === "sw" ? "Kiungo kimekopwa!" : "Link copied to clipboard!", "success");
         }
       } catch (err) {
         // User cancelled share — not an error
@@ -409,7 +412,10 @@ export function Applications({
 
     return (
       <button
-        onClick={(e) => { e.stopPropagation(); handleShare(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleShare();
+        }}
         disabled={sharing}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
         title={lang === "sw" ? "Shiriki Hati" : "Share Certificate"}
@@ -543,9 +549,14 @@ export function Applications({
                     <p className="font-semibold text-emerald-700 hover:underline flex items-center gap-1.5 group-hover:text-emerald-800">
                       {lang === "sw"
                         ? app.service_name || (app as any).services?.name || "—"
-                        : (app as any).services?.name_en || app.service_name || (app as any).services?.name || "—"}
+                        : (app as any).services?.name_en ||
+                          app.service_name ||
+                          (app as any).services?.name ||
+                          "—"}
                     </p>
-                    <p className="text-[10px] text-stone-400 mt-0.5">{lang === "sw" ? "Bonyeza kuona maelezo" : "Click to view details"}</p>
+                    <p className="text-[10px] text-stone-400 mt-0.5">
+                      {lang === "sw" ? "Bonyeza kuona maelezo" : "Click to view details"}
+                    </p>
                   </td>
                   <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm text-stone-500 font-mono">
                     {app.application_number}
@@ -585,19 +596,26 @@ export function Applications({
                     {(app.status === "submitted" || app.status === "pending_payment") &&
                     getPaymentAmount(app) > 0 ? (
                       <button
-                        onClick={(e) => { e.stopPropagation(); onPay(app); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPay(app);
+                        }}
                         className="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all"
                       >
                         {t("payNow")} ({formatCurrency(getPaymentAmount(app), displayCurrency)})
                       </button>
                     ) : app.status === "approved" ? (
                       <button
-                        onClick={(e) => { e.stopPropagation(); onPay(app); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPay(app);
+                        }}
                         className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-all flex items-center gap-1.5"
                       >
                         <CreditCard size={13} />
                         {lang === "sw" ? "Lipia & Pakua" : "Pay & Download"}
-                        {getPaymentAmount(app) > 0 && ` · ${formatCurrency(getPaymentAmount(app), displayCurrency)}`}
+                        {getPaymentAmount(app) > 0 &&
+                          ` · ${formatCurrency(getPaymentAmount(app), displayCurrency)}`}
                       </button>
                     ) : app.status === "issued" ? (
                       <div className="flex items-center justify-end gap-2 flex-wrap">
@@ -636,7 +654,10 @@ export function Applications({
                   <p className="font-bold text-stone-900">
                     {lang === "sw"
                       ? app.service_name || (app as any).services?.name || "—"
-                      : (app as any).services?.name_en || app.service_name || (app as any).services?.name || "—"}
+                      : (app as any).services?.name_en ||
+                        app.service_name ||
+                        (app as any).services?.name ||
+                        "—"}
                   </p>
                   <p className="text-xs text-stone-500 font-mono mt-1">{app.application_number}</p>
                 </div>
@@ -651,19 +672,26 @@ export function Applications({
                 {(app.status === "submitted" || app.status === "pending_payment") &&
                 getPaymentAmount(app) > 0 ? (
                   <button
-                    onClick={(e) => { e.stopPropagation(); onPay(app); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPay(app);
+                    }}
                     className="w-full bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700"
                   >
                     {t("payNow")} ({formatCurrency(getPaymentAmount(app), displayCurrency)})
                   </button>
                 ) : app.status === "approved" ? (
                   <button
-                    onClick={(e) => { e.stopPropagation(); onPay(app); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPay(app);
+                    }}
                     className="w-full bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 flex items-center justify-center gap-2"
                   >
                     <CreditCard size={14} />
                     {lang === "sw" ? "Lipia & Pakua" : "Pay & Download"}
-                    {getPaymentAmount(app) > 0 && ` · ${formatCurrency(getPaymentAmount(app), displayCurrency)}`}
+                    {getPaymentAmount(app) > 0 &&
+                      ` · ${formatCurrency(getPaymentAmount(app), displayCurrency)}`}
                   </button>
                 ) : app.status === "issued" ? (
                   <div className="space-y-2">
@@ -756,7 +784,6 @@ export function Applications({
         )}
       </div>
 
-
       {/* ── Application Detail Panel ──────────────────────────────────── */}
       <AnimatePresence>
         {selectedApp && (
@@ -801,7 +828,6 @@ export function Applications({
 
               {/* Scrollable body */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
-
                 {/* Status + dates */}
                 <div className="bg-stone-50 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
@@ -812,37 +838,64 @@ export function Applications({
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Tarehe ya Kuwasilisha" : "Submitted"}</p>
-                      <p className="font-semibold text-stone-700">{new Date(selectedApp.created_at).toLocaleDateString(lang === "sw" ? "sw-TZ" : "en-US", { day: "numeric", month: "short", year: "numeric" })}</p>
+                      <p className="text-xs text-stone-400 mb-0.5">
+                        {lang === "sw" ? "Tarehe ya Kuwasilisha" : "Submitted"}
+                      </p>
+                      <p className="font-semibold text-stone-700">
+                        {new Date(selectedApp.created_at).toLocaleDateString(
+                          lang === "sw" ? "sw-TZ" : "en-US",
+                          { day: "numeric", month: "short", year: "numeric" },
+                        )}
+                      </p>
                     </div>
                     {selectedApp.approved_at && (
                       <div>
-                        <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Tarehe ya Kuidhinishwa" : "Approved"}</p>
-                        <p className="font-semibold text-emerald-600">{new Date(selectedApp.approved_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-stone-400 mb-0.5">
+                          {lang === "sw" ? "Tarehe ya Kuidhinishwa" : "Approved"}
+                        </p>
+                        <p className="font-semibold text-emerald-600">
+                          {new Date(selectedApp.approved_at).toLocaleDateString()}
+                        </p>
                       </div>
                     )}
                     {(selectedApp as any).paid_at && (
                       <div>
-                        <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Tarehe ya Malipo" : "Paid"}</p>
-                        <p className="font-semibold text-emerald-600">{new Date((selectedApp as any).paid_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-stone-400 mb-0.5">
+                          {lang === "sw" ? "Tarehe ya Malipo" : "Paid"}
+                        </p>
+                        <p className="font-semibold text-emerald-600">
+                          {new Date((selectedApp as any).paid_at).toLocaleDateString()}
+                        </p>
                       </div>
                     )}
                     {selectedApp.issued_at && (
                       <div>
-                        <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Tarehe ya Kutolewa" : "Issued"}</p>
-                        <p className="font-semibold text-emerald-600">{new Date(selectedApp.issued_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-stone-400 mb-0.5">
+                          {lang === "sw" ? "Tarehe ya Kutolewa" : "Issued"}
+                        </p>
+                        <p className="font-semibold text-emerald-600">
+                          {new Date(selectedApp.issued_at).toLocaleDateString()}
+                        </p>
                       </div>
                     )}
                     {selectedApp.region && (
                       <div>
-                        <p className="text-xs text-stone-400 mb-0.5">{lang === "sw" ? "Eneo" : "Location"}</p>
-                        <p className="font-semibold text-stone-700">{[selectedApp.ward, selectedApp.district, selectedApp.region].filter(Boolean).join(", ")}</p>
+                        <p className="text-xs text-stone-400 mb-0.5">
+                          {lang === "sw" ? "Eneo" : "Location"}
+                        </p>
+                        <p className="font-semibold text-stone-700">
+                          {[selectedApp.ward, selectedApp.district, selectedApp.region]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
                       </div>
                     )}
                   </div>
                   {selectedApp.feedback && (
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-2">
-                      <p className="text-xs font-bold text-amber-700 mb-1">{lang === "sw" ? "Maoni ya Ofisi" : "Office Feedback"}</p>
+                      <p className="text-xs font-bold text-amber-700 mb-1">
+                        {lang === "sw" ? "Maoni ya Ofisi" : "Office Feedback"}
+                      </p>
                       <p className="text-sm text-amber-800">{selectedApp.feedback}</p>
                     </div>
                   )}
@@ -856,19 +909,29 @@ export function Applications({
                     </p>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-xs text-emerald-600">{lang === "sw" ? "Kiasi" : "Amount"}</p>
+                        <p className="text-xs text-emerald-600">
+                          {lang === "sw" ? "Kiasi" : "Amount"}
+                        </p>
                         <p className="font-black text-emerald-800">
                           TZS {Number(selectedApp.payment_data.amount ?? 0).toLocaleString()}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-emerald-600">{lang === "sw" ? "Njia ya Malipo" : "Method"}</p>
-                        <p className="font-semibold text-emerald-800 capitalize">{selectedApp.payment_data.payment_method || "—"}</p>
+                        <p className="text-xs text-emerald-600">
+                          {lang === "sw" ? "Njia ya Malipo" : "Method"}
+                        </p>
+                        <p className="font-semibold text-emerald-800 capitalize">
+                          {selectedApp.payment_data.payment_method || "—"}
+                        </p>
                       </div>
                       {selectedApp.payment_data.transaction_id && (
                         <div className="col-span-2">
-                          <p className="text-xs text-emerald-600">{lang === "sw" ? "Namba ya Muamala" : "Transaction ID"}</p>
-                          <p className="font-mono text-xs text-emerald-800">{selectedApp.payment_data.transaction_id}</p>
+                          <p className="text-xs text-emerald-600">
+                            {lang === "sw" ? "Namba ya Muamala" : "Transaction ID"}
+                          </p>
+                          <p className="font-mono text-xs text-emerald-800">
+                            {selectedApp.payment_data.transaction_id}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -882,15 +945,41 @@ export function Applications({
                   </p>
                   <div className="space-y-2">
                     {Object.entries(selectedApp.form_data || {})
-                      .filter(([k]) => !["service_name","application_reference","terms_accepted","data_confirmed","document_types","children"].includes(k))
+                      .filter(
+                        ([k]) =>
+                          ![
+                            "service_name",
+                            "application_reference",
+                            "terms_accepted",
+                            "data_confirmed",
+                            "document_types",
+                            "children",
+                          ].includes(k),
+                      )
                       .map(([key, val]) => {
                         if (val === null || val === undefined || val === "") return null;
-                        const label = key.replace(/_/g, " ").replace(/\w/g, c => c.toUpperCase());
-                        const display = typeof val === "boolean" ? (val ? "✓ Yes" : "✗ No") : Array.isArray(val) ? val.join(", ") : typeof val === "object" ? JSON.stringify(val) : String(val);
+                        const label = key.replace(/_/g, " ").replace(/\w/g, (c) => c.toUpperCase());
+                        const display =
+                          typeof val === "boolean"
+                            ? val
+                              ? "✓ Yes"
+                              : "✗ No"
+                            : Array.isArray(val)
+                              ? val.join(", ")
+                              : typeof val === "object"
+                                ? JSON.stringify(val)
+                                : String(val);
                         return (
-                          <div key={key} className="flex justify-between items-start gap-4 py-2 border-b border-stone-50">
-                            <span className="text-xs text-stone-400 font-medium shrink-0 w-40">{label}</span>
-                            <span className="text-sm text-stone-700 font-semibold text-right break-all">{display}</span>
+                          <div
+                            key={key}
+                            className="flex justify-between items-start gap-4 py-2 border-b border-stone-50"
+                          >
+                            <span className="text-xs text-stone-400 font-medium shrink-0 w-40">
+                              {label}
+                            </span>
+                            <span className="text-sm text-stone-700 font-semibold text-right break-all">
+                              {display}
+                            </span>
                           </div>
                         );
                       })}
@@ -903,13 +992,20 @@ export function Applications({
                 {(selectedApp.status === "pending_payment" ||
                   selectedApp.status === "approved") && (
                   <button
-                    onClick={() => { onPay(selectedApp); setSelectedApp(null); }}
+                    onClick={() => {
+                      onPay(selectedApp);
+                      setSelectedApp(null);
+                    }}
                     className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
                   >
                     <CreditCard size={16} />
                     {selectedApp.status === "approved"
-                      ? (lang === "sw" ? "Lipia & Pakua" : "Pay & Download")
-                      : (lang === "sw" ? "Lipia Sasa" : "Pay Now")}
+                      ? lang === "sw"
+                        ? "Lipia & Pakua"
+                        : "Pay & Download"
+                      : lang === "sw"
+                        ? "Lipia Sasa"
+                        : "Pay Now"}
                   </button>
                 )}
                 {selectedApp.status === "issued" && (

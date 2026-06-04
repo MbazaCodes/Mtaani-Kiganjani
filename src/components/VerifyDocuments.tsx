@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -66,7 +65,6 @@ interface VerifiedDocument {
   officeRegion?: string;
   [key: string]: unknown; // allow extra fields from different document types
 }
-
 
 // Safe accessor for verified document fields
 const vf = (doc: Record<string, unknown> | null, key: string): string => String(doc?.[key] ?? "");
@@ -1037,7 +1035,7 @@ export function VerifyDocuments({
                       {lang === "sw" ? "Data ya Fomu (Staff Only)" : "Form Data (Staff Only)"}
                     </p>
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      {Object.entries((verifiedDocument?.formData ?? {}))
+                      {Object.entries(verifiedDocument?.formData ?? {})
                         .filter(([key]) => !key.includes("payment_data"))
                         .slice(0, 8)
                         .map(([key, value]) => (

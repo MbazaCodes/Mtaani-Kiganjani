@@ -109,7 +109,10 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
             <Row label={sw ? "Mume / Mke" : "Spouse"} value={fd.surviving_spouse ?? ""} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Mahali Alipokufia" : "Place of Death"} value={fd.place_of_death ?? ""} />
+            <Row
+              label={sw ? "Mahali Alipokufia" : "Place of Death"}
+              value={fd.place_of_death ?? ""}
+            />
             <Row label={sw ? "Maiti Ipo" : "Body Location"} value={fd.body_location ?? ""} />
           </View>
         </View>
@@ -125,10 +128,16 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
               value={fd.service_date ? formatDate(String(fd.service_date)) : undefined}
             />
             <Row label={sw ? "Muda" : "Time"} value={fd.service_time ?? ""} />
-            <Row label={sw ? "Mahali pa Ibada" : "Service Venue"} value={fd.service_location ?? ""} />
+            <Row
+              label={sw ? "Mahali pa Ibada" : "Service Venue"}
+              value={fd.service_location ?? ""}
+            />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Mahali pa Kuzikwa" : "Burial Site"} value={fd.burial_location ?? ""} />
+            <Row
+              label={sw ? "Mahali pa Kuzikwa" : "Burial Site"}
+              value={fd.burial_location ?? ""}
+            />
           </View>
         </View>
 
@@ -138,7 +147,11 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
         </View>
         <Row label={sw ? "Mwakilishi" : "Representative"} value={fd.family_representative ?? ""} />
         <Row label={sw ? "Simu" : "Phone"} value={fd.representative_phone ?? ""} />
-        {fd.children_names ? <Row label={sw ? "Watoto" : "Children"} value={fd.children_names} /> : <View/>}
+        {fd.children_names ? (
+          <Row label={sw ? "Watoto" : "Children"} value={fd.children_names} />
+        ) : (
+          <View />
+        )}
 
         {/* Stamp + signature */}
         <View style={s.signatureSection}>

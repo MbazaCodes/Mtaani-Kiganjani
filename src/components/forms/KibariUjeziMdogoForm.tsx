@@ -177,19 +177,21 @@ export const KibariUjeziMdogoForm: React.FC<FormProps> = ({
   });
 
   const districts = React.useMemo(
-    () => vals.property_region
-      ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.map(
-          (d) => d.name,
-        ) ?? []
-      : [],
+    () =>
+      vals.property_region
+        ? (TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.map(
+            (d) => d.name,
+          ) ?? [])
+        : [],
     [vals.property_region],
   );
   const wards = React.useMemo(
-    () => vals.property_region && vals.property_district
-      ? TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.find(
-          (d) => d.name === vals.property_district,
-        )?.wards ?? []
-      : [],
+    () =>
+      vals.property_region && vals.property_district
+        ? (TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.find(
+            (d) => d.name === vals.property_district,
+          )?.wards ?? [])
+        : [],
     [vals.property_region, vals.property_district],
   );
 

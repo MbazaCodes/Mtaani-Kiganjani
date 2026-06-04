@@ -133,8 +133,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         // Use service_id only if it's a real UUID (hardcoded services have ids like "1","2")
-        const isRealUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-          .test(selectedService.id ?? "");
+        const isRealUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          selectedService.id ?? "",
+        );
 
         const { error, data: insertedApp } = await supabase
           .from("applications")
@@ -237,14 +238,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [user, selectedService, lang, showToast, fetchApplications],
   );
 
-  const handleInitiatePayment = useCallback(
-    (app: Application) => {
-      // For approved applications, always open payment gateway
-      // (fee may be 0 for free services — still show the confirmation flow)
-      setPayingApplication(app);
-    },
-    [],
-  );
+  const handleInitiatePayment = useCallback((app: Application) => {
+    // For approved applications, always open payment gateway
+    // (fee may be 0 for free services — still show the confirmation flow)
+    setPayingApplication(app);
+  }, []);
 
   const handlePaymentSuccess = useCallback(
     async (paymentData: PaymentResult) => {

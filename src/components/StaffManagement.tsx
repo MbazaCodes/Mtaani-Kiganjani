@@ -307,7 +307,10 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
           );
           return;
         }
-        if (createError.includes("already registered") || createError.includes("already been registered")) {
+        if (
+          createError.includes("already registered") ||
+          createError.includes("already been registered")
+        ) {
           showToast(
             lang === "sw"
               ? "Barua pepe hii tayari imesajiliwa."
@@ -338,7 +341,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
           office_id: officeId,
           assigned_region: selectedRegion,
           assigned_district: officeLevel === "district" ? selectedDistrict : null,
-          is_verified: false,      // forces password change on first login
+          is_verified: false, // forces password change on first login
           account_status: "pending",
           gender: "M",
           nationality: "Tanzanian",
@@ -525,7 +528,9 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
     if (!selectedStaff || !resetPwd.trim()) return;
     if (resetPwd.length < 6) {
       showToast(
-        lang === "sw" ? "Nywila lazima iwe na herufi 6 au zaidi" : "Password must be at least 6 characters",
+        lang === "sw"
+          ? "Nywila lazima iwe na herufi 6 au zaidi"
+          : "Password must be at least 6 characters",
         "error",
       );
       return;
@@ -558,7 +563,9 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
         .eq("id", selectedStaff.id);
 
       showToast(
-        lang === "sw" ? "Nywila imebadilishwa! Mtumishi atabadilisha anapoingia." : "Password reset! Staff will be prompted to change it on next login.",
+        lang === "sw"
+          ? "Nywila imebadilishwa! Mtumishi atabadilisha anapoingia."
+          : "Password reset! Staff will be prompted to change it on next login.",
         "success",
       );
 
@@ -805,7 +812,8 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                   {/* Password Input */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
-                      <KeyRound size={13} /> {lang === "sw" ? "Nywila ya Muda" : "Temporary Password"}{" "}
+                      <KeyRound size={13} />{" "}
+                      {lang === "sw" ? "Nywila ya Muda" : "Temporary Password"}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <div className="flex gap-2">
@@ -839,7 +847,10 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                         type="button"
                         onClick={() => {
                           void navigator.clipboard.writeText(newStaff.password);
-                          showToast(lang === "sw" ? "Nywila imenakiliwa!" : "Password copied!", "success");
+                          showToast(
+                            lang === "sw" ? "Nywila imenakiliwa!" : "Password copied!",
+                            "success",
+                          );
                         }}
                         className="px-3 h-12 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl transition-colors"
                         title={lang === "sw" ? "Nakili nywila" : "Copy password"}
@@ -848,7 +859,8 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                       </button>
                     </div>
                     <p className="text-[10px] text-amber-600 font-medium flex items-center gap-1">
-                      ⚠ {lang === "sw"
+                      ⚠{" "}
+                      {lang === "sw"
                         ? "Nywila hii ni ya muda. Mtumishi atalazimika kuibadilisha anapoingia kwa mara ya kwanza."
                         : "Temporary password. Staff must change it on first login — their account auto-verifies when they do."}
                     </p>
@@ -992,7 +1004,9 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                       aria-label={lang === "sw" ? "Chagua wajibu" : "Select role"}
                       className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:border-primary outline-none transition-all bg-white"
                       value={newStaff.role}
-                      onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value as 'staff' | 'admin' })}
+                      onChange={(e) =>
+                        setNewStaff({ ...newStaff, role: e.target.value as "staff" | "admin" })
+                      }
                     >
                       <option value="staff">
                         {lang === "sw"
@@ -1257,7 +1271,10 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                         aria-label={lang === "sw" ? "Chagua wajibu" : "Select role"}
                         value={editFormData.role}
                         onChange={(e) =>
-                          setEditFormData({ ...editFormData, role: e.target.value as 'staff' | 'admin' })
+                          setEditFormData({
+                            ...editFormData,
+                            role: e.target.value as "staff" | "admin",
+                          })
                         }
                         className="w-full h-12 px-4 rounded-xl border border-purple-200 focus:border-purple-500 outline-none transition-all bg-white"
                       >
@@ -1512,7 +1529,10 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                   </div>
                 </div>
                 <button
-                  onClick={() => { setShowResetModal(false); setResetDone(false); }}
+                  onClick={() => {
+                    setShowResetModal(false);
+                    setResetDone(false);
+                  }}
                   className="p-2 hover:bg-stone-200 rounded-full transition-colors"
                   aria-label="Close"
                 >
@@ -1551,7 +1571,10 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                       </button>
                     </div>
                     <button
-                      onClick={() => { setShowResetModal(false); setResetDone(false); }}
+                      onClick={() => {
+                        setShowResetModal(false);
+                        setResetDone(false);
+                      }}
                       className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors"
                     >
                       {lang === "sw" ? "Sawa — Funga" : "Done — Close"}
@@ -1602,7 +1625,8 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                         </button>
                       </div>
                       <p className="text-[10px] text-amber-600 font-medium">
-                        ⚠ {lang === "sw"
+                        ⚠{" "}
+                        {lang === "sw"
                           ? "Mtumishi atalazimika kubadilisha nywila hii anapoingia kwa mara ya kwanza."
                           : "Staff must change this password on their next login — account auto-verifies when they do."}
                       </p>
@@ -1611,16 +1635,27 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                     <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700">
                       <strong>{selectedStaff.email}</strong>
                       {" · "}
-                      <span className={selectedStaff.is_verified ? "text-emerald-600" : "text-amber-600"}>
+                      <span
+                        className={
+                          selectedStaff.is_verified ? "text-emerald-600" : "text-amber-600"
+                        }
+                      >
                         {selectedStaff.is_verified
-                          ? (lang === "sw" ? "Imethibitishwa" : "Verified")
-                          : (lang === "sw" ? "Inasubiri" : "Pending")}
+                          ? lang === "sw"
+                            ? "Imethibitishwa"
+                            : "Verified"
+                          : lang === "sw"
+                            ? "Inasubiri"
+                            : "Pending"}
                       </span>
                     </div>
 
                     <div className="flex gap-3">
                       <button
-                        onClick={() => { setShowResetModal(false); setResetDone(false); }}
+                        onClick={() => {
+                          setShowResetModal(false);
+                          setResetDone(false);
+                        }}
                         className="flex-1 h-12 bg-stone-100 text-stone-600 rounded-2xl font-bold hover:bg-stone-200 transition-all"
                       >
                         {lang === "sw" ? "Ghairi" : "Cancel"}
@@ -1630,7 +1665,11 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                         disabled={resetting || !resetPwd.trim()}
                         className="flex-1 h-12 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                       >
-                        {resetting ? <Loader2 size={18} className="animate-spin" /> : <KeyRound size={18} />}
+                        {resetting ? (
+                          <Loader2 size={18} className="animate-spin" />
+                        ) : (
+                          <KeyRound size={18} />
+                        )}
                         {lang === "sw" ? "Weka Upya" : "Reset Password"}
                       </button>
                     </div>
