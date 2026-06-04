@@ -1,33 +1,52 @@
 /**
- * Supabase Admin client — uses the service role key to bypass RLS and
- * create email-confirmed users. Only ever called from admin-protected
- * components (StaffManagement). Never import this in citizen-facing code.
+ * Admin operations — SECURE client wrapper.
  *
- * Required env var: VITE_SUPABASE_SERVICE_ROLE_KEY
- * Add it to your Vercel project settings and local .env file.
+ * IMPORTANT: The Supabase service role key is NEVER used in the browser. These
+ * functions call the server-side Vercel function at /api/admin, which holds the
+ * service key and verifies the caller is an authenticated admin/staff before
+ * performing any privileged action.
+ *
+ * This keeps the same function signatures the rest of the app already uses, so
+ * no callers needed to change.
  */
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
 
-function getAdminClient() {
-  const url = import.meta.env.VITE_SUPABASE_URL as string;
-  const serviceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string;
+async function callAdminApi(
+  payload: Record<string, unknown>,
+): Promise<{ data: Record<string, unknown> | null; error: string | null }> {
+  // Attach the caller's session token so the server can verify their role.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const token = session?.access_token;
 
-  if (!url || !serviceKey) {
-    return null;
+  if (!token) {
+    return { data: null, error: "You must be signed in to perform this action." };
   }
 
-  return createClient<Database>(url, serviceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  try {
+    const res = await fetch("/api/admin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { data: null, error: json.error || `Request failed (${res.status})` };
+    }
+    return { data: json, error: null };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Network error contacting admin service.";
+    return { data: null, error: msg };
+  }
 }
 
 /**
- * Create a staff/admin user with email already confirmed so they can
- * log in immediately with the provided password.
+ * Create a staff/admin user with email already confirmed so they can log in
+ * immediately with the provided password.
  */
 export async function adminCreateUser(params: {
   email: string;
@@ -35,31 +54,15 @@ export async function adminCreateUser(params: {
   role: "staff" | "admin";
   officeId?: string;
 }): Promise<{ userId: string | null; error: string | null }> {
-  const adminClient = getAdminClient();
-
-  if (!adminClient) {
-    return {
-      userId: null,
-      error:
-        "VITE_SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your .env and Vercel environment variables.",
-    };
-  }
-
-  const { data, error } = await adminClient.auth.admin.createUser({
+  const { data, error } = await callAdminApi({
+    action: "createUser",
     email: params.email,
     password: params.password,
-    email_confirm: true, // skips email confirmation — user can log in immediately
-    user_metadata: {
-      role: params.role,
-      office_id: params.officeId ?? "",
-    },
+    role: params.role,
+    officeId: params.officeId,
   });
-
-  if (error) {
-    return { userId: null, error: error.message };
-  }
-
-  return { userId: data.user?.id ?? null, error: null };
+  if (error) return { userId: null, error };
+  return { userId: (data?.userId as string) ?? null, error: null };
 }
 
 /**
@@ -69,20 +72,12 @@ export async function adminResetPassword(params: {
   userId: string;
   newPassword: string;
 }): Promise<{ error: string | null }> {
-  const adminClient = getAdminClient();
-
-  if (!adminClient) {
-    return {
-      error:
-        "VITE_SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your .env and Vercel environment variables.",
-    };
-  }
-
-  const { error } = await adminClient.auth.admin.updateUserById(params.userId, {
-    password: params.newPassword,
+  const { error } = await callAdminApi({
+    action: "resetPassword",
+    userId: params.userId,
+    newPassword: params.newPassword,
   });
-
-  return { error: error?.message ?? null };
+  return { error };
 }
 
 /**
@@ -92,18 +87,9 @@ export async function adminResetPassword(params: {
 export async function adminConfirmUserEmail(params: {
   userId: string;
 }): Promise<{ error: string | null }> {
-  const adminClient = getAdminClient();
-
-  if (!adminClient) {
-    return {
-      error:
-        "VITE_SUPABASE_SERVICE_ROLE_KEY is not set. Add it to your Vercel environment variables.",
-    };
-  }
-
-  const { error } = await adminClient.auth.admin.updateUserById(params.userId, {
-    email_confirm: true,
+  const { error } = await callAdminApi({
+    action: "confirmEmail",
+    userId: params.userId,
   });
-
-  return { error: error?.message ?? null };
+  return { error };
 }

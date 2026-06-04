@@ -299,11 +299,11 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
 
       if (createError) {
         // Fallback: if service role key not configured, inform admin
-        if (createError.includes("VITE_SUPABASE_SERVICE_ROLE_KEY")) {
+        if (createError.includes("SUPABASE_SERVICE_ROLE_KEY")) {
           showToast(
             lang === "sw"
-              ? "Hatua ya ziada inahitajika: Ongeza VITE_SUPABASE_SERVICE_ROLE_KEY kwenye mipangilio ya Vercel."
-              : "Extra step needed: Add VITE_SUPABASE_SERVICE_ROLE_KEY to your Vercel environment variables.",
+              ? "Hatua ya ziada inahitajika: Ongeza SUPABASE_SERVICE_ROLE_KEY kwenye mipangilio ya Vercel."
+              : "Extra step needed: Add SUPABASE_SERVICE_ROLE_KEY to your Vercel environment variables.",
             "error",
           );
           return;
@@ -545,11 +545,11 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
       });
 
       if (resetError) {
-        if (resetError.includes("VITE_SUPABASE_SERVICE_ROLE_KEY")) {
+        if (resetError.includes("SUPABASE_SERVICE_ROLE_KEY")) {
           showToast(
             lang === "sw"
-              ? "Hatua ya ziada: Ongeza VITE_SUPABASE_SERVICE_ROLE_KEY kwenye Vercel."
-              : "Extra step: Add VITE_SUPABASE_SERVICE_ROLE_KEY to Vercel env vars.",
+              ? "Hatua ya ziada: Ongeza SUPABASE_SERVICE_ROLE_KEY kwenye Vercel."
+              : "Extra step: Add SUPABASE_SERVICE_ROLE_KEY to Vercel env vars.",
             "error",
           );
           return;
