@@ -72,6 +72,127 @@ const LEVEL_COLORS = {
   district: "bg-purple-50 text-purple-700 border-purple-200",
 };
 
+// Pre-defined department categories with auto-fill data
+const DEPARTMENT_CATEGORIES = [
+  { name: "Tanzania Police Force", name_sw: "Jeshi la Polisi Tanzania", code: "TPF" },
+  { name: "Ministry of Health", name_sw: "Wizara ya Afya", code: "MOH" },
+  { name: "Judiciary / Court Registry", name_sw: "Mahakama / Usajili wa Kesi", code: "JUD" },
+  { name: "Ministry of Education", name_sw: "Wizara ya Elimu", code: "MOE" },
+  { name: "Immigration Department", name_sw: "Idara ya Uhamiaji", code: "IMM" },
+  { name: "Social Welfare Department", name_sw: "Idara ya Ustawi wa Jamii", code: "SWD" },
+  { name: "Fire and Rescue Force", name_sw: "Jeshi la Zimamoto na Uokoaji", code: "FRF" },
+  { name: "Tanzania Revenue Authority", name_sw: "Mamlaka ya Mapato Tanzania", code: "TRA" },
+  { name: "BRELA (Business Registration)", name_sw: "BRELA (Usajili wa Biashara)", code: "BRL" },
+  {
+    name: "RITA (Registration of Births/Deaths)",
+    name_sw: "RITA (Usajili wa Vizazi/Vifo)",
+    code: "RIT",
+  },
+  { name: "Ministry of Lands", name_sw: "Wizara ya Ardhi", code: "MOL" },
+  { name: "Ministry of Water", name_sw: "Wizara ya Maji", code: "MOW" },
+  { name: "Environment Department", name_sw: "Idara ya Mazingira", code: "ENV" },
+  { name: "Transport Authority (LATRA)", name_sw: "Mamlaka ya Usafiri (LATRA)", code: "LAT" },
+  { name: "Drug Control Commission", name_sw: "Tume ya Kudhibiti Dawa za Kulevya", code: "DCC" },
+  { name: "Labour Department", name_sw: "Idara ya Kazi", code: "LAB" },
+  { name: "Other", name_sw: "Nyingine", code: "" },
+];
+
+// Tanzania regions and districts
+const TZ_REGIONS = [
+  "Dar es Salaam",
+  "Arusha",
+  "Dodoma",
+  "Mwanza",
+  "Tanga",
+  "Morogoro",
+  "Mbeya",
+  "Kilimanjaro",
+  "Iringa",
+  "Kagera",
+  "Mara",
+  "Kigoma",
+  "Tabora",
+  "Rukwa",
+  "Ruvuma",
+  "Shinyanga",
+  "Singida",
+  "Lindi",
+  "Mtwara",
+  "Pwani",
+  "Songwe",
+  "Geita",
+  "Katavi",
+  "Njombe",
+  "Simiyu",
+  "Zanzibar Urban/West",
+  "Zanzibar North",
+  "Zanzibar South",
+  "Pemba North",
+  "Pemba South",
+];
+
+const TZ_DISTRICTS: Record<string, string[]> = {
+  "Dar es Salaam": ["Ilala", "Kinondoni", "Ubungo", "Temeke", "Kigamboni"],
+  Arusha: ["Arusha CC", "Arusha DC", "Meru", "Longido", "Monduli", "Karatu", "Ngorongoro"],
+  Dodoma: ["Dodoma CC", "Bahi", "Chamwino", "Chemba", "Kondoa", "Kongwa", "Mpwapwa"],
+  Mwanza: ["Nyamagana", "Ilemela", "Magu", "Kwimba", "Sengerema", "Misungwi", "Ukerewe", "Buchosa"],
+  Tanga: [
+    "Tanga CC",
+    "Muheza",
+    "Korogwe TC",
+    "Korogwe DC",
+    "Lushoto",
+    "Handeni",
+    "Kilindi",
+    "Pangani",
+    "Mkinga",
+  ],
+  Morogoro: [
+    "Morogoro CC",
+    "Morogoro DC",
+    "Kilosa",
+    "Ulanga",
+    "Malinyi",
+    "Mvomero",
+    "Kilombero",
+    "Gairo",
+    "Ifakara",
+  ],
+  Mbeya: ["Mbeya CC", "Mbeya DC", "Rungwe", "Kyela", "Mbozi", "Chunya", "Mbarali"],
+  Kilimanjaro: ["Moshi CC", "Moshi DC", "Hai", "Siha", "Rombo", "Same", "Mwanga"],
+  Iringa: ["Iringa CC", "Iringa DC", "Kilolo", "Mufindi"],
+  Kagera: [
+    "Bukoba CC",
+    "Bukoba DC",
+    "Muleba",
+    "Karagwe",
+    "Kyerwa",
+    "Missenyi",
+    "Ngara",
+    "Biharamulo",
+  ],
+  Mara: ["Musoma CC", "Musoma DC", "Bunda", "Tarime", "Serengeti", "Rorya", "Butiama"],
+  Kigoma: ["Kigoma CC", "Kigoma DC", "Kasulu", "Kibondo", "Kakonko", "Buhigwe", "Uvinza"],
+  Tabora: ["Tabora CC", "Tabora DC", "Uyui", "Nzega", "Igunga", "Sikonge", "Urambo", "Kaliua"],
+  Rukwa: ["Sumbawanga CC", "Sumbawanga DC", "Nkasi", "Kalambo"],
+  Ruvuma: ["Songea CC", "Songea DC", "Mbinga", "Nyasa", "Tunduru", "Namtumbo"],
+  Shinyanga: ["Shinyanga CC", "Shinyanga DC", "Kahama TC", "Kahama DC", "Kishapu", "Ushetu"],
+  Singida: ["Singida CC", "Singida DC", "Manyoni", "Iramba", "Ikungi"],
+  Lindi: ["Lindi CC", "Lindi DC", "Kilwa", "Liwale", "Nachingwea", "Ruangwa"],
+  Mtwara: ["Mtwara CC", "Mtwara DC", "Newala", "Tandahimba", "Masasi", "Nanyumbu"],
+  Pwani: ["Kibaha TC", "Kibaha DC", "Bagamoyo", "Kisarawe", "Mkuranga", "Mafia", "Rufiji"],
+  Songwe: ["Tunduma", "Songwe DC", "Mbozi"],
+  Geita: ["Geita TC", "Geita DC", "Bukombe", "Chato", "Mbogwe", "Nyang'hwale"],
+  Katavi: ["Mpanda TC", "Mpanda DC", "Mlele"],
+  Njombe: ["Njombe TC", "Njombe DC", "Makete", "Ludewa", "Wanging'ombe"],
+  Simiyu: ["Bariadi", "Busega", "Itilima", "Maswa", "Meatu"],
+  "Zanzibar Urban/West": ["Zanzibar City", "West A", "West B"],
+  "Zanzibar North": ["Kaskazini A", "Kaskazini B"],
+  "Zanzibar South": ["Kusini", "Kati"],
+  "Pemba North": ["Wete", "Micheweni"],
+  "Pemba South": ["Chake Chake", "Mkoani"],
+};
+
 // ── Component ────────────────────────────────────────────────────────────────
 export function DepartmentManagement() {
   const { lang } = useLanguage();
@@ -84,6 +205,7 @@ export function DepartmentManagement() {
   const [showModal, setShowModal] = useState(false);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
   const [form, setForm] = useState(INITIAL_FORM);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -168,6 +290,13 @@ export function DepartmentManagement() {
   const handleSave = async () => {
     if (!form.name.trim() || !form.code.trim()) {
       showToast(L("Jina na msimbo vinahitajika", "Name and code are required"), "error");
+      return;
+    }
+    if (form.level === "district" && !form.contact_email.trim()) {
+      showToast(
+        L("Email inahitajika kwa idara ya wilaya", "Email required for district department"),
+        "error",
+      );
       return;
     }
     setSaving(true);
@@ -612,6 +741,36 @@ export function DepartmentManagement() {
               </div>
 
               <div className="p-6 space-y-4">
+                {/* Department Category */}
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                    {L("Aina ya Idara", "Department Category")} *
+                  </label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => {
+                      const cat = DEPARTMENT_CATEGORIES.find((c) => c.name === e.target.value);
+                      setSelectedCategory(e.target.value);
+                      if (cat && cat.name !== "Other") {
+                        setForm((prev) => ({
+                          ...prev,
+                          name: cat.name,
+                          name_sw: cat.name_sw,
+                          code: cat.code,
+                        }));
+                      }
+                    }}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm"
+                  >
+                    <option value="">{L("-- Chagua Aina --", "-- Select Category --")}</option>
+                    {DEPARTMENT_CATEGORIES.map((cat) => (
+                      <option key={cat.code || cat.name} value={cat.name}>
+                        {lang === "sw" ? cat.name_sw : cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2 sm:col-span-1">
                     <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
@@ -675,28 +834,56 @@ export function DepartmentManagement() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                        {L("Mkoa", "Region")}
+                        {L("Mkoa", "Region")} *
                       </label>
-                      <input
+                      <select
                         value={form.region}
-                        onChange={(e) => setForm({ ...form, region: e.target.value })}
-                        placeholder="e.g. Dar es Salaam"
+                        onChange={(e) => setForm({ ...form, region: e.target.value, district: "" })}
                         className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm"
-                      />
+                      >
+                        <option value="">{L("-- Chagua Mkoa --", "-- Select Region --")}</option>
+                        {TZ_REGIONS.map((r) => (
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     {form.level === "district" && (
                       <div>
                         <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                          {L("Wilaya", "District")}
+                          {L("Wilaya", "District")} *
                         </label>
-                        <input
+                        <select
                           value={form.district}
                           onChange={(e) => setForm({ ...form, district: e.target.value })}
-                          placeholder="e.g. Ilala"
-                          className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm"
-                        />
+                          disabled={!form.region}
+                          className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm disabled:opacity-50"
+                        >
+                          <option value="">
+                            {L("-- Chagua Wilaya --", "-- Select District --")}
+                          </option>
+                          {(TZ_DISTRICTS[form.region] || []).map((d) => (
+                            <option key={d} value={d}>
+                              {d}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Default email required for district-level departments */}
+                {form.level === "district" && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                    <p className="text-xs text-amber-700 font-medium flex items-center gap-1.5">
+                      <AlertCircle size={12} />
+                      {L(
+                        "Email ya msingi inahitajika kwa idara za wilaya. Mtumiaji anaweza kubadilisha baada ya kuingia.",
+                        "A default email is required for district departments. Users can change it after first login.",
+                      )}
+                    </p>
                   </div>
                 )}
 

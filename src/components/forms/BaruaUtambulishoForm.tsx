@@ -8,7 +8,8 @@
  *   Each additional institution: +TSh 1,000
  *   Max 6 institutions total → max TSh 8,000
  */
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import {
   Loader2,
   CheckCircle,
@@ -168,6 +169,39 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
   });
 
   // ─── Fee calculator ─────────────────────────────────────────────────────
+  // Government departments for auto-fill when purpose is government-related
+  const [govDepartments, setGovDepartments] = useState<
+    {
+      id: string;
+      name: string;
+      name_sw?: string;
+      code: string;
+      region?: string;
+      district?: string;
+      contact_email?: string;
+      address?: string;
+    }[]
+  >([]);
+  const isGovPurpose = [
+    "SERIKALI",
+    "TRA",
+    "PASIPOTI",
+    "LESENI_UDEREVA",
+    "LESENI_BIASHARA",
+  ].includes(vals.purpose);
+
+  useEffect(() => {
+    if (isGovPurpose && govDepartments.length === 0) {
+      supabase
+        .from("government_departments")
+        .select("id, name, name_sw, code, region, district, contact_email, address")
+        .eq("active", true)
+        .order("name")
+        .then(({ data }: { data: typeof govDepartments | null }) => setGovDepartments(data || []));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGovPurpose]);
+
   const totalFee = calcFee(institutions.length);
   const fmtFee = (n: number) => `TSh ${n.toLocaleString()}`;
 
@@ -298,6 +332,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
         service_name: "Barua ya Utambulisho",
         application_reference: ref,
         applicant_signature: signature,
+        target_departments: institutions.filter((i) => i.department).map((i) => i.department),
         document_count: docs.length,
         beneficiary_name:
           vals.application_type === "MINOR"
@@ -1249,6 +1284,42 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                   )}
                 </div>
                 <div className="p-4 space-y-3">
+                  {/* Government department selector (shown for gov-related purposes) */}
+                  {isGovPurpose && govDepartments.length > 0 && (
+                    <Field
+                      name={`inst_dept_${i}`}
+                      label={L("Chagua Idara ya Serikali", "Select Government Department")}
+                    >
+                      <select
+                        value={inst.department || ""}
+                        onChange={(e) => {
+                          const dept = govDepartments.find((d) => d.id === e.target.value);
+                          setInst(i, "department", e.target.value);
+                          if (dept) {
+                            setInst(
+                              i,
+                              "name",
+                              lang === "sw" ? dept.name_sw || dept.name : dept.name,
+                            );
+                            if (dept.address) setInst(i, "address", dept.address);
+                          }
+                          clrErr(`inst_name_${i}`);
+                        }}
+                        className={inputCls(`inst_dept_${i}`)}
+                      >
+                        <option value="">
+                          {L("-- Chagua Idara (hiari) --", "-- Select Department (optional) --")}
+                        </option>
+                        {govDepartments.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {lang === "sw" ? d.name_sw || d.name : d.name}
+                            {d.region ? ` — ${d.region}` : ""}
+                            {d.district ? ` / ${d.district}` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                  )}
                   <Field
                     name={`inst_name_${i}`}
                     label={L("Jina la Taasisi / Ofisi", "Institution / Office Name")}
