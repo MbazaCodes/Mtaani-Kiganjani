@@ -64,6 +64,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { SignaturePad } from "@/components/ui/SignaturePad";
 import type { ApplicationStatus } from "@/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -180,6 +181,10 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
   const [rejectionReason, setRejectionReason] = useState("");
   const [showInfoRequestModal, setShowInfoRequestModal] = useState(false);
   const [showEscalateModal, setShowEscalateModal] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [approveSignature, setApproveSignature] = useState<string | null>(null);
+  const [approveStamp, setApproveStamp] = useState<string | null>(null);
+  const [saveToProfile, setSaveToProfile] = useState(true);
   const [departments, setDepartments] = useState<
     { id: string; name: string; code: string; region?: string; district?: string }[]
   >([]);
@@ -338,8 +343,40 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
     }
   };
 
+  // Open the approve modal, pre-filling signature/stamp from the officer's saved profile
+  const openApproveModal = () => {
+    if (!selected || !user) return;
+    setApproveSignature(user.signature_url ?? null);
+    setApproveStamp(user.stamp_url ?? null);
+    setSaveToProfile(true);
+    setShowApproveModal(true);
+  };
+
+  // Upload a stamp image -> base64 (max 2MB)
+  const handleApproveStampUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2_000_000) {
+      showToast(lang === "sw" ? "Faili kubwa sana (max 2MB)" : "File too large (max 2MB)", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setApproveStamp(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleApprove = async () => {
     if (!selected || !user) return;
+
+    if (!approveSignature) {
+      showToast(
+        lang === "sw"
+          ? "Tafadhali weka saini kabla ya kuidhinisha."
+          : "Please add your signature before approving.",
+        "error",
+      );
+      return;
+    }
 
     // Embed the approving officer's signature, stamp and name into form_data so
     // they render in the Ward Executive Officer section of the certificate.
@@ -349,18 +386,24 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
       .trim();
     const mergedFormData = {
       ...existingFormData,
-      weo_signature: user.signature_url ?? existingFormData.weo_signature ?? null,
-      weo_stamp: user.stamp_url ?? existingFormData.weo_stamp ?? null,
+      weo_signature: approveSignature ?? existingFormData.weo_signature ?? null,
+      weo_stamp: approveStamp ?? existingFormData.weo_stamp ?? null,
       weo_name: officerName || existingFormData.weo_name || "",
     };
 
-    if (!user.signature_url) {
-      showToast(
-        lang === "sw"
-          ? "Kidokezo: Ongeza saini yako kwenye Wasifu > Saini & Muhuri ili ionekane kwenye cheti."
-          : "Tip: Add your signature in Profile > Signature & Stamp so it appears on the certificate.",
-        "info",
-      );
+    // Optionally save the signature/stamp to the officer's profile for reuse
+    if (
+      saveToProfile &&
+      (approveSignature !== user.signature_url || approveStamp !== user.stamp_url)
+    ) {
+      try {
+        await supabase
+          .from("users")
+          .update({ signature_url: approveSignature, stamp_url: approveStamp })
+          .eq("id", user.id);
+      } catch {
+        // Non-fatal — approval still proceeds
+      }
     }
 
     const ok = await updateApp(selected.id, {
@@ -370,6 +413,12 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
       form_data: mergedFormData as Application["form_data"],
     });
     if (ok) {
+      setShowApproveModal(false);
+      logActivity(user.id, "approve_application", {
+        applicationId: selected.id,
+        number: selected.application_number,
+        service: selected.service_name,
+      });
       showToast(L("Maombi yameidhinishwa", "Application approved"), "success");
       if (selected.user_id) {
         await createNotification({
@@ -1111,7 +1160,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                     {/* Status-specific primary action */}
                     {["submitted", "pending_review"].includes(selected.status) && (
                       <button
-                        onClick={handleApprove}
+                        onClick={openApproveModal}
                         disabled={processing}
                         className="col-span-2 px-3 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shadow-lg"
                       >
@@ -1153,7 +1202,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                     )}
                     {selected.status === "verified" && (
                       <button
-                        onClick={handleApprove}
+                        onClick={openApproveModal}
                         disabled={processing}
                         className="col-span-2 px-3 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shadow-lg"
                       >
@@ -1167,7 +1216,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                     )}
                     {selected.status === "returned" && (
                       <button
-                        onClick={handleApprove}
+                        onClick={openApproveModal}
                         disabled={processing}
                         className="col-span-2 px-3 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shadow-lg"
                       >
@@ -1202,6 +1251,123 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
               )}
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Approve modal — sign + stamp */}
+      <AnimatePresence>
+        {showApproveModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowApproveModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-6 py-4 border-b border-stone-100">
+                <h3 className="text-lg font-black text-stone-900 flex items-center gap-2">
+                  <CheckCircle2 size={20} className="text-emerald-600" />
+                  {L("Idhinisha kwa Saini", "Approve with Signature")}
+                </h3>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  {L(
+                    "Saini na muhuri vitaonekana kwenye cheti.",
+                    "Your signature and stamp will appear on the certificate.",
+                  )}
+                </p>
+              </div>
+
+              <div className="p-6 space-y-5">
+                {/* Signature */}
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                    {L("Saini ya Afisa", "Officer Signature")} *
+                  </label>
+                  <SignaturePad
+                    value={approveSignature}
+                    onChange={setApproveSignature}
+                    lang={lang === "sw" ? "sw" : "en"}
+                  />
+                </div>
+
+                {/* Stamp */}
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                    {L("Muhuri wa Ofisi", "Official Stamp")}
+                  </label>
+                  {approveStamp ? (
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={approveStamp}
+                        alt="stamp"
+                        className="w-20 h-20 object-contain border border-stone-200 rounded-lg bg-white"
+                      />
+                      <button
+                        onClick={() => setApproveStamp(null)}
+                        className="text-xs font-bold text-red-500 hover:text-red-600"
+                      >
+                        {L("Ondoa", "Remove")}
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-stone-200 rounded-xl cursor-pointer hover:border-emerald-400 transition-colors text-sm text-stone-500">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        onChange={handleApproveStampUpload}
+                        className="hidden"
+                      />
+                      {L("Pakia muhuri (PNG, max 2MB)", "Upload stamp (PNG, max 2MB)")}
+                    </label>
+                  )}
+                </div>
+
+                {/* Save to profile */}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={saveToProfile}
+                    onChange={(e) => setSaveToProfile(e.target.checked)}
+                    className="w-4 h-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <span className="text-xs text-stone-600">
+                    {L(
+                      "Hifadhi saini na muhuri kwa matumizi yajayo",
+                      "Save signature & stamp for future approvals",
+                    )}
+                  </span>
+                </label>
+              </div>
+
+              <div className="px-6 py-4 border-t border-stone-100 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowApproveModal(false)}
+                  className="px-5 py-2.5 text-sm font-bold text-stone-600 hover:bg-stone-100 rounded-xl"
+                >
+                  {L("Ghairi", "Cancel")}
+                </button>
+                <button
+                  onClick={handleApprove}
+                  disabled={processing || !approveSignature}
+                  className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center gap-2"
+                >
+                  {processing ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <CheckCircle2 size={14} />
+                  )}
+                  {L("Idhinisha", "Approve")}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
