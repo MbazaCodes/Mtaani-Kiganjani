@@ -11,6 +11,7 @@ import {
   formatDate,
   formatCurrency,
 } from "./types";
+import { ApplicantSignatureBox, OfficerSignatureBox } from "./SignatureBlocks";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
@@ -76,6 +77,10 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
 }) => {
   const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const applicantSig = fd.applicant_signature;
+  const weoSig = fd.weo_signature;
+  const weoStamp = fd.weo_stamp;
+  const weoName = fd.weo_name;
   const qr = qrDataUrl || generateQRCodeUrl(application, "CP");
   const sw = lang === "sw";
 
@@ -211,21 +216,17 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
 
         {/* Signature section */}
         <View style={s.signatureSection}>
-          <View style={s.signatureBox}>
-            <View style={s.signatureLine} />
-            <Text style={s.signatureName}>{sw ? "MMILIKI" : "OWNER"}</Text>
-            <Text style={s.signatureTitle}>{fd.owner_name || formatFullName(user)}</Text>
-          </View>
-          <View style={s.signatureBox}>
-            <View style={s.stampBox}>
-              <Text style={s.stampText}>{sw ? "MUHURI WA OFISI" : "OFFICE SEAL"}</Text>
-            </View>
-            <View style={s.signatureLine} />
-            <Text style={s.signatureName}>
-              {sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
-            </Text>
-            <Text style={s.signatureTitle}>{user?.ward || "Local Ward Office"}</Text>
-          </View>
+          <ApplicantSignatureBox
+            signature={applicantSig}
+            name={fd.owner_name || formatFullName(user)}
+            title={sw ? "MMILIKI / OWNER" : "OWNER"}
+          />
+          <OfficerSignatureBox
+            signature={weoSig}
+            stamp={weoStamp}
+            name={weoName}
+            title={sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
+          />
         </View>
 
         {/* QR code */}

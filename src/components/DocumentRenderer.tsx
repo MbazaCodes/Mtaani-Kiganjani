@@ -18,14 +18,11 @@ import { MakubalianoMauzianoPDF } from "./documents/MakubalianoMauzianoPDF";
 import { MakubalianoPangoPDF } from "./documents/MakubalianoPangoPDF";
 import { RisitiMalipoPDF } from "./documents/RisitiMalipoPDF";
 import { MgogoroMashauriPDF } from "./documents/MgogoroMashauriPDF";
+import type { DocumentPDFProps } from "./documents/types";
 
 // Map service_id / name keywords to PDF component + service code
 type PDFFactory = {
-  Component: React.ComponentType<{
-    application: Application;
-    lang: "sw" | "en";
-    qrDataUrl?: string;
-  }>;
+  Component: React.ComponentType<DocumentPDFProps>;
   code: string;
   filenamePrefix: string;
 };
@@ -91,9 +88,12 @@ export const CertificatePDFDocument: React.FC<{
   application: Application;
   lang?: "sw" | "en";
   qrDataUrl: string;
-}> = ({ application, lang = "sw", qrDataUrl }) => {
+  photoUrl?: string | null;
+}> = ({ application, lang = "sw", qrDataUrl, photoUrl }) => {
   const { Component } = resolvePDF(application);
-  return <Component application={application} lang={lang} qrDataUrl={qrDataUrl} />;
+  return (
+    <Component application={application} lang={lang} qrDataUrl={qrDataUrl} photoUrl={photoUrl} />
+  );
 };
 
 // ── Inline download button ───────────────────────────────────────────────────

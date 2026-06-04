@@ -11,6 +11,7 @@ import {
   formatDate,
   formatCurrency,
 } from "./types";
+import { ApplicantSignatureBox, OfficerSignatureBox } from "./SignatureBlocks";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
@@ -70,6 +71,10 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
 }) => {
   const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const applicantSig = fd.applicant_signature;
+  const weoSig = fd.weo_signature;
+  const weoStamp = fd.weo_stamp;
+  const weoName = fd.weo_name;
   const qr = qrDataUrl || generateQRCodeUrl(application, "MUZ");
   const sw = lang === "sw";
 
@@ -227,11 +232,11 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
 
         {/* Signatures */}
         <View style={s.signatureSection}>
-          <View style={s.signatureBox}>
-            <View style={s.signatureLine} />
-            <Text style={s.signatureName}>{formatFullName(user)}</Text>
-            <Text style={s.signatureTitle}>{L.sellerParty}</Text>
-          </View>
+          <ApplicantSignatureBox
+            signature={applicantSig}
+            name={formatFullName(user) || fd.applicant_name}
+            title={L.sellerParty}
+          />
           <View style={s.signatureBox}>
             <View style={s.signatureLine} />
             <Text style={s.signatureName}>
@@ -245,20 +250,17 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         {/* WEO */}
         <View
           style={{
-            ...s.signatureBox,
-            width: "44%",
-            alignSelf: "center",
-            alignItems: "center",
+            flexDirection: "row",
+            justifyContent: "center",
             marginTop: 10,
           }}
         >
-          <View style={s.stampBox}>
-            <Text style={s.stampText}>MUHURI{"\n"}STAMP</Text>
-          </View>
-          <View style={s.signatureLine} />
-          <Text style={s.signatureTitle}>
-            {sw ? "AFISA MTENDAJI WA MTAA" : "WARD EXECUTIVE OFFICER"}
-          </Text>
+          <OfficerSignatureBox
+            signature={weoSig}
+            stamp={weoStamp}
+            name={weoName}
+            title={sw ? "AFISA MTENDAJI WA MTAA" : "WARD EXECUTIVE OFFICER"}
+          />
         </View>
 
         {/* QR */}

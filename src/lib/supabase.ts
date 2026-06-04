@@ -82,6 +82,8 @@ export interface UserProfile {
   voter_id_number?: string;
   driving_license_number?: string;
   citizen_id?: string;
+  signature_url?: string;
+  stamp_url?: string;
   seller_id?: string;
   landlord_id?: string;
   broker_id?: string;

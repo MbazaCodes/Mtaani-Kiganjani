@@ -13,6 +13,7 @@ import {
   formatFullName,
   formatDate,
 } from "./types";
+import { OfficerSignatureBox } from "./SignatureBlocks";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
@@ -64,6 +65,9 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
 }) => {
   const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const weoSig = fd.weo_signature;
+  const weoStamp = fd.weo_stamp;
+  const weoName = fd.weo_name;
   const qr = qrDataUrl || generateQRCodeUrl(application, "IL");
   const sw = lang === "sw";
 
@@ -243,16 +247,12 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
         <Text style={ls.signoff}>{sw ? "Wenu Mwaminifu," : "Yours faithfully,"}</Text>
 
         <View style={s.signatureSection}>
-          <View style={s.signatureBox}>
-            <View style={s.stampBox}>
-              <Text style={s.stampText}>{sw ? "MUHURI WA OFISI" : "OFFICE SEAL"}</Text>
-            </View>
-            <View style={s.signatureLine} />
-            <Text style={s.signatureName}>
-              {sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
-            </Text>
-            <Text style={s.signatureTitle}>{user?.ward || "Local Ward Office"}</Text>
-          </View>
+          <OfficerSignatureBox
+            signature={weoSig}
+            stamp={weoStamp}
+            name={weoName}
+            title={sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
+          />
         </View>
 
         {/* QR code */}

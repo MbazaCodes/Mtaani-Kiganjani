@@ -110,6 +110,9 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
   qrDataUrl,
 }) => {
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const weoSig = fd.weo_signature;
+  const weoStamp = fd.weo_stamp;
+  const weoName = fd.weo_name;
   const qr = qrDataUrl || generateQRCodeUrl(application, "RA");
   const sw = lang === "sw";
 
@@ -272,7 +275,7 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
           <View style={ls.fourSigBox}>
             <View style={ls.fourSigLine} />
             <Text style={ls.fourSigName}>{sw ? "MPANGISHAJI" : "LANDLORD"}</Text>
-            <Text style={ls.fourSigSub}>{String((fd as any).landlord_name || "")}</Text>
+            <Text style={ls.fourSigSub}>{String(fd.landlord_name || "")}</Text>
           </View>
           <View style={ls.fourSigBox}>
             <View style={ls.fourSigLine} />
@@ -290,13 +293,23 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
             <Text style={ls.fourSigSub}>{String(fd.witness2_name || "")}</Text>
           </View>
           <View style={[ls.fourSigBox, { width: "100%" }]}>
-            <View style={s.stampBox}>
-              <Text style={s.stampText}>{sw ? "MUHURI WA OFISI" : "OFFICE SEAL"}</Text>
-            </View>
+            {weoStamp ? (
+              <Image src={weoStamp} style={s.stampImg} />
+            ) : (
+              <View style={s.stampBox}>
+                <Text style={s.stampText}>{sw ? "MUHURI WA OFISI" : "OFFICE SEAL"}</Text>
+              </View>
+            )}
+            {weoSig ? (
+              <Image src={weoSig} style={s.signatureImg} />
+            ) : (
+              <View style={{ height: 36 }} />
+            )}
             <View style={ls.fourSigLine} />
             <Text style={ls.fourSigName}>
               {sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
             </Text>
+            {weoName ? <Text style={ls.fourSigSub}>{String(weoName)}</Text> : <View />}
           </View>
         </View>
 

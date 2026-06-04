@@ -111,6 +111,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         (formData as Record<string, unknown>).uploaded_documents = uploaded;
       }
 
+      // Embed the citizen's profile photo into form_data so the certificate can
+      // show it regardless of who downloads it (staff don't have the citizen's photo).
+      if (user.photo_url && !(formData as Record<string, unknown>).photo_url) {
+        (formData as Record<string, unknown>).photo_url = user.photo_url;
+      }
+      if (!(formData as Record<string, unknown>).applicant_name) {
+        (formData as Record<string, unknown>).applicant_name =
+          `${user.first_name ?? ""} ${user.middle_name ?? ""} ${user.last_name ?? ""}`
+            .replace(/\s+/g, " ")
+            .trim();
+      }
+
       const now = new Date();
       const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
       const randomNum = Math.floor(1000 + Math.random() * 9000);

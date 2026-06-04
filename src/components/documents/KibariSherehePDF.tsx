@@ -10,6 +10,7 @@ import {
   formatFullName,
   formatDate,
 } from "./types";
+import { ApplicantSignatureBox, OfficerSignatureBox } from "./SignatureBlocks";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
@@ -64,6 +65,10 @@ const ls = StyleSheet.create({
 export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang, qrDataUrl }) => {
   const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const applicantSig = fd.applicant_signature;
+  const weoSig = fd.weo_signature;
+  const weoStamp = fd.weo_stamp;
+  const weoName = fd.weo_name;
   const qr = qrDataUrl || generateQRCodeUrl(application, "KIB");
   const sw = lang === "sw";
 
@@ -188,22 +193,17 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
 
         {/* Signatures */}
         <View style={[s.signatureSection, { marginTop: 20 }]}>
-          <View style={s.signatureBox}>
-            <View style={s.signatureLine} />
-            <Text style={s.signatureName}>{applicantName}</Text>
-            <Text style={s.signatureTitle}>
-              {sw ? "MWANDAAJI / MWOMBAJI" : "ORGANISER / APPLICANT"}
-            </Text>
-          </View>
-          <View style={s.signatureBox}>
-            <View style={s.stampBox}>
-              <Text style={s.stampText}>MUHURI{"\n"}STAMP</Text>
-            </View>
-            <View style={s.signatureLine} />
-            <Text style={s.signatureTitle}>
-              {sw ? "AFISA MTENDAJI WA MTAA" : "WARD EXECUTIVE OFFICER"}
-            </Text>
-          </View>
+          <ApplicantSignatureBox
+            signature={applicantSig}
+            name={applicantName}
+            title={sw ? "MWANDAAJI / MWOMBAJI" : "ORGANISER / APPLICANT"}
+          />
+          <OfficerSignatureBox
+            signature={weoSig}
+            stamp={weoStamp}
+            name={weoName}
+            title={sw ? "AFISA MTENDAJI WA MTAA" : "WARD EXECUTIVE OFFICER"}
+          />
         </View>
 
         {/* QR — inline after signatures, NOT absolute */}

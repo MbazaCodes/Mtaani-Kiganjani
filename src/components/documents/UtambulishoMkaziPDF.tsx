@@ -17,9 +17,15 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
   application,
   lang,
   qrDataUrl,
+  photoUrl,
 }) => {
   const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const photo = photoUrl || user?.photo_url || fd.photo_url || null;
+  const applicantSig = fd.applicant_signature;
+  const weoSig = fd.weo_signature;
+  const weoStamp = fd.weo_stamp;
+  const weoName = fd.weo_name;
   const qr = qrDataUrl || generateQRCodeUrl(application, "MKZ");
   const s = commonStyles;
   const sw = lang === "sw";
@@ -69,8 +75,8 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
         {/* ── Photo box ── */}
         <View style={s.photoSection}>
           <View style={s.photoBox}>
-            {user?.photo_url ? (
-              <Image src={user.photo_url} style={s.photo} />
+            {photo ? (
+              <Image src={photo} style={s.photo} />
             ) : (
               <Text style={s.photoPlaceholder}>{"PICHA\nPHOTO"}</Text>
             )}
@@ -169,15 +175,30 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
         {/* ── Signatures ── */}
         <View style={s.signatureSection}>
           <View style={s.signatureBox}>
+            {applicantSig ? (
+              <Image src={applicantSig} style={s.signatureImg} />
+            ) : (
+              <View style={{ height: 44 }} />
+            )}
             <View style={s.signatureLine} />
-            <Text style={s.signatureName}>{formatFullName(user)}</Text>
+            <Text style={s.signatureName}>{formatFullName(user) || fd.applicant_name || ""}</Text>
             <Text style={s.signatureTitle}>{L.applicantSig}</Text>
           </View>
           <View style={s.signatureBox}>
-            <View style={s.stampBox}>
-              <Text style={s.stampText}>MUHURI{"\n"}STAMP</Text>
-            </View>
+            {weoStamp ? (
+              <Image src={weoStamp} style={s.stampImg} />
+            ) : (
+              <View style={s.stampBox}>
+                <Text style={s.stampText}>MUHURI{"\n"}STAMP</Text>
+              </View>
+            )}
+            {weoSig ? (
+              <Image src={weoSig} style={s.signatureImg} />
+            ) : (
+              <View style={{ height: 44 }} />
+            )}
             <View style={s.signatureLine} />
+            <Text style={s.signatureName}>{weoName || ""}</Text>
             <Text style={s.signatureTitle}>{L.weoSig}</Text>
           </View>
         </View>

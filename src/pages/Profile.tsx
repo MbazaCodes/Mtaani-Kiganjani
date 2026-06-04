@@ -47,9 +47,12 @@ import {
   Plus,
   FileImage,
   FileBadge,
+  PenTool,
+  Stamp,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { SignaturePad } from "@/components/ui/SignaturePad";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { InfoItem } from "../components/ui/InfoItem";
@@ -480,6 +483,9 @@ export function Profile() {
   const [showNidaFormat, setShowNidaFormat] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
+  const [staffSignature, setStaffSignature] = useState<string | null>(null);
+  const [staffStamp, setStaffStamp] = useState<string | null>(null);
+  const [savingSigStamp, setSavingSigStamp] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isProfileImageBroken, setIsProfileImageBroken] = useState(false);
   const [failedDocumentPreviews, setFailedDocumentPreviews] = useState<Record<string, boolean>>({});
@@ -592,6 +598,42 @@ export function Profile() {
     }
   }, [user, loading]);
 
+  // Save staff signature + stamp to the user profile for reuse on approvals
+  const handleSaveSignatureStamp = async () => {
+    if (!user?.id) return;
+    setSavingSigStamp(true);
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ signature_url: staffSignature, stamp_url: staffStamp })
+        .eq("id", user.id);
+      if (error) throw error;
+      showToast(
+        lang === "sw" ? "Saini na muhuri vimehifadhiwa!" : "Signature and stamp saved!",
+        "success",
+      );
+      await refreshProfile();
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      showToast(e.message ?? "Failed to save", "error");
+    } finally {
+      setSavingSigStamp(false);
+    }
+  };
+
+  // Upload stamp image file -> base64
+  const handleStampUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2_000_000) {
+      showToast(lang === "sw" ? "Faili kubwa sana (max 2MB)" : "File too large (max 2MB)", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setStaffStamp(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const fetchCompleteProfile = async () => {
     setLoading(true);
     try {
@@ -627,6 +669,10 @@ export function Profile() {
 
       // Set citizen_id (read-only, auto-generated)
       setCitizenId(data.citizen_id || "");
+
+      // Staff signature + stamp (reusable)
+      setStaffSignature(data.signature_url || null);
+      setStaffStamp(data.stamp_url || null);
 
       // Set business IDs if registered
       setSellerId(data.seller_id || "");
@@ -1244,6 +1290,15 @@ export function Profile() {
           { id: "emergency", label: lang === "sw" ? "Dharura" : "Emergency", icon: AlertCircle },
           { id: "additional", label: lang === "sw" ? "Nyongeza" : "Additional", icon: Info },
           { id: "documents", label: lang === "sw" ? "Nyaraka" : "Documents", icon: FileText },
+          ...(user?.role === "staff" || user?.role === "admin"
+            ? [
+                {
+                  id: "signature",
+                  label: lang === "sw" ? "Saini & Muhuri" : "Signature & Stamp",
+                  icon: PenTool,
+                },
+              ]
+            : []),
         ].map((tab) => (
           <button
             key={tab.id}
@@ -3285,6 +3340,96 @@ export function Profile() {
                   </div>
                 );
               })}
+            </motion.div>
+          )}
+
+          {/* Signature & Stamp tab (staff/admin only) */}
+          {activeTab === "signature" && (user?.role === "staff" || user?.role === "admin") && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                <PenTool size={18} className="text-blue-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-blue-800">
+                    {lang === "sw" ? "Saini na Muhuri wa Afisa" : "Officer Signature & Stamp"}
+                  </p>
+                  <p className="text-xs text-blue-600 mt-0.5">
+                    {lang === "sw"
+                      ? "Saini na muhuri huu utatumika kwenye vyeti unavyoidhinisha. Hifadhi mara moja, utatumika kiotomatiki."
+                      : "This signature and stamp are applied to certificates you approve. Save once — they will be reused automatically."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Signature pad */}
+              <div className="bg-white border border-stone-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <PenTool size={15} className="text-stone-600" />
+                  <p className="text-sm font-bold text-stone-700">
+                    {lang === "sw" ? "Saini Yako" : "Your Signature"}
+                  </p>
+                </div>
+                <SignaturePad value={staffSignature} onChange={setStaffSignature} lang={lang} />
+              </div>
+
+              {/* Stamp upload */}
+              <div className="bg-white border border-stone-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Stamp size={15} className="text-stone-600" />
+                  <p className="text-sm font-bold text-stone-700">
+                    {lang === "sw" ? "Muhuri Rasmi" : "Official Stamp"}
+                  </p>
+                </div>
+                {staffStamp ? (
+                  <div className="flex items-center justify-between gap-3 border border-stone-200 rounded-xl p-3">
+                    <img src={staffStamp} alt="stamp" className="h-20 object-contain" />
+                    <button
+                      type="button"
+                      onClick={() => setStaffStamp(null)}
+                      className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                    >
+                      {lang === "sw" ? "Ondoa" : "Remove"}
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-stone-300 rounded-xl py-8 cursor-pointer hover:bg-stone-50 transition-colors">
+                    <Stamp size={28} className="text-stone-400" />
+                    <span className="text-sm font-medium text-stone-500">
+                      {lang === "sw"
+                        ? "Bonyeza kupakia muhuri (PNG)"
+                        : "Click to upload stamp (PNG)"}
+                    </span>
+                    <span className="text-xs text-stone-400">
+                      {lang === "sw"
+                        ? "Picha yenye mandharinyuma wazi inapendekezwa"
+                        : "Transparent PNG recommended"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={handleStampUpload}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSaveSignatureStamp}
+                disabled={savingSigStamp}
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-300 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-sm"
+              >
+                {savingSigStamp ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <PenTool size={16} />
+                )}
+                {lang === "sw" ? "Hifadhi Saini na Muhuri" : "Save Signature & Stamp"}
+              </button>
             </motion.div>
           )}
         </div>

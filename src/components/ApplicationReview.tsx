@@ -282,10 +282,34 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
 
   const handleApprove = async () => {
     if (!selected || !user) return;
+
+    // Embed the approving officer's signature, stamp and name into form_data so
+    // they render in the Ward Executive Officer section of the certificate.
+    const existingFormData = (selected.form_data as Record<string, unknown>) || {};
+    const officerName = `${user.first_name ?? ""} ${user.middle_name ?? ""} ${user.last_name ?? ""}`
+      .replace(/\s+/g, " ")
+      .trim();
+    const mergedFormData = {
+      ...existingFormData,
+      weo_signature: user.signature_url ?? existingFormData.weo_signature ?? null,
+      weo_stamp: user.stamp_url ?? existingFormData.weo_stamp ?? null,
+      weo_name: officerName || existingFormData.weo_name || "",
+    };
+
+    if (!user.signature_url) {
+      showToast(
+        lang === "sw"
+          ? "Kidokezo: Ongeza saini yako kwenye Wasifu > Saini & Muhuri ili ionekane kwenye cheti."
+          : "Tip: Add your signature in Profile > Signature & Stamp so it appears on the certificate.",
+        "info",
+      );
+    }
+
     const ok = await updateApp(selected.id, {
       status: "approved",
       approved_at: new Date().toISOString(),
       approved_by: user.id,
+      form_data: mergedFormData as Application["form_data"],
     });
     if (ok) {
       showToast(L("Maombi yameidhinishwa", "Application approved"), "success");

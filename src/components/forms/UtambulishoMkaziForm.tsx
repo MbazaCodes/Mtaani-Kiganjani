@@ -45,6 +45,7 @@ import {
   Star,
   Activity,
 } from "lucide-react";
+import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";
 import { ProgressFill } from "../ui/ProgressFill";
 import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
@@ -235,6 +236,7 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
 
   const [step, setStep] = useState<Step>("location");
   const [submitted, setSubmitted] = useState(false);
+  const [signature, setSignature] = useState<string | null>(null);
   const [applicationRef, setApplicationRef] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -484,6 +486,7 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
         elderly_count: Number(vals.elderly_count),
         years_at_residence: Number(vals.years_at_residence),
         document_types: docs.map((d) => d.type),
+        applicant_signature: signature,
         service_name: "Utambulisho wa Mkazi",
         application_reference: ref,
       };
@@ -2127,6 +2130,20 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
                   <AlertCircle size={11} /> {errors.terms_accepted || errors.data_confirmed}
                 </p>
               )}
+            </div>
+
+            {/* Applicant electronic signature */}
+            <div className="bg-white border border-stone-200 rounded-2xl p-4">
+              <p className="text-sm font-bold text-stone-700 mb-1">
+                {L("Saini ya Kielektroniki", "Electronic Signature")}
+              </p>
+              <p className="text-xs text-stone-400 mb-3">
+                {L(
+                  "Saini hapa chini kuthibitisha maombi haya.",
+                  "Sign below to confirm this application.",
+                )}
+              </p>
+              <SignaturePad value={signature} onChange={setSignature} lang={lang} />
             </div>
           </div>
         );
