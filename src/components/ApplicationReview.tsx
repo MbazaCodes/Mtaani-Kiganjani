@@ -55,6 +55,7 @@ import {
   AlertTriangle,
   FileCheck,
   DollarSign,
+  ArrowUpRight,
 } from "lucide-react";
 import { supabase, Application, UserProfile } from "@/lib/supabase";
 import { logActivity } from "@/lib/activity-log";
@@ -171,6 +172,13 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showInfoRequestModal, setShowInfoRequestModal] = useState(false);
+  const [showEscalateModal, setShowEscalateModal] = useState(false);
+  const [departments, setDepartments] = useState<
+    { id: string; name: string; code: string; region?: string; district?: string }[]
+  >([]);
+  const [escalateDeptId, setEscalateDeptId] = useState("");
+  const [escalateNote, setEscalateNote] = useState("");
+  const [escalating, setEscalating] = useState(false);
   const [infoRequest, setInfoRequest] = useState("");
 
   // ─── Fetch applications ─────────────────────────────────────────────────
@@ -278,6 +286,48 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
       return false;
     } finally {
       setProcessing(false);
+    }
+  };
+
+  // Fetch departments for escalation dropdown
+  const fetchDepartments = async () => {
+    const { data } = await supabase
+      .from("government_departments")
+      .select("id, name, code, region, district")
+      .eq("active", true)
+      .order("name");
+    setDepartments(data || []);
+  };
+
+  const handleEscalate = async () => {
+    if (!selected || !escalateDeptId || !user) return;
+    setEscalating(true);
+    try {
+      const { error } = await supabase.from("escalations").insert({
+        application_id: selected.id,
+        from_user_id: user.id,
+        to_department_id: escalateDeptId,
+        escalation_note: escalateNote.trim() || null,
+        priority: "normal",
+      });
+      if (error) throw error;
+      logActivity(user.id, "submit_application", {
+        action: "escalate",
+        applicationId: selected.id,
+        department: escalateDeptId,
+      });
+      showToast(
+        lang === "sw" ? "Maombi yamepandishwa kwa idara!" : "Application escalated to department!",
+        "success",
+      );
+      setShowEscalateModal(false);
+      setEscalateNote("");
+      setEscalateDeptId("");
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      showToast(e.message || "Error", "error");
+    } finally {
+      setEscalating(false);
     }
   };
 
@@ -1040,6 +1090,16 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                     >
                       <MessageSquare size={14} /> {L("Omba Taarifa", "Request Info")}
                     </button>
+                    <button
+                      onClick={() => {
+                        fetchDepartments();
+                        setShowEscalateModal(true);
+                      }}
+                      disabled={processing}
+                      className="col-span-2 px-3 py-2.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                    >
+                      <ArrowUpRight size={14} /> {L("Pandisha kwa Idara", "Escalate to Department")}
+                    </button>
 
                     {/* Status-specific primary action */}
                     {["submitted", "pending_review"].includes(selected.status) && (
@@ -1135,6 +1195,93 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
               )}
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Escalate modal */}
+      <AnimatePresence>
+        {showEscalateModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowEscalateModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-6 py-4 border-b border-stone-100">
+                <h3 className="text-lg font-black text-stone-900 flex items-center gap-2">
+                  <ArrowUpRight size={20} className="text-blue-600" />
+                  {L("Pandisha kwa Idara", "Escalate to Department")}
+                </h3>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                    {L("Chagua Idara", "Select Department")} *
+                  </label>
+                  <select
+                    value={escalateDeptId}
+                    onChange={(e) => setEscalateDeptId(e.target.value)}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value="">{L("-- Chagua --", "-- Select --")}</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name} ({d.code}){d.region ? ` — ${d.region}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  {departments.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                      <AlertCircle size={11} />
+                      {L(
+                        "Hakuna idara zilizoundwa. Msimamizi aunde idara kwanza.",
+                        "No departments created. Admin must create departments first.",
+                      )}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                    {L("Maelezo ya Kupandisha", "Escalation Note")}
+                  </label>
+                  <textarea
+                    value={escalateNote}
+                    onChange={(e) => setEscalateNote(e.target.value)}
+                    rows={3}
+                    placeholder={L(
+                      "Eleza kwa nini maombi haya yanahitaji kushughulikiwa na idara...",
+                      "Explain why this application needs department involvement...",
+                    )}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm resize-none"
+                  />
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-stone-100 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowEscalateModal(false)}
+                  className="px-5 py-2.5 text-sm font-bold text-stone-600 hover:bg-stone-100 rounded-xl"
+                >
+                  {L("Ghairi", "Cancel")}
+                </button>
+                <button
+                  onClick={handleEscalate}
+                  disabled={escalating || !escalateDeptId}
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center gap-2"
+                >
+                  {escalating && <Loader2 size={14} className="animate-spin" />}
+                  {L("Pandisha", "Escalate")}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 

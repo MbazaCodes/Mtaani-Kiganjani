@@ -30,6 +30,7 @@ import { OfficeManagement } from "./pages/admin/OfficeManagement";
 import { LocationManagement } from "./pages/admin/LocationManagement";
 import { ServiceManagement } from "./pages/admin/ServiceManagement";
 import { AdminLogs } from "./pages/admin/AdminLogs";
+import { DepartmentManagement } from "./pages/admin/DepartmentManagement";
 import { CitizenManagement } from "./pages/admin/CitizenManagement";
 
 // Staff pages
@@ -676,6 +677,16 @@ export default function App() {
                   <PageTransition>
                     <ServiceManagement />
                   </PageTransition>
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/departments"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AppShell>
+                  <DepartmentManagement />
                 </AppShell>
               </ProtectedRoute>
             }

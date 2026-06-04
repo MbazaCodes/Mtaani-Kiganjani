@@ -166,6 +166,12 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
             onClick={() => setView("service_management")}
           />
           <SidebarItem
+            icon={<Building2 size={20} />}
+            label={lang === "sw" ? "Idara za Serikali" : "Gov. Departments"}
+            active={currentView === "departments"}
+            onClick={() => setView("departments")}
+          />
+          <SidebarItem
             icon={<Activity size={20} />}
             label={lang === "sw" ? "Kumbukumbu" : "Activity Logs"}
             active={currentView === "admin_logs"}
