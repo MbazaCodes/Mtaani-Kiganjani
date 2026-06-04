@@ -30,6 +30,18 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
   const s = commonStyles;
   const sw = lang === "sw";
 
+  // Fallbacks: application.users is not joined, so read profile snapshot from form_data
+  const aName =
+    formatFullName(user) !== "N/A" ? formatFullName(user) : String(fd.applicant_name || "N/A");
+  const aNida = user?.nida_number || fd.applicant_nida || "—";
+  const aCitizenId = user?.citizen_id || fd.applicant_citizen_id || "—";
+  const aDob = user?.date_of_birth || fd.applicant_dob || "";
+  const aSex = user?.sex || fd.applicant_sex || "";
+  const aRegion = user?.region || fd.applicant_region || fd.region || "";
+  const aDistrict = user?.district || fd.applicant_district || fd.district || "";
+  const aWard = user?.ward || fd.applicant_ward || fd.ward || "";
+  const aStreet = user?.street || fd.applicant_street || fd.village_street || "";
+
   const L = {
     title: sw ? "CHETI CHA UTAMBULISHO WA MKAZI" : "CERTIFICATE OF RESIDENCY",
     personal: sw ? "TAARIFA BINAFSI" : "PERSONAL INFORMATION",
@@ -82,7 +94,7 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
             )}
           </View>
           <Text style={s.nidaLabel}>{L.nida}</Text>
-          <Text style={s.nidaNumber}>{user?.nida_number || "—"}</Text>
+          <Text style={s.nidaNumber}>{aNida}</Text>
         </View>
 
         {/* ── Government header ── */}
@@ -110,27 +122,24 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
         </View>
         <View style={s.twoCol}>
           <View style={s.colLeft}>
-            <Row label={L.fullName} value={formatFullName(user)} />
-            <Row label={L.nida} value={user?.nida_number} />
-            <Row label={L.citizenId} value={user?.citizen_id} />
-            <Row
-              label={L.dob}
-              value={user?.date_of_birth ? formatDate(user.date_of_birth) : undefined}
-            />
+            <Row label={L.fullName} value={aName} />
+            <Row label={L.nida} value={aNida} />
+            <Row label={L.citizenId} value={aCitizenId} />
+            <Row label={L.dob} value={aDob ? formatDate(aDob) : undefined} />
           </View>
           <View style={s.colRight}>
             <Row
               label={L.sex}
               value={
-                user?.sex === "M"
+                aSex === "M"
                   ? sw
                     ? "Mume"
                     : "Male"
-                  : user?.sex === "F"
+                  : aSex === "F"
                     ? sw
                       ? "Mke"
                       : "Female"
-                    : user?.sex
+                    : aSex
               }
             />
             <Row label={L.marital} value={fd.marital_status ?? ""} />
@@ -144,10 +153,10 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
         </View>
         <View style={s.twoCol}>
           <View style={s.colLeft}>
-            <Row label={L.region} value={user?.region} />
-            <Row label={L.district} value={user?.district} />
-            <Row label={L.ward} value={user?.ward} />
-            <Row label={L.street} value={user?.street} />
+            <Row label={L.region} value={aRegion} />
+            <Row label={L.district} value={aDistrict} />
+            <Row label={L.ward} value={aWard} />
+            <Row label={L.street} value={aStreet} />
           </View>
           <View style={s.colRight}>
             <Row label={L.neighborhood} value={fd.neighborhood ?? ""} />

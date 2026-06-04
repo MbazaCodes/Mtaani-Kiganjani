@@ -104,6 +104,13 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
   const qr = qrDataUrl || generateQRCodeUrl(application, "DS");
   const sw = lang === "sw";
 
+  // Fallbacks: application.users is not joined — read complainant snapshot from form_data
+  const compName =
+    formatFullName(user) !== "N/A" ? formatFullName(user) : String(fd.complainant_name || "N/A");
+  const compNida = user?.nida_number || fd.complainant_nida || "—";
+  const compPhone = user?.phone || fd.complainant_phone || "—";
+  const compWard = user?.ward || fd.complainant_ward || "—";
+
   const isDispute = fd.mode === "CITIZEN_DISPUTE";
   const typeKey = String(isDispute ? fd.dispute_type : fd.issue_type || "");
   const typeLabel = isDispute
@@ -167,12 +174,12 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         </View>
         <View style={s.twoCol}>
           <View style={s.colLeft}>
-            <Row label={sw ? "Jina" : "Name"} value={formatFullName(user)} />
-            <Row label="NIDA" value={user?.nida_number} />
+            <Row label={sw ? "Jina" : "Name"} value={compName} />
+            <Row label="NIDA" value={compNida} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Simu" : "Phone"} value={user?.phone} />
-            <Row label={sw ? "Kata" : "Ward"} value={user?.ward} />
+            <Row label={sw ? "Simu" : "Phone"} value={compPhone} />
+            <Row label={sw ? "Kata" : "Ward"} value={compWard} />
           </View>
         </View>
 
@@ -314,7 +321,7 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         <View style={s.signatureSection}>
           <ApplicantSignatureBox
             signature={applicantSig}
-            name={formatFullName(user) || fd.applicant_name}
+            name={compName}
             title={sw ? "MLALAMIKAJI / COMPLAINANT" : "COMPLAINANT"}
           />
           <OfficerSignatureBox

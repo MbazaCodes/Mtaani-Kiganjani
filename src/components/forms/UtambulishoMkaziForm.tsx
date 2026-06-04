@@ -492,6 +492,19 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
         applicant_signature: signature,
         service_name: "Utambulisho wa Mkazi",
         application_reference: ref,
+        // Snapshot of applicant profile so the PDF never depends on a DB join
+        applicant_name:
+          `${userProfile?.first_name || ""} ${userProfile?.middle_name || ""} ${userProfile?.last_name || ""}`
+            .replace(/\s+/g, " ")
+            .trim(),
+        applicant_nida: userProfile?.nida_number || "",
+        applicant_citizen_id: userProfile?.citizen_id || "",
+        applicant_dob: userProfile?.date_of_birth || "",
+        applicant_sex: userProfile?.sex || "",
+        applicant_region: vals.region || userProfile?.region || "",
+        applicant_district: vals.district || userProfile?.district || "",
+        applicant_ward: vals.ward || userProfile?.ward || "",
+        applicant_street: vals.village_street || userProfile?.street || "",
       };
       await onSubmit(payload, files);
       setApplicationRef(ref);

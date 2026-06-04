@@ -327,6 +327,7 @@ export const KibariUjeziMdogoForm: React.FC<FormProps> = ({
           application_reference: ref,
           applicant_signature: signature,
           document_count: docs.length,
+          owner_nida: userProfile?.nida_number || "",
         },
         files,
       );

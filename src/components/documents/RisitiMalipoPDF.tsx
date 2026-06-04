@@ -66,6 +66,13 @@ export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang,
   const qr = qrDataUrl || generateQRCodeUrl(application, "RCP");
   const sw = lang === "sw";
 
+  // Fallbacks: application.users is not joined — read payer snapshot from form_data
+  const payerName =
+    formatFullName(user) !== "N/A" ? formatFullName(user) : String(fd.payer_name || "N/A");
+  const payerNida = user?.nida_number || fd.payer_nida || "—";
+  const payerCitizenId = user?.citizen_id || fd.payer_citizen_id || "—";
+  const payerPhone = user?.phone || fd.payer_phone_snapshot || fd.payer_phone || "—";
+
   const amount = Number(pd.amount || fd.service_fee || application.services?.fee || 0);
   const method = String(pd.payment_method || "mpesa");
   const methodLabel = (PAYMENT_METHODS[method.toLowerCase()] || { sw: method, en: method })[lang];
@@ -141,10 +148,10 @@ export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang,
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{L.applicantInfo}</Text>
         </View>
-        <TRow label={sw ? "Jina" : "Name"} value={formatFullName(user)} />
-        <TRow label="NIDA" value={user?.nida_number || "—"} alt />
-        <TRow label={sw ? "Namba ya Raia" : "Citizen ID"} value={user?.citizen_id || "—"} />
-        <TRow label={sw ? "Simu" : "Phone"} value={user?.phone || "—"} alt />
+        <TRow label={sw ? "Jina" : "Name"} value={payerName} />
+        <TRow label="NIDA" value={payerNida} alt />
+        <TRow label={sw ? "Namba ya Raia" : "Citizen ID"} value={payerCitizenId} />
+        <TRow label={sw ? "Simu" : "Phone"} value={payerPhone} alt />
 
         {/* QR */}
         <View style={s.qrSection}>

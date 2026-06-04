@@ -78,6 +78,12 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
   const qr = qrDataUrl || generateQRCodeUrl(application, "MUZ");
   const sw = lang === "sw";
 
+  // Fallbacks: application.users is not joined — read seller snapshot from form_data
+  const sellerName =
+    formatFullName(user) !== "N/A" ? formatFullName(user) : String(fd.seller_name || "N/A");
+  const sellerNida = user?.nida_number || fd.seller_nida || "—";
+  const sellerCitizenId = user?.citizen_id || fd.seller_citizen_id || "—";
+
   const assetType = String(fd.asset_type || "");
   const isRental = assetType.startsWith("KODI");
   const assetLabel = (ASSET_LABELS[assetType] || { sw: assetType, en: assetType })[lang];
@@ -188,9 +194,9 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           <View style={s.colLeft}>
             <View style={ls.partyBox}>
               <Text style={ls.partyRole}>{L.sellerParty}</Text>
-              <Row label={sw ? "Jina" : "Name"} value={formatFullName(user)} />
-              <Row label="NIDA" value={user?.nida_number} />
-              <Row label={sw ? "Raia ID" : "Cit. ID"} value={user?.citizen_id} />
+              <Row label={sw ? "Jina" : "Name"} value={sellerName} />
+              <Row label="NIDA" value={sellerNida} />
+              <Row label={sw ? "Raia ID" : "Cit. ID"} value={sellerCitizenId} />
               {fd.seller_tin ? <Row label="TIN" value={fd.seller_tin ?? ""} /> : <View />}
             </View>
           </View>
@@ -232,11 +238,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
 
         {/* Signatures */}
         <View style={s.signatureSection}>
-          <ApplicantSignatureBox
-            signature={applicantSig}
-            name={formatFullName(user) || fd.applicant_name}
-            title={L.sellerParty}
-          />
+          <ApplicantSignatureBox signature={applicantSig} name={sellerName} title={L.sellerParty} />
           <View style={s.signatureBox}>
             <View style={s.signatureLine} />
             <Text style={s.signatureName}>

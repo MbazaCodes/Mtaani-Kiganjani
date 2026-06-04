@@ -378,6 +378,13 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
           application_reference: ref,
           applicant_signature: signature,
           document_count: docs.length,
+          complainant_name:
+            `${userProfile?.first_name || ""} ${userProfile?.middle_name || ""} ${userProfile?.last_name || ""}`
+              .replace(/\s+/g, " ")
+              .trim(),
+          complainant_nida: userProfile?.nida_number || "",
+          complainant_phone: userProfile?.phone || "",
+          complainant_ward: userProfile?.ward || "",
         },
         files,
       );

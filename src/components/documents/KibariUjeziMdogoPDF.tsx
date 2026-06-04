@@ -151,7 +151,7 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
           value={fd.owner_name || formatFullName(user)}
         />
         <Row label={sw ? "Simu" : "Phone"} value={fd.owner_phone || user?.phone} />
-        <Row label="NIDA" value={user?.nida_number} />
+        <Row label="NIDA" value={fd.owner_nida || user?.nida_number || "—"} />
         <Row label={sw ? "Hali ya Umiliki" : "Ownership"} value={fd.property_ownership ?? ""} />
 
         {/* Property section */}

@@ -334,6 +334,13 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
           application_reference: ref,
           applicant_signature: signature,
           document_count: proofDoc ? 1 : 0,
+          payer_name:
+            `${userProfile?.first_name || ""} ${userProfile?.middle_name || ""} ${userProfile?.last_name || ""}`
+              .replace(/\s+/g, " ")
+              .trim(),
+          payer_nida: userProfile?.nida_number || "",
+          payer_citizen_id: userProfile?.citizen_id || "",
+          payer_phone_snapshot: userProfile?.phone || "",
         },
         files,
       );

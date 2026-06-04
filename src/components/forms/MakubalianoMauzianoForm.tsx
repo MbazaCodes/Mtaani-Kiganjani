@@ -333,6 +333,13 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
           buyer_nida: buyerFound?.nida_number,
           buyer_phone: buyerFound?.phone,
           seller_id: userProfile?.id,
+          seller_name:
+            `${userProfile?.first_name || ""} ${userProfile?.middle_name || ""} ${userProfile?.last_name || ""}`
+              .replace(/\s+/g, " ")
+              .trim(),
+          seller_nida: userProfile?.nida_number || "",
+          seller_citizen_id: userProfile?.citizen_id || "",
+          seller_phone: userProfile?.phone || "",
           total_fee: fee,
           service_name: "Makubaliano ya Mauzo",
           application_reference: ref,
