@@ -25,63 +25,219 @@
 
 ---
 
-## Phase 3 — Scale & Intelligence (3–6 Months)
+## Phase 3 — Progressive Web App & Offline Support (3–6 Months)
 
-### Multi-Ward Deployment
-- **Ward-specific branding**: Each ward office gets its own subdomain or path
-- **Central admin dashboard**: National/regional aggregated statistics
-- **Inter-ward transfers**: Citizen relocation workflow between wards
-- **Hierarchical administration**: Regional → District → Ward admin cascade
+### Progressive Web App (PWA)
+- **Install on homescreen**: Citizens tap "Add to Home Screen" on Android/iOS — the app launches like a native application with a splash screen and the Mtaani Kiganjani icon, no app store needed
+- **Service Worker**: Caches the application shell (HTML, CSS, JS, icons) so the app opens instantly even without internet
+- **Offline pages**: Dashboard, profile, and form pages load from cache when offline — critical for rural Tanzania where connectivity is intermittent
+- **Push notifications**: Real-time alerts for application status changes without SMS costs (requires HTTPS + service worker)
+- **Web App Manifest**: Defines app name ("Mtaani Kiganjani"), theme color (emerald), orientation, and display mode (standalone)
 
-### Offline-First / PWA
-- **Progressive Web App**: Install on phone homescreen, works offline
-- **Background sync**: Forms save locally, submit when connectivity returns
-- **Critical for rural Tanzania**: Many wards have intermittent internet
-- **Service Worker caching**: Key pages and form schemas cached for offline use
+### Background Sync for Forms
+- **Auto-save on every field change**: Form progress saved to IndexedDB/localStorage after each input — citizens never lose work if the browser crashes or they accidentally close the tab
+- **Offline queue**: When a citizen submits a form without internet, it enters a local queue with a "Pending Sync" badge
+- **Automatic retry**: When connectivity returns, the Service Worker detects the network change and submits all queued applications in order
+- **Conflict resolution**: If the same form is submitted from two devices, the server keeps the newest submission and notifies the citizen
+- **Sync status indicator**: A small icon in the header shows: ● Green (online, synced) / ● Amber (online, syncing) / ● Red (offline, queued)
 
-### Analytics & Reporting
-- **Service delivery metrics**: Average processing time per service, approval rates
-- **Revenue dashboards**: Fee collection by ward, service type, time period
-- **Citizen satisfaction**: Post-service feedback collection
-- **Export to Excel/PDF**: Reports for government oversight bodies
-
-### Audit & Compliance
-- **Comprehensive activity logging**: Every click, view, and action recorded
-- **Data retention policies**: Configurable auto-archival of old records
-- **GDPR-style data access**: Citizens can request data export/deletion
-- **Role-based audit trails**: Who approved what, when, with full change history
+### Inter-Ward Transfer Workflow
+- **Citizen relocation**: When a citizen moves from one ward to another, they initiate a transfer request from their profile
+- **Current ward release**: The citizen's current ward officer reviews and approves the release, confirming the citizen's record is clean
+- **New ward acceptance**: The destination ward officer receives the transfer request and accepts the citizen into their jurisdiction
+- **Record migration**: All historical applications, documents, and verification status transfer with the citizen — no re-verification needed
+- **Transfer certificate**: An official "Certificate of Transfer" PDF is generated with QR verification, signed by both ward officers
+- **Timeline tracking**: Full audit trail: Requested → Released → Accepted → Completed
 
 ---
 
-## Phase 4 — Advanced Features (6–12 Months)
+## Phase 4 — Analytics, Reporting & Document Verification (6–9 Months)
 
-### AI-Powered Features
-- **Smart form filling**: Auto-detect document type from uploaded images
-- **OCR for NIDA cards**: Extract NIDA number, name, and photo from uploaded card images
-- **Chatbot assistance**: Swahili-language chatbot to guide citizens through services
-- **Fraud detection**: Flag suspicious applications (duplicate submissions, altered documents)
+### Service Delivery Analytics Dashboard
+- **Processing time metrics**: Average time from submission to approval per service type, per ward, per month — identifies bottlenecks (e.g., "Burial permits take 4.2 days average in Ilala but 1.1 days in Kinondoni")
+- **Approval rate tracking**: Percentage of applications approved vs. rejected vs. returned, broken down by service and officer — surfaces training needs
+- **Staff performance**: Applications processed per officer, average review time, citizen satisfaction scores
+- **Trend analysis**: Month-over-month growth in registrations, service usage, and revenue with interactive charts (Recharts)
+- **Peak hours heatmap**: When citizens submit applications — helps with staffing decisions
 
-### Social Login & Authentication
-- **Google OAuth**: Sign in with Google (already UI-ready, needs Supabase config)
-- **Apple Sign-In**: iOS users (already UI-ready)
-- **Phone OTP**: SMS-based one-time password login (already UI-ready)
-- **Biometric login**: Fingerprint/face on supported devices
+### Revenue & Financial Dashboards
+- **Fee collection by ward**: Total revenue per ward office, filterable by date range
+- **Service type breakdown**: Which services generate the most revenue (pie chart + table)
+- **Payment method distribution**: M-Pesa vs. TigoPesa vs. Airtel vs. Bank — informs payment provider negotiations
+- **Outstanding fees**: Applications approved but not yet paid — follow-up action queue
+- **Monthly/quarterly/annual summaries**: Auto-generated financial reports for government oversight
+- **Budget vs. actual**: Compare expected fee collection against actual collected amounts
 
-### Inter-System Integration
-- **TRA (Tanzania Revenue Authority)**: Tax compliance verification
-- **BRELA**: Business registration cross-reference
-- **RITA**: Birth/death certificate verification
-- **Ministry of Lands**: Property ownership verification
-- **Immigration**: Passport and visa status
+### Citizen Satisfaction & Feedback
+- **Post-service rating**: After downloading a certificate, citizens rate the experience (1–5 stars) with optional comment
+- **NPS (Net Promoter Score)**: "Would you recommend this service to others?" — tracked over time
+- **Complaint tracking**: Citizens can flag issues directly from their application detail page
+- **Feedback dashboard**: Admin sees aggregated ratings per service, per ward, with trend lines
+- **Automated follow-up**: Low-rated experiences trigger a notification to the ward supervisor
 
-### Document Verification Portal
-- **Public QR scanner**: Any institution (bank, employer, school) can scan a certificate's QR code and verify it's genuine
-- **Verification API**: REST endpoint for automated verification by third-party systems
-- **Tamper detection**: Hash-based integrity check on document contents
+### Export to Excel/PDF Reports
+- **One-click Excel export**: Any dashboard table exportable to `.xlsx` with formatted headers, filters, and totals
+- **PDF report generation**: Formal government reports with letterhead, charts, tables, and signatures — ready for printing
+- **Scheduled reports**: Admin configures weekly/monthly auto-generated reports delivered via email
+- **Custom date ranges**: All reports filterable by start date, end date, region, district, service type
+- **Government format compliance**: Reports formatted per Tanzania public sector reporting standards
+
+### Document Verification Portal (Public)
+- **Public QR scanner page**: A standalone page at `/verify` accessible without login — any institution (bank, employer, school, police) can scan or enter a certificate's QR code to verify authenticity
+- **Verification display**: Shows document type, holder name, issue date, issuing officer, and ward — with a clear "AUTHENTIC ✓" or "NOT FOUND ✗" result
+- **Verification API (REST)**: `GET /api/verify?ref=TZ-MKZ-20260604-5380` returns JSON with document status — allows automated verification by third-party systems (banks, employers, courts)
+- **Rate limiting**: Prevent abuse with IP-based rate limiting (100 verifications/hour per IP)
+- **Tamper detection**: Each document's content (applicant name, dates, service type) is hashed at generation time; the verification endpoint re-computes the hash and compares — any tampering (altered PDF) is detected and flagged
+- **Verification log**: Every verification attempt is logged (who verified, when, from where) for audit purposes
+- **Offline verification**: The QR code encodes enough data (name, reference, hash) for basic verification even without internet — the scanner app checks the hash locally
 
 ---
 
-## Phase 5 — National Scale (12+ Months)
+## Phase 5 — Government Department Integration (9–15 Months)
+
+### Government Department Portal
+
+A major platform expansion that connects ward-level services to **national government departments** (Police, Health, Legal/Courts, Education, Social Welfare, Immigration, etc.), enabling cross-departmental workflows, escalation, and inter-agency communication.
+
+#### Department Management (Admin)
+
+| Feature | Description |
+|---------|-------------|
+| **Create departments** | Admin defines government departments (e.g., Tanzania Police Force, Ministry of Health, Judiciary, RITA, Immigration) with name, code, level (national/regional/district), and contact details |
+| **Department roles & permissions** | Each department gets its own role type with configurable capabilities — what they can view, what actions they can take, what data they access |
+| **Department staff creation** | Like creating ward staff, but scoped to a department — admin creates department users with department-specific dashboards |
+| **Department hierarchy** | National HQ → Regional offices → District offices — mirrors Tanzania's government structure |
+| **Service routing rules** | Admin configures which services automatically route copies to which departments (e.g., "All dispute resolutions → Legal Department", "All burial permits → Health Department") |
+
+#### Department Portal (Per-Department Dashboard)
+
+Each department gets its own portal with a tailored interface:
+
+```
+┌──────────────────────────────────────────────────────┐
+│  POLICE DEPARTMENT PORTAL                             │
+│  Tanzania Police Force — Dar es Salaam Region         │
+├──────────────────────────────────────────────────────┤
+│                                                       │
+│  📊 Dashboard                                         │
+│  ├── Escalations received this month: 47              │
+│  ├── Pending actions: 12                              │
+│  ├── Resolved: 35                                     │
+│  └── Average response time: 2.3 days                  │
+│                                                       │
+│  📋 Escalation Requests                               │
+│  ├── #ESC-2026-0412 — Dispute: Land boundary          │
+│  ├── #ESC-2026-0413 — Bail application letter          │
+│  └── #ESC-2026-0414 — Criminal complaint referral      │
+│                                                       │
+│  📄 Application Copies                                │
+│  ├── Auto-forwarded disputes (read-only)              │
+│  └── Bail/custody letters requiring action             │
+│                                                       │
+│  🏢 District Offices                                  │
+│  ├── Ilala District Police                            │
+│  ├── Kinondoni District Police                        │
+│  └── Temeke District Police                           │
+│                                                       │
+└──────────────────────────────────────────────────────┘
+```
+
+**Core features per department portal**:
+
+1. **Dashboard**: Escalation counts, response metrics, pending actions, resolution rates
+2. **Escalation Requests**: Incoming requests from ward staff — viewable, actionable, with response workflow
+3. **Court Registry** (Legal/Judiciary): Case filing, hearing schedules, verdict records, bail processing
+4. **Application Copies**: Auto-forwarded copies of relevant applications from ward level (read-only unless action required)
+5. **Department-in-District/Regional**: Each department's portal filters to their geographic jurisdiction
+6. **Inter-department referral**: Department A can forward a case to Department B (e.g., Police → Judiciary)
+
+#### Staff Escalation Workflow
+
+Ward staff gain the ability to **escalate applications to government departments**:
+
+```
+Staff reviewing         Staff clicks           Department receives       Department
+an application    →    "Escalate" button   →   escalation notification  →  takes action
+                       Selects department       with full application
+                       Adds note/reason         context and attachments
+```
+
+**How it works**:
+
+1. Ward staff opens an application (e.g., a land dispute that requires police involvement)
+2. Staff clicks **"Escalate to Department"** button on the review panel
+3. A dropdown shows **available departments** (only those the admin has created and activated)
+4. Staff selects the department (e.g., "Tanzania Police Force — Ilala District")
+5. Staff adds an **escalation note** explaining why the department's involvement is needed
+6. The system creates an **escalation record** linked to the original application
+7. The department's portal shows the escalation with full context (application data, uploaded documents, citizen info, staff notes)
+8. The department can: **Accept** (take ownership), **Respond** (provide guidance back to ward staff), or **Refer** (forward to another department)
+9. The citizen sees "Escalated to Police Department" in their application timeline
+10. Resolution flows back: department marks resolved → ward staff completes the application
+
+**Use cases**:
+
+| Scenario | Ward Action | Department | Department Action |
+|----------|------------|------------|-------------------|
+| Land dispute turns violent | Escalate dispute application | Police | Investigation, incident report |
+| Citizen needs bail letter | Submit Barua ya Utambulisho addressed to police | Police | Receive letter, process bail |
+| Dispute requires court hearing | Escalate dispute | Judiciary | Register case, schedule hearing |
+| Burial permit — unnatural death | Escalate burial application | Health / Police | Death investigation, medical examiner |
+| Construction near protected area | Escalate construction permit | Environment | Environmental impact assessment |
+| Business fraud complaint | Escalate dispute | Legal / BRELA | Investigation, regulatory action |
+| Child welfare concern | Escalate from staff observation | Social Welfare | Case worker assignment |
+
+#### Data Model for Departments
+
+```sql
+-- New tables for Phase 5
+CREATE TABLE government_departments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,              -- "Tanzania Police Force"
+  name_sw TEXT,                    -- "Jeshi la Polisi Tanzania"
+  code TEXT UNIQUE,                -- "TPF"
+  level TEXT CHECK (level IN ('national', 'regional', 'district')),
+  parent_department_id UUID,       -- For hierarchy (HQ → Regional → District)
+  region TEXT,                     -- Geographic scope
+  district TEXT,
+  contact_email TEXT,
+  contact_phone TEXT,
+  active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE department_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  department_id UUID REFERENCES government_departments(id),
+  role TEXT CHECK (role IN ('head', 'officer', 'clerk')),
+  assigned_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE escalations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  application_id UUID REFERENCES applications(id),
+  from_user_id UUID REFERENCES users(id),     -- Ward staff who escalated
+  to_department_id UUID REFERENCES government_departments(id),
+  status TEXT CHECK (status IN ('pending', 'accepted', 'responded', 'referred', 'resolved', 'rejected')),
+  escalation_note TEXT,
+  response_note TEXT,
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE department_application_copies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  application_id UUID REFERENCES applications(id),
+  department_id UUID REFERENCES government_departments(id),
+  auto_forwarded BOOLEAN DEFAULT FALSE,       -- TRUE if routing rule, FALSE if manual
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+---
+
+## Phase 6 — National Scale & Interoperability (15+ Months)
 
 ### Multi-Language Support
 - **Beyond Swahili/English**: Support for regional languages where applicable
@@ -93,17 +249,26 @@
 - **Tax collection**: Property tax, business levy, market fees
 - **Community projects**: Participatory budgeting, development fund tracking
 
+### Inter-System Integration
+- **TRA (Tanzania Revenue Authority)**: Tax compliance verification
+- **BRELA**: Business registration cross-reference
+- **RITA**: Birth/death certificate verification
+- **Ministry of Lands**: Property ownership verification
+- **Immigration**: Passport and visa status
+- **NECTA**: Education certificate verification
+
 ### Government Dashboard
-- **National statistics**: Citizen registration rates, service delivery performance
-- **Ward ranking**: Performance-based comparison across wards
-- **Resource allocation**: Data-driven staffing and budget decisions
-- **Transparency portal**: Public-facing statistics on service delivery
+- **National statistics**: Citizen registration rates, service delivery performance across all wards
+- **Ward ranking**: Performance-based comparison across wards nationally
+- **Resource allocation**: Data-driven staffing and budget decisions based on demand patterns
+- **Transparency portal**: Public-facing statistics on service delivery (Open Government Partnership)
 
 ### Mobile App (Native)
 - **React Native**: Share 80% of business logic with the web app
 - **Push notifications**: Real-time alerts without SMS costs
 - **Camera integration**: Direct document scanning with quality guidance
-- **Offline forms**: Full form completion without internet
+- **Biometric authentication**: Fingerprint/face login on supported devices
+- **Offline forms**: Full form completion without internet, sync on reconnect
 
 ---
 
@@ -114,7 +279,7 @@
 | **Testing** | No test coverage | Add Vitest unit tests + Playwright E2E tests |
 | **Error monitoring** | Console.error only | Add Sentry error tracking |
 | **CI/CD** | Vercel auto-deploy only | Add GitHub Actions for lint/test/build gates |
-| **API layer** | Direct Supabase queries | Add an API abstraction layer for easier backend swaps |
+| **API layer** | Direct Supabase queries | Add API abstraction layer for easier backend swaps |
 | **State management** | React Context | Consider Zustand for complex state flows |
 | **Internationalization** | Inline L() helper | Migrate to i18next for proper translation management |
 | **Image optimization** | Raw base64 | WebP conversion, compression, lazy loading |
@@ -123,22 +288,25 @@
 
 ---
 
-## Estimated Timeline
+## Estimated Timeline & Investment
 
-| Phase | Timeline | Investment | Impact |
-|-------|----------|-----------|--------|
-| Phase 2 | 1–3 months | Moderate | Production-ready with real payments |
-| Phase 3 | 3–6 months | Significant | Multi-ward deployment, offline support |
-| Phase 4 | 6–12 months | Major | AI features, cross-system integration |
-| Phase 5 | 12+ months | National program | Full national digital governance platform |
+| Phase | Timeline | Focus | Impact |
+|-------|----------|-------|--------|
+| **Phase 2** | 1–3 months | Payments, NIDA, SMS | Production-ready with real transactions |
+| **Phase 3** | 3–6 months | PWA, offline, transfers | Works without internet; citizen mobility |
+| **Phase 4** | 6–9 months | Analytics, verification, feedback | Data-driven governance; document trust |
+| **Phase 5** | 9–15 months | Department integration, escalation | Cross-government coordination |
+| **Phase 6** | 15+ months | National scale, native app, inter-system | Full digital governance platform |
 
 ---
 
-## Government Alignment
+## Government Strategy Alignment
 
 This roadmap aligns with:
 
-- **Tanzania's e-Government Strategy 2025-2030**: Digital transformation of public services
-- **TAMISEMI Digital Agenda**: Local government modernization
-- **National ICT Policy**: Leveraging technology for citizen service delivery
-- **Open Government Partnership**: Transparency and accountability in governance
+- **Tanzania e-Government Strategy 2025–2030**: Digital transformation of public services at all levels
+- **TAMISEMI Digital Agenda**: Local government modernization and service delivery improvement
+- **National ICT Policy**: Leveraging technology for citizen service delivery and government efficiency
+- **Open Government Partnership (OGP)**: Transparency, accountability, and citizen participation
+- **Tanzania Development Vision 2025**: Building a middle-income nation through digital infrastructure
+- **Sustainable Development Goals (SDG 16)**: Effective, accountable, and inclusive institutions at all levels
