@@ -153,6 +153,8 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
   const [appRef, setAppRef] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const errorsRef = useRef(errors);
+  errorsRef.current = errors;
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
   const docRef = useRef<HTMLInputElement>(null);
   const [docErr, setDocErr] = useState("");
@@ -210,13 +212,14 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
 
   const set = (k: keyof FormValues, v: string | boolean | string[]) =>
     setVals((p) => ({ ...p, [k]: v }));
-  const clrErr = (k: string) =>
+  const clrErr = useCallback((k: string) => {
     setErrors((p) => {
       const n = { ...p };
       delete n[k];
       return n;
     });
-  const err = (k: string) => errors[k];
+  }, []);
+  const err = useCallback((k: string) => errorsRef.current[k], []);
 
   const toggleUtility = (key: string) => {
     const curr = vals.included_utilities;
@@ -401,92 +404,104 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
   };
 
   // ─── Shared UI ───────────────────────────────────────────────────────────
-  const inputCls = (name: string) =>
-    `w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all bg-white text-sm ${err(name) ? "border-red-400 bg-red-50" : "border-stone-200"}`;
+  const inputCls = useCallback(
+    (name: string) =>
+      `w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all bg-white text-sm ${err(name) ? "border-red-400 bg-red-50" : "border-stone-200"}`,
+    [err],
+  );
   const lbl = "block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5";
   const secHdr =
     "bg-gradient-to-r from-teal-50 to-cyan-50 px-4 py-3 rounded-xl border-l-4 border-teal-500 mb-4";
 
-  const Field = ({
-    name,
-    label,
-    required,
-    hint,
-    children: ch,
-  }: {
-    name: string;
-    label: string;
-    required?: boolean;
-    hint?: string;
-    children: React.ReactNode;
-  }) => (
-    <div>
-      <label className={lbl}>
-        {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-      {ch}
-      {err(name) && (
-        <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-          <AlertCircle size={11} />
-          {err(name)}
-        </p>
-      )}
-      {hint && !err(name) && <p className="text-stone-400 text-xs mt-1">{hint}</p>}
-    </div>
+  const Field = useCallback(
+    ({
+      name,
+      label,
+      required,
+      hint,
+      children: ch,
+    }: {
+      name: string;
+      label: string;
+      required?: boolean;
+      hint?: string;
+      children: React.ReactNode;
+    }) => (
+      <div>
+        <label className={lbl}>
+          {label}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+        {ch}
+        {err(name) && (
+          <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <AlertCircle size={11} />
+            {err(name)}
+          </p>
+        )}
+        {hint && !err(name) && <p className="text-stone-400 text-xs mt-1">{hint}</p>}
+      </div>
+    ),
+    [err],
   );
-  const Sel = ({
-    name,
-    value,
-    onChange,
-    options,
-    placeholder,
-  }: {
-    name: string;
-    value: string;
-    onChange: (v: string) => void;
-    options: { label: string; value: string }[];
-    placeholder?: string;
-  }) => (
-    <select
-      value={value}
-      onChange={(e) => {
-        onChange(e.target.value);
-        clrErr(name);
-      }}
-      className={inputCls(name)}
-    >
-      <option value="">{placeholder || t.select}</option>
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
+  const Sel = useCallback(
+    ({
+      name,
+      value,
+      onChange,
+      options,
+      placeholder,
+    }: {
+      name: string;
+      value: string;
+      onChange: (v: string) => void;
+      options: { label: string; value: string }[];
+      placeholder?: string;
+    }) => (
+      <select
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          clrErr(name);
+        }}
+        className={inputCls(name)}
+      >
+        <option value="">{placeholder || t.select}</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    ),
+    [inputCls, clrErr, t],
   );
-  const TI = ({
-    name,
-    value,
-    onChange,
-    placeholder,
-    type = "text",
-  }: {
-    name: string;
-    value: string;
-    onChange: (v: string) => void;
-    placeholder?: string;
-    type?: string;
-  }) => (
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => {
-        onChange(e.target.value);
-        clrErr(name);
-      }}
-      placeholder={placeholder}
-      className={inputCls(name)}
-    />
+  const TI = useCallback(
+    ({
+      name,
+      value,
+      onChange,
+      placeholder,
+      type = "text",
+    }: {
+      name: string;
+      value: string;
+      onChange: (v: string) => void;
+      placeholder?: string;
+      type?: string;
+    }) => (
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          clrErr(name);
+        }}
+        placeholder={placeholder}
+        className={inputCls(name)}
+      />
+    ),
+    [inputCls, clrErr],
   );
 
   const ProgressBar = () => (
