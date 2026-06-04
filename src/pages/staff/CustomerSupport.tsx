@@ -66,7 +66,7 @@ export function CustomerSupport() {
               phone: "0712345678",
               nida_number: "12345678901234567890",
             },
-          } as any);
+          });
         } else if (!isConfigured) {
           setError(lang === "sw" ? "Maombi hayajapatikana." : "Application not found.");
         }
@@ -189,7 +189,7 @@ export function CustomerSupport() {
         lang === "sw" ? "Malipo yamehusishwa kurejeshwa." : "Refund processed successfully.",
         "success",
       );
-      setApplication({ ...application, status: "refunded" as any });
+      setApplication({ ...application, status: "refunded" });
     }
     setProcessing(false);
   };

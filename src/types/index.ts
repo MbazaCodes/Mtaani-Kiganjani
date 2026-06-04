@@ -65,8 +65,14 @@ export interface FormFieldOption {
 
 export interface FormFieldShowIf {
   field: string;
-  value?: string;
-  values?: string[]; // for multi-value showIf conditions
+  value?: string | number | boolean;
+  values?: (string | number | boolean)[]; // for multi-value showIf conditions
+}
+
+export interface FormFieldValidation {
+  min?: number;
+  max?: number;
+  pattern?: string;
 }
 
 export interface FormField {
@@ -82,11 +88,18 @@ export interface FormField {
     | "header"
     | "phone"
     | "email"
+    | "tel"
+    | "time"
+    | "url"
+    | "datetime-local"
     | "checkbox"
+    | "nida_lookup"
     | "citizen_id_lookup";
   required?: boolean;
+  disabled?: boolean;
   placeholder?: string;
   options?: FormFieldOption[];
+  validation?: FormFieldValidation;
   showIf?: FormFieldShowIf;
   value?: string | number | boolean;
 }

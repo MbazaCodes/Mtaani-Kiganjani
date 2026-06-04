@@ -187,7 +187,7 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
           ? "Huduma ya kuingia haikujibu kwa wakati. Tafadhali jaribu tena."
           : "The sign-in service did not respond in time. Please try again.",
       );
-      (unreachableError as any).__isTimeout = true;
+      (unreachableError as Error & { __isTimeout?: boolean }).__isTimeout = true;
 
       let loginTimeoutId: ReturnType<typeof setTimeout> | undefined;
       const { data, error } = await Promise.race([
@@ -349,7 +349,7 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       const _e = err as { message?: string };
       console.error("Login error:", _e.message);
 
-      const isTimeout = !!(err as any).__isTimeout;
+      const isTimeout = !!(err as { __isTimeout?: boolean }).__isTimeout;
       const isNetworkError =
         isTimeout ||
         _e.message?.includes("Failed to fetch") ||
@@ -421,8 +421,9 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
         lang === "sw" ? `OTP imetumwa kwa ${formattedPhone}` : `OTP sent to ${formattedPhone}`,
         "success",
       );
-    } catch (err: any) {
-      showToast(err.message || "Failed to send OTP", "error");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to send OTP";
+      showToast(msg, "error");
     } finally {
       setOtpLoading(false);
     }
@@ -446,8 +447,9 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
         lang === "sw" ? `OTP imetumwa kwa ${emailAddr}` : `OTP sent to ${emailAddr}`,
         "success",
       );
-    } catch (err: any) {
-      showToast(err.message || "Failed to send OTP", "error");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to send OTP";
+      showToast(msg, "error");
     } finally {
       setOtpLoading(false);
     }
@@ -468,8 +470,9 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       if (error) throw error;
       showToast(lang === "sw" ? "Umeingia kwa mafanikio!" : "Logged in successfully!", "success");
       // Auth state change will redirect automatically
-    } catch (err: any) {
-      showToast(err.message || (lang === "sw" ? "OTP si sahihi" : "Invalid OTP code"), "error");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : (lang === "sw" ? "OTP si sahihi" : "Invalid OTP code");
+      showToast(msg, "error");
     } finally {
       setOtpLoading(false);
     }

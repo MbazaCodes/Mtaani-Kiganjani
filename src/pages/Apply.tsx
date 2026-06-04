@@ -138,7 +138,7 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
             <p className="text-sm text-stone-500 max-w-sm mx-auto">
               {L(
                 `Huduma ya "${selectedService.name}" ni kwa watumiaji waliosajiliwa na kuthibitishwa pekee.`,
-                `The "${(selectedService as any).name_en || selectedService.name}" service is only available to verified business users.`,
+                `The "${selectedService.name_en || selectedService.name}" service is only available to verified business users.`,
               )}
             </p>
           </div>
@@ -228,11 +228,11 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
         <h2 className="text-2xl font-heading font-black text-stone-900 uppercase tracking-tight mb-1">
           {lang === "sw"
             ? selectedService.name
-            : (selectedService as any).name_en || selectedService.name}
+            : selectedService.name_en || selectedService.name}
         </h2>
         <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-6">
           {lang === "sw"
-            ? (selectedService as any).name_en || selectedService.name
+            ? selectedService.name_en || selectedService.name
             : selectedService.name}
         </p>
 
@@ -272,7 +272,7 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
           <DynamicFormGenerator
             schema={
               userProfileForForm?.is_diaspora
-                ? (selectedService as any).diaspora_form_schema || selectedService.form_schema
+                ? selectedService.diaspora_form_schema || selectedService.form_schema
                 : selectedService.form_schema
             }
             onSubmit={onSubmit}

@@ -249,7 +249,7 @@ export function Agreement() {
     });
   const err = (k: string) => errors[k];
 
-  const handleDocSelect = (file: File, setter: (d: UploadedDoc) => void): string | null => {
+  const handleDocSelect = (file: File, setter: (d: UploadedDoc | null) => void): string | null => {
     if (!ALLOWED_DOCS.includes(file.type))
       return L("Aina ya faili haikushukuliwa. Tumia JPG, PNG, au PDF", "Invalid file type");
     if (file.size > MAX_DOC_SIZE)
@@ -373,7 +373,7 @@ export function Agreement() {
       setTermsAccepted(false);
       setDataConfirmed(false);
       fetchRegs();
-    } catch (e: any) {
+    } catch (e) {
       console.error("submit error", e);
       showToast(
         L("Imeshindwa kuwasilisha. Jaribu tena.", "Failed to submit. Please try again."),
@@ -993,7 +993,7 @@ export function Agreement() {
                           onClick={(e) => {
                             e.stopPropagation();
                             URL.revokeObjectURL(item.doc!.preview);
-                            item.setter(null as any);
+                            item.setter(null);
                           }}
                           className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full shrink-0"
                         >
@@ -1020,7 +1020,7 @@ export function Agreement() {
                     onChange={(e) => {
                       const f = e.target.files?.[0];
                       if (!f) return;
-                      const er = handleDocSelect(f, item.setter as any);
+                      const er = handleDocSelect(f, item.setter);
                       if (er) showToast(er, "error");
                       else clrErr(item.errKey);
                       e.target.value = "";

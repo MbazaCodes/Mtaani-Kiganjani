@@ -18,41 +18,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import type { AnyFormData } from "@/types";
-
-interface FormField {
-  name: string;
-  label: string;
-  type:
-    | "text"
-    | "textarea"
-    | "select"
-    | "date"
-    | "tel"
-    | "number"
-    | "file"
-    | "checkbox"
-    | "header"
-    | "time"
-    | "url"
-    | "datetime-local"
-    | "nida_lookup"
-    | "citizen_id_lookup";
-  placeholder?: string;
-  options?: { label: string; value: string }[];
-  required?: boolean;
-  disabled?: boolean;
-  validation?: {
-    min?: number;
-    max?: number;
-    pattern?: string;
-  };
-  showIf?: {
-    field: string;
-    value?: string | number | boolean;
-    values?: (string | number | boolean)[]; // Support for multiple values (OR condition)
-  };
-}
+import type { AnyFormData, FormField } from "@/types";
 
 interface UserProfile {
   id: string;
