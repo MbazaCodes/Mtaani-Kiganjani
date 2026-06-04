@@ -179,7 +179,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: userData },
+      options: {
+        data: userData,
+        // After the user clicks the confirmation link, Supabase returns them
+        // here. Uses the current origin so it works in dev (localhost) and in
+        // production (the Vercel domain) without hardcoding. The target URL
+        // must also be added to Supabase Auth > URL Configuration > Redirect URLs.
+        emailRedirectTo: `${window.location.origin}/confirm`,
+      },
     });
     return { error, user: data?.user };
   };
