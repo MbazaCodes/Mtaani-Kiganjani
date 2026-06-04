@@ -47,7 +47,12 @@ export function Applications({
   onRefresh,
   onResumeDraft,
 }: ApplicationsProps) {
-  const PDFDownloadLinkCompat = PDFDownloadLink as unknown as React.ComponentType<any>;
+  const PDFDownloadLinkCompat = PDFDownloadLink as unknown as React.ComponentType<{
+    document: React.ReactElement;
+    fileName: string;
+    className?: string;
+    children: (props: { loading: boolean; error: Error | null }) => React.ReactNode;
+  }>;
   const { lang } = useLanguage();
   const { showToast } = useToast();
   const { user } = useAuth();
@@ -141,8 +146,7 @@ export function Applications({
     if (!user) return;
     setProcessingId(app.id);
     try {
-      const serviceName =
-        app.service_name || app.services?.name || "";
+      const serviceName = app.service_name || app.services?.name || "";
       const fd = (app.form_data || {}) as Record<string, unknown>;
       const isBuyer =
         serviceName.includes("Mauzo") && String(fd.buyer_nida || "") === user.nida_number;
@@ -181,10 +185,7 @@ export function Applications({
         const serviceName =
           lang === "sw"
             ? app.service_name || app.services?.name || ""
-            : app.services?.name_en ||
-              app.service_name ||
-              app.services?.name ||
-              "";
+            : app.services?.name_en || app.service_name || app.services?.name || "";
         const matchesSearch =
           serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           app.application_number.toLowerCase().includes(searchTerm.toLowerCase());
@@ -549,10 +550,7 @@ export function Applications({
                     <p className="font-semibold text-emerald-700 hover:underline flex items-center gap-1.5 group-hover:text-emerald-800">
                       {lang === "sw"
                         ? app.service_name || app.services?.name || "—"
-                        : app.services?.name_en ||
-                          app.service_name ||
-                          app.services?.name ||
-                          "—"}
+                        : app.services?.name_en || app.service_name || app.services?.name || "—"}
                     </p>
                     <p className="text-[10px] text-stone-400 mt-0.5">
                       {lang === "sw" ? "Bonyeza kuona maelezo" : "Click to view details"}
@@ -654,10 +652,7 @@ export function Applications({
                   <p className="font-bold text-stone-900">
                     {lang === "sw"
                       ? app.service_name || app.services?.name || "—"
-                      : app.services?.name_en ||
-                        app.service_name ||
-                        app.services?.name ||
-                        "—"}
+                      : app.services?.name_en || app.service_name || app.services?.name || "—"}
                   </p>
                   <p className="text-xs text-stone-500 font-mono mt-1">{app.application_number}</p>
                 </div>
@@ -958,7 +953,9 @@ export function Applications({
                       )
                       .map(([key, val]) => {
                         if (val === null || val === undefined || val === "") return null;
-                        const label = key.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
+                        const label = key
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (ch) => ch.toUpperCase());
                         const display =
                           typeof val === "boolean"
                             ? val

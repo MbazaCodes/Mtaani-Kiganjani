@@ -339,9 +339,7 @@ export function CustomerSupport() {
                       <span className="text-sm font-bold text-stone-500">
                         {lang === "sw" ? "Huduma" : "Service"}
                       </span>
-                      <span className="font-bold text-stone-900">
-                        {application.services?.name}
-                      </span>
+                      <span className="font-bold text-stone-900">{application.services?.name}</span>
                     </div>
                     <div className="flex justify-between items-center border-b border-stone-200 pb-3">
                       <span className="text-sm font-bold text-stone-500">
@@ -382,8 +380,7 @@ export function CustomerSupport() {
                         {lang === "sw" ? "Jina" : "Name"}
                       </span>
                       <span className="font-bold text-stone-900">
-                        {application.users?.first_name}{" "}
-                        {application.users?.last_name}
+                        {application.users?.first_name} {application.users?.last_name}
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-b border-stone-200 pb-3">

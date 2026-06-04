@@ -492,7 +492,17 @@ export function CitizenManagement() {
           </div>
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
+            onChange={(e) =>
+              setFilter(
+                e.target.value as
+                  | "all"
+                  | "verified"
+                  | "unverified"
+                  | "sellers"
+                  | "landlords"
+                  | "brokers",
+              )
+            }
             aria-label={lang === "sw" ? "Chuja kwa hali" : "Filter by verification status"}
             title={lang === "sw" ? "Chuja kwa hali" : "Filter by verification status"}
             className="h-12 px-4 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 transition-all font-medium"

@@ -1119,7 +1119,7 @@ export function Profile() {
       };
 
       const sensitiveUpdates: { field: string; oldValue: string; newValue: string }[] = [];
-      const directUpdates: Record<string, any> = {};
+      const directUpdates: Record<string, string | number | boolean | null> = {};
 
       // Get current user data for comparison
       const { data: currentUser } = await supabase

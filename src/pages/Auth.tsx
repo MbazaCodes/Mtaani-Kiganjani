@@ -471,7 +471,8 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       showToast(lang === "sw" ? "Umeingia kwa mafanikio!" : "Logged in successfully!", "success");
       // Auth state change will redirect automatically
     } catch (err) {
-      const msg = err instanceof Error ? err.message : (lang === "sw" ? "OTP si sahihi" : "Invalid OTP code");
+      const msg =
+        err instanceof Error ? err.message : lang === "sw" ? "OTP si sahihi" : "Invalid OTP code";
       showToast(msg, "error");
     } finally {
       setOtpLoading(false);

@@ -528,7 +528,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
             item.users && Array.isArray(item.users) && item.users.length > 0
               ? `${item.users[0].first_name} ${item.users[0].last_name}`
               : item.users && !Array.isArray(item.users)
-                ? `${(item.users as any).first_name} ${(item.users as any).last_name}`
+                ? `${(item.users as { first_name?: string; last_name?: string }).first_name} ${(item.users as { first_name?: string; last_name?: string }).last_name}`
                 : "System",
           timestamp: item.created_at,
           status: determineActivityStatus(item.action),
@@ -631,7 +631,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
             title={lang === "sw" ? "Chagua kipindi cha wakati" : "Select time range"}
             aria-label={lang === "sw" ? "Kipindi cha wakati" : "Time range"}
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as any)}
+            onChange={(e) => setTimeRange(e.target.value as "today" | "week" | "month" | "year")}
             className="h-12 px-4 bg-white border border-stone-200 rounded-xl font-medium text-stone-600 focus:ring-2 focus:ring-emerald-500 transition-all"
           >
             <option value="today">{lang === "sw" ? "Leo" : "Today"}</option>

@@ -242,8 +242,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
                     <div>
                       <p className="font-bold text-stone-900">{app.services?.name}</p>
                       <p className="text-xs text-stone-400 font-medium">
-                        {app.users?.first_name} {app.users?.last_name} •{" "}
-                        {app.application_number}
+                        {app.users?.first_name} {app.users?.last_name} • {app.application_number}
                       </p>
                     </div>
                   </div>

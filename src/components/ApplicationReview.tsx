@@ -869,7 +869,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                 )}
 
                 {/* Fee */}
-                {(selected.form_data as any)?.total_fee > 0 && (
+                {Number((selected.form_data as Record<string, unknown>)?.total_fee ?? 0) > 0 && (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex justify-between items-center">
                     <span className="text-xs font-bold text-emerald-800">{L("Ada:", "Fee:")}</span>
                     <span className="text-lg font-black text-emerald-700">

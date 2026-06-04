@@ -38,7 +38,7 @@ interface Service {
   currency?: string;
   active: boolean;
   form_schema: FormField[];
-  document_template?: Record<string, any>;
+  document_template?: Record<string, unknown>;
   processing_time?: number; // in days
   required_documents?: string[];
   category?: string;

@@ -226,14 +226,10 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
         <div className="h-px bg-stone-100 w-24 mx-auto mb-6" />
 
         <h2 className="text-2xl font-heading font-black text-stone-900 uppercase tracking-tight mb-1">
-          {lang === "sw"
-            ? selectedService.name
-            : selectedService.name_en || selectedService.name}
+          {lang === "sw" ? selectedService.name : selectedService.name_en || selectedService.name}
         </h2>
         <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-6">
-          {lang === "sw"
-            ? selectedService.name_en || selectedService.name
-            : selectedService.name}
+          {lang === "sw" ? selectedService.name_en || selectedService.name : selectedService.name}
         </p>
 
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100">
