@@ -68,11 +68,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (error) {
+        const pgError = error as { code?: string; message: string; details?: string; hint?: string };
         console.error("Error fetching user profile:", {
-          code: (error as any).code,
-          message: error.message,
-          details: (error as any).details,
-          hint: (error as any).hint,
+          code: pgError.code,
+          message: pgError.message,
+          details: pgError.details,
+          hint: pgError.hint,
           userId,
         });
         return null;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Kibari cha Ujezi Mdogo — Minor Construction Permit
  */
@@ -75,7 +74,7 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
   lang,
   qrDataUrl,
 }) => {
-  const user = (application as any).users;
+  const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
   const qr = qrDataUrl || generateQRCodeUrl(application, "CP");
   const sw = lang === "sw";

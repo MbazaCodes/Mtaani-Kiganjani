@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Kibari cha Matukio / Sherehe — Event / Celebration Permit
  */
@@ -63,7 +62,7 @@ const ls = StyleSheet.create({
 });
 
 export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang, qrDataUrl }) => {
-  const user = (application as any).users;
+  const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
   const qr = qrDataUrl || generateQRCodeUrl(application, "KIB");
   const sw = lang === "sw";

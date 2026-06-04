@@ -146,8 +146,8 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
 
   const [vals, setVals] = useState<FormValues>({
     application_type: "SELF",
-    ct_id_reference: (userProfile as any)?.citizen_id || "",
-    has_resident_id: (userProfile as any)?.citizen_id ? "YES" : "",
+    ct_id_reference: userProfile?.citizen_id || "",
+    has_resident_id: userProfile?.citizen_id ? "YES" : "",
     minor_full_name: "",
     minor_dob: "",
     minor_relationship: "",

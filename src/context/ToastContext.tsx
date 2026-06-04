@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 interface ToastContextType {
   showToast: (message: string, type?: "success" | "error" | "warning" | "info") => void;
   showPromise: (
-    promise: Promise<any>,
+    promise: Promise<unknown>,
     messages: { pending: string; success: string; error: string },
   ) => void;
 }
@@ -45,7 +45,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 
   const showPromise = useCallback(
-    (promise: Promise<any>, messages: { pending: string; success: string; error: string }) => {
+    (promise: Promise<unknown>, messages: { pending: string; success: string; error: string }) => {
       return toast.promise(promise, messages, {
         position: "top-right",
         autoClose: 5000,

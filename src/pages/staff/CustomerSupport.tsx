@@ -340,7 +340,7 @@ export function CustomerSupport() {
                         {lang === "sw" ? "Huduma" : "Service"}
                       </span>
                       <span className="font-bold text-stone-900">
-                        {(application as any).services?.name}
+                        {application.services?.name}
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-b border-stone-200 pb-3">
@@ -366,7 +366,7 @@ export function CustomerSupport() {
                         {lang === "sw" ? "Gharama" : "Fee"}
                       </span>
                       <span className="font-bold text-stone-900">
-                        {formatCurrency((application as any).services?.fee || 0, currency)}
+                        {formatCurrency(application.services?.fee || 0, currency)}
                       </span>
                     </div>
                   </div>
@@ -382,8 +382,8 @@ export function CustomerSupport() {
                         {lang === "sw" ? "Jina" : "Name"}
                       </span>
                       <span className="font-bold text-stone-900">
-                        {(application as any).users?.first_name}{" "}
-                        {(application as any).users?.last_name}
+                        {application.users?.first_name}{" "}
+                        {application.users?.last_name}
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-b border-stone-200 pb-3">
@@ -391,7 +391,7 @@ export function CustomerSupport() {
                         {lang === "sw" ? "Simu" : "Phone"}
                       </span>
                       <span className="font-bold text-stone-900">
-                        {(application as any).users?.phone || "-"}
+                        {application.users?.phone || "-"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -399,7 +399,7 @@ export function CustomerSupport() {
                         {lang === "sw" ? "NIDA" : "NIDA"}
                       </span>
                       <span className="font-bold text-stone-900">
-                        {(application as any).users?.nida_number || "-"}
+                        {application.users?.nida_number || "-"}
                       </span>
                     </div>
                   </div>

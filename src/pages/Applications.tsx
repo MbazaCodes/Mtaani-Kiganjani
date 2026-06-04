@@ -83,9 +83,9 @@ export function Applications({
   };
 
   const getPaymentAmount = (app: Application): number => {
-    const serviceFee = (app as any).services?.fee || 0;
+    const serviceFee = app.services?.fee || 0;
     const formServiceFee = app.form_data?.service_fee;
-    const extraAddressFee = (app as any).services?.extra_address_fee || 0;
+    const extraAddressFee = app.services?.extra_address_fee || 0;
 
     let baseFee = 0;
     if (serviceFee > 0) {
@@ -142,7 +142,7 @@ export function Applications({
     setProcessingId(app.id);
     try {
       const serviceName =
-        app.service_name || app.service_name || (app as any).services?.name || "—" || "";
+        app.service_name || app.services?.name || "";
       const fd = (app.form_data || {}) as Record<string, unknown>;
       const isBuyer =
         serviceName.includes("Mauzo") && String(fd.buyer_nida || "") === user.nida_number;
@@ -180,10 +180,10 @@ export function Applications({
       .filter((app) => {
         const serviceName =
           lang === "sw"
-            ? app.service_name || (app as any).services?.name || ""
-            : (app as any).services?.name_en ||
+            ? app.service_name || app.services?.name || ""
+            : app.services?.name_en ||
               app.service_name ||
-              (app as any).services?.name ||
+              app.services?.name ||
               "";
         const matchesSearch =
           serviceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -548,10 +548,10 @@ export function Applications({
                   <td className="px-3 sm:px-6 py-3 sm:py-4">
                     <p className="font-semibold text-emerald-700 hover:underline flex items-center gap-1.5 group-hover:text-emerald-800">
                       {lang === "sw"
-                        ? app.service_name || (app as any).services?.name || "—"
-                        : (app as any).services?.name_en ||
+                        ? app.service_name || app.services?.name || "—"
+                        : app.services?.name_en ||
                           app.service_name ||
-                          (app as any).services?.name ||
+                          app.services?.name ||
                           "—"}
                     </p>
                     <p className="text-[10px] text-stone-400 mt-0.5">
@@ -653,10 +653,10 @@ export function Applications({
                 <div>
                   <p className="font-bold text-stone-900">
                     {lang === "sw"
-                      ? app.service_name || (app as any).services?.name || "—"
-                      : (app as any).services?.name_en ||
+                      ? app.service_name || app.services?.name || "—"
+                      : app.services?.name_en ||
                         app.service_name ||
-                        (app as any).services?.name ||
+                        app.services?.name ||
                         "—"}
                   </p>
                   <p className="text-xs text-stone-500 font-mono mt-1">{app.application_number}</p>
@@ -811,7 +811,7 @@ export function Applications({
                     {lang === "sw" ? "Maombi" : "Application"}
                   </p>
                   <h2 className="text-lg font-black text-stone-900">
-                    {selectedApp.service_name || (selectedApp as any).services?.name || "—"}
+                    {selectedApp.service_name || selectedApp.services?.name || "—"}
                   </h2>
                   <p className="text-xs text-stone-500 font-mono mt-0.5">
                     {selectedApp.application_number}
@@ -858,13 +858,13 @@ export function Applications({
                         </p>
                       </div>
                     )}
-                    {(selectedApp as any).paid_at && (
+                    {selectedApp.paid_at && (
                       <div>
                         <p className="text-xs text-stone-400 mb-0.5">
                           {lang === "sw" ? "Tarehe ya Malipo" : "Paid"}
                         </p>
                         <p className="font-semibold text-emerald-600">
-                          {new Date((selectedApp as any).paid_at).toLocaleDateString()}
+                          {new Date(selectedApp.paid_at).toLocaleDateString()}
                         </p>
                       </div>
                     )}
@@ -958,7 +958,7 @@ export function Applications({
                       )
                       .map(([key, val]) => {
                         if (val === null || val === undefined || val === "") return null;
-                        const label = key.replace(/_/g, " ").replace(/\w/g, (c) => c.toUpperCase());
+                        const label = key.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
                         const display =
                           typeof val === "boolean"
                             ? val
@@ -1031,7 +1031,7 @@ export function Applications({
       {previewApp && (
         <DocumentPreview
           application={previewApp}
-          service={(previewApp as any).services}
+          service={previewApp.services}
           onClose={() => setPreviewApp(null)}
         />
       )}

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Makubaliano ya Mauziano / Pangisha — Sales / Rental Agreement
  */
@@ -69,7 +68,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
   lang,
   qrDataUrl,
 }) => {
-  const user = (application as any).users;
+  const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
   const qr = qrDataUrl || generateQRCodeUrl(application, "MUZ");
   const sw = lang === "sw";

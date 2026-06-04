@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Risiti ya Malipo — Official Payment Receipt
  */
@@ -58,7 +57,7 @@ const PAYMENT_METHODS: Record<string, { sw: string; en: string }> = {
 };
 
 export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang, qrDataUrl }) => {
-  const user = (application as any).users;
+  const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
   const pd = (fd.payment_data || application.payment_data || {}) as Record<
     string,
@@ -67,7 +66,7 @@ export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang,
   const qr = qrDataUrl || generateQRCodeUrl(application, "RCP");
   const sw = lang === "sw";
 
-  const amount = Number(pd.amount || fd.service_fee || (application as any).services?.fee || 0);
+  const amount = Number(pd.amount || fd.service_fee || application.services?.fee || 0);
   const method = String(pd.payment_method || "mpesa");
   const methodLabel = (PAYMENT_METHODS[method.toLowerCase()] || { sw: method, en: method })[lang];
   const txnId = String(pd.transaction_id || application.application_number || "—");

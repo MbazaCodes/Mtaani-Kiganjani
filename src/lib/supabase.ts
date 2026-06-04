@@ -155,6 +155,10 @@ export interface Application {
   issued_by?: string;
   verified_by?: string;
   verified_at?: string;
+  // Optional joined relations (populated by Supabase select with embedded resources)
+  services?: Partial<Service> | null;
+  users?: Partial<UserProfile> | null;
+  second_party_user_id?: string;
 }
 
 export type UserRole = "citizen" | "staff" | "admin";

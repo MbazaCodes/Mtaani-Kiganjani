@@ -98,7 +98,7 @@ export const CertificatePDFDocument: React.FC<{
 // ── Inline download button ───────────────────────────────────────────────────
 export const DocumentRenderer: React.FC<{
   application: Application;
-  service: Service;
+  service?: Partial<Service> | null;
   lang?: "sw" | "en";
 }> = ({ application, lang = "sw" }) => {
   const { Component, code, filenamePrefix } = resolvePDF(application);
@@ -140,7 +140,7 @@ export const DocumentRenderer: React.FC<{
 // ── Document download modal (preview removed — PDFViewer causes crashes) ────
 export const DocumentPreview: React.FC<{
   application: Application;
-  service: Service;
+  service?: Partial<Service> | null;
   lang?: "sw" | "en";
   onClose: () => void;
 }> = ({ application, lang = "sw", onClose }) => {

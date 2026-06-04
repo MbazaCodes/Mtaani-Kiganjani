@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Utambulisho wa Mkazi — Residency Certificate
  * Layout: A4, government letterhead, photo top-left, QR bottom-right
@@ -19,7 +18,7 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
   lang,
   qrDataUrl,
 }) => {
-  const user = (application as any).users;
+  const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
   const qr = qrDataUrl || generateQRCodeUrl(application, "MKZ");
   const s = commonStyles;

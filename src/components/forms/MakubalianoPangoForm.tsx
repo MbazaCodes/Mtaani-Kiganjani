@@ -169,7 +169,7 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
     property_ward: userProfile?.ward || "",
     property_district: userProfile?.district || "",
     property_region: userProfile?.region || "",
-    house_number: (userProfile as any)?.house_number || "",
+    house_number: userProfile?.house_number || "",
     floor_level: "",
     num_rooms: "",
     property_description: "",

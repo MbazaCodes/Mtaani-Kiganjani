@@ -152,7 +152,7 @@ export const KibariUjeziMdogoForm: React.FC<FormProps> = ({
     property_district: userProfile?.district || "",
     property_ward: userProfile?.ward || "",
     property_street: userProfile?.street || "",
-    house_number: (userProfile as any)?.house_number || "",
+    house_number: userProfile?.house_number || "",
     plot_number: "",
     owner_name: `${userProfile?.first_name || ""} ${userProfile?.last_name || ""}`.trim(),
     owner_phone: userProfile?.phone || "",

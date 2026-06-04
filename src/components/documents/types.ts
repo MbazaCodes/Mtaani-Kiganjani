@@ -373,7 +373,7 @@ export const generateQRCodeUrl = (application: Application, serviceCode: string)
 };
 
 export const formatFullName = (
-  user: Pick<UserProfile, "first_name" | "middle_name" | "last_name"> | null | undefined,
+  user: Partial<Pick<UserProfile, "first_name" | "middle_name" | "last_name">> | null | undefined,
 ): string => {
   if (!user) return "N/A";
   return (

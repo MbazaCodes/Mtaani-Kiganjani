@@ -62,7 +62,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
   lang,
   qrDataUrl,
 }) => {
-  const user = (application as any).users;
+  const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
   const qr = qrDataUrl || generateQRCodeUrl(application, "IL");
   const sw = lang === "sw";

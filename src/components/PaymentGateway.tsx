@@ -465,7 +465,9 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                       if (navigator.share && navigator.canShare?.(shareData)) {
                         try {
                           await navigator.share(shareData);
-                        } catch {}
+                        } catch {
+                          /* user cancelled share */
+                        }
                       } else {
                         await navigator.clipboard.writeText(shareData.url);
                         alert(lang === "sw" ? "Kiungo kimekopwa!" : "Link copied!");

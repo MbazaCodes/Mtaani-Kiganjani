@@ -240,9 +240,9 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
                       <FileText size={20} />
                     </div>
                     <div>
-                      <p className="font-bold text-stone-900">{(app as any).services?.name}</p>
+                      <p className="font-bold text-stone-900">{app.services?.name}</p>
                       <p className="text-xs text-stone-400 font-medium">
-                        {(app as any).users?.first_name} {(app as any).users?.last_name} •{" "}
+                        {app.users?.first_name} {app.users?.last_name} •{" "}
                         {app.application_number}
                       </p>
                     </div>

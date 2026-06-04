@@ -806,7 +806,7 @@ export function Profile() {
     if (!phone) return { isValid: true, message: "" };
 
     // Strip spaces and dashes for validation
-    const clean = phone.replace(/[\s\-]/g, "");
+    const clean = phone.replace(/[\s-]/g, "");
 
     // Tanzania: +2556XXXXXXXX, +2557XXXXXXXX, 06XXXXXXXX, 07XXXXXXXX (9 local digits after 0/+255)
     const tzFull = /^\+255[67]\d{8}$/; // +255 6/7 + 8 digits = 13 chars
@@ -829,7 +829,7 @@ export function Profile() {
   // Normalise phone to +255XXXXXXXXX before saving
   const normalisePhone = (phone: string): string => {
     if (!phone) return phone;
-    const clean = phone.replace(/[\s\-]/g, "");
+    const clean = phone.replace(/[\s-]/g, "");
     if (/^0[67]\d{8}$/.test(clean)) return "+255" + clean.slice(1);
     return clean;
   };
