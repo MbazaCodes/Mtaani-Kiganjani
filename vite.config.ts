@@ -21,11 +21,17 @@ export default defineConfig({
           router: ["react-router-dom"],
           supabase: ["@supabase/supabase-js"],
           ui: ["framer-motion", "lucide-react"],
+          pdf: ["@react-pdf/renderer"],
         },
       },
     },
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-router-dom"],
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@react-pdf/renderer",
+    ],
   },
 });
