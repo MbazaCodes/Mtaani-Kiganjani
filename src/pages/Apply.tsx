@@ -14,7 +14,7 @@ import { useRouterView } from "@/components/layout/AppShell";
 interface ApplyProps {
   selectedService: Service;
   onBack: () => void;
-  onSubmit: (formData: Record<string, unknown>) => void;
+  onSubmit: (formData: Record<string, unknown>, files?: File[]) => void;
   draft?: ApplicationDraft | null;
 }
 

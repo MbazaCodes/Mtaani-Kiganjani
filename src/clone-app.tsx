@@ -130,8 +130,8 @@ function ApplyRoute() {
         setSelectedDraft(null);
         setView("services");
       }}
-      onSubmit={async (formData) => {
-        await submitApplication(formData as import("./types").AnyFormData);
+      onSubmit={async (formData, files) => {
+        await submitApplication(formData as import("./types").AnyFormData, files);
         setView("applications");
       }}
       draft={selectedDraft}

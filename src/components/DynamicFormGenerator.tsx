@@ -38,12 +38,7 @@ interface UserProfile {
 interface DynamicFormProps {
   schema: FormField[];
   // data is typed as Record internally (dynamic Zod schema); cast to AnyFormData at call site
-  onSubmit: (
-    data: Record<string, unknown>,
-    attachments: string[],
-    applicantType: string,
-    representativeName?: string,
-  ) => void;
+  onSubmit: (data: Record<string, unknown>, files?: File[]) => void;
   initialData?: Record<string, unknown>;
   isLoading?: boolean;
   lang?: "sw" | "en";
@@ -477,19 +472,18 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
     };
 
     // Include all file names in attachments
-    const allAttachments = [
-      ...attachments,
-      ...Object.values(fieldFiles)
-        .flat()
-        .map((f) => f.name),
-    ];
+    // Collect the actual uploaded File objects so they can be persisted/reviewed
+    const allFiles: File[] = Object.values(fieldFiles).flat();
+    const fileTypes = Object.entries(fieldFiles).flatMap(([key, fs]) => fs.map(() => key));
 
-    onSubmit(
-      enrichedData,
-      allAttachments,
-      applicantType,
-      applicantType !== "self" ? representativeName : undefined,
-    );
+    const dataWithMeta = {
+      ...enrichedData,
+      applicant_type: applicantType,
+      representative_name: applicantType !== "self" ? representativeName : undefined,
+      document_types: fileTypes,
+    };
+
+    onSubmit(dataWithMeta, allFiles);
   };
 
   const onFormError = (errors: Record<string, unknown>) => {
@@ -1323,12 +1317,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
 interface DynamicFormProps {
   schema: FormField[];
   // data is typed as Record internally (dynamic Zod schema); cast to AnyFormData at call site
-  onSubmit: (
-    data: Record<string, unknown>,
-    attachments: string[],
-    applicantType: string,
-    representativeName?: string,
-  ) => void;
+  onSubmit: (data: Record<string, unknown>, files?: File[]) => void;
   initialData?: Record<string, unknown>;
   isLoading?: boolean;
   lang?: "sw" | "en";

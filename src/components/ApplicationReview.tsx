@@ -142,7 +142,9 @@ const fmtVal = (v: unknown): string => {
 };
 
 const isDocUrl = (v: unknown): boolean =>
-  typeof v === "string" && /^https?:\/\//.test(v) && /\.(jpg|jpeg|png|webp|pdf)$/i.test(v);
+  typeof v === "string" &&
+  ((/^https?:\/\//.test(v) && /\.(jpg|jpeg|png|webp|pdf)$/i.test(v)) ||
+    /^data:(image\/(jpeg|jpg|png|webp)|application\/pdf);base64,/i.test(v));
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
@@ -427,8 +429,21 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
     const entries = Object.entries(selected.form_data as Record<string, unknown>);
     const fields: [string, unknown][] = [];
     const docs: { key: string; url: string }[] = [];
+
+    // Structured uploads saved by submitApplication (selfie, id_front, etc.)
+    const uploaded = (selected.form_data as Record<string, unknown>).uploaded_documents;
+    if (Array.isArray(uploaded)) {
+      uploaded.forEach((d) => {
+        const doc = d as { type?: string; name?: string; dataUrl?: string };
+        if (doc?.dataUrl) {
+          docs.push({ key: doc.type || doc.name || "document", url: doc.dataUrl });
+        }
+      });
+    }
+
     for (const [k, v] of entries) {
       if (HIDDEN_FORM_FIELDS.has(k)) continue;
+      if (k === "uploaded_documents") continue; // already handled above
       if (isDocUrl(v)) {
         docs.push({ key: k, url: v as string });
       } else if (Array.isArray(v) && v.length > 0 && v.every(isDocUrl)) {
@@ -831,7 +846,9 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                     </div>
                     <div className="p-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {formDataEntries.docs.map((doc, i) => {
-                        const isPdf = doc.url.toLowerCase().endsWith(".pdf");
+                        const isPdf =
+                          doc.url.toLowerCase().endsWith(".pdf") ||
+                          doc.url.startsWith("data:application/pdf");
                         return (
                           <a
                             key={i}

@@ -18,7 +18,7 @@ interface AppContextType {
   setSelectedService: (s: Service | null) => void;
   selectedDraft: ApplicationDraft | null;
   setSelectedDraft: (d: ApplicationDraft | null) => void;
-  submitApplication: (formData: AnyFormData) => Promise<void>;
+  submitApplication: (formData: AnyFormData, files?: File[]) => Promise<void>;
   // Payment flow
   payingApplication: Application | null;
   handleInitiatePayment: (app: Application) => void;
@@ -52,7 +52,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const submitApplication = useCallback(
-    async (formData: AnyFormData) => {
+    async (formData: AnyFormData, files?: File[]) => {
       if (!user || !selectedService) {
         showToast(
           lang === "sw"
@@ -78,6 +78,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             .toUpperCase() || "APP"
         );
       };
+
+      // Convert uploaded files to base64 data URLs and attach to form_data so
+      // staff can review them. Matches the app's existing base64-in-DB pattern
+      // (profile photos / user_documents use the same approach).
+      const fileToDataUrl = (file: File): Promise<string> =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+      if (files && files.length > 0) {
+        const docTypes = (formData.document_types as string[] | undefined) ?? [];
+        const uploaded: { type: string; name: string; dataUrl: string; size: number }[] = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (file.size > 4_000_000) continue; // skip files >4MB to avoid bloating the row
+          try {
+            const dataUrl = await fileToDataUrl(file);
+            uploaded.push({
+              type: docTypes[i] ?? "support",
+              name: file.name,
+              dataUrl,
+              size: file.size,
+            });
+          } catch {
+            // skip unreadable file
+          }
+        }
+        (formData as Record<string, unknown>).uploaded_documents = uploaded;
+      }
 
       const now = new Date();
       const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
