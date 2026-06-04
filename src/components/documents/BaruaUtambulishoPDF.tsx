@@ -87,11 +87,15 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
       ? String(fd.minor_full_name || "")
       : appType === "BEHALF"
         ? String(fd.behalf_full_name || "")
-        : formatFullName(user);
+        : formatFullName(user) !== "N/A"
+          ? formatFullName(user)
+          : fd.applicant_name || "N/A";
   const isSelf = appType === "SELF";
 
   // Genitive form for context
-  const subjectName = beneficiaryName || formatFullName(user);
+  const subjectName =
+    beneficiaryName ||
+    (formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A");
 
   return (
     <Document>
@@ -104,8 +108,8 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={s.country}>JAMHURI YA MUUNGANO WA TANZANIA</Text>
           <Text style={s.office}>OFISI YA RAIS — TAMISEMI</Text>
           <Text style={s.council}>
-            {user?.ward
-              ? `OFISI YA SERIKALI YA MTAA — KATA YA ${String(user.ward).toUpperCase()}`
+            {user?.ward || fd.applicant_ward
+              ? `OFISI YA SERIKALI YA MTAA — KATA YA ${String(user?.ward || fd.applicant_ward).toUpperCase()}`
               : "OFISI YA SERIKALI YA MTAA"}
           </Text>
           <View style={s.divider} />
@@ -139,8 +143,8 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={[ls.recipientLine, { fontWeight: "bold" }]}>
             {firstInst.name || (sw ? "TAASISI HUSIKA" : "CONCERNED INSTITUTION")}
           </Text>
-          {firstInst.department ? (
-            <Text style={ls.recipientLine}>{String(firstInst.department ?? "")}</Text>
+          {firstInst.department && !firstInst.department.includes("-") ? (
+            <Text style={ls.recipientLine}>{String(firstInst.department)}</Text>
           ) : (
             <View />
           )}
@@ -163,20 +167,20 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
         {/* Body */}
         <Text style={s.body}>
           {sw
-            ? `Ofisi ya Serikali ya Mtaa, Kata ya ${user?.ward || "_______"}, Wilaya ya ${user?.district || "_______"}, inathibitisha kuwa ndugu ${subjectName} ni mkazi halali wa mtaa huu, na ametambuliwa rasmi katika kumbukumbu za Ofisi hii.`
-            : `The Local Government Office of ${user?.ward || "_______"} Ward, ${user?.district || "_______"} District, hereby confirms that ${subjectName} is a legitimate resident of this locality and is officially registered in our records.`}
+            ? `Ofisi ya Serikali ya Mtaa, Kata ya ${user?.ward || fd.applicant_ward || "_______"}, Wilaya ya ${user?.district || fd.applicant_district || "_______"}, inathibitisha kuwa ndugu ${subjectName} ni mkazi halali wa mtaa huu, na ametambuliwa rasmi katika kumbukumbu za Ofisi hii.`
+            : `The Local Government Office of ${user?.ward || fd.applicant_ward || "_______"} Ward, ${user?.district || fd.applicant_district || "_______"} District, hereby confirms that ${subjectName} is a legitimate resident of this locality and is officially registered in our records.`}
         </Text>
 
         <Text style={s.body}>
           {sw
             ? `Barua hii imetolewa kwa ajili ya ${purposeLabel}${firstInst.name ? ` katika taasisi ya ${firstInst.name}` : ""}. ${
                 !isSelf
-                  ? `Muombaji wa barua hii ni ${formatFullName(user)}${appType === "MINOR" ? ", mlezi wa mtoto." : ", anayemsaidia ndugu yake."}`
+                  ? `Muombaji wa barua hii ni ${formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A"}${appType === "MINOR" ? ", mlezi wa mtoto." : ", anayemsaidia ndugu yake."}`
                   : ""
               }`
             : `This letter has been issued for the purpose of ${purposeLabel}${firstInst.name ? ` at ${firstInst.name}` : ""}. ${
                 !isSelf
-                  ? `The applicant of this letter is ${formatFullName(user)}${appType === "MINOR" ? ", the guardian of the child." : ", representing on their behalf."}`
+                  ? `The applicant of this letter is ${formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A"}${appType === "MINOR" ? ", the guardian of the child." : ", representing on their behalf."}`
                   : ""
               }`}
         </Text>
@@ -200,7 +204,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
             {isSelf ? (
               <View style={s.infoRow}>
                 <Text style={s.infoLabel}>NIDA:</Text>
-                <Text style={s.infoValue}>{user?.nida_number || "N/A"}</Text>
+                <Text style={s.infoValue}>{user?.nida_number || fd.applicant_nida || "N/A"}</Text>
               </View>
             ) : (
               <View />
@@ -208,7 +212,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
             {isSelf ? (
               <View style={s.infoRow}>
                 <Text style={s.infoLabel}>{sw ? "Simu:" : "Phone:"}</Text>
-                <Text style={s.infoValue}>{user?.phone || "N/A"}</Text>
+                <Text style={s.infoValue}>{user?.phone || fd.applicant_phone || "N/A"}</Text>
               </View>
             ) : (
               <View />
@@ -217,15 +221,15 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
           <View style={s.colRight}>
             <View style={s.infoRow}>
               <Text style={s.infoLabel}>{sw ? "Mkoa:" : "Region:"}</Text>
-              <Text style={s.infoValue}>{user?.region || "N/A"}</Text>
+              <Text style={s.infoValue}>{user?.region || fd.applicant_region || "N/A"}</Text>
             </View>
             <View style={s.infoRow}>
               <Text style={s.infoLabel}>{sw ? "Wilaya:" : "District:"}</Text>
-              <Text style={s.infoValue}>{user?.district || "N/A"}</Text>
+              <Text style={s.infoValue}>{user?.district || fd.applicant_district || "N/A"}</Text>
             </View>
             <View style={s.infoRow}>
               <Text style={s.infoLabel}>{sw ? "Kata:" : "Ward:"}</Text>
-              <Text style={s.infoValue}>{user?.ward || "N/A"}</Text>
+              <Text style={s.infoValue}>{user?.ward || fd.applicant_ward || "N/A"}</Text>
             </View>
           </View>
         </View>

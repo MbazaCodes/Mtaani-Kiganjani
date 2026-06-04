@@ -245,6 +245,8 @@ export function DepartmentManagement() {
   // Add staff to department
   const [showAddStaff, setShowAddStaff] = useState(false);
   const [staffEmail, setStaffEmail] = useState("");
+  const [staffPassword, setStaffPassword] = useState("Mtaani@2026");
+  const [staffName, setStaffName] = useState("");
   const [staffRole, setStaffRole] = useState<"head" | "officer" | "clerk">("officer");
   const [addingStaff, setAddingStaff] = useState(false);
 
@@ -431,6 +433,8 @@ export function DepartmentManagement() {
       }
       showToast(L("Mtumiaji ameongezwa!", "Staff added to department!"), "success");
       setStaffEmail("");
+      setStaffName("");
+      setStaffPassword("Mtaani@2026");
       fetchStaff(expandedId);
     } catch (err: unknown) {
       const e = err as { message?: string };
@@ -633,36 +637,61 @@ export function DepartmentManagement() {
 
                     {/* Add staff form */}
                     {showAddStaff && (
-                      <div className="flex flex-col sm:flex-row gap-2 mb-4 p-3 bg-white rounded-xl border border-stone-200">
-                        <input
-                          type="email"
-                          placeholder={L("Email ya mtumiaji...", "User email...")}
-                          value={staffEmail}
-                          onChange={(e) => setStaffEmail(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
-                        />
-                        <select
-                          value={staffRole}
-                          onChange={(e) =>
-                            setStaffRole(e.target.value as "head" | "officer" | "clerk")
-                          }
-                          className="px-3 py-2 border border-stone-200 rounded-lg text-sm"
-                        >
-                          <option value="head">{L("Mkuu", "Head")}</option>
-                          <option value="officer">{L("Afisa", "Officer")}</option>
-                          <option value="clerk">{L("Karani", "Clerk")}</option>
-                        </select>
+                      <div className="mb-4 p-4 bg-white rounded-xl border border-stone-200 space-y-3">
+                        <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                          {L("Ongeza Mfanyakazi Mpya", "Add Staff Member")}
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            placeholder={L("Jina kamili...", "Full name...")}
+                            value={staffName}
+                            onChange={(e) => setStaffName(e.target.value)}
+                            className="px-3 py-2.5 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                          />
+                          <input
+                            type="email"
+                            placeholder={L("Email...", "Email address...")}
+                            value={staffEmail}
+                            onChange={(e) => setStaffEmail(e.target.value)}
+                            className="px-3 py-2.5 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                          />
+                          <input
+                            type="text"
+                            placeholder={L("Nenosiri la msingi", "Default password")}
+                            value={staffPassword}
+                            onChange={(e) => setStaffPassword(e.target.value)}
+                            className="px-3 py-2.5 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 font-mono"
+                          />
+                          <select
+                            value={staffRole}
+                            onChange={(e) =>
+                              setStaffRole(e.target.value as "head" | "officer" | "clerk")
+                            }
+                            className="px-3 py-2.5 border border-stone-200 rounded-lg text-sm"
+                          >
+                            <option value="head">{L("Mkuu", "Head")}</option>
+                            <option value="officer">{L("Afisa", "Officer")}</option>
+                            <option value="clerk">{L("Karani", "Clerk")}</option>
+                          </select>
+                        </div>
+                        <p className="text-[10px] text-stone-400">
+                          {L(
+                            "Mtumiaji aliyopo ataunganishwa tu. Mtumiaji mpya ataundwa na nenosiri hili.",
+                            "Existing user will be linked. New user created with this password.",
+                          )}
+                        </p>
                         <button
                           onClick={handleAddStaff}
                           disabled={addingStaff || !staffEmail.trim()}
-                          className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold disabled:opacity-50 flex items-center gap-1.5"
+                          className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-1.5 transition-colors"
                         >
                           {addingStaff ? (
                             <Loader2 size={14} className="animate-spin" />
                           ) : (
                             <CheckCircle2 size={14} />
                           )}
-                          {L("Ongeza", "Add")}
+                          {L("Ongeza Mfanyakazi", "Add Staff Member")}
                         </button>
                       </div>
                     )}

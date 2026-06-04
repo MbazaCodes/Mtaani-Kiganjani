@@ -55,7 +55,7 @@ interface ActivityLog {
     | "approve"
     | "reject"
     | "other";
-  details: string;
+  details: string | Record<string, unknown> | null;
   ip_address?: string;
   user_agent?: string;
   device_type?: "desktop" | "mobile" | "tablet" | "unknown";
@@ -1140,7 +1140,11 @@ Timestamp: ${new Date(log.created_at).toLocaleString()}
                       </span>
                     </div>
                     <p className="text-sm font-medium text-stone-700">{log.action}</p>
-                    <p className="text-xs text-stone-500 line-clamp-2">{log.details}</p>
+                    <p className="text-xs text-stone-500 line-clamp-2">
+                      {typeof log.details === "object"
+                        ? JSON.stringify(log.details)
+                        : String(log.details || "")}
+                    </p>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-stone-400">
@@ -1321,7 +1325,11 @@ Timestamp: ${new Date(log.created_at).toLocaleString()}
                   <p className="text-xs text-stone-400 font-bold uppercase tracking-widest mb-2">
                     {lang === "sw" ? "Maelezo" : "Description"}
                   </p>
-                  <p className="text-stone-700">{selectedLog.details}</p>
+                  <p className="text-stone-700">
+                    {typeof selectedLog.details === "object"
+                      ? JSON.stringify(selectedLog.details, null, 2)
+                      : String(selectedLog.details || "—")}
+                  </p>
                 </div>
 
                 {/* Technical Details */}

@@ -333,6 +333,12 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
         application_reference: ref,
         applicant_signature: signature,
         target_departments: institutions.filter((i) => i.department).map((i) => i.department),
+        applicant_region: userProfile?.region || "",
+        applicant_district: userProfile?.district || "",
+        applicant_ward: userProfile?.ward || "",
+        applicant_nida: userProfile?.nida_number || "",
+        applicant_phone: userProfile?.phone || "",
+        applicant_email: userProfile?.email || "",
         document_count: docs.length,
         beneficiary_name:
           vals.application_type === "MINOR"

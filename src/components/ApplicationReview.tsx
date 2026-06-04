@@ -129,6 +129,13 @@ const HIDDEN_FORM_FIELDS = new Set([
   "data_confirmed",
   "seller_confirmed",
   "landlord_confirmed",
+  "applicant_signature",
+  "weo_signature",
+  "weo_stamp",
+  "weo_name",
+  "photo_url",
+  "applicant_name",
+  "uploaded_documents",
 ]);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
