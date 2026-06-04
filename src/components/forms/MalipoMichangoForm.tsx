@@ -37,6 +37,7 @@ import {
   User,
   Calendar,
 } from "lucide-react";
+import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";
 import { ProgressFill } from "../ui/ProgressFill";
 
@@ -192,6 +193,7 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [appRef, setAppRef] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [signature, setSignature] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const errorsRef = useRef(errors);
   errorsRef.current = errors;
@@ -330,6 +332,7 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
           total_fee: parseFloat(vals.amount) || 0,
           service_name: "Malipo na Michango",
           application_reference: ref,
+          applicant_signature: signature,
           document_count: proofDoc ? 1 : 0,
         },
         files,
@@ -1212,6 +1215,20 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
                 {err("terms_accepted")}
               </p>
             )}
+
+            {/* Applicant electronic signature */}
+            <div className="bg-white border border-stone-200 rounded-2xl p-4">
+              <p className="text-sm font-bold text-stone-700 mb-1">
+                {L("Saini ya Kielektroniki", "Electronic Signature")}
+              </p>
+              <p className="text-xs text-stone-400 mb-3">
+                {L(
+                  "Saini hapa chini kuthibitisha malipo haya.",
+                  "Sign below to confirm this payment.",
+                )}
+              </p>
+              <SignaturePad value={signature} onChange={setSignature} lang={lang} />
+            </div>
           </div>
         );
 

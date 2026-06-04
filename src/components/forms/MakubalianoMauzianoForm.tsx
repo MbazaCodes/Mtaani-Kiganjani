@@ -35,6 +35,7 @@ import {
   UserCheck,
   UserX,
 } from "lucide-react";
+import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";
 import { ProgressFill } from "../ui/ProgressFill";
 import { supabase } from "../../lib/supabase";
@@ -138,6 +139,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [appRef, setAppRef] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [signature, setSignature] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const errorsRef = useRef(errors);
   errorsRef.current = errors;
@@ -334,6 +336,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
           total_fee: fee,
           service_name: "Makubaliano ya Mauzo",
           application_reference: ref,
+          applicant_signature: signature,
         },
         docs.map((d) => d.file),
       );
@@ -1317,6 +1320,20 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                   {errors.seller_confirmed || errors.terms_accepted}
                 </p>
               )}
+            </div>
+
+            {/* Applicant electronic signature */}
+            <div className="bg-white border border-stone-200 rounded-2xl p-4">
+              <p className="text-sm font-bold text-stone-700 mb-1">
+                {L("Saini ya Kielektroniki", "Electronic Signature")}
+              </p>
+              <p className="text-xs text-stone-400 mb-3">
+                {L(
+                  "Saini hapa chini kuthibitisha makubaliano haya.",
+                  "Sign below to confirm this agreement.",
+                )}
+              </p>
+              <SignaturePad value={signature} onChange={setSignature} lang={lang} />
             </div>
           </div>
         );
