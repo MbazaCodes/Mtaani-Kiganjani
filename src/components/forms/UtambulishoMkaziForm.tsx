@@ -1010,8 +1010,15 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
                     ["NIDA", userProfile.nida_number || "—"],
                     [L("Simu", "Phone"), userProfile.phone || "—"],
                     ["Email", userProfile.email || "—"],
-                    [L("Jinsia", "Gender"), userProfile.gender || "—"],
-                    [L("Tarehe ya Kuzaliwa", "Date of Birth"), userProfile?.date_of_birth || "—"],
+                    [L("Jinsia", "Gender"), userProfile.gender || userProfile.sex || "—"],
+                    [
+                      L("Tarehe ya Kuzaliwa", "Date of Birth"),
+                      userProfile?.date_of_birth
+                        ? new Date(userProfile.date_of_birth).toLocaleDateString(
+                            lang === "sw" ? "sw-TZ" : "en-GB",
+                          )
+                        : "—",
+                    ],
                   ].map(([lbl, val]) => (
                     <div key={String(lbl)} className="bg-white rounded-lg px-3 py-2">
                       <p className="text-[9px] text-stone-400 uppercase tracking-wide">{lbl}</p>

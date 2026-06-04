@@ -75,23 +75,16 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
   }, [user?.id, requiresBusinessReg, requiresSeller]);
 
   // Ensure user profile has all required fields, provide defaults
+  // Pass the FULL user profile to forms so every field (gender, date_of_birth,
+  // marital_status, occupation, citizen_id, etc.) is available — not just a
+  // hand-picked subset. user is already a UserProfile from AuthContext.
   const userProfileForForm = user
     ? {
-        id: user.id,
+        ...user,
         first_name: user.first_name || "",
-        middle_name: user.middle_name,
         last_name: user.last_name || "",
         email: user.email || "",
         phone: user.phone || "",
-        nida_number: user.nida_number,
-        region: user.region,
-        district: user.district,
-        ward: user.ward,
-        street: user.street,
-        is_diaspora: user.is_diaspora,
-        role: user.role,
-        is_verified: user.is_verified,
-        account_status: user.account_status,
       }
     : null;
 
