@@ -574,6 +574,7 @@ export function Profile() {
       fetchPendingChanges();
       fetchDocuments();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   useEffect(() => {
@@ -850,6 +851,7 @@ export function Profile() {
     } finally {
       setTimeout(() => setIsRefreshing(false), 500);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, showToast]);
 
   // Handle file upload

@@ -50,6 +50,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = "sw" 
     if (user?.id) {
       fetchPendingApprovals();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const fetchPendingApprovals = async () => {

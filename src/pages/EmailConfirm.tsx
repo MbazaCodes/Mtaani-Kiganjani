@@ -70,6 +70,7 @@ export function EmailConfirm() {
     };
 
     confirm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const L = {

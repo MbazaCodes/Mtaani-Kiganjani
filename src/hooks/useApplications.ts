@@ -87,6 +87,7 @@ export function useApplications(user: UserProfile | null) {
 
     setDrafts([]);
     setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   useEffect(() => {

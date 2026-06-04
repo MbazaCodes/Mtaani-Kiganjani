@@ -80,6 +80,7 @@ function useQRCode(application: Application | null, code: string) {
   useEffect(() => {
     if (!application) return;
     generateQRDataUrl(application, code).then(setQr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [application?.id, code]);
   return qr;
 }

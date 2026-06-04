@@ -138,6 +138,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
   useEffect(() => {
     fetchStaff();
     generateOffices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const generateOffices = () => {

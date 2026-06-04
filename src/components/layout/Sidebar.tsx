@@ -61,6 +61,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
     };
 
     fetchActualRole();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id, user?.role]);
 
   // Use database role if available, otherwise fall back to context

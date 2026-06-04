@@ -494,6 +494,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
       setLoading(false);
       setRefreshing(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, showToast]);
 
   const fetchRecentActivities = useCallback(async () => {

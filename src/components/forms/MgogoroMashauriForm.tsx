@@ -158,7 +158,7 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
   userProfile,
 }) => {
   const t = labels[lang];
-  const L = (sw: string, en: string) => (lang === "sw" ? sw : en);
+  const L = useCallback((sw: string, en: string) => (lang === "sw" ? sw : en), [lang]);
 
   const [step, setStep] = useState<Step>("mode");
   const [submitted, setSubmitted] = useState(false);
@@ -291,7 +291,7 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
       setDocs((p) => [...p, { file, preview: URL.createObjectURL(file), label: file.name }]);
       return null;
     },
-    [lang],
+    [L],
   );
   const removeDoc = (i: number) =>
     setDocs((p) => {

@@ -12,6 +12,7 @@ export function useQRCode(application: Application | null, serviceCode: string) 
   useEffect(() => {
     if (!application) return;
     generateQRDataUrl(application, serviceCode).then(setQrDataUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [application?.id, serviceCode]);
 
   return qrDataUrl;

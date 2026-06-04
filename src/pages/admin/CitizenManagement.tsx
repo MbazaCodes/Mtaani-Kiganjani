@@ -110,6 +110,7 @@ export function CitizenManagement() {
   useEffect(() => {
     fetchCitizens();
     fetchPendingProfileChanges();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchPendingProfileChanges = async () => {

@@ -248,6 +248,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
   // Reset form when useProfileData changes
   useEffect(() => {
     reset(getDefaultValues());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useProfileData, userProfile]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

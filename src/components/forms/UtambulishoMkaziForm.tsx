@@ -231,7 +231,7 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
   userProfile,
 }) => {
   const t = labels[lang];
-  const L = (sw: string, en: string) => (lang === "sw" ? sw : en);
+  const L = useCallback((sw: string, en: string) => (lang === "sw" ? sw : en), [lang]);
 
   const [step, setStep] = useState<Step>("location");
   const [submitted, setSubmitted] = useState(false);
@@ -351,7 +351,7 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
       });
       return null;
     },
-    [lang],
+    [L],
   );
 
   const removeDoc = (idx: number) =>

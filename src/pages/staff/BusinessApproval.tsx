@@ -150,6 +150,7 @@ export const BusinessApproval: React.FC = () => {
 
   useEffect(() => {
     fetchRegistrations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, typeFilter]);
 
   const fetchRegistrations = async () => {

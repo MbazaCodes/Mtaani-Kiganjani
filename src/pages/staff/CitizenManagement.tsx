@@ -73,6 +73,7 @@ export function StaffCitizenManagement() {
   useEffect(() => {
     fetchCitizens();
     fetchPendingProfileChanges();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchPendingProfileChanges = async () => {
