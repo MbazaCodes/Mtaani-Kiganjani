@@ -23,6 +23,7 @@ import { supabase, UserProfile } from "@/lib/supabase";
 import { adminConfirmUserEmail } from "@/lib/supabase-admin";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ interface PendingProfileChange {
 export function StaffCitizenManagement() {
   const { lang, t } = useLanguage();
   const { showToast } = useToast();
+  const { user: staffUser } = useAuth();
   const [citizens, setCitizens] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -190,11 +192,21 @@ export function StaffCitizenManagement() {
   const fetchCitizens = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Staff only see citizens in their assigned region/district
+      let query = supabase
         .from("users")
         .select("*")
         .eq("role", "citizen")
         .order("created_at", { ascending: false });
+
+      if (staffUser?.assigned_region) {
+        query = query.eq("region", staffUser.assigned_region);
+      }
+      if (staffUser?.assigned_district) {
+        query = query.eq("district", staffUser.assigned_district);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching citizens:", error);

@@ -60,6 +60,8 @@ export function CitizenManagement() {
   const [filter, setFilter] = useState<
     "all" | "verified" | "unverified" | "sellers" | "landlords" | "brokers"
   >("all");
+  const [regionFilter, setRegionFilter] = useState("");
+  const [districtFilter, setDistrictFilter] = useState("");
   const [activeTab, setActiveTab] = useState<"citizens" | "profile-changes">("citizens");
   const [pendingChanges, setPendingChanges] = useState<PendingProfileChange[]>([]);
   const [loadingChanges, setLoadingChanges] = useState(false);
@@ -451,7 +453,10 @@ export function CitizenManagement() {
       (filter === "landlords" && !!c.landlord_id) ||
       (filter === "brokers" && !!c.broker_id);
 
-    return matchesSearch && matchesFilter;
+    const matchesRegion = !regionFilter || c.region === regionFilter;
+    const matchesDistrict = !districtFilter || c.district === districtFilter;
+
+    return matchesSearch && matchesFilter && matchesRegion && matchesDistrict;
   });
 
   return (
@@ -467,7 +472,7 @@ export function CitizenManagement() {
           </h1>
           <p className="text-stone-500 font-medium">
             {lang === "sw"
-              ? "Tazama na dhibiti watumiaji wote waliosajiliwa"
+              ? `Wananchi ${filteredCitizens.length} kati ya ${citizens.length}`
               : "View and manage all registered citizens"}
           </p>
         </div>
@@ -515,6 +520,35 @@ export function CitizenManagement() {
             <option value="landlords">{lang === "sw" ? "🔑 Wapangishaji" : "🔑 Landlords"}</option>
             <option value="brokers">{lang === "sw" ? "👥 Madalali" : "👥 Brokers"}</option>
           </select>
+          <select
+            value={regionFilter}
+            onChange={(e) => {
+              setRegionFilter(e.target.value);
+              setDistrictFilter("");
+            }}
+            className="h-12 px-4 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
+          >
+            <option value="">{lang === "sw" ? "Mkoa Wote" : "All Regions"}</option>
+            {regions.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+          {regionFilter && (
+            <select
+              value={districtFilter}
+              onChange={(e) => setDistrictFilter(e.target.value)}
+              className="h-12 px-4 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
+            >
+              <option value="">{lang === "sw" ? "Wilaya Zote" : "All Districts"}</option>
+              {getDistrictsForRegion(regionFilter).map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 
