@@ -74,26 +74,54 @@ const LEVEL_COLORS = {
 
 // Pre-defined department categories with auto-fill data
 const DEPARTMENT_CATEGORIES = [
+  // Security & Law Enforcement
   { name: "Tanzania Police Force", name_sw: "Jeshi la Polisi Tanzania", code: "TPF" },
-  { name: "Ministry of Health", name_sw: "Wizara ya Afya", code: "MOH" },
-  { name: "Judiciary / Court Registry", name_sw: "Mahakama / Usajili wa Kesi", code: "JUD" },
-  { name: "Ministry of Education", name_sw: "Wizara ya Elimu", code: "MOE" },
   { name: "Immigration Department", name_sw: "Idara ya Uhamiaji", code: "IMM" },
-  { name: "Social Welfare Department", name_sw: "Idara ya Ustawi wa Jamii", code: "SWD" },
   { name: "Fire and Rescue Force", name_sw: "Jeshi la Zimamoto na Uokoaji", code: "FRF" },
+  { name: "Tanzania Prisons Service", name_sw: "Jeshi la Magereza Tanzania", code: "TPS" },
+  // Judiciary & Legal
+  { name: "Judiciary of Tanzania", name_sw: "Mahakama ya Tanzania", code: "JUD" },
+  { name: "Attorney General Office", name_sw: "Ofisi ya Mwanasheria Mkuu", code: "AGO" },
+  // Finance & Revenue
   { name: "Tanzania Revenue Authority", name_sw: "Mamlaka ya Mapato Tanzania", code: "TRA" },
-  { name: "BRELA (Business Registration)", name_sw: "BRELA (Usajili wa Biashara)", code: "BRL" },
-  {
-    name: "RITA (Registration of Births/Deaths)",
-    name_sw: "RITA (Usajili wa Vizazi/Vifo)",
-    code: "RIT",
-  },
+  { name: "Ministry of Finance", name_sw: "Wizara ya Fedha", code: "MOF" },
+  // Health
+  { name: "Ministry of Health", name_sw: "Wizara ya Afya", code: "MOH" },
+  { name: "NHIF (Health Insurance)", name_sw: "Mfuko wa Bima ya Afya (NHIF)", code: "NHIF" },
+  // Education
+  { name: "Ministry of Education", name_sw: "Wizara ya Elimu", code: "MOE" },
+  { name: "NECTA (Examinations)", name_sw: "Baraza la Mitihani (NECTA)", code: "NECTA" },
+  { name: "HESLB (Student Loans)", name_sw: "Bodi ya Mikopo (HESLB)", code: "HESLB" },
+  // Land & Environment
   { name: "Ministry of Lands", name_sw: "Wizara ya Ardhi", code: "MOL" },
+  { name: "NEMC (Environment)", name_sw: "Baraza la Mazingira (NEMC)", code: "NEMC" },
+  // Transport
+  { name: "TANROADS", name_sw: "Wakala wa Barabara Tanzania", code: "TNR" },
+  { name: "LATRA (Transport)", name_sw: "Mamlaka ya Usafiri (LATRA)", code: "LATRA" },
+  // Business & Industry
+  { name: "BRELA (Business Registration)", name_sw: "Usajili wa Biashara (BRELA)", code: "BRELA" },
+  { name: "Tanzania Investment Centre", name_sw: "Kituo cha Uwekezaji", code: "TIC" },
+  // Social & Labour
+  { name: "Social Welfare Department", name_sw: "Idara ya Ustawi wa Jamii", code: "SWD" },
+  { name: "Ministry of Labour", name_sw: "Wizara ya Kazi na Ajira", code: "MOLAB" },
+  { name: "NSSF (Social Security)", name_sw: "Mfuko wa Hifadhi ya Jamii (NSSF)", code: "NSSF" },
+  // Registration & Identity
+  { name: "RITA (Births & Deaths)", name_sw: "Usajili wa Vizazi/Vifo (RITA)", code: "RITA" },
+  { name: "NIDA (National ID)", name_sw: "Vitambulisho vya Taifa (NIDA)", code: "NIDA" },
+  { name: "TCRA (Communications)", name_sw: "Mamlaka ya Mawasiliano (TCRA)", code: "TCRA" },
+  // Agriculture & Resources
+  { name: "Ministry of Agriculture", name_sw: "Wizara ya Kilimo", code: "MOA" },
   { name: "Ministry of Water", name_sw: "Wizara ya Maji", code: "MOW" },
-  { name: "Environment Department", name_sw: "Idara ya Mazingira", code: "ENV" },
-  { name: "Transport Authority (LATRA)", name_sw: "Mamlaka ya Usafiri (LATRA)", code: "LAT" },
-  { name: "Drug Control Commission", name_sw: "Tume ya Kudhibiti Dawa za Kulevya", code: "DCC" },
-  { name: "Labour Department", name_sw: "Idara ya Kazi", code: "LAB" },
+  { name: "Ministry of Energy", name_sw: "Wizara ya Nishati", code: "MOEN" },
+  { name: "Mining Commission", name_sw: "Tume ya Madini", code: "MC" },
+  // Utilities
+  { name: "TANESCO (Electricity)", name_sw: "Shirika la Umeme (TANESCO)", code: "TANESCO" },
+  { name: "DAWASA (Water Supply)", name_sw: "Majisafi Dar es Salaam", code: "DAWASA" },
+  // Anti-Corruption & Governance
+  { name: "TAKUKURU (Anti-Corruption)", name_sw: "Kupambana na Rushwa", code: "TAKUKURU" },
+  { name: "Drug Control Commission", name_sw: "Tume ya Dawa za Kulevya", code: "DCC" },
+  { name: "TAMISEMI (Local Government)", name_sw: "Ofisi ya Rais — TAMISEMI", code: "TAMISEMI" },
+  // Custom
   { name: "Other", name_sw: "Nyingine", code: "" },
 ];
 
