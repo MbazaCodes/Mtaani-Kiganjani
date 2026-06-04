@@ -160,11 +160,13 @@ export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang
 
         {/* QR */}
         <View style={s.qrSection}>
-          <View style={s.qrBorder}>
-            <Image src={qr} style={s.qrCode} />
+          <View style={s.qrInner}>
+            <View style={s.qrBorder}>
+              <Image src={qr} style={s.qrCode} />
+            </View>
+            <Text style={s.qrLabel}>{L.scanVerify}</Text>
+            <Text style={s.qrRef}>{application.application_number}</Text>
           </View>
-          <Text style={s.qrLabel}>{L.scanVerify}</Text>
-          <Text style={s.qrRef}>{application.application_number}</Text>
         </View>
 
         {/* Footer */}

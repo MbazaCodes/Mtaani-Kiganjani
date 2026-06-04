@@ -18,7 +18,7 @@ const ls = StyleSheet.create({
     backgroundColor: "#7c3aed",
     paddingVertical: 10,
     paddingHorizontal: 14,
-    marginBottom: 14,
+    marginBottom: 10,
     alignItems: "center",
   },
   bannerTitle: {
@@ -33,12 +33,33 @@ const ls = StyleSheet.create({
     backgroundColor: "#f5f3ff",
     borderWidth: 2,
     borderColor: "#7c3aed",
-    padding: 10,
+    padding: 8,
     alignItems: "center",
-    marginVertical: 10,
+    marginBottom: 10,
   },
-  guestsNum: { fontSize: 22, fontWeight: "bold", color: "#5b21b6" },
+  guestsNum: { fontSize: 20, fontWeight: "bold", color: "#5b21b6" },
   guestsLabel: { fontSize: 8, color: "#6d28d9" },
+  // QR placed inline (not absolute) so it never overlaps content
+  qrRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  qrBox: {
+    alignItems: "center",
+    width: 76,
+  },
+  qrBorder: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 3,
+    backgroundColor: "#fff",
+    marginBottom: 2,
+  },
+  qrImg: { width: 60, height: 60 },
+  qrLabel: { fontSize: 5.5, color: "#999", textAlign: "center" },
+  qrRef: { fontSize: 5, color: "#bbb", textAlign: "center" },
 });
 
 export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang, qrDataUrl }) => {
@@ -49,9 +70,8 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
 
   const L = {
     title: sw ? "KIBARI CHA MATUKIO / SHEREHE" : "EVENT / CELEBRATION PERMIT",
-    eventInfo: sw ? "TAARIFA ZA TUKIO" : "EVENT INFORMATION",
     venueTime: sw ? "ENEO NA MUDA" : "VENUE & TIME",
-    organiser: sw ? "MWANDAAJI / MAWASILIANO" : "ORGANISER / CONTACT",
+    organiser: sw ? "MSIMAMIZI / MAWASILIANO" : "ORGANISER / CONTACT",
     scanVerify: sw ? "Changanua kuthibitisha" : "Scan to verify",
     footer: sw
       ? "Kibari hiki ni rasmi na lazima kionyeshwe wakati wote wa tukio."
@@ -72,7 +92,7 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
     OTHER: sw ? "Nyingine" : "Other",
   };
 
-  const Row = ({ label, value }: { label: string; value?: string | undefined }) => (
+  const Row = ({ label, value }: { label: string; value?: string }) => (
     <View style={s.infoRow}>
       <Text style={s.infoLabel}>{label}:</Text>
       <Text style={s.infoValue}>{String(value || "N/A")}</Text>
@@ -81,6 +101,11 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
 
   const eventType = String(fd.event_type || "");
   const eventLabel = eventTypeLabels[eventType] || eventType;
+
+  // Applicant name — prefer form organizer_name, fall back to joined user
+  const applicantName = fd.organizer_name || formatFullName(user);
+  const applicantNida = fd.organizer_nida || user?.nida_number;
+  const applicantPhone = fd.organizer_phone || user?.phone;
 
   return (
     <Document>
@@ -106,7 +131,7 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
         {/* Event banner */}
         <View style={ls.eventBanner}>
           <Text style={ls.bannerTitle}>{eventLabel || (sw ? "TUKIO" : "EVENT")}</Text>
-          {fd.event_name ? <Text style={ls.bannerSub}>{String(fd.event_name)}</Text> : <View/>}
+          {fd.event_name ? <Text style={ls.bannerSub}>{String(fd.event_name)}</Text> : <View />}
         </View>
 
         {/* Guests box */}
@@ -115,15 +140,15 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
             <Text style={ls.guestsNum}>{String(fd.expected_guests)}</Text>
             <Text style={ls.guestsLabel}>{sw ? "WAGENI WANAOTARAJIWA" : "EXPECTED GUESTS"}</Text>
           </View>
-        ) : <View/>}
+        ) : <View />}
 
         {/* Applicant info */}
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{sw ? "MWOMBAJI" : "APPLICANT"}</Text>
         </View>
-        <Row label={sw ? "Jina Kamili" : "Full Name"} value={formatFullName(user)} />
-        <Row label={sw ? "NIDA" : "NIDA No."} value={user?.nida_number} />
-        <Row label={sw ? "Namba ya Raia" : "Citizen ID"} value={user?.citizen_id} />
+        <Row label={sw ? "Jina Kamili" : "Full Name"} value={applicantName} />
+        <Row label={sw ? "NIDA" : "NIDA No."} value={applicantNida} />
+        <Row label={sw ? "Simu" : "Phone"} value={applicantPhone} />
 
         {/* Venue & time */}
         <View style={s.sectionHeader}>
@@ -135,10 +160,13 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
               label={sw ? "Tarehe ya Kuanza" : "Start Date"}
               value={fd.start_date ? formatDate(String(fd.start_date)) : undefined}
             />
-            <Row label={sw ? "Muda wa Kuanza" : "Start Time"} value={fd.start_time ?? ""} />
+            <Row label={sw ? "Muda wa Kuanza" : "Start Time"} value={fd.start_time} />
+            <Row label={sw ? "Tarehe ya Mwisho" : "End Date"} value={fd.end_date ? formatDate(String(fd.end_date)) : undefined} />
           </View>
           <View style={s.colRight}>
-            <Row label={sw ? "Eneo la Tukio" : "Venue"} value={fd.venue ?? ""} />
+            <Row label={sw ? "Jina la Ukumbi" : "Venue Name"} value={fd.venue_name} />
+            <Row label={sw ? "Kata" : "Ward"} value={fd.venue_ward} />
+            <Row label={sw ? "Wilaya" : "District"} value={fd.venue_district} />
           </View>
         </View>
 
@@ -146,15 +174,17 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{L.organiser}</Text>
         </View>
-        <Row label={sw ? "Mwasiliano" : "Contact Person"} value={fd.contact_person ?? ""} />
-        <Row label={sw ? "Simu" : "Phone"} value={fd.contact_phone ?? ""} />
-        {fd.whatsapp_group ? <Row label="WhatsApp" value={fd.whatsapp_group ?? ""} /> : <View/>}
+        <Row label={sw ? "Jina la Msimamizi" : "Organiser Name"} value={fd.organizer_name} />
+        <Row label={sw ? "Simu ya Msimamizi" : "Organiser Phone"} value={fd.organizer_phone} />
+        {fd.second_contact_name ? (
+          <Row label={sw ? "Msimamizi 2" : "2nd Contact"} value={fd.second_contact_name} />
+        ) : <View />}
 
         {/* Signatures */}
-        <View style={s.signatureSection}>
+        <View style={[s.signatureSection, { marginTop: 20 }]}>
           <View style={s.signatureBox}>
             <View style={s.signatureLine} />
-            <Text style={s.signatureName}>{formatFullName(user)}</Text>
+            <Text style={s.signatureName}>{applicantName}</Text>
             <Text style={s.signatureTitle}>
               {sw ? "MWANDAAJI / MWOMBAJI" : "ORGANISER / APPLICANT"}
             </Text>
@@ -170,13 +200,15 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
           </View>
         </View>
 
-        {/* QR */}
-        <View style={s.qrSection}>
-          <View style={s.qrBorder}>
-            <Image src={qr} style={s.qrCode} />
+        {/* QR — inline after signatures, NOT absolute */}
+        <View style={ls.qrRow}>
+          <View style={ls.qrBox}>
+            <View style={ls.qrBorder}>
+              <Image src={qr} style={ls.qrImg} />
+            </View>
+            <Text style={ls.qrLabel}>{L.scanVerify}</Text>
+            <Text style={ls.qrRef}>{application.application_number}</Text>
           </View>
-          <Text style={s.qrLabel}>{L.scanVerify}</Text>
-          <Text style={s.qrRef}>{application.application_number}</Text>
         </View>
 
         {/* Footer */}

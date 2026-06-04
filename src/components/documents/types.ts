@@ -266,11 +266,14 @@ export const commonStyles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // ── QR code block (bottom-right absolute) ─────────────────────────────────
+  // ── QR code block (inline, right-aligned, after signatures) ──────────────
   qrSection: {
-    position: "absolute",
-    bottom: 62,
-    right: 44,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  qrInner: {
     alignItems: "center",
     width: 76,
   },
