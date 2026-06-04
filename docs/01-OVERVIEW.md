@@ -16,6 +16,7 @@ The system serves **three user roles** across the full service lifecycle:
 | **Citizen** | Mwananchi | Apply for services, upload documents, sign electronically, track status, download certificates |
 | **Staff** | Afisa | Review applications, verify documents, approve/reject, manage citizens in their ward |
 | **Admin** | Msimamizi | Full system management, user creation, service configuration, audit logs, all-region access |
+| **Department** | Afisa wa Idara | Government department staff — receive escalated cases, review forwarded applications |
 
 ---
 
@@ -68,6 +69,7 @@ Mtaani Kiganjani provides:
 - **Offline-ready architecture**: Forms save progress locally; critical data cached
 - **Zero infrastructure cost**: Runs entirely on cloud services (Vercel + Supabase) — no physical servers needed
 - **Scalable**: From a single ward to nationwide deployment with the same codebase
+- **Cross-department integration**: Ward staff can escalate cases to 52+ government departments (Police, Health, Judiciary, etc.)
 - **Open and auditable**: Full activity logging, QR verification, and transparent processes
 
 ---

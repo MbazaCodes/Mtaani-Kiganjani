@@ -2,7 +2,7 @@
 
 ## Overview
 
-Mtaani Kiganjani uses **PostgreSQL** hosted on Supabase with **16 tables**, full **Row-Level Security (RLS)**, database triggers, and helper functions. All tables use UUIDs as primary keys.
+Mtaani Kiganjani uses **PostgreSQL** hosted on Supabase with **20 tables**, full **Row-Level Security (RLS)**, database triggers, and helper functions. All tables use UUIDs as primary keys.
 
 ---
 
@@ -114,6 +114,22 @@ Application status updates, reminders, and system messages for users.
 
 ### 12. `activity_logs` — Audit Trail
 Every significant action (login, approval, rejection, document generation) is logged with user, action type, and metadata.
+
+---
+
+## Government Department Tables (Phase 5 — Built)
+
+### 13. `government_departments` — Department Registry
+52 pre-populated Tanzania government departments (Police, Health, Judiciary, TRA, NIDA, etc.) with name (EN+SW), code, level (national/regional/district), region, district, contact details. Admin-managed.
+
+### 14. `department_users` — Department Staff Assignments
+Links users to departments with a role (head/officer/clerk). Unique constraint on user+department.
+
+### 15. `escalations` — Case Escalation Records
+When ward staff escalate an application to a government department. Tracks: from_user, to_department, status (pending/accepted/responded/referred/resolved/rejected), escalation_note, response_note, priority, resolution.
+
+### 16. `department_application_copies` — Forwarded Application Copies
+Applications auto-forwarded or manually copied to departments for their records.
 
 ---
 

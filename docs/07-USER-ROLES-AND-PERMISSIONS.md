@@ -65,6 +65,7 @@ Dashboard → Services → Apply → My Applications → Profile → Notificatio
 | **Customer Support** | Handle citizen inquiries and complaints |
 | **Signature & Stamp** | Save reusable electronic signature and official stamp for certificates |
 | **Citizen Database** | Search and filter citizens in assigned region (read-only for other regions) |
+| **Escalate to Department** | Forward applications to government departments (Police, Health, Courts, etc.) with notes |
 
 ### Staff Assignment
 - Each staff member has `assigned_region` and `assigned_district` in their profile
@@ -95,6 +96,7 @@ All Staff capabilities PLUS:
 | **Service Management** | Configure services, fees, form schemas, enable/disable |
 | **Office Management** | Manage ward offices, contact information, locations |
 | **Location Management** | Manage administrative hierarchy (regions → districts → wards) |
+| **Government Departments** | Create/manage 52+ departments, assign staff, configure escalation targets |
 | **Activity Logs** | Full audit trail of all system actions |
 
 ### Navigation
@@ -121,6 +123,9 @@ Admin Dashboard → Staff Mgmt → Citizens → Services → Offices → Locatio
 | View activity logs | ❌ | ❌ | ✅ |
 | Delete user accounts | ❌ | ❌ | ✅ |
 | Save signature/stamp | ❌ | ✅ | ✅ |
+| Escalate to department | ❌ | ✅ | ✅ |
+| Manage departments | ❌ | ❌ | ✅ |
+| Select department in forms | ✅ | ❌ | ❌ |
 
 ---
 

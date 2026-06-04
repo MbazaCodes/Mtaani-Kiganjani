@@ -1,5 +1,29 @@
 # Future Improvements & Roadmap
 
+## ✅ Already Delivered (Current Release)
+
+The following features from the original roadmap have been **built and deployed**:
+
+| Feature | Originally Planned | Status |
+|---------|-------------------|--------|
+| Electronic signatures (citizen) | Phase 2 | ✅ Built — canvas pad on all 9 forms |
+| Staff reusable signature + stamp | Phase 2 | ✅ Built — Profile tab, auto-applied on approval |
+| Profile photo on certificates | Phase 2 | ✅ Built — embedded in PDFs |
+| Activity logging | Phase 3 | ✅ Built — login, submit, approve logged |
+| Staff region scoping | Phase 3 | ✅ Built — staff see only their ward's citizens |
+| Admin region/district filters | Phase 3 | ✅ Built — dropdowns in citizen management |
+| Office → staff list | Phase 3 | ✅ Built — click office to see assigned staff |
+| Government department management | Phase 5 | ✅ Built — 52 departments, CRUD, staff assignment |
+| Department category auto-fill | Phase 5 | ✅ Built — 36 categories with EN/SW/code |
+| Staff escalation to departments | Phase 5 | ✅ Built — button + modal in review panel |
+| Citizen department selection | Phase 5 | ✅ Built — introduction letter form |
+| Tanzania regions/districts | Phase 5 | ✅ Built — 30 regions, 130+ districts |
+| Secure admin API (serverless) | Phase 2 | ✅ Built — service key server-side only |
+| Document upload persistence | Phase 2 | ✅ Built — base64 in form_data |
+| Social login buttons (hidden) | Phase 4 | ✅ Prepared — feature flag, flip to enable |
+
+---
+
 ## Phase 2 — Production Hardening (Next 3 Months)
 
 ### Payment Integration

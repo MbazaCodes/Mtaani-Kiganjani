@@ -46,8 +46,10 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...your_service_role_key
 
 In Supabase Dashboard → SQL Editor, run these in order:
 
-1. `supabase/e_serikali_schema.sql` — Creates all 16 tables, RLS policies, triggers, and functions
-2. `supabase/add_signature_stamp_columns.sql` — Adds signature/stamp columns for staff
+1. `supabase/e_serikali_schema.sql` — Creates all 16 core tables, RLS policies, triggers, and functions
+2. `supabase/add_signature_stamp_columns.sql` — Adds signature_url/stamp_url to users table
+3. `supabase/add_activity_log_columns.sql` — Adds action_type/severity/status to activity_logs
+4. `supabase/add_government_departments.sql` — Creates 4 department tables + seeds 52 Tanzania departments
 
 ### 4. Configure Supabase Authentication
 

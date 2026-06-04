@@ -61,7 +61,7 @@
 │                    SUPABASE CLOUD                             │
 │  ┌──────────────┐  ┌──────────────┐  ┌───────────────────┐ │
 │  │  PostgreSQL   │  │  Auth         │  │  Storage (future) │ │
-│  │  16 tables    │  │  JWT tokens   │  │  Document files   │ │
+│  │  20 tables    │  │  JWT tokens   │  │  Document files   │ │
 │  │  RLS enabled  │  │  Email confirm│  │                   │ │
 │  │  Triggers     │  │  Sessions     │  │                   │ │
 │  └──────────────┘  └──────────────┘  └───────────────────┘ │
@@ -124,7 +124,7 @@ Citizen Submits     Staff Reviews      Payment          Document Issued
 ```
 Mtaani-Kiganjani/
 ├── api/                          # Vercel serverless functions
-│   └── admin.ts                  # Secure admin operations
+│   └── admin.ts                  # Secure admin operations (service key server-side)
 ├── docs/                         # Project documentation
 ├── supabase/                     # Database migrations
 │   ├── e_serikali_schema.sql     # Full schema (16 tables)
@@ -135,11 +135,13 @@ Mtaani-Kiganjani/
 │   │   ├── forms/                # 9 service-specific multi-step forms
 │   │   ├── layout/               # AppShell, Sidebar, Header, Nav
 │   │   └── ui/                   # shadcn/ui + custom (SignaturePad, etc.)
+│   │       └── SignaturePad.tsx   # Dependency-free canvas signature capture
 │   ├── constants/                # Services config, logo, countries
 │   ├── context/                  # Auth, App, Language, Toast contexts
 │   ├── hooks/                    # Custom hooks (useApplications, useQRCode)
 │   ├── integrations/supabase/    # Supabase client configuration
-│   ├── lib/                      # Utilities (i18n, currency, QR, admin)
+│   ├── lib/                      # Utilities (i18n, currency, QR, admin, logging)
+│   │   ├── activity-log.ts       # Fire-and-forget activity logging
 │   ├── pages/
 │   │   ├── admin/                # Admin dashboard, staff/citizen/service mgmt
 │   │   └── staff/                # Staff dashboard, reviews, verification
