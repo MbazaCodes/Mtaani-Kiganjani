@@ -11,6 +11,7 @@ import {
   MapPin,
   AlertTriangle,
   CheckCircle2,
+  Users,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
@@ -138,6 +139,58 @@ export function OfficeManagement() {
   const [editingOffice, setEditingOffice] = useState<VirtualOffice | null>(null);
   const [formData, setFormData] = useState<OfficeFormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof OfficeFormData, string>>>({});
+  const [expandedOfficeId, setExpandedOfficeId] = useState<string | null>(null);
+  const [officeStaff, setOfficeStaff] = useState<
+    {
+      id: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+      phone?: string;
+      role: string;
+      position?: string;
+    }[]
+  >([]);
+  const [loadingStaff, setLoadingStaff] = useState(false);
+
+  // Fetch staff assigned to an office (by office_id or matching region/district)
+  const fetchOfficeStaff = async (office: VirtualOffice) => {
+    if (expandedOfficeId === office.id) {
+      setExpandedOfficeId(null);
+      setOfficeStaff([]);
+      return;
+    }
+    setExpandedOfficeId(office.id);
+    setLoadingStaff(true);
+    try {
+      let query = supabase
+        .from("users")
+        .select("id, first_name, last_name, email, phone, role, position, department")
+        .in("role", ["staff", "admin"])
+        .order("first_name");
+
+      // Match by office_id OR by assigned region/district
+      if (office.district) {
+        query = query.or(
+          `office_id.eq.${office.id},and(assigned_region.eq.${office.region},assigned_district.eq.${office.district})`,
+        );
+      } else {
+        query = query.or(`office_id.eq.${office.id},assigned_region.eq.${office.region}`);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error("Error fetching staff:", error);
+        setOfficeStaff([]);
+      } else {
+        setOfficeStaff(data || []);
+      }
+    } catch {
+      setOfficeStaff([]);
+    } finally {
+      setLoadingStaff(false);
+    }
+  };
 
   // Computed properties
   const isSupabaseConfigured = useMemo(() => {
@@ -630,117 +683,178 @@ export function OfficeManagement() {
               </thead>
               <tbody className="divide-y divide-stone-50">
                 {filteredOffices.map((office) => (
-                  <tr key={office.id} className="hover:bg-stone-50/50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-                            "group-hover:bg-emerald-50 group-hover:text-emerald-600",
-                            office.level === "region"
-                              ? "bg-blue-50 text-blue-600"
-                              : "bg-purple-50 text-purple-600",
-                          )}
-                        >
-                          <Building2 size={20} />
-                        </div>
-                        <div>
-                          <p className="font-bold text-stone-900">
-                            {lang === "sw"
-                              ? office.name_sw || office.name
-                              : office.name_en || office.name}
-                          </p>
-                          {office.address && (
-                            <p className="text-xs text-stone-400 flex items-center gap-1">
-                              <MapPin size={10} />
-                              {office.address}
+                  <React.Fragment key={office.id}>
+                    <tr
+                      className="hover:bg-stone-50/50 transition-colors group cursor-pointer"
+                      onClick={() => fetchOfficeStaff(office)}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                              "group-hover:bg-emerald-50 group-hover:text-emerald-600",
+                              office.level === "region"
+                                ? "bg-blue-50 text-blue-600"
+                                : "bg-purple-50 text-purple-600",
+                            )}
+                          >
+                            <Building2 size={20} />
+                          </div>
+                          <div>
+                            <p className="font-bold text-stone-900">
+                              {lang === "sw"
+                                ? office.name_sw || office.name
+                                : office.name_en || office.name}
                             </p>
-                          )}
+                            {office.address && (
+                              <p className="text-xs text-stone-400 flex items-center gap-1">
+                                <MapPin size={10} />
+                                {office.address}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={cn(
-                          "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                          office.level === "region"
-                            ? "bg-blue-50 text-blue-600 border-blue-100"
-                            : "bg-purple-50 text-purple-600 border-purple-100",
-                        )}
-                      >
-                        {office.level === "region"
-                          ? lang === "sw"
-                            ? "Mkoa"
-                            : "Region"
-                          : lang === "sw"
-                            ? "Wilaya"
-                            : "District"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-stone-900">{office.region}</p>
-                      {office.district && (
-                        <p className="text-xs text-stone-500">{office.district}</p>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {office.email && <p className="text-xs text-stone-600">{office.email}</p>}
-                      {office.phone && <p className="text-xs text-stone-500">{office.phone}</p>}
-                      {!office.email && !office.phone && (
-                        <p className="text-xs text-stone-400">-</p>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleToggleStatus(office.id, office.active)}
-                        disabled={processing}
-                        className={cn(
-                          "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all",
-                          office.active
-                            ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
-                            : "bg-red-50 text-red-600 border-red-100 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100",
-                          processing && "opacity-50 cursor-not-allowed",
-                        )}
-                        title={
-                          office.active
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={cn(
+                            "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                            office.level === "region"
+                              ? "bg-blue-50 text-blue-600 border-blue-100"
+                              : "bg-purple-50 text-purple-600 border-purple-100",
+                          )}
+                        >
+                          {office.level === "region"
                             ? lang === "sw"
-                              ? "Zima ofisi"
-                              : "Deactivate office"
+                              ? "Mkoa"
+                              : "Region"
                             : lang === "sw"
-                              ? "Washa ofisi"
-                              : "Activate office"
-                        }
-                      >
-                        {office.active
-                          ? lang === "sw"
-                            ? "Inatumika"
-                            : "Active"
-                          : lang === "sw"
-                            ? "Haifanyi kazi"
-                            : "Inactive"}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                              ? "Wilaya"
+                              : "District"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-stone-900">{office.region}</p>
+                        {office.district && (
+                          <p className="text-xs text-stone-500">{office.district}</p>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {office.email && <p className="text-xs text-stone-600">{office.email}</p>}
+                        {office.phone && <p className="text-xs text-stone-500">{office.phone}</p>}
+                        {!office.email && !office.phone && (
+                          <p className="text-xs text-stone-400">-</p>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
                         <button
-                          onClick={() => handleEditClick(office)}
+                          onClick={() => handleToggleStatus(office.id, office.active)}
                           disabled={processing}
-                          className="p-2 hover:bg-stone-100 rounded-lg text-stone-400 hover:text-stone-900 transition-all disabled:opacity-50"
-                          title={lang === "sw" ? "Hariri" : "Edit"}
+                          className={cn(
+                            "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all",
+                            office.active
+                              ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-red-50 hover:text-red-600 hover:border-red-100"
+                              : "bg-red-50 text-red-600 border-red-100 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100",
+                            processing && "opacity-50 cursor-not-allowed",
+                          )}
+                          title={
+                            office.active
+                              ? lang === "sw"
+                                ? "Zima ofisi"
+                                : "Deactivate office"
+                              : lang === "sw"
+                                ? "Washa ofisi"
+                                : "Activate office"
+                          }
                         >
-                          <Edit2 size={18} />
+                          {office.active
+                            ? lang === "sw"
+                              ? "Inatumika"
+                              : "Active"
+                            : lang === "sw"
+                              ? "Haifanyi kazi"
+                              : "Inactive"}
                         </button>
-                        <button
-                          onClick={() => handleDeleteOffice(office.id)}
-                          disabled={processing}
-                          className="p-2 hover:bg-red-50 rounded-lg text-stone-400 hover:text-red-600 transition-all disabled:opacity-50"
-                          title={lang === "sw" ? "Futa" : "Delete"}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleEditClick(office)}
+                            disabled={processing}
+                            className="p-2 hover:bg-stone-100 rounded-lg text-stone-400 hover:text-stone-900 transition-all disabled:opacity-50"
+                            title={lang === "sw" ? "Hariri" : "Edit"}
+                          >
+                            <Edit2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteOffice(office.id)}
+                            disabled={processing}
+                            className="p-2 hover:bg-red-50 rounded-lg text-stone-400 hover:text-red-600 transition-all disabled:opacity-50"
+                            title={lang === "sw" ? "Futa" : "Delete"}
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {expandedOfficeId === office.id && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-6 py-4 bg-emerald-50/50 border-b border-emerald-100"
                         >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                          <div className="space-y-2">
+                            <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                              <Users size={13} />
+                              {lang === "sw"
+                                ? `Wafanyakazi (${officeStaff.length})`
+                                : `Staff Members (${officeStaff.length})`}
+                            </p>
+                            {loadingStaff ? (
+                              <div className="flex items-center gap-2 py-3 text-stone-400 text-sm">
+                                <Loader2 size={14} className="animate-spin" />
+                                {lang === "sw" ? "Inapakia..." : "Loading..."}
+                              </div>
+                            ) : officeStaff.length === 0 ? (
+                              <p className="text-sm text-stone-400 py-2">
+                                {lang === "sw"
+                                  ? "Hakuna wafanyakazi waliokabidhiwa ofisi hii."
+                                  : "No staff assigned to this office."}
+                              </p>
+                            ) : (
+                              <div className="grid gap-2">
+                                {officeStaff.map((s) => (
+                                  <div
+                                    key={s.id}
+                                    className="flex items-center justify-between bg-white rounded-lg px-3 py-2.5 border border-stone-100"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
+                                        {s.first_name?.[0]}
+                                        {s.last_name?.[0]}
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-bold text-stone-800">
+                                          {s.first_name} {s.last_name}
+                                        </p>
+                                        <p className="text-xs text-stone-400">
+                                          {s.position || s.role} {s.email ? `· ${s.email}` : ""}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    {s.phone && (
+                                      <span className="text-xs text-stone-400">{s.phone}</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

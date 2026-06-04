@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { supabase, Service, Application } from "@/lib/supabase";
+import { logActivity } from "@/lib/activity-log";
 import type { AnyFormData, PaymentResult, ApplicationDraft } from "@/types";
 import { HARDCODED_SERVICES } from "@/constants/services";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
@@ -250,6 +251,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         }
 
+        logActivity(user.id, "submit_application", {
+          applicationId: insertedApp?.id,
+          service: newApp.service_name,
+          number: newApp.application_number,
+        });
         showToast(
           lang === "sw" ? "Maombi yametumwa kikamilifu!" : "Application submitted successfully!",
           "success",

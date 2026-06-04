@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase, UserProfile, Session } from "@/lib/supabase";
+import { logActivity } from "@/lib/activity-log";
 import type { SignUpUserData, SupabaseError } from "@/types";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
 
@@ -192,6 +193,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    logActivity(user?.id, "logout");
     // Clear local state immediately so UI responds right away
     setUser(null);
     setSession(null);

@@ -57,6 +57,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { supabase, Application, UserProfile } from "@/lib/supabase";
+import { logActivity } from "@/lib/activity-log";
 import { createNotification } from "@/lib/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
