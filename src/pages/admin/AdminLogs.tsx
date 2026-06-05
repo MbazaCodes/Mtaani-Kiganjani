@@ -510,7 +510,7 @@ export function AdminLogs() {
 ID: ${log.id}
 Action: ${log.action}
 Type: ${log.action_type}
-Details: ${log.details}
+Details: ${typeof log.details === "object" ? JSON.stringify(log.details) : log.details}
 User: ${log.users ? `${log.users.first_name} ${log.users.last_name} (${log.users.email})` : "Unknown"}
 Role: ${log.users?.role || "unknown"}
 Severity: ${log.severity}

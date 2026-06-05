@@ -524,7 +524,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           id: item.id,
           type: determineActivityType(item.action),
           action: item.action,
-          description: item.details,
+          description: typeof item.details === "object" && item.details ? JSON.stringify(item.details) : String(item.details || item.action || ""),
           user:
             item.users && Array.isArray(item.users) && item.users.length > 0
               ? `${item.users[0].first_name} ${item.users[0].last_name}`
