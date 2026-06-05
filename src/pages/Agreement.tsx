@@ -243,15 +243,44 @@ export function Agreement() {
   // ─── Fetch user's agreements ─────────────────────────────────────────────
   const fetchAgreements = useCallback(async () => {
     if (!user?.id) return;
-    const { data } = await supabase
+    // Fetch agreements: try both Swahili and English service names
+    // Also check form_data->buyer_id for this user
+    const results: AgreementApp[] = [];
+    
+    // Query 1: where user is applicant, second party, or target AND service is agreement-type
+    const { data: d1 } = await supabase
       .from("applications")
-      .select(
-        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
-      )
+      .select("id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at")
       .or(`user_id.eq.${user.id},second_party_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
-      .ilike("service_name", "%Makubaliano%")
+      .or("service_name.ilike.%Makubaliano%,service_name.ilike.%Agreement%,service_name.ilike.%Mauzo%,service_name.ilike.%Pango%")
       .order("created_at", { ascending: false });
-    setAgreementApps((data as AgreementApp[]) || []);
+    if (d1) results.push(...(d1 as AgreementApp[]));
+    
+    // Query 2: where buyer_id in form_data matches this user (fallback if second_party_user_id wasn't set)
+    const { data: d2 } = await supabase
+      .from("applications")
+      .select("id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at")
+      .contains("form_data", { buyer_id: user.id })
+      .order("created_at", { ascending: false });
+    if (d2) {
+      for (const app of d2 as AgreementApp[]) {
+        if (!results.find((r) => r.id === app.id)) results.push(app);
+      }
+    }
+
+    // Query 3: also check tenant_id in form_data
+    const { data: d3 } = await supabase
+      .from("applications")
+      .select("id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at")
+      .contains("form_data", { tenant_id: user.id })
+      .order("created_at", { ascending: false });
+    if (d3) {
+      for (const app of d3 as AgreementApp[]) {
+        if (!results.find((r) => r.id === app.id)) results.push(app);
+      }
+    }
+
+    setAgreementApps(results);
   }, [user?.id]);
 
   useEffect(() => {
