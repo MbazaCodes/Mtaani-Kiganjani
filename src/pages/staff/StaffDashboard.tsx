@@ -38,13 +38,29 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
     pendingBusiness: 0, // Pending business registration applications
   });
 
-  // Auto-redirect department officers to their portal
+  // Auto-redirect department officers to their portal.
+  // Uses the same query as DepartmentPortal (which is proven to work).
+  const [deptChecked, setDeptChecked] = useState(false);
   useEffect(() => {
-    if (user?.is_department_member && setView) {
-      setView("department_portal");
+    if (!user?.id || user?.role === "citizen" || deptChecked) return;
+    setDeptChecked(true);
+    // Quick check: if is_department_member is already set (from AuthContext)
+    if (user.is_department_member) {
+      if (setView) setView("department_portal");
+      return;
     }
+    // Fallback: direct query (same as DepartmentPortal does)
+    supabase
+      .from("department_users")
+      .select("department_id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data && setView) setView("department_portal");
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.is_department_member]);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchData();
