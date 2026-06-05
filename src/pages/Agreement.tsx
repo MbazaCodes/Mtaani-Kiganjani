@@ -187,6 +187,8 @@ export function Agreement() {
   const [regs, setRegs] = useState<BusinessRegistration[]>([]);
   const [loadingRegs, setLoading] = useState(true);
   const [agreementApps, setAgreementApps] = useState<AgreementApp[]>([]);
+  const [agrSearch, setAgrSearch] = useState("");
+  const [agrTypeFilter, setAgrTypeFilter] = useState<"all" | "sales" | "rental">("all");
 
   // Application mode
   const [applying, setApplying] = useState(false);
@@ -1544,10 +1546,6 @@ export function Agreement() {
           issued: { sw: "Imetolewa", en: "Issued" },
           rejected: { sw: "Imekataliwa", en: "Rejected" },
         };
-
-        const [agrSearch, setAgrSearch] = React.useState("");
-        const [agrTypeFilter, setAgrTypeFilter] = React.useState<"all" | "sales" | "rental">("all");
-
         const filtered = agreementApps.filter((a) => {
           const q = agrSearch.toLowerCase();
           const matchSearch =
@@ -1560,10 +1558,8 @@ export function Agreement() {
             (agrTypeFilter === "rental" && (a.service_name || "").includes("Pango"));
           return matchSearch && matchType;
         });
-
         return (
           <div className="space-y-3">
-            {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="text-base font-black text-stone-800 flex items-center gap-2">
                 <FileSignature size={18} className="text-stone-600" />
@@ -1582,19 +1578,15 @@ export function Agreement() {
                 <RefreshCw size={14} />
               </button>
             </div>
-
-            {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  value={agrSearch}
-                  onChange={(e) => setAgrSearch(e.target.value)}
-                  placeholder={L("Tafuta kwa namba au aina...", "Search by ref or type...")}
-                  aria-label={L("Tafuta makubaliano", "Search agreements")}
-                  className="w-full pl-4 pr-4 py-2 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-stone-400 outline-none bg-white"
-                />
-              </div>
+              <input
+                type="text"
+                value={agrSearch}
+                onChange={(e) => setAgrSearch(e.target.value)}
+                placeholder={L("Tafuta kwa namba au aina...", "Search by ref or type...")}
+                aria-label={L("Tafuta makubaliano", "Search agreements")}
+                className="flex-1 px-4 py-2 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-stone-400 outline-none bg-white"
+              />
               <select
                 value={agrTypeFilter}
                 onChange={(e) => setAgrTypeFilter(e.target.value as "all" | "sales" | "rental")}
@@ -1607,32 +1599,17 @@ export function Agreement() {
                 <option value="rental">{L("Pango", "Rental")}</option>
               </select>
             </div>
-
-            {/* Table */}
             <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
-              {/* Desktop table */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-left">
                   <thead className="bg-stone-50 border-b border-stone-200">
                     <tr>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
-                        {L("Aina", "Type")}
-                      </th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
-                        {L("Namba ya Maombi", "Ref #")}
-                      </th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
-                        {L("Nafsi Yako", "Your Role")}
-                      </th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
-                        {L("Hali", "Status")}
-                      </th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
-                        {L("Hali ya Makubaliano", "Agreement Status")}
-                      </th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
-                        {L("Tarehe", "Date")}
-                      </th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Aina", "Type")}</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Namba", "Ref #")}</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Nafsi Yako", "Your Role")}</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Hali", "Status")}</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Hali ya Makubaliano", "Agreement Status")}</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Tarehe", "Date")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
@@ -1640,136 +1617,81 @@ export function Agreement() {
                       <tr>
                         <td colSpan={6} className="px-5 py-10 text-center text-stone-400">
                           <FileSignature size={28} className="mx-auto mb-2 opacity-30" />
-                          <p className="text-sm">
-                            {L("Hakuna makubaliano yaliyopatikana.", "No agreements found.")}
-                          </p>
+                          <p className="text-sm">{L("Hakuna makubaliano yaliyopatikana.", "No agreements found.")}</p>
                           {agreementApps.length === 0 && (
                             <p className="text-xs mt-1 text-stone-300">
-                              {L(
-                                "Makubaliano yataonekana hapa baada ya kuanzisha.",
-                                "Agreements will appear here once initiated.",
-                              )}
+                              {L("Makubaliano yataonekana hapa baada ya kuanzisha.", "Agreements will appear here once initiated.")}
                             </p>
                           )}
                         </td>
                       </tr>
-                    ) : (
-                      filtered.map((agr) => {
-                        const isInitiator = agr.user_id === user?.id;
-                        const isSales = (agr.service_name || "").includes("Mauzo");
-                        const st = agr.status || "submitted";
-                        const style =
-                          AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";
-                        const label =
-                          AGR_STATUS_LABEL[st]?.[lang === "sw" ? "sw" : "en"] || st;
-                        return (
-                          <tr key={agr.id} className="hover:bg-stone-50 transition-colors">
-                            <td className="px-5 py-3">
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSales ? "bg-blue-100" : "bg-emerald-100"}`}
-                                >
-                                  {isSales ? (
-                                    <ShoppingCart size={13} className="text-blue-600" />
-                                  ) : (
-                                    <Key size={13} className="text-emerald-600" />
-                                  )}
-                                </div>
-                                <span className="text-xs font-bold text-stone-700">
-                                  {agr.service_name || L("Makubaliano", "Agreement")}
-                                </span>
+                    ) : filtered.map((agr) => {
+                      const isInitiator = agr.user_id === user?.id;
+                      const isSales = (agr.service_name || "").includes("Mauzo");
+                      const st = agr.status || "submitted";
+                      const stStyle = AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";
+                      const stLabel = AGR_STATUS_LABEL[st]?.[lang === "sw" ? "sw" : "en"] || st;
+                      return (
+                        <tr key={agr.id} className="hover:bg-stone-50 transition-colors">
+                          <td className="px-5 py-3">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSales ? "bg-blue-100" : "bg-emerald-100"}`}>
+                                {isSales ? <ShoppingCart size={13} className="text-blue-600" /> : <Key size={13} className="text-emerald-600" />}
                               </div>
-                            </td>
-                            <td className="px-5 py-3 font-mono text-xs text-stone-500">
-                              {agr.application_number || "—"}
-                            </td>
-                            <td className="px-5 py-3">
-                              <span
-                                className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isInitiator ? "bg-stone-100 text-stone-600 border-stone-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}
-                              >
-                                {isInitiator
-                                  ? L("Mwanzilishi", "Initiator")
-                                  : L("Pande ya Pili", "Second Party")}
-                              </span>
-                            </td>
-                            <td className="px-5 py-3">
-                              <span
-                                className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${style}`}
-                              >
-                                {label}
-                              </span>
-                            </td>
-                            <td className="px-5 py-3 text-xs text-stone-500">
-                              {agr.agreement_status || "—"}
-                            </td>
-                            <td className="px-5 py-3 text-xs text-stone-400">
-                              {new Date(agr.created_at).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
+                              <span className="text-xs font-bold text-stone-700">{agr.service_name || L("Makubaliano", "Agreement")}</span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-3 font-mono text-xs text-stone-500">{agr.application_number || "—"}</td>
+                          <td className="px-5 py-3">
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isInitiator ? "bg-stone-100 text-stone-600 border-stone-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}>
+                              {isInitiator ? L("Mwanzilishi", "Initiator") : L("Pande ya Pili", "Second Party")}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3">
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${stStyle}`}>{stLabel}</span>
+                          </td>
+                          <td className="px-5 py-3 text-xs text-stone-500">{agr.agreement_status || "—"}</td>
+                          <td className="px-5 py-3 text-xs text-stone-400">{new Date(agr.created_at).toLocaleDateString()}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
-
-              {/* Mobile cards */}
               <div className="sm:hidden divide-y divide-stone-100">
                 {filtered.length === 0 ? (
                   <div className="px-4 py-8 text-center text-stone-400">
                     <FileSignature size={28} className="mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">
-                      {L("Hakuna makubaliano.", "No agreements found.")}
-                    </p>
+                    <p className="text-sm">{L("Hakuna makubaliano.", "No agreements found.")}</p>
                   </div>
-                ) : (
-                  filtered.map((agr) => {
-                    const isInitiator = agr.user_id === user?.id;
-                    const isSales = (agr.service_name || "").includes("Mauzo");
-                    const st = agr.status || "submitted";
-                    const style =
-                      AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";
-                    const label =
-                      AGR_STATUS_LABEL[st]?.[lang === "sw" ? "sw" : "en"] || st;
-                    return (
-                      <div key={agr.id} className="p-4 space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSales ? "bg-blue-100" : "bg-emerald-100"}`}
-                            >
-                              {isSales ? (
-                                <ShoppingCart size={13} className="text-blue-600" />
-                              ) : (
-                                <Key size={13} className="text-emerald-600" />
-                              )}
-                            </div>
-                            <p className="text-xs font-black text-stone-800">
-                              {agr.service_name || L("Makubaliano", "Agreement")}
-                            </p>
+                ) : filtered.map((agr) => {
+                  const isInitiator = agr.user_id === user?.id;
+                  const isSales = (agr.service_name || "").includes("Mauzo");
+                  const st = agr.status || "submitted";
+                  const stStyle = AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";
+                  const stLabel = AGR_STATUS_LABEL[st]?.[lang === "sw" ? "sw" : "en"] || st;
+                  return (
+                    <div key={agr.id} className="p-4 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSales ? "bg-blue-100" : "bg-emerald-100"}`}>
+                            {isSales ? <ShoppingCart size={13} className="text-blue-600" /> : <Key size={13} className="text-emerald-600" />}
                           </div>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${style}`}>
-                            {label}
-                          </span>
+                          <p className="text-xs font-black text-stone-800">{agr.service_name || L("Makubaliano", "Agreement")}</p>
                         </div>
-                        <p className="text-[10px] font-mono text-stone-400">{agr.application_number}</p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span
-                            className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isInitiator ? "bg-stone-100 text-stone-600 border-stone-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}
-                          >
-                            {isInitiator ? L("Mwanzilishi", "Initiator") : L("Pande ya Pili", "Second Party")}
-                          </span>
-                          {agr.agreement_status && (
-                            <span className="text-[10px] text-stone-500">{agr.agreement_status}</span>
-                          )}
-                          <span className="text-[10px] text-stone-400 ml-auto">
-                            {new Date(agr.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${stStyle}`}>{stLabel}</span>
                       </div>
-                    );
-                  })
-                )}
+                      <p className="text-[10px] font-mono text-stone-400">{agr.application_number}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isInitiator ? "bg-stone-100 text-stone-600 border-stone-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}>
+                          {isInitiator ? L("Mwanzilishi", "Initiator") : L("Pande ya Pili", "Second Party")}
+                        </span>
+                        {agr.agreement_status && <span className="text-[10px] text-stone-500">{agr.agreement_status}</span>}
+                        <span className="text-[10px] text-stone-400 ml-auto">{new Date(agr.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
