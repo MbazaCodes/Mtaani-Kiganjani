@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Megaphone,
   Wallet,
+  Mail,
   MessageSquare,
   UserCheck,
   Activity,
@@ -170,6 +171,13 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
       label: lang === "sw" ? "Idhini ya Biashara" : "Business Approval",
       roles: ["staff", "admin"],
       view: "business_approval",
+    },
+    {
+      id: "messages",
+      icon: <Mail size={20} />,
+      label: lang === "sw" ? "Mawasiliano" : "Messages",
+      roles: ["citizen", "staff", "admin"],
+      view: "messages",
     },
     {
       id: "my_payments",

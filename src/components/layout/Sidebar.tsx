@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Megaphone,
   Wallet,
+  Mail,
   MapPin,
   Settings,
   HelpCircle,
@@ -290,6 +291,13 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
           onClick={() => setView("community_reports")}
         />
       )}
+      {/* Communications — shown for all */}
+      <SidebarItem
+        icon={<Mail size={20} />}
+        label={lang === "sw" ? "Mawasiliano" : "Messages"}
+        active={currentView === "messages"}
+        onClick={() => setView("messages")}
+      />
       {/* Citizen Support — shown for citizens and ward staff */}
       {(displayRole === "citizen" || (displayRole === "staff" && !(user?.is_department_member || localDeptCheck))) && (
         <SidebarItem

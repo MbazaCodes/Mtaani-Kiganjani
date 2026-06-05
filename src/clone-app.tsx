@@ -39,6 +39,7 @@ import { CommunityReporting } from "./pages/CommunityReporting";
 import { StaffReportsInbox } from "./pages/staff/StaffReportsInbox";
 import { Announcements } from "./pages/Announcements";
 import { MyPayments } from "./pages/MyPayments";
+import { CommunicationsCenter } from "./pages/CommunicationsCenter";
 import { CitizenManagement } from "./pages/admin/CitizenManagement";
 
 // Staff pages
@@ -662,6 +663,16 @@ export default function App() {
               <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
                 <AppShell>
                   <CommunityReporting />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                <AppShell>
+                  <CommunicationsCenter />
                 </AppShell>
               </ProtectedRoute>
             }

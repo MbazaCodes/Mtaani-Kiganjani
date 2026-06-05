@@ -36,6 +36,7 @@ export type ViewName =
   | "announcements"
   | "staff_announcements"
   | "my_payments"
+  | "messages"
   | "citizen_management";
 
 // ─── Application status ────────────────────────────────────────────────────────
