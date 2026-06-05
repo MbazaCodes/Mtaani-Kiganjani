@@ -247,7 +247,7 @@ export function Agreement() {
       .select(
         "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
       )
-      .or(`user_id.eq.${user.id},second_party_user_id.eq.${user.id}`)
+      .or(`user_id.eq.${user.id},second_party_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
       .ilike("service_name", "%Makubaliano%")
       .order("created_at", { ascending: false });
     setAgreementApps((data as AgreementApp[]) || []);
@@ -1546,6 +1546,7 @@ export function Agreement() {
           issued: { sw: "Imetolewa", en: "Issued" },
           rejected: { sw: "Imekataliwa", en: "Rejected" },
         };
+        const isInitiatorOf = (a: AgreementApp) => a.user_id === user?.id;
         const filtered = agreementApps.filter((a) => {
           const q = agrSearch.toLowerCase();
           const matchSearch =
@@ -1626,7 +1627,7 @@ export function Agreement() {
                         </td>
                       </tr>
                     ) : filtered.map((agr) => {
-                      const isInitiator = agr.user_id === user?.id;
+                      const isInitiator = isInitiatorOf(agr);
                       const isSales = (agr.service_name || "").includes("Mauzo");
                       const st = agr.status || "submitted";
                       const stStyle = AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";

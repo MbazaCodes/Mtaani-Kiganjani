@@ -160,8 +160,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       try {
-        const targetUserId = formData.target_user_id ?? formData.second_party_user_id ?? null;
-        const hasSecondParty = !!formData.second_party_user_id;
+        const targetUserId =
+          formData.target_user_id ??
+          formData.second_party_user_id ??
+          formData.buyer_id ??
+          formData.tenant_id ??
+          null;
+        const hasSecondParty = !!(
+          formData.second_party_user_id ??
+          formData.buyer_id ??
+          formData.tenant_id
+        );
         const sendForApproval = formData.send_for_approval === "YES" || hasSecondParty;
 
         let targetUserRole: string | null = null;
@@ -196,6 +205,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ward: user.ward ?? null,
             street: user.street ?? null,
             target_user_id: sendForApproval ? targetUserId : null,
+            second_party_user_id: sendForApproval ? targetUserId : null,
             target_user_nida: sendForApproval ? (formData.target_user_nida ?? null) : null,
             target_user_role: sendForApproval ? targetUserRole : null,
             agreement_status: sendForApproval && targetUserId ? "pending" : null,
