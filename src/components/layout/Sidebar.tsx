@@ -11,6 +11,7 @@ import {
   User,
   Building2,
   MessageSquare,
+  AlertTriangle,
   MapPin,
   Settings,
   HelpCircle,
@@ -260,6 +261,15 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         </>
       )}
 
+      {/* Community Reports — shown for citizens */}
+      {displayRole === "citizen" && (
+        <SidebarItem
+          icon={<AlertTriangle size={20} />}
+          label={lang === "sw" ? "Taarifa za Jamii" : "Community Reports"}
+          active={currentView === "community_reports"}
+          onClick={() => setView("community_reports")}
+        />
+      )}
       {/* Citizen Support — shown for citizens and ward staff */}
       {(displayRole === "citizen" || (displayRole === "staff" && !(user?.is_department_member || localDeptCheck))) && (
         <SidebarItem
@@ -267,6 +277,15 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
           label={lang === "sw" ? "Msaada" : "Support"}
           active={currentView === "citizen_support" || currentView === "staff_tickets"}
           onClick={() => setView(displayRole === "citizen" ? "citizen_support" : "staff_tickets")}
+        />
+      )}
+      {/* Staff Community Reports inbox */}
+      {displayRole === "staff" && !(user?.is_department_member || localDeptCheck) && (
+        <SidebarItem
+          icon={<AlertTriangle size={20} />}
+          label={lang === "sw" ? "Taarifa za Jamii" : "Community Reports"}
+          active={currentView === "staff_reports"}
+          onClick={() => setView("staff_reports")}
         />
       )}
       <SidebarItem

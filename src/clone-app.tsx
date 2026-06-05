@@ -35,6 +35,8 @@ import { DepartmentManagement } from "./pages/admin/DepartmentManagement";
 import { DepartmentPortal } from "./pages/department/DepartmentPortal";
 import { CitizenSupport } from "./pages/CitizenSupport";
 import { StaffTicketInbox } from "./pages/staff/StaffTicketInbox";
+import { CommunityReporting } from "./pages/CommunityReporting";
+import { StaffReportsInbox } from "./pages/staff/StaffReportsInbox";
 import { CitizenManagement } from "./pages/admin/CitizenManagement";
 
 // Staff pages
@@ -648,6 +650,26 @@ export default function App() {
               <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
                 <AppShell>
                   <CitizenSupport />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                <AppShell>
+                  <CommunityReporting />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/reports"
+            element={
+              <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                <AppShell>
+                  <StaffReportsInbox />
                 </AppShell>
               </ProtectedRoute>
             }
