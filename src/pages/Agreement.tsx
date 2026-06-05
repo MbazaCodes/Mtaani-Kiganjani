@@ -90,6 +90,17 @@ interface UploadedDoc {
   preview: string;
 }
 
+interface AgreementApp {
+  id: string;
+  application_number: string | null;
+  service_name: string | null;
+  status: string | null;
+  agreement_status: string | null;
+  user_id: string | null;
+  second_party_user_id: string | null;
+  created_at: string;
+}
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 const BIZ_TYPES = [
   {
@@ -175,6 +186,7 @@ export function Agreement() {
   // Data state
   const [regs, setRegs] = useState<BusinessRegistration[]>([]);
   const [loadingRegs, setLoading] = useState(true);
+  const [agreementApps, setAgreementApps] = useState<AgreementApp[]>([]);
 
   // Application mode
   const [applying, setApplying] = useState(false);
@@ -225,9 +237,24 @@ export function Agreement() {
     }
   }, [user?.id]);
 
+  // ─── Fetch user's agreements ─────────────────────────────────────────────
+  const fetchAgreements = useCallback(async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from("applications")
+      .select(
+        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+      )
+      .or(`user_id.eq.${user.id},second_party_user_id.eq.${user.id}`)
+      .ilike("service_name", "%Makubaliano%")
+      .order("created_at", { ascending: false });
+    setAgreementApps((data as AgreementApp[]) || []);
+  }, [user?.id]);
+
   useEffect(() => {
     fetchRegs();
-  }, [fetchRegs]);
+    fetchAgreements();
+  }, [fetchRegs, fetchAgreements]);
 
   // ─── Address cascade ────────────────────────────────────────────────────
   const districts = region
@@ -450,6 +477,7 @@ export function Agreement() {
           <button
             onClick={cancelApp}
             aria-label={L("Ghairi", "Cancel")}
+            title={L("Ghairi", "Cancel")}
             className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg"
           >
             <X size={20} />
@@ -604,11 +632,12 @@ export function Agreement() {
               </div>
 
               <div>
-                <label className={lbl}>
+                <label htmlFor="biz-name" className={lbl}>
                   {L("Jina la Biashara / Kampuni", "Business / Company Name")}{" "}
                   <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="biz-name"
                   value={businessName}
                   onChange={(e) => {
                     setBusinessName(e.target.value);
@@ -629,10 +658,11 @@ export function Agreement() {
               </div>
 
               <div>
-                <label className={lbl}>
+                <label htmlFor="biz-tin" className={lbl}>
                   {L("Namba ya TIN", "TIN Number")} <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="biz-tin"
                   value={tin}
                   onChange={(e) => {
                     setTin(e.target.value);
@@ -653,11 +683,12 @@ export function Agreement() {
               </div>
 
               <div>
-                <label className={lbl}>
+                <label htmlFor="biz-desc" className={lbl}>
                   {L("Maelezo ya Biashara", "Business Description")}{" "}
                   <span className="text-red-500">*</span>
                 </label>
                 <textarea
+                  id="biz-desc"
                   value={description}
                   onChange={(e) => {
                     setDescription(e.target.value);
@@ -683,16 +714,18 @@ export function Agreement() {
               </div>
 
               <div>
-                <label className={lbl}>
+                <label htmlFor="biz-spec" className={lbl}>
                   {L("Utaalamu", "Specialization")} <span className="text-red-500">*</span>
                 </label>
                 <select
+                  id="biz-spec"
                   value={specialization}
                   onChange={(e) => {
                     setSpecialization(e.target.value);
                     clrErr("specialization");
                   }}
                   aria-label={L("Utaalamu", "Specialization")}
+                  title={L("Utaalamu", "Specialization")}
                   className={inputCls("specialization")}
                 >
                   <option value="">{L("Chagua", "Select")}</option>
@@ -711,11 +744,12 @@ export function Agreement() {
               </div>
 
               <div>
-                <label className={lbl}>
+                <label htmlFor="biz-exp" className={lbl}>
                   {L("Miaka ya Uzoefu", "Years of Experience")}{" "}
                   <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="biz-exp"
                   type="number"
                   value={experienceYears}
                   onChange={(e) => {
@@ -745,10 +779,11 @@ export function Agreement() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={lbl}>
+                  <label htmlFor="biz-phone" className={lbl}>
                     {L("Simu Kuu", "Primary Phone")} <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="biz-phone"
                     value={phone}
                     onChange={(e) => {
                       setPhone(e.target.value);
@@ -765,10 +800,11 @@ export function Agreement() {
                   )}
                 </div>
                 <div>
-                  <label className={lbl}>
+                  <label htmlFor="biz-alt-phone" className={lbl}>
                     {L("Simu Mbadala (Hiari)", "Alternative Phone (Optional)")}
                   </label>
                   <input
+                    id="biz-alt-phone"
                     value={altPhone}
                     onChange={(e) => setAltPhone(e.target.value)}
                     placeholder="+255 7XX XXX XXX"
@@ -778,11 +814,12 @@ export function Agreement() {
               </div>
 
               <div>
-                <label className={lbl}>
+                <label htmlFor="biz-email" className={lbl}>
                   {L("Barua Pepe ya Biashara", "Business Email")}{" "}
                   <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="biz-email"
                   type="email"
                   value={email}
                   onChange={(e) => {
@@ -801,10 +838,11 @@ export function Agreement() {
               </div>
 
               <div>
-                <label className={lbl}>
+                <label htmlFor="biz-region" className={lbl}>
                   {L("Mkoa", "Region")} <span className="text-red-500">*</span>
                 </label>
                 <select
+                  id="biz-region"
                   value={region}
                   onChange={(e) => {
                     setRegion(e.target.value);
@@ -813,6 +851,7 @@ export function Agreement() {
                     clrErr("region");
                   }}
                   aria-label={L("Mkoa", "Region")}
+                  title={L("Mkoa", "Region")}
                   className={inputCls("region")}
                 >
                   <option value="">{L("Chagua Mkoa", "Select Region")}</option>
@@ -832,10 +871,11 @@ export function Agreement() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={lbl}>
+                  <label htmlFor="biz-district" className={lbl}>
                     {L("Wilaya", "District")} <span className="text-red-500">*</span>
                   </label>
                   <select
+                    id="biz-district"
                     value={district}
                     onChange={(e) => {
                       setDistrict(e.target.value);
@@ -843,6 +883,7 @@ export function Agreement() {
                       clrErr("district");
                     }}
                     aria-label={L("Wilaya", "District")}
+                    title={L("Wilaya", "District")}
                     disabled={!region}
                     className={`${inputCls("district")} disabled:bg-stone-50`}
                   >
@@ -861,16 +902,18 @@ export function Agreement() {
                   )}
                 </div>
                 <div>
-                  <label className={lbl}>
+                  <label htmlFor="biz-ward" className={lbl}>
                     {L("Kata", "Ward")} <span className="text-red-500">*</span>
                   </label>
                   <select
+                    id="biz-ward"
                     value={ward}
                     onChange={(e) => {
                       setWard(e.target.value);
                       clrErr("ward");
                     }}
                     aria-label={L("Kata", "Ward")}
+                    title={L("Kata", "Ward")}
                     disabled={!district}
                     className={`${inputCls("ward")} disabled:bg-stone-50`}
                   >
@@ -891,10 +934,11 @@ export function Agreement() {
               </div>
 
               <div>
-                <label className={lbl}>
+                <label htmlFor="biz-street" className={lbl}>
                   {L("Mtaa / Kijiji (Hiari)", "Street / Village (Optional)")}
                 </label>
                 <input
+                  id="biz-street"
                   value={street}
                   onChange={(e) => setStreet(e.target.value)}
                   placeholder={L("Mfano: Mtaa wa Uhuru", "E.g. Uhuru Street")}
@@ -990,6 +1034,7 @@ export function Agreement() {
                         <button
                           type="button"
                           aria-label={L("Ondoa faili", "Remove file")}
+                          title={L("Ondoa faili", "Remove file")}
                           onClick={(e) => {
                             e.stopPropagation();
                             URL.revokeObjectURL(item.doc!.preview);
@@ -1313,6 +1358,7 @@ export function Agreement() {
                       {meta.services.map((serviceName) => (
                         <button
                           key={serviceName}
+                          type="button"
                           onClick={() => setView("services")}
                           className="w-full px-3 py-2 bg-white hover:bg-stone-50 rounded-lg flex items-center justify-between gap-2 text-xs font-bold text-stone-700 shadow-sm transition-all"
                         >
@@ -1405,6 +1451,7 @@ export function Agreement() {
                       </div>
                     )}
                     <button
+                      type="button"
                       onClick={() => {
                         setBizType(reg.business_type);
                         setApplying(true);
@@ -1454,6 +1501,7 @@ export function Agreement() {
       <div className={`${hasAnyReg ? "" : "mt-2"}`}>
         {canApplyNew ? (
           <button
+            type="button"
             onClick={() => {
               setApplying(true);
               setStep("type");
@@ -1477,6 +1525,82 @@ export function Agreement() {
           </div>
         )}
       </div>
+
+      {/* MY AGREEMENTS */}
+      {agreementApps.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-black text-stone-800">
+              {L("Makubaliano Yangu", "My Agreements")}
+            </h2>
+            <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2.5 py-1 rounded-full">
+              {agreementApps.length}
+            </span>
+          </div>
+          {agreementApps.map((agr) => {
+            const isInitiator = agr.user_id === user?.id;
+            const statusStyles: Record<string, string> = {
+              submitted: "bg-blue-50 border-blue-200 text-blue-700",
+              pending_payment: "bg-amber-50 border-amber-200 text-amber-700",
+              paid: "bg-emerald-50 border-emerald-200 text-emerald-700",
+              processing: "bg-indigo-50 border-indigo-200 text-indigo-700",
+              issued: "bg-emerald-100 border-emerald-300 text-emerald-800",
+              rejected: "bg-red-50 border-red-200 text-red-700",
+            };
+            const statusLabels: Record<string, { sw: string; en: string }> = {
+              submitted: { sw: "Imetumwa", en: "Submitted" },
+              pending_payment: { sw: "Inasubiri Malipo", en: "Pending Payment" },
+              paid: { sw: "Imelipiwa", en: "Paid" },
+              processing: { sw: "Inashughulikiwa", en: "Processing" },
+              issued: { sw: "Imetolewa", en: "Issued" },
+              rejected: { sw: "Imekataliwa", en: "Rejected" },
+            };
+            const st = agr.status || "submitted";
+            const style = statusStyles[st] || "bg-stone-50 border-stone-200 text-stone-600";
+            const label = statusLabels[st]?.[lang === "sw" ? "sw" : "en"] || st;
+            return (
+              <div
+                key={agr.id}
+                className="bg-white border border-stone-200 rounded-2xl p-4 flex items-start gap-3"
+              >
+                <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
+                  <FileSignature size={20} className="text-stone-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-black text-stone-800 text-sm">
+                      {agr.service_name || L("Makubaliano", "Agreement")}
+                    </h3>
+                    <span
+                      className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${style}`}
+                    >
+                      {label}
+                    </span>
+                    {agr.agreement_status && (
+                      <span className="text-[9px] font-black text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full border border-purple-200">
+                        {agr.agreement_status}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-stone-400 font-mono mt-0.5">
+                    {agr.application_number}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-[10px] text-stone-400">
+                      {new Date(agr.created_at).toLocaleDateString()}
+                    </span>
+                    <span className="text-[10px] font-semibold text-stone-500">
+                      {isInitiator
+                        ? L("Uliianzisha", "You initiated")
+                        : L("Wewe ni pande ya pili", "You are second party")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Info box — what is this */}
       {!hasAnyReg && (

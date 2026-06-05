@@ -120,10 +120,51 @@ const SPECIALIZATIONS_LABELS: { [key: string]: { sw: string; en: string } } = {
   general_broker: { sw: "Dalali wa Jumla", en: "General Broker" },
 };
 
+type StaffTab = "registrations" | "agreements" | "applications";
+
+interface AgreementRow {
+  id: string;
+  application_number: string | null;
+  service_name: string | null;
+  status: string | null;
+  agreement_status: string | null;
+  user_id: string | null;
+  second_party_user_id: string | null;
+  created_at: string;
+  user?: { first_name: string; last_name: string; citizen_id: string } | null;
+  second_party?: { first_name: string; last_name: string; citizen_id: string } | null;
+}
+
+interface AppRow {
+  id: string;
+  application_number: string | null;
+  service_name: string | null;
+  status: string | null;
+  user_id: string | null;
+  created_at: string;
+  district: string | null;
+  region: string | null;
+  user?: { first_name: string; last_name: string; citizen_id: string } | null;
+}
+
 export const BusinessApproval: React.FC = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
   const { showToast } = useToast();
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<StaffTab>("registrations");
+
+  // Agreements state
+  const [agreements, setAgreements] = useState<AgreementRow[]>([]);
+  const [loadingAgreements, setLoadingAgreements] = useState(false);
+  const [agrSearchQuery, setAgrSearchQuery] = useState("");
+
+  // All applications state
+  const [allApps, setAllApps] = useState<AppRow[]>([]);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [appSearchQuery, setAppSearchQuery] = useState("");
+  const [appStatusFilter, setAppStatusFilter] = useState("all");
 
   const [registrations, setRegistrations] = useState<BusinessRegistration[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,9 +190,11 @@ export const BusinessApproval: React.FC = () => {
   });
 
   useEffect(() => {
-    fetchRegistrations();
+    if (activeTab === "registrations") fetchRegistrations();
+    if (activeTab === "agreements") fetchAgreements();
+    if (activeTab === "applications") fetchAllApps();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, typeFilter]);
+  }, [activeTab, statusFilter, typeFilter, appStatusFilter]);
 
   const fetchRegistrations = async () => {
     setLoading(true);
@@ -202,6 +245,75 @@ export const BusinessApproval: React.FC = () => {
       showToast(lang === "sw" ? "Hitilafu katika kupakia data" : "Error loading data", "error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch all agreement applications
+  const fetchAgreements = async () => {
+    setLoadingAgreements(true);
+    try {
+      const { data, error } = await supabase
+        .from("applications")
+        .select(
+          "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+        )
+        .ilike("service_name", "%Makubaliano%")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const enriched = await Promise.all(
+        (data || []).map(async (row) => {
+          const [{ data: u }, { data: sp }] = await Promise.all([
+            supabase
+              .from("users")
+              .select("first_name, last_name, citizen_id")
+              .eq("id", row.user_id)
+              .maybeSingle(),
+            row.second_party_user_id
+              ? supabase
+                  .from("users")
+                  .select("first_name, last_name, citizen_id")
+                  .eq("id", row.second_party_user_id)
+                  .maybeSingle()
+              : Promise.resolve({ data: null }),
+          ]);
+          return { ...row, user: u ?? null, second_party: sp ?? null };
+        }),
+      );
+      setAgreements(enriched as AgreementRow[]);
+    } catch (err) {
+      console.error("fetch agreements", err);
+    } finally {
+      setLoadingAgreements(false);
+    }
+  };
+
+  // Fetch all service applications
+  const fetchAllApps = async () => {
+    setLoadingApps(true);
+    try {
+      let query = supabase
+        .from("applications")
+        .select("id, application_number, service_name, status, user_id, created_at, district, region")
+        .not("service_name", "ilike", "%Makubaliano%")
+        .order("created_at", { ascending: false });
+      if (appStatusFilter !== "all") query = query.eq("status", appStatusFilter);
+      const { data, error } = await query;
+      if (error) throw error;
+      const enriched = await Promise.all(
+        (data || []).map(async (row) => {
+          const { data: u } = await supabase
+            .from("users")
+            .select("first_name, last_name, citizen_id")
+            .eq("id", row.user_id)
+            .maybeSingle();
+          return { ...row, user: u ?? null };
+        }),
+      );
+      setAllApps(enriched as AppRow[]);
+    } catch (err) {
+      console.error("fetch all apps", err);
+    } finally {
+      setLoadingApps(false);
     }
   };
 
@@ -390,6 +502,7 @@ export const BusinessApproval: React.FC = () => {
             </div>
 
             <button
+              type="button"
               onClick={fetchRegistrations}
               className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
             >
@@ -508,7 +621,281 @@ export const BusinessApproval: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Filters */}
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 bg-white rounded-xl border border-gray-200 p-1 w-fit">
+          {(
+            [
+              { key: "registrations", sw: "Usajili wa Biashara", en: "Business Registrations" },
+              { key: "agreements", sw: "Makubaliano", en: "Agreements" },
+              { key: "applications", sw: "Maombi Yote", en: "All Applications" },
+            ] as { key: StaffTab; sw: string; en: string }[]
+          ).map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === tab.key
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+              }`}
+            >
+              {lang === "sw" ? tab.sw : tab.en}
+            </button>
+          ))}
+        </div>
+
+        {/* ── AGREEMENTS TAB ───────────────────────────────────────────────── */}
+        {activeTab === "agreements" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+          >
+            <div className="p-4 border-b border-gray-100 flex items-center gap-3">
+              <div className="flex-1 relative">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={agrSearchQuery}
+                  onChange={(e) => setAgrSearchQuery(e.target.value)}
+                  placeholder={lang === "sw" ? "Tafuta makubaliano..." : "Search agreements..."}
+                  className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            {loadingAgreements ? (
+              <div className="p-12 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Mwanzilishi" : "Initiator"}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Pande ya Pili" : "Second Party"}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Aina" : "Type"}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Hali" : "Status"}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Tarehe" : "Date"}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {agreements
+                      .filter((a) => {
+                        if (!agrSearchQuery) return true;
+                        const q = agrSearchQuery.toLowerCase();
+                        return (
+                          a.application_number?.toLowerCase().includes(q) ||
+                          a.user?.first_name?.toLowerCase().includes(q) ||
+                          a.user?.last_name?.toLowerCase().includes(q) ||
+                          a.user?.citizen_id?.toLowerCase().includes(q) ||
+                          a.second_party?.citizen_id?.toLowerCase().includes(q)
+                        );
+                      })
+                      .map((agr) => (
+                        <tr key={agr.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <p className="font-medium text-gray-900">
+                              {agr.user
+                                ? `${agr.user.first_name} ${agr.user.last_name}`
+                                : "—"}
+                            </p>
+                            <p className="text-xs text-emerald-600 font-mono">
+                              {agr.user?.citizen_id || "—"}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="font-medium text-gray-900">
+                              {agr.second_party
+                                ? `${agr.second_party.first_name} ${agr.second_party.last_name}`
+                                : "—"}
+                            </p>
+                            <p className="text-xs text-emerald-600 font-mono">
+                              {agr.second_party?.citizen_id || "—"}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm text-gray-700">{agr.service_name || "—"}</p>
+                            <p className="text-xs text-gray-400 font-mono">
+                              {agr.application_number}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                                agr.status === "issued"
+                                  ? "bg-green-50 text-green-700 border-green-200"
+                                  : agr.status === "rejected"
+                                    ? "bg-red-50 text-red-700 border-red-200"
+                                    : agr.status === "processing"
+                                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                                      : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                              }`}
+                            >
+                              {agr.status || "—"}
+                            </span>
+                            {agr.agreement_status && (
+                              <p className="text-xs text-purple-600 mt-1">{agr.agreement_status}</p>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">
+                            {new Date(agr.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+                {agreements.length === 0 && (
+                  <div className="p-12 text-center text-gray-400">
+                    <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                    <p>{lang === "sw" ? "Hakuna makubaliano" : "No agreements found"}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ── ALL APPLICATIONS TAB ─────────────────────────────────────────── */}
+        {activeTab === "applications" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+          >
+            <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row gap-3">
+              <div className="flex-1 relative">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={appSearchQuery}
+                  onChange={(e) => setAppSearchQuery(e.target.value)}
+                  placeholder={lang === "sw" ? "Tafuta maombi..." : "Search applications..."}
+                  className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+              </div>
+              <select
+                value={appStatusFilter}
+                onChange={(e) => setAppStatusFilter(e.target.value)}
+                aria-label={lang === "sw" ? "Chuja kwa hali" : "Filter by status"}
+                title={lang === "sw" ? "Chuja kwa hali" : "Filter by status"}
+                className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="all">{lang === "sw" ? "Hali Zote" : "All Statuses"}</option>
+                {["submitted", "approved", "pending_payment", "paid", "processing", "issued", "rejected", "refunded"].map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            {loadingApps ? (
+              <div className="p-12 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Mwombaji" : "Applicant"}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Huduma" : "Service"}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Eneo" : "Location"}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Hali" : "Status"}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Tarehe" : "Date"}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {allApps
+                      .filter((a) => {
+                        if (!appSearchQuery) return true;
+                        const q = appSearchQuery.toLowerCase();
+                        return (
+                          a.application_number?.toLowerCase().includes(q) ||
+                          a.service_name?.toLowerCase().includes(q) ||
+                          a.user?.first_name?.toLowerCase().includes(q) ||
+                          a.user?.last_name?.toLowerCase().includes(q) ||
+                          a.user?.citizen_id?.toLowerCase().includes(q)
+                        );
+                      })
+                      .map((app) => (
+                        <tr key={app.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <p className="font-medium text-gray-900">
+                              {app.user
+                                ? `${app.user.first_name} ${app.user.last_name}`
+                                : "—"}
+                            </p>
+                            <p className="text-xs text-emerald-600 font-mono">
+                              {app.user?.citizen_id || "—"}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm text-gray-700">{app.service_name || "—"}</p>
+                            <p className="text-xs text-gray-400 font-mono">
+                              {app.application_number}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {[app.district, app.region].filter(Boolean).join(", ") || "—"}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                                app.status === "issued"
+                                  ? "bg-green-50 text-green-700 border-green-200"
+                                  : app.status === "rejected"
+                                    ? "bg-red-50 text-red-700 border-red-200"
+                                    : app.status === "paid" || app.status === "processing"
+                                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                                      : app.status === "pending_payment"
+                                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                                        : "bg-gray-50 text-gray-700 border-gray-200"
+                              }`}
+                            >
+                              {app.status || "—"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">
+                            {new Date(app.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+                {allApps.length === 0 && (
+                  <div className="p-12 text-center text-gray-400">
+                    <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                    <p>{lang === "sw" ? "Hakuna maombi" : "No applications found"}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Filters & Table — registrations tab only */}
+        {activeTab === "registrations" && (
+        <>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -657,6 +1044,7 @@ export const BusinessApproval: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button
+                            type="button"
                             onClick={() => setSelectedRegistration(reg)}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                           >
@@ -672,6 +1060,8 @@ export const BusinessApproval: React.FC = () => {
             </div>
           )}
         </motion.div>
+        </>
+        )}
 
         {/* Detail Modal */}
         <AnimatePresence>
@@ -715,8 +1105,10 @@ export const BusinessApproval: React.FC = () => {
                             </div>
                           </div>
                           <button
+                            type="button"
                             onClick={() => setSelectedRegistration(null)}
                             aria-label="Close"
+                            title="Close"
                             className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                           >
                             <X className="w-6 h-6 text-white" />
@@ -920,6 +1312,7 @@ export const BusinessApproval: React.FC = () => {
                         {selectedRegistration.status === "pending" && (
                           <div className="flex items-center justify-end gap-4 pt-6 border-t">
                             <button
+                              type="button"
                               onClick={() => setShowRejectModal(true)}
                               disabled={processing}
                               className="px-6 py-2.5 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 disabled:opacity-50 flex items-center gap-2"
@@ -928,6 +1321,7 @@ export const BusinessApproval: React.FC = () => {
                               {lang === "sw" ? "Kataa" : "Reject"}
                             </button>
                             <button
+                              type="button"
                               onClick={handleApprove}
                               disabled={processing}
                               className="px-6 py-2.5 bg-linear-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-xl hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
@@ -988,6 +1382,7 @@ export const BusinessApproval: React.FC = () => {
 
                 <div className="flex items-center justify-end gap-3">
                   <button
+                    type="button"
                     onClick={() => {
                       setShowRejectModal(false);
                       setRejectionReason("");
@@ -998,6 +1393,7 @@ export const BusinessApproval: React.FC = () => {
                     {lang === "sw" ? "Ghairi" : "Cancel"}
                   </button>
                   <button
+                    type="button"
                     onClick={handleReject}
                     disabled={processing || !rejectionReason.trim()}
                     className="px-4 py-2 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 disabled:opacity-50 flex items-center gap-2"
