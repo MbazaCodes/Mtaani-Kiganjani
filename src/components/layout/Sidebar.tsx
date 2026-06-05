@@ -12,6 +12,7 @@ import {
   Building2,
   MessageSquare,
   AlertTriangle,
+  Megaphone,
   MapPin,
   Settings,
   HelpCircle,
@@ -261,6 +262,15 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         </>
       )}
 
+      {/* Announcements — shown for citizens */}
+      {displayRole === "citizen" && (
+        <SidebarItem
+          icon={<Megaphone size={20} />}
+          label={lang === "sw" ? "Matangazo" : "Announcements"}
+          active={currentView === "announcements"}
+          onClick={() => setView("announcements")}
+        />
+      )}
       {/* Community Reports — shown for citizens */}
       {displayRole === "citizen" && (
         <SidebarItem
@@ -277,6 +287,15 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
           label={lang === "sw" ? "Msaada" : "Support"}
           active={currentView === "citizen_support" || currentView === "staff_tickets"}
           onClick={() => setView(displayRole === "citizen" ? "citizen_support" : "staff_tickets")}
+        />
+      )}
+      {/* Staff Announcements */}
+      {displayRole === "staff" && !(user?.is_department_member || localDeptCheck) && (
+        <SidebarItem
+          icon={<Megaphone size={20} />}
+          label={lang === "sw" ? "Matangazo" : "Announcements"}
+          active={currentView === "staff_announcements"}
+          onClick={() => setView("staff_announcements")}
         />
       )}
       {/* Staff Community Reports inbox */}
