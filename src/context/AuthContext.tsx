@@ -99,8 +99,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshProfile = async () => {
     if (session?.user?.id) {
       const profile = await fetchUserProfile(session.user.id);
-      // Department membership: just check if department_id is set on the profile
-      if (profile?.department_id) profile.is_department_member = true;
+      // Department membership detection
+      if (profile) {
+        console.log("[AUTH] Profile loaded:", { id: profile.id, role: profile.role, department_id: profile.department_id });
+        if (profile.department_id) {
+          profile.is_department_member = true;
+          console.log("[AUTH] Dept member via department_id column");
+        } else if (profile.role === "staff" || profile.role === "admin") {
+          try {
+            const { data: deptRow, error: deptErr } = await supabase
+              .from("department_users")
+              .select("department_id, role")
+              .eq("user_id", profile.id)
+              .limit(1)
+              .maybeSingle();
+            console.log("[AUTH] department_users query:", { deptRow, deptErr });
+            if (deptRow) {
+              profile.is_department_member = true;
+              profile.department_id = deptRow.department_id;
+              console.log("[AUTH] Dept member via department_users query");
+            } else {
+              console.log("[AUTH] NOT a dept member (no department_users row found)");
+            }
+          } catch (e) {
+            console.warn("[AUTH] Dept check exception:", e);
+          }
+        }
+        console.log("[AUTH] Final is_department_member:", profile.is_department_member);
+      }
       setUser(profile);
     }
   };
@@ -133,7 +159,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (currentSession?.user) {
           const profile = await withProfileTimeout(fetchUserProfile(currentSession.user.id));
           if (!isMounted) return;
-          if (profile?.department_id) profile.is_department_member = true;
+          if (profile) {
+            if (profile.department_id) {
+              profile.is_department_member = true;
+            } else if (profile.role === "staff" || profile.role === "admin") {
+              try {
+                const { data: deptRow } = await supabase
+                  .from("department_users")
+                  .select("department_id, role")
+                  .eq("user_id", profile.id)
+                  .limit(1)
+                  .maybeSingle();
+                if (deptRow) {
+                  profile.is_department_member = true;
+                  profile.department_id = deptRow.department_id;
+                }
+              } catch (e) {
+                console.warn("Dept membership check failed:", e);
+              }
+            }
+          }
           setUser(profile ?? buildFallbackUser(currentSession.user));
         } else {
           setUser(null);
