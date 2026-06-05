@@ -42,6 +42,7 @@ export const VIEW_PATHS: Record<ViewName, string> = {
   staff_reports: "/staff/reports",
   announcements: "/announcements",
   staff_announcements: "/staff/announcements",
+  my_payments: "/payments",
   citizen_management: "/citizens",
 };
 

@@ -13,6 +13,7 @@ import {
   MessageSquare,
   AlertTriangle,
   Megaphone,
+  Wallet,
   MapPin,
   Settings,
   HelpCircle,
@@ -262,6 +263,15 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         </>
       )}
 
+      {/* My Payments — shown for citizens */}
+      {displayRole === "citizen" && (
+        <SidebarItem
+          icon={<Wallet size={20} />}
+          label={lang === "sw" ? "Malipo" : "Payments"}
+          active={currentView === "my_payments"}
+          onClick={() => setView("my_payments")}
+        />
+      )}
       {/* Announcements — shown for citizens */}
       {displayRole === "citizen" && (
         <SidebarItem

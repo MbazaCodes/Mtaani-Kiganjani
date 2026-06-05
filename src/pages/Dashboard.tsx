@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 /**
  * Citizen Dashboard — the main view after login
  *
@@ -86,6 +87,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const [ticketStats, setTicketStats] = useState({ total: 0, open: 0 });
   const [reportStats, setReportStats] = useState({ total: 0, open: 0 });
   const [announcementCount, setAnnouncementCount] = useState(0);
+  const [paymentStats, setPaymentStats] = useState({ outstanding: 0, amount: 0 });
 
   useEffect(() => {
     if (!user?.id) return;
@@ -100,6 +102,16 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
       .then(({ data }) => {
         const r = data || [];
         setReportStats({ total: r.length, open: r.filter((x: any) => !["resolved","closed"].includes(x.status)).length });
+      });
+    // Payments
+    supabase.from("applications")
+      .select("id, form_data, payment_data")
+      .eq("user_id", user.id)
+      .eq("status", "pending_payment")
+      .then(({ data }) => {
+        const outstanding = data || [];
+        const total = outstanding.reduce((s: number, a: any) => s + Number(a.form_data?.service_fee || a.payment_data?.amount || 0), 0);
+        setPaymentStats({ outstanding: outstanding.length, amount: total });
       });
     // Announcements
     supabase.from("announcements").select("id", { count: "exact", head: true })
@@ -299,7 +311,25 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
       )}
 
       {/* New Module Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div
+          onClick={() => setView("my_payments")}
+          className={cn(
+            "border rounded-2xl p-4 cursor-pointer transition-colors",
+            paymentStats.outstanding > 0
+              ? "bg-red-50 border-red-100 hover:border-red-300"
+              : "bg-emerald-50 border-emerald-100 hover:border-emerald-300"
+          )}
+        >
+          <p className="text-xl font-black text-stone-900">
+            {paymentStats.outstanding > 0 ? `TSh ${paymentStats.amount.toLocaleString()}` : "✓"}
+          </p>
+          <p className="text-xs font-bold text-stone-500 mt-0.5">
+            {paymentStats.outstanding > 0
+              ? (lang === "sw" ? `${paymentStats.outstanding} Madeni` : `${paymentStats.outstanding} Due`)
+              : (lang === "sw" ? "Hakuna Madeni" : "No Dues")}
+          </p>
+        </div>
         <div
           onClick={() => setView("citizen_support")}
           className="bg-blue-50 border border-blue-100 rounded-2xl p-4 cursor-pointer hover:border-blue-300 transition-colors"
