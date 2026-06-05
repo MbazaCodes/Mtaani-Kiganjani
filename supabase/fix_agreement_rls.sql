@@ -17,3 +17,13 @@ CREATE POLICY "applications_select_form_party" ON public.applications
     (form_data->>'buyer_id')::uuid = auth.uid()
     OR (form_data->>'tenant_id')::uuid = auth.uid()
   );
+
+-- Allow buyer/tenant to update agreement_status on applications filed with them
+DROP POLICY IF EXISTS "applications_update_second_party" ON public.applications;
+CREATE POLICY "applications_update_second_party" ON public.applications
+  FOR UPDATE USING (
+    auth.uid() = second_party_user_id
+    OR auth.uid() = target_user_id
+    OR (form_data->>'buyer_id')::uuid = auth.uid()
+    OR (form_data->>'tenant_id')::uuid = auth.uid()
+  );

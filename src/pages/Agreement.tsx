@@ -190,6 +190,7 @@ export function Agreement() {
   const [agreementApps, setAgreementApps] = useState<AgreementApp[]>([]);
   const [agrSearch, setAgrSearch] = useState("");
   const [agrTypeFilter, setAgrTypeFilter] = useState<"all" | "sales" | "rental">("all");
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   // Application mode
   const [applying, setApplying] = useState(false);
@@ -241,6 +242,51 @@ export function Agreement() {
   }, [user?.id]);
 
   // ─── Fetch user's agreements ─────────────────────────────────────────────
+  const handleAgreementAction = async (agr: AgreementApp, action: "accept" | "reject") => {
+    if (!user) return;
+    setProcessingId(agr.id);
+    try {
+      const newStatus = action === "accept" ? "buyer_accepted" : "buyer_rejected";
+      
+      // Update agreement_status on the application
+      const { error } = await supabase
+        .from("applications")
+        .update({ agreement_status: newStatus })
+        .eq("id", agr.id);
+      if (error) throw error;
+
+      // Notify the seller
+      const sellerMsg = action === "accept"
+        ? (lang === "sw"
+            ? `Mnunuzi amekubali makubaliano ${agr.application_number}`
+            : `Buyer has accepted agreement ${agr.application_number}`)
+        : (lang === "sw"
+            ? `Mnunuzi amekataa makubaliano ${agr.application_number}`
+            : `Buyer has rejected agreement ${agr.application_number}`);
+      
+      await supabase.from("notifications").insert({
+        user_id: agr.user_id,
+        title: action === "accept"
+          ? (lang === "sw" ? "Makubaliano Yamekubaliwa" : "Agreement Accepted")
+          : (lang === "sw" ? "Makubaliano Yamekataliwa" : "Agreement Rejected"),
+        message: sellerMsg,
+        type: "agreement_update",
+      });
+
+      showToast(
+        action === "accept"
+          ? L("Umekubali makubaliano!", "Agreement accepted!")
+          : L("Umekataa makubaliano.", "Agreement rejected."),
+        action === "accept" ? "success" : "info",
+      );
+      fetchAgreements();
+    } catch (err: unknown) {
+      showToast((err as { message?: string }).message || "Error", "error");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const fetchAgreements = useCallback(async () => {
     if (!user?.id) return;
     // Fetch agreements: try both Swahili and English service names
@@ -1361,8 +1407,16 @@ export function Agreement() {
                           {agr.status}
                         </span>
                         {agr.agreement_status && (
-                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-stone-100 text-stone-600 uppercase">
-                            {agr.agreement_status}
+                          <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                            agr.agreement_status === "buyer_accepted" ? "bg-emerald-100 text-emerald-800"
+                              : agr.agreement_status === "buyer_rejected" ? "bg-red-100 text-red-800"
+                              : "bg-stone-100 text-stone-600"
+                          )}>
+                            {agr.agreement_status === "buyer_accepted"
+                              ? (lang === "sw" ? "Umekubali" : "Accepted")
+                              : agr.agreement_status === "buyer_rejected"
+                                ? (lang === "sw" ? "Umekataa" : "Rejected")
+                                : agr.agreement_status}
                           </span>
                         )}
                       </div>
@@ -1373,6 +1427,39 @@ export function Agreement() {
                         {lang === "sw" ? "Imetumwa:" : "Filed:"} {new Date(agr.created_at).toLocaleDateString("sw-TZ")}
                       </p>
                     </div>
+                    {/* Accept/Reject buttons — only show if not already responded */}
+                    {!agr.agreement_status && (
+                      <div className="flex gap-2 shrink-0">
+                        <button
+                          onClick={() => handleAgreementAction(agr, "accept")}
+                          disabled={processingId === agr.id}
+                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                        >
+                          {processingId === agr.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
+                          {lang === "sw" ? "Kubali" : "Accept"}
+                        </button>
+                        <button
+                          onClick={() => handleAgreementAction(agr, "reject")}
+                          disabled={processingId === agr.id}
+                          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                        >
+                          <X size={12} />
+                          {lang === "sw" ? "Kataa" : "Reject"}
+                        </button>
+                      </div>
+                    )}
+                    {agr.agreement_status === "buyer_accepted" && (
+                      <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                        <CheckCircle size={12} />
+                        {lang === "sw" ? "Umekubali" : "Accepted"}
+                      </span>
+                    )}
+                    {agr.agreement_status === "buyer_rejected" && (
+                      <span className="px-3 py-1.5 bg-red-100 text-red-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                        <X size={12} />
+                        {lang === "sw" ? "Umekataa" : "Rejected"}
+                      </span>
+                    )}
                   </div>
                 </div>
               );
