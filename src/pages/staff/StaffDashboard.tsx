@@ -29,6 +29,8 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
   const { lang } = useLanguage();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ticketCount, setTicketCount] = useState(0);
+  const [reportCount, setReportCount] = useState(0);
   const [stats, setStats] = useState({
     pending: 0,
     paid: 0,
@@ -86,6 +88,15 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
           return true;
         });
 
+        // Ticket + report counts for this area
+        let tQuery = supabase.from("support_tickets").select("id", { count: "exact", head: true });
+        let rQuery = supabase.from("community_reports").select("id", { count: "exact", head: true });
+        if (user?.ward) { tQuery = tQuery.eq("ward", user.ward); rQuery = rQuery.eq("ward", user.ward); }
+        else if (user?.assigned_district) { tQuery = tQuery.eq("district", user.assigned_district); rQuery = rQuery.eq("district", user.assigned_district); }
+        else if (user?.assigned_region) { tQuery = tQuery.eq("region", user.assigned_region); rQuery = rQuery.eq("region", user.assigned_region); }
+        tQuery.then(({ count }) => setTicketCount(count || 0));
+        rQuery.then(({ count }) => setReportCount(count || 0));
+
         setStats({
           pending: filteredApps.filter(
             (a: import("@/lib/supabase").Application) =>
@@ -136,6 +147,15 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         .eq("status", "pending");
 
       if (allApps) {
+        // Ticket + report counts for this area
+        let tQuery = supabase.from("support_tickets").select("id", { count: "exact", head: true });
+        let rQuery = supabase.from("community_reports").select("id", { count: "exact", head: true });
+        if (user?.ward) { tQuery = tQuery.eq("ward", user.ward); rQuery = rQuery.eq("ward", user.ward); }
+        else if (user?.assigned_district) { tQuery = tQuery.eq("district", user.assigned_district); rQuery = rQuery.eq("district", user.assigned_district); }
+        else if (user?.assigned_region) { tQuery = tQuery.eq("region", user.assigned_region); rQuery = rQuery.eq("region", user.assigned_region); }
+        tQuery.then(({ count }) => setTicketCount(count || 0));
+        rQuery.then(({ count }) => setReportCount(count || 0));
+
         setStats({
           pending: allApps.filter((a) => a.status === "submitted" || a.status === "pending_review")
             .length,

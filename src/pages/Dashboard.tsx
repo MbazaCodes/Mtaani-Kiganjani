@@ -82,6 +82,33 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const rejected = applications.filter((a) => a.status === "rejected").length;
   const recent = applications.slice(0, 5);
 
+  // Module 2-4 stats
+  const [ticketStats, setTicketStats] = useState({ total: 0, open: 0 });
+  const [reportStats, setReportStats] = useState({ total: 0, open: 0 });
+  const [announcementCount, setAnnouncementCount] = useState(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    // Tickets
+    supabase.from("support_tickets").select("id, status").eq("citizen_id", user.id)
+      .then(({ data }) => {
+        const t = data || [];
+        setTicketStats({ total: t.length, open: t.filter((x: any) => !["resolved","closed"].includes(x.status)).length });
+      });
+    // Reports
+    supabase.from("community_reports").select("id, status").eq("citizen_id", user.id)
+      .then(({ data }) => {
+        const r = data || [];
+        setReportStats({ total: r.length, open: r.filter((x: any) => !["resolved","closed"].includes(x.status)).length });
+      });
+    // Announcements
+    supabase.from("announcements").select("id", { count: "exact", head: true })
+      .eq("is_active", true)
+      .or(`level.eq.national,ward.eq.${user.ward || "NONE"},district.eq.${user.district || "NONE"},region.eq.${user.region || "NONE"}`)
+      .then(({ count }) => setAnnouncementCount(count || 0));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   const hasBizRole = !!(user?.seller_id || user?.landlord_id || user?.broker_id);
 
   return (
@@ -270,6 +297,39 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
           <ArrowRight size={18} className="text-stone-400 group-hover:text-amber-600 shrink-0" />
         </button>
       )}
+
+      {/* New Module Stats */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div
+          onClick={() => setView("citizen_support")}
+          className="bg-blue-50 border border-blue-100 rounded-2xl p-4 cursor-pointer hover:border-blue-300 transition-colors"
+        >
+          <p className="text-xl font-black text-blue-700">{ticketStats.open}</p>
+          <p className="text-xs font-bold text-stone-500 mt-0.5">
+            {lang === "sw" ? "Tiketi Wazi" : "Open Tickets"}
+          </p>
+          <p className="text-[10px] text-stone-400">{ticketStats.total} {lang === "sw" ? "jumla" : "total"}</p>
+        </div>
+        <div
+          onClick={() => setView("community_reports")}
+          className="bg-amber-50 border border-amber-100 rounded-2xl p-4 cursor-pointer hover:border-amber-300 transition-colors"
+        >
+          <p className="text-xl font-black text-amber-700">{reportStats.open}</p>
+          <p className="text-xs font-bold text-stone-500 mt-0.5">
+            {lang === "sw" ? "Taarifa Wazi" : "Open Reports"}
+          </p>
+          <p className="text-[10px] text-stone-400">{reportStats.total} {lang === "sw" ? "jumla" : "total"}</p>
+        </div>
+        <div
+          onClick={() => setView("announcements")}
+          className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 cursor-pointer hover:border-emerald-300 transition-colors"
+        >
+          <p className="text-xl font-black text-emerald-700">{announcementCount}</p>
+          <p className="text-xs font-bold text-stone-500 mt-0.5">
+            {lang === "sw" ? "Matangazo" : "Announcements"}
+          </p>
+        </div>
+      </div>
 
       {/* Recent Applications */}
       <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">

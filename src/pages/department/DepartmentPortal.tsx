@@ -83,6 +83,9 @@ export function DepartmentPortal() {
   const [escalations, setEscalations] = useState<Escalation[]>([]);
   const [selectedEsc, setSelectedEsc] = useState<Escalation | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<"escalations" | "tickets" | "reports">("escalations");
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
 
   // Response modal
   const [showResponseModal, setShowResponseModal] = useState(false);
@@ -145,7 +148,23 @@ export function DepartmentPortal() {
   }, [fetchDeptMembership]);
 
   useEffect(() => {
-    if (department) fetchEscalations();
+    if (department) {
+      fetchEscalations();
+      // Fetch tickets assigned to this department
+      supabase
+        .from("support_tickets")
+        .select("*, citizen:citizen_id(first_name, last_name, email)")
+        .eq("assigned_department_id", department.id)
+        .order("created_at", { ascending: false })
+        .then(({ data }) => setTickets(data || []));
+      // Fetch reports assigned to this department
+      supabase
+        .from("community_reports")
+        .select("*, citizen:citizen_id(first_name, last_name, email)")
+        .eq("assigned_department_id", department.id)
+        .order("created_at", { ascending: false })
+        .then(({ data }) => setReports(data || []));
+    }
   }, [department, fetchEscalations]);
 
   // ── Handle response actions ───────────────────────────────────────────
@@ -290,7 +309,77 @@ export function DepartmentPortal() {
         ))}
       </div>
 
-      {/* Filter + Inbox */}
+      {/* Tabs: Escalations | Tickets | Reports */}
+      <div className="flex gap-1 bg-stone-100 rounded-xl p-1 mb-4">
+        {([
+          { key: "escalations", label: L("Maombi", "Escalations"), count: escalations.length },
+          { key: "tickets", label: L("Tiketi", "Tickets"), count: tickets.length },
+          { key: "reports", label: L("Taarifa", "Reports"), count: reports.length },
+        ] as const).map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={cn(
+              "flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-colors",
+              activeTab === tab.key
+                ? "bg-white text-stone-900 shadow-sm"
+                : "text-stone-500 hover:text-stone-700",
+            )}
+          >
+            {tab.label} ({tab.count})
+          </button>
+        ))}
+      </div>
+
+      {/* Tickets tab */}
+      {activeTab === "tickets" && (
+        <div className="space-y-3">
+          {tickets.length === 0 ? (
+            <div className="text-center py-12 bg-stone-50 rounded-2xl">
+              <p className="text-stone-500 font-bold">{L("Hakuna tiketi", "No tickets")}</p>
+            </div>
+          ) : tickets.map((t: any) => (
+            <div key={t.id} className="bg-white border border-stone-200 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-mono text-stone-400">{t.ticket_number}</span>
+                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-blue-100 text-blue-800">{t.status?.replace(/_/g, " ")}</span>
+                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-amber-50 text-amber-700">{t.priority}</span>
+              </div>
+              <p className="font-bold text-stone-900 text-sm">{t.subject}</p>
+              <p className="text-xs text-stone-500 mt-1 line-clamp-2">{t.description}</p>
+              <p className="text-xs text-stone-400 mt-1">
+                {t.citizen?.first_name} {t.citizen?.last_name} · {t.ward || t.district} · {new Date(t.created_at).toLocaleDateString("sw-TZ")}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Reports tab */}
+      {activeTab === "reports" && (
+        <div className="space-y-3">
+          {reports.length === 0 ? (
+            <div className="text-center py-12 bg-stone-50 rounded-2xl">
+              <p className="text-stone-500 font-bold">{L("Hakuna taarifa", "No reports")}</p>
+            </div>
+          ) : reports.map((r: any) => (
+            <div key={r.id} className="bg-white border border-stone-200 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-mono text-stone-400">{r.report_number}</span>
+                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-blue-100 text-blue-800">{r.status?.replace(/_/g, " ")}</span>
+              </div>
+              <p className="font-bold text-stone-900 text-sm">{r.title}</p>
+              <p className="text-xs text-stone-500 mt-1 line-clamp-2">{r.description}</p>
+              <p className="text-xs text-stone-400 mt-1">
+                {r.citizen?.first_name} {r.citizen?.last_name} · {r.ward || r.district} · {new Date(r.created_at).toLocaleDateString("sw-TZ")}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Escalations tab */}
+      {activeTab === "escalations" && (
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-black text-stone-700 uppercase tracking-wider flex items-center gap-2">
@@ -563,6 +652,8 @@ export function DepartmentPortal() {
           </div>
         )}
       </div>
+
+      )}
 
       {/* Response Modal */}
       <AnimatePresence>
