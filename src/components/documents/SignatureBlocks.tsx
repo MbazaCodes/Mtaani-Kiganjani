@@ -15,6 +15,7 @@
 import React from "react";
 import { View, Text, Image } from "@react-pdf/renderer";
 import { commonStyles as s } from "./types";
+import { GovernmentStamp } from "./GovernmentStamp";
 
 interface ApplicantSigProps {
   /** drawn signature data URL */
@@ -43,6 +44,11 @@ interface OfficerSigProps {
   name?: string | null;
   /** role label (e.g. "AFISA MTENDAJI WA KATA / WARD EXECUTIVE OFFICER") */
   title: string;
+  /** date of certification (for stamp) */
+  stampDate?: string | null;
+  /** reference number (for stamp) */
+  reference?: string;
+  lang?: "sw" | "en";
 }
 
 export const OfficerSignatureBox: React.FC<OfficerSigProps> = ({
@@ -50,14 +56,15 @@ export const OfficerSignatureBox: React.FC<OfficerSigProps> = ({
   stamp,
   name,
   title,
+  stampDate,
+  reference,
+  lang,
 }) => (
   <View style={s.signatureBox}>
     {stamp ? (
       <Image src={stamp} style={s.stampImg} />
     ) : (
-      <View style={s.stampBox}>
-        <Text style={s.stampText}>MUHURI{"\n"}STAMP</Text>
-      </View>
+      <GovernmentStamp date={stampDate} reference={reference} lang={lang} />
     )}
     {signature ? <Image src={signature} style={s.signatureImg} /> : <View style={{ height: 44 }} />}
     <View style={s.signatureLine} />

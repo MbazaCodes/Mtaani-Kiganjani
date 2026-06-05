@@ -12,6 +12,7 @@ import {
   formatDate,
 } from "./types";
 import { ReceiptPage } from "./ReceiptPage";
+import { GovernmentStamp } from "./GovernmentStamp";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
@@ -201,9 +202,11 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
             {weoStamp ? (
               <Image src={weoStamp} style={s.stampImg} />
             ) : (
-              <View style={s.stampBox}>
-                <Text style={s.stampText}>MUHURI{"\n"}STAMP</Text>
-              </View>
+              <GovernmentStamp
+                date={application.approved_at || application.issued_at}
+                reference={application.application_number}
+                lang={lang}
+              />
             )}
             {weoSig ? (
               <Image src={weoSig} style={s.signatureImg} />
