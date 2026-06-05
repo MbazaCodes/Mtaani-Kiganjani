@@ -167,6 +167,16 @@ export function CitizenSupport() {
 
       if (error) throw error;
 
+      // Confirmation notification for citizen
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        title: lang === "sw" ? "Tiketi Imetumwa" : "Ticket Submitted",
+        message: lang === "sw"
+          ? `Tiketi yako ${ticketNumber} imetumwa. Tutakujibu hivi karibuni.`
+          : `Your ticket ${ticketNumber} has been submitted. We will respond shortly.`,
+        type: "ticket_created",
+      });
+
       showToast(
         L(`Tiketi ${ticketNumber} imetumwa!`, `Ticket ${ticketNumber} submitted!`),
         "success",

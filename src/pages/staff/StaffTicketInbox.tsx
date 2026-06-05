@@ -182,6 +182,18 @@ export function StaffTicketInbox() {
       if (error) throw error;
       setReplyText("");
       fetchResponses(ticketId);
+      // Notify citizen (only for non-internal responses)
+      if (!isInternal) {
+        const ticket = tickets.find((t) => t.id === ticketId);
+        if (ticket?.citizen_id) {
+          await supabase.from("notifications").insert({
+            user_id: ticket.citizen_id,
+            title: "Jibu Jipya / New Response",
+            message: `Tiketi ${ticket.ticket_number} imejibiwa. / Your ticket ${ticket.ticket_number} has a new response.`,
+            type: "ticket_response",
+          });
+        }
+      }
       showToast(L("Jibu limetumwa", "Response sent"), "success");
     } catch (err: unknown) {
       showToast((err as { message?: string }).message || "Error", "error");
@@ -214,6 +226,16 @@ export function StaffTicketInbox() {
         .eq("id", ticket.id);
       if (error) throw error;
 
+      // Notify citizen about status change
+      if (ticket.citizen_id) {
+        const statusLabel = STATUS_OPTIONS.find((s) => s.value === newStatus);
+        await supabase.from("notifications").insert({
+          user_id: ticket.citizen_id,
+          title: "Hali ya Tiketi Imebadilika / Ticket Status Changed",
+          message: `Tiketi ${ticket.ticket_number}: ${statusLabel?.sw || newStatus} / ${statusLabel?.en || newStatus}`,
+          type: newStatus === "resolved" ? "ticket_resolved" : "ticket_updated",
+        });
+      }
       showToast(L("Hali imesasishwa", "Status updated"), "success");
       fetchTickets();
     } catch (err: unknown) {

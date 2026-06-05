@@ -41,7 +41,7 @@ const CATEGORIES: Record<string, { en: string; sw: string; icon: string }> = {
 };
 
 interface Report {
-  id: string; report_number: string; title: string; description: string;
+  id: string; citizen_id: string; report_number: string; title: string; description: string;
   category: string; priority: string; status: string;
   region?: string; district?: string; ward?: string; street?: string;
   gps_lat?: number; gps_lng?: number;
@@ -128,6 +128,18 @@ export function StaffReportsInbox() {
       });
       setReplyText("");
       fetchDetail(reportId);
+      // Notify citizen
+      if (!isInternal) {
+        const report = reports.find((r) => r.id === reportId);
+        if (report?.citizen_id) {
+          await supabase.from("notifications").insert({
+            user_id: report.citizen_id,
+            title: "Jibu Jipya / New Response",
+            message: `Taarifa ${report.report_number} imejibiwa. / Report ${report.report_number} has a new response.`,
+            type: "report_response",
+          });
+        }
+      }
       showToast(L("Jibu limetumwa", "Response sent"), "success");
     } catch (err: unknown) { showToast((err as { message?: string }).message || "Error", "error"); }
     finally { setSending(false); }
@@ -145,6 +157,16 @@ export function StaffReportsInbox() {
         patch.resolution_note = resolutionNote.trim() || null;
       }
       await supabase.from("community_reports").update(patch).eq("id", report.id);
+      // Notify citizen
+      const statusLabel = STATUS_OPTIONS.find((s) => s.value === newStatus);
+      if (report.citizen_id) {
+        await supabase.from("notifications").insert({
+          user_id: report.citizen_id,
+          title: "Hali ya Taarifa Imebadilika / Report Status Changed",
+          message: `Taarifa ${report.report_number}: ${statusLabel?.sw || newStatus} / ${statusLabel?.en || newStatus}`,
+          type: newStatus === "resolved" ? "report_resolved" : "report_updated",
+        });
+      }
       showToast(L("Hali imesasishwa", "Status updated"), "success");
       fetchReports();
     } catch (err: unknown) { showToast((err as { message?: string }).message || "Error", "error"); }

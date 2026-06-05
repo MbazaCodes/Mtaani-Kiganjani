@@ -13,6 +13,10 @@ import React, { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell,
+  MessageSquare,
+  AlertTriangle,
+  FileText,
+  Megaphone,
   BellOff,
   CheckCircle,
   XCircle,
@@ -206,6 +210,10 @@ export function Notifications() {
   const pendingActionCount = agreements.filter((a) => !a.is_actioned).length;
 
   const typeIcon = (t: string) => {
+    if (t.startsWith("ticket")) return <MessageSquare size={16} className="text-blue-600" />;
+    if (t.startsWith("report")) return <AlertTriangle size={16} className="text-amber-600" />;
+    if (t === "announcement") return <Megaphone size={16} className="text-purple-600" />;
+    if (t === "agreement_update") return <FileText size={16} className="text-indigo-600" />;
     switch (t) {
       case "success":
         return <CheckCircle size={16} className="text-emerald-600" />;
@@ -218,16 +226,16 @@ export function Notifications() {
     }
   };
   const typeBg = (t: string, read: boolean) => {
-    if (read) return "bg-white border-stone-100";
+    if (read) return "bg-stone-50/50";
+    if (t.startsWith("ticket") || t === "agreement_update") return "bg-blue-50/70";
+    if (t.startsWith("report")) return "bg-amber-50/70";
+    if (t === "announcement") return "bg-purple-50/70";
+    if (t.includes("resolved")) return "bg-emerald-50/70";
     switch (t) {
-      case "success":
-        return "bg-emerald-50/50 border-emerald-200";
-      case "warning":
-        return "bg-amber-50/50 border-amber-200";
-      case "error":
-        return "bg-red-50/50 border-red-200";
-      default:
-        return "bg-blue-50/50 border-blue-200";
+      case "success": return "bg-emerald-50/70";
+      case "warning": return "bg-amber-50/70";
+      case "error": return "bg-red-50/70";
+      default: return "bg-blue-50/70";
     }
   };
 

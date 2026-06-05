@@ -221,6 +221,16 @@ export function CommunityReporting() {
         await supabase.from("community_report_media").insert(mediaInserts);
       }
 
+      // Confirmation notification
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        title: lang === "sw" ? "Taarifa Imetumwa" : "Report Submitted",
+        message: lang === "sw"
+          ? `Taarifa yako ${reportNumber} imetumwa. Tutashughulikia hivi karibuni.`
+          : `Your report ${reportNumber} has been submitted. We will address it shortly.`,
+        type: "report_submitted",
+      });
+
       showToast(L(`Taarifa ${reportNumber} imetumwa!`, `Report ${reportNumber} submitted!`), "success");
       setCategory("");
       setTitle("");
