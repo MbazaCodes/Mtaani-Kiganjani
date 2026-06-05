@@ -113,6 +113,7 @@ export const commonStyles = StyleSheet.create({
     width: 54,
     height: 54,
     marginBottom: 6,
+    backgroundColor: "#ffffff",
   },
   country: {
     fontSize: 11,

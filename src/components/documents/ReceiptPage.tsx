@@ -19,7 +19,7 @@ const rs = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   header: { alignItems: "center", marginBottom: 10 },
-  logo: { width: 40, height: 40, marginBottom: 4 },
+  logo: { width: 40, height: 40, marginBottom: 4, backgroundColor: "#ffffff" },
   country: { fontSize: 9, fontWeight: "bold", textAlign: "center", marginBottom: 1 },
   office: { fontSize: 7.5, color: "#3a3a3a", textAlign: "center", marginBottom: 4 },
   divider: { width: 40, height: 1, backgroundColor: "#111", marginBottom: 10 },
