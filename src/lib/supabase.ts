@@ -39,6 +39,7 @@ export interface UserProfile {
   is_verified: boolean;
   is_diaspora?: boolean;
   account_status: string;
+  is_department_member?: boolean;
 
   // Location fields
   region?: string;

@@ -31,7 +31,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
   const { user, session } = useAuth();
   const { lang, t } = useLanguage();
   const [actualRole, setActualRole] = useState<string | null>(null);
-  const [isDeptMember, setIsDeptMember] = useState(false);
+  // Department membership is now on user.is_department_member (set in AuthContext)
   const [loading, setLoading] = useState(true);
 
   // Direct database check for actual role using RPC (bypasses RLS)
@@ -63,40 +63,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
 
     fetchActualRole();
 
-    // Department membership check — try multiple approaches for reliability.
-    // RLS can block the query if auth isn't fully warmed up, so we retry.
-    const uid = session.user.id;
-    const checkDept = async (): Promise<boolean> => {
-      try {
-        // Approach 1: count query (works with minimal RLS)
-        const { count } = await supabase
-          .from("department_users")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", uid);
-        if (count && count > 0) return true;
-        // Approach 2: data query (different RLS path)
-        const { data } = await supabase
-          .from("department_users")
-          .select("id")
-          .eq("user_id", uid)
-          .limit(1);
-        if (data && data.length > 0) return true;
-      } catch {
-        // RLS blocked or table doesn't exist
-      }
-      return false;
-    };
 
-    // Try immediately, then retry after 1.5s if false (auth warmup delay)
-    checkDept().then((found) => {
-      if (found) {
-        setIsDeptMember(true);
-      } else {
-        setTimeout(() => {
-          checkDept().then((retry) => setIsDeptMember(retry));
-        }, 1500);
-      }
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id, user?.role]);
 
@@ -124,7 +91,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         }
         onClick={() => {
           if (displayRole === "admin") setView("admin_dashboard");
-          else if (displayRole === "staff" && isDeptMember) setView("department_portal");
+          else if (displayRole === "staff" && user?.is_department_member) setView("department_portal");
           else if (displayRole === "staff") setView("staff_dashboard");
           else setView("dashboard");
         }}
@@ -219,7 +186,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
       )}
 
       {/* Department Portal — shown for any staff/admin who is a department member */}
-      {isDeptMember && displayRole !== "staff" && (
+      {user?.is_department_member && displayRole !== "staff" && (
         <>
           <div className="px-3 pt-4 pb-1">
             <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
@@ -235,7 +202,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         </>
       )}
 
-      {displayRole === "staff" && !isDeptMember && (
+      {displayRole === "staff" && !user?.is_department_member && (
         <>
           <SidebarItem
             icon={<Users size={20} />}
