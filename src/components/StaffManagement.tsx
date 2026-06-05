@@ -83,9 +83,17 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
 
   const [newStaff, setNewStaff] = useState({
     email: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    employeeNumber: "",
     role: "staff" as "staff" | "admin",
     password: "",
+    staffLevel: "ward" as "regional" | "district" | "ward",
+    ward: "",
+    departmentId: "",
   });
+  const [departments, setDepartments] = useState<{ id: string; name: string; code: string }[]>([]);
 
   // Generate a default password when modal opens
   const generatePassword = () => {
@@ -137,6 +145,13 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
 
   useEffect(() => {
     fetchStaff();
+    // Fetch departments for the dropdown
+    supabase
+      .from("government_departments")
+      .select("id, name, code")
+      .eq("active", true)
+      .order("name")
+      .then(({ data }) => setDepartments(data || []));
     generateOffices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -260,13 +275,21 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
 
       if (existingUser) {
         // User exists in public.users, just update their role
+        const staffWard = newStaff.staffLevel === "ward" ? newStaff.ward : null;
+        const staffDistrict = newStaff.staffLevel !== "regional" ? selectedDistrict : null;
         const { error: updateError } = await supabase
           .from("users")
           .update({
             role: newStaff.role,
             office_id: officeId,
             assigned_region: selectedRegion,
-            assigned_district: officeLevel === "district" ? selectedDistrict : null,
+            assigned_district: staffDistrict,
+            ward: staffWard,
+            department_id: newStaff.departmentId || null,
+            first_name: newStaff.firstName.trim() || undefined,
+            last_name: newStaff.lastName.trim() || undefined,
+            phone: newStaff.phone || undefined,
+            employee_id: newStaff.employeeNumber || undefined,
             is_verified: true,
           })
           .eq("id", existingUser.id);
@@ -326,25 +349,30 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
       }
 
       if (userId) {
-        // Generate first name from email (temporary — staff updates profile on first login)
-        const emailLocal = newStaff.email.split("@")[0];
-        const parts = emailLocal.split(/[._-]/);
-        const firstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : "Staff";
-        const lastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : "Member";
+        const firstName = newStaff.firstName.trim() || "Staff";
+        const lastName = newStaff.lastName.trim() || "Member";
 
-        // Create Profile — is_verified: false so staff is forced to change password on first login
+        // Determine ward and district based on staff level
+        const staffWard = newStaff.staffLevel === "ward" ? newStaff.ward : null;
+        const staffDistrict = newStaff.staffLevel !== "regional" ? selectedDistrict : null;
+        const staffDeptId = newStaff.departmentId || null;
+
+        // Create Profile
         const { error: profileError } = await supabase.from("users").insert({
           id: userId,
           first_name: firstName,
           last_name: lastName,
           email: newStaff.email,
+          phone: newStaff.phone || null,
+          employee_id: newStaff.employeeNumber || null,
           role: newStaff.role,
           office_id: officeId,
           assigned_region: selectedRegion,
-          assigned_district: officeLevel === "district" ? selectedDistrict : null,
-          is_verified: false, // forces password change on first login
+          assigned_district: staffDistrict,
+          ward: staffWard,
+          department_id: staffDeptId,
+          is_verified: false,
           account_status: "pending",
-          gender: "M",
           nationality: "Tanzanian",
         });
 
@@ -373,7 +401,10 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
   };
 
   const resetForm = () => {
-    setNewStaff({ email: "", role: "staff", password: "" });
+    setNewStaff({
+      email: "", firstName: "", lastName: "", phone: "", employeeNumber: "",
+      role: "staff", password: "", staffLevel: "ward", ward: "", departmentId: "",
+    });
     setSelectedRegion("");
     setSelectedDistrict("");
     setOfficeLevel("region");
@@ -687,11 +718,29 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-stone-600">
-                        <Building2 size={14} className="text-stone-400" />
-                        <span className="text-sm">
-                          {s.assigned_region}
-                          {s.assigned_district ? ` / ${s.assigned_district}` : " (Regional)"}
+                      <div className="text-stone-600">
+                        <div className="flex items-center gap-2">
+                          <Building2 size={14} className="text-stone-400" />
+                          <span className="text-sm">
+                            {s.assigned_region}
+                            {s.assigned_district ? ` / ${s.assigned_district}` : ""}
+                            {s.ward ? ` / ${s.ward}` : ""}
+                          </span>
+                        </div>
+                        <span className={cn(
+                          "text-[10px] font-bold uppercase tracking-wider mt-0.5 inline-block px-1.5 py-0.5 rounded",
+                          s.department_id ? "bg-indigo-50 text-indigo-600"
+                            : s.ward ? "bg-emerald-50 text-emerald-600"
+                            : s.assigned_district ? "bg-blue-50 text-blue-600"
+                            : "bg-amber-50 text-amber-600"
+                        )}>
+                          {s.department_id
+                            ? (lang === "sw" ? "Idara" : "Department")
+                            : s.ward
+                              ? (lang === "sw" ? "Kata" : "Ward")
+                              : s.assigned_district
+                                ? (lang === "sw" ? "Wilaya" : "District")
+                                : (lang === "sw" ? "Mkoa" : "Regional")}
                         </span>
                       </div>
                     </td>
@@ -786,28 +835,82 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
 
               <form onSubmit={handleCreateStaff} className="p-8 space-y-6">
                 <div className="space-y-6">
-                  {/* Email Input */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
-                      <Mail size={14} /> {lang === "sw" ? "Barua Pepe" : "Email"}{" "}
-                      <span className="text-red-500">*</span>
+                  {/* Name Fields */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Jina la Kwanza" : "First Name"} *
+                      </label>
+                      <input
+                        required
+                        placeholder={lang === "sw" ? "Jina" : "First name"}
+                        className="w-full h-11 px-4 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none text-sm"
+                        value={newStaff.firstName}
+                        onChange={(e) => setNewStaff({ ...newStaff, firstName: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Jina la Mwisho" : "Last Name"} *
+                      </label>
+                      <input
+                        required
+                        placeholder={lang === "sw" ? "Ukoo" : "Last name"}
+                        className="w-full h-11 px-4 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none text-sm"
+                        value={newStaff.lastName}
+                        onChange={(e) => setNewStaff({ ...newStaff, lastName: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email + Phone */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
+                        <Mail size={14} /> {lang === "sw" ? "Barua Pepe" : "Email"} *
+                      </label>
+                      <input
+                        required
+                        type="email"
+                        placeholder="staff@example.com"
+                        className={cn(
+                          "w-full h-11 px-4 rounded-xl border focus:border-emerald-500 outline-none text-sm",
+                          errors.email ? "border-red-300 bg-red-50" : "border-stone-200",
+                        )}
+                        value={newStaff.email}
+                        onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                      />
+                      {errors.email && (
+                        <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                          <AlertCircle size={12} /> {errors.email}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                        {lang === "sw" ? "Simu" : "Phone"}
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="+255..."
+                        className="w-full h-11 px-4 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none text-sm"
+                        value={newStaff.phone}
+                        onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Employee Number */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                      {lang === "sw" ? "Nambari ya Mfanyakazi" : "Employee Number"}
                     </label>
                     <input
-                      required
-                      type="email"
-                      placeholder="staff@example.com"
-                      className={cn(
-                        "w-full h-12 px-4 rounded-xl border focus:border-primary outline-none transition-all",
-                        errors.email ? "border-red-300 bg-red-50" : "border-stone-200",
-                      )}
-                      value={newStaff.email}
-                      onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                      placeholder={lang === "sw" ? "mfano: EMP-2026-001" : "e.g. EMP-2026-001"}
+                      className="w-full h-11 px-4 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none text-sm font-mono"
+                      value={newStaff.employeeNumber}
+                      onChange={(e) => setNewStaff({ ...newStaff, employeeNumber: e.target.value })}
                     />
-                    {errors.email && (
-                      <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
-                        <AlertCircle size={12} /> {errors.email}
-                      </p>
-                    )}
                   </div>
 
                   {/* Password Input */}
@@ -908,48 +1011,33 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                     )}
                   </div>
 
-                  {/* Office Level Selection */}
-                  {selectedRegion && (
-                    <div className="space-y-3 p-4 bg-stone-50 rounded-xl">
-                      <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
-                        {lang === "sw" ? "Kiwango cha Ofisi" : "Office Level"}
-                      </label>
-                      <div className="flex gap-4">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="officeLevel"
-                            value="region"
-                            checked={officeLevel === "region"}
-                            onChange={() => {
-                              setOfficeLevel("region");
-                              setSelectedDistrict("");
-                            }}
-                            className="w-4 h-4 text-primary"
-                          />
-                          <span className="text-sm font-medium text-stone-700">
-                            {lang === "sw" ? "Mkoa (Regional)" : "Regional"}
-                          </span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="officeLevel"
-                            value="district"
-                            checked={officeLevel === "district"}
-                            onChange={() => setOfficeLevel("district")}
-                            className="w-4 h-4 text-primary"
-                          />
-                          <span className="text-sm font-medium text-stone-700">
-                            {lang === "sw" ? "Wilaya (District)" : "District"}
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  )}
+                  {/* Staff Level */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                      {lang === "sw" ? "Kiwango cha Mtumishi" : "Staff Level"} *
+                    </label>
+                    <select
+                      className="w-full h-11 px-4 rounded-xl border border-stone-200 focus:border-emerald-500 outline-none text-sm bg-white"
+                      value={newStaff.staffLevel}
+                      onChange={(e) => {
+                        const level = e.target.value as "regional" | "district" | "ward";
+                        setNewStaff({ ...newStaff, staffLevel: level, ward: "" });
+                        if (level === "regional") {
+                          setOfficeLevel("region");
+                          setSelectedDistrict("");
+                        } else {
+                          setOfficeLevel("district");
+                        }
+                      }}
+                    >
+                      <option value="regional">{lang === "sw" ? "Mtumishi wa Mkoa (Regional)" : "Regional Staff"}</option>
+                      <option value="district">{lang === "sw" ? "Mtumishi wa Wilaya (District)" : "District Staff"}</option>
+                      <option value="ward">{lang === "sw" ? "Afisa wa Kata (Ward Officer)" : "Ward Officer"}</option>
+                    </select>
+                  </div>
 
                   {/* District Selection (if district level) */}
-                  {selectedRegion && officeLevel === "district" && (
+                  {selectedRegion && newStaff.staffLevel !== "regional" && (
                     <div className="space-y-2">
                       <label
                         htmlFor="staff-district-select"

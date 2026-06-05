@@ -212,8 +212,10 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
         .order("created_at", { ascending: false })
         .limit(200);
 
-      // Scope to staff's assigned region/district if applicable
-      if (user?.assigned_district) {
+      // Scope to staff's assigned area: ward > district > region (most specific wins)
+      if (user?.ward && user?.role === "staff") {
+        query = query.eq("ward", user.ward);
+      } else if (user?.assigned_district) {
         query = query.eq("district", user.assigned_district);
       } else if (user?.assigned_region) {
         query = query.eq("region", user.assigned_region);

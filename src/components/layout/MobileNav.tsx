@@ -261,7 +261,19 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
                   <p className="text-sm font-bold text-stone-900 truncate">
                     {user?.first_name} {user?.last_name}
                   </p>
-                  <p className="text-xs text-stone-500 capitalize truncate">{user?.role}</p>
+                  <p className="text-xs text-stone-500 capitalize truncate">
+                  {isDept
+                    ? (lang === "sw" ? "Afisa wa Idara" : "Department Officer")
+                    : user?.ward && user?.role === "staff"
+                      ? (lang === "sw" ? "Afisa wa Kata" : "Ward Officer")
+                      : user?.assigned_district && user?.role === "staff"
+                        ? (lang === "sw" ? "Mtumishi wa Wilaya" : "District Staff")
+                        : user?.assigned_region && user?.role === "staff"
+                          ? (lang === "sw" ? "Mtumishi wa Mkoa" : "Regional Staff")
+                          : user?.role === "admin"
+                            ? (lang === "sw" ? "Msimamizi" : "Admin")
+                            : user?.role}
+                </p>
                 </div>
               </div>
               <button

@@ -79,6 +79,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         // Filter by location if staff has assigned region/district
         const filteredApps = demoApps.filter((app: Application) => {
           if (["staff", "admin"].includes(user?.role || "")) {
+            if (user?.ward && app.ward !== user.ward) return false;
             if (user?.assigned_district && app.district !== user.assigned_district) return false;
             if (user?.assigned_region && app.region !== user.assigned_region) return false;
           }
@@ -117,7 +118,9 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       let statsQuery = supabase.from("applications").select("status", { count: "exact" });
 
       if (["staff", "admin"].includes(user?.role || "")) {
-        if (user?.assigned_district) {
+        if (user?.ward) {
+          statsQuery = statsQuery.eq("ward", user.ward);
+        } else if (user?.assigned_district) {
           statsQuery = statsQuery.eq("district", user.assigned_district);
         } else if (user?.assigned_region) {
           statsQuery = statsQuery.eq("region", user.assigned_region);
@@ -152,7 +155,9 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
 
       // Only filter by location if assigned - otherwise, staff can see all (small mtaa)
       if (["staff", "admin"].includes(user?.role || "")) {
-        if (user?.assigned_district) {
+        if (user?.ward) {
+          query = query.eq("ward", user.ward);
+        } else if (user?.assigned_district) {
           query = query.eq("district", user.assigned_district);
         } else if (user?.assigned_region) {
           query = query.eq("region", user.assigned_region);

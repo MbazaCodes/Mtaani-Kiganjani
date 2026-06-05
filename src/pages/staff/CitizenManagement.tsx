@@ -205,6 +205,9 @@ export function StaffCitizenManagement() {
       if (staffUser?.assigned_district) {
         query = query.eq("district", staffUser.assigned_district);
       }
+      if (staffUser?.ward) {
+        query = query.eq("ward", staffUser.ward);
+      }
 
       const { data, error } = await query;
 
