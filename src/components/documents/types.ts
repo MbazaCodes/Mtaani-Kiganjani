@@ -21,42 +21,43 @@ export interface DocumentPDFProps {
 
 // ─── Colour tokens ─────────────────────────────────────────────────────────────
 const C = {
-  ink: "#0f0f0f",
-  inkLight: "#44403c",
-  inkFaint: "#78716c",
-  rule: "#d6d3d1",
-  ruleLight: "#f0eeec",
-  emerald: "#065f46",
-  emeraldMid: "#059669",
-  emeraldBg: "#f0fdf4",
-  gold: "#92400e",
-  goldBg: "#fef9ee",
+  ink: "#111111",
+  inkLight: "#3a3a3a",
+  inkFaint: "#6b6b6b",
+  rule: "#c0c0c0",
+  ruleLight: "#e8e8e8",
+  emerald: "#1a5632",     // Government green — used sparingly
+  emeraldMid: "#1a5632",
+  emeraldBg: "#f7f7f7",   // Very subtle grey, not green
+  gold: "#6b4c1e",
+  goldBg: "#faf8f5",
   white: "#ffffff",
-  pageBg: "#fafaf8",
+  pageBg: "#ffffff",       // Clean white — prints perfectly
 };
 
 // ─── Shared stylesheet ─────────────────────────────────────────────────────────
 export const commonStyles = StyleSheet.create({
   // Page
   page: {
-    paddingTop: 36,
-    paddingBottom: 60,
-    paddingHorizontal: 44,
+    paddingTop: 30,
+    paddingBottom: 50,
+    paddingHorizontal: 40,
     fontFamily: "Helvetica",
     fontSize: 10,
     color: C.ink,
-    backgroundColor: C.pageBg,
+    backgroundColor: C.white,
   },
 
   // ── Watermark ──────────────────────────────────────────────────────────────
   watermark: {
     position: "absolute",
-    top: "38%",
-    left: "15%",
-    fontSize: 96,
-    color: C.ruleLight,
-    opacity: 0.6,
+    top: "40%",
+    left: "18%",
+    fontSize: 80,
+    color: "#eeeeee",
+    opacity: 0.35,
     transform: "rotate(-40deg)",
+    letterSpacing: 8,
   },
 
   // ── Photo box (top-left absolute) ─────────────────────────────────────────
@@ -134,9 +135,9 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 6,
   },
   divider: {
-    width: 56,
-    height: 2,
-    backgroundColor: C.emerald,
+    width: 48,
+    height: 1,
+    backgroundColor: C.ink,
     marginTop: 4,
   },
 
@@ -147,24 +148,24 @@ export const commonStyles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: "bold",
     textAlign: "center",
-    textDecoration: "underline",
     textTransform: "uppercase",
-    color: C.emerald,
-    letterSpacing: 1,
+    color: C.ink,
+    letterSpacing: 1.5,
   },
   appNumberBadge: {
-    marginTop: 6,
-    backgroundColor: C.emerald,
+    marginTop: 5,
+    borderWidth: 1,
+    borderColor: C.rule,
     paddingVertical: 3,
     paddingHorizontal: 14,
     alignSelf: "center",
   },
   appNumberText: {
-    color: C.white,
-    fontSize: 9,
+    color: C.inkLight,
+    fontSize: 8.5,
     fontFamily: "Courier",
     fontWeight: "bold",
     letterSpacing: 1,
@@ -172,43 +173,40 @@ export const commonStyles = StyleSheet.create({
 
   // ── Section headers ────────────────────────────────────────────────────────
   sectionHeader: {
-    backgroundColor: C.emeraldBg,
-    paddingVertical: 5,
-    paddingHorizontal: 8,
+    paddingBottom: 4,
     marginBottom: 8,
-    marginTop: 14,
-    borderLeftWidth: 3,
-    borderLeftColor: C.emeraldMid,
+    marginTop: 12,
+    borderBottomWidth: 0.75,
+    borderBottomColor: C.ink,
     flexDirection: "row",
     alignItems: "center",
   },
   sectionTitle: {
-    fontSize: 8.5,
+    fontSize: 8,
     fontWeight: "bold",
-    color: C.emerald,
+    color: C.ink,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
 
   // ── Info rows ──────────────────────────────────────────────────────────────
   infoRow: {
     flexDirection: "row",
-    marginBottom: 6,
-    paddingBottom: 5,
-    borderBottomWidth: 0.5,
+    marginBottom: 4,
+    paddingBottom: 3,
+    borderBottomWidth: 0.3,
     borderBottomColor: C.ruleLight,
-    minHeight: 16,
+    minHeight: 14,
   },
   infoLabel: {
-    width: "38%",
-    fontSize: 9,
-    fontWeight: "bold",
-    color: C.inkLight,
+    width: "36%",
+    fontSize: 8.5,
+    color: C.inkFaint,
     paddingRight: 6,
   },
   infoValue: {
-    width: "62%",
-    fontSize: 9.5,
+    width: "64%",
+    fontSize: 9,
     color: C.ink,
     fontWeight: "bold",
   },
@@ -225,8 +223,8 @@ export const commonStyles = StyleSheet.create({
   signatureSection: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 30,
-    marginBottom: 8,
+    marginTop: 20,
+    marginBottom: 6,
   },
   signatureBox: {
     width: "44%",
@@ -263,19 +261,20 @@ export const commonStyles = StyleSheet.create({
     textAlign: "center",
   },
   stampBox: {
-    width: 64,
-    height: 64,
+    width: 58,
+    height: 58,
     borderWidth: 1,
-    borderColor: C.rule,
-    borderRadius: 32,
+    borderColor: C.ruleLight,
+    borderStyle: "dashed",
+    borderRadius: 29,
     alignSelf: "center",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: 4,
   },
   stampText: {
-    fontSize: 6,
-    color: C.rule,
+    fontSize: 5.5,
+    color: C.ruleLight,
     textAlign: "center",
   },
 
@@ -343,15 +342,15 @@ export const commonStyles = StyleSheet.create({
 
   // ── Notice / info box ──────────────────────────────────────────────────────
   noticeBox: {
-    backgroundColor: C.goldBg,
-    borderLeftWidth: 3,
-    borderLeftColor: C.gold,
-    padding: 10,
-    marginVertical: 10,
+    backgroundColor: C.emeraldBg,
+    borderWidth: 0.5,
+    borderColor: C.rule,
+    padding: 8,
+    marginVertical: 8,
   },
   noticeText: {
-    fontSize: 8.5,
-    color: C.gold,
+    fontSize: 8,
+    color: C.inkLight,
     lineHeight: 1.5,
   },
 
