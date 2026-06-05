@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 /**
  * Agreement / Business Portal
  *
@@ -1306,6 +1307,93 @@ export function Agreement() {
           </div>
         </div>
       </div>
+
+      {/* Agreements Filed With This User — show even without registration */}
+      {agreementApps.filter((a) => a.user_id !== user?.id).length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
+          <h2 className="text-base font-bold text-amber-900 flex items-center gap-2">
+            <AlertCircle size={18} className="text-amber-600" />
+            {lang === "sw" ? "Makubaliano Yanayokusubiri" : "Agreements Pending Your Action"}
+          </h2>
+          <div className="space-y-2">
+            {agreementApps.filter((a) => a.user_id !== user?.id).map((agr) => {
+              const statusColor =
+                agr.status === "issued" ? "bg-emerald-100 text-emerald-800"
+                  : agr.status === "rejected" ? "bg-red-100 text-red-800"
+                  : agr.status === "submitted" ? "bg-amber-100 text-amber-800"
+                  : "bg-blue-100 text-blue-800";
+              return (
+                <div key={agr.id} className="bg-white rounded-xl p-4 border border-amber-100">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-mono text-stone-400">{agr.application_number}</span>
+                        <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", statusColor)}>
+                          {agr.status}
+                        </span>
+                        {agr.agreement_status && (
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-stone-100 text-stone-600 uppercase">
+                            {agr.agreement_status}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm font-bold text-stone-900">
+                        {(agr.service_name || "").replace("Makubaliano ya ", "")}
+                      </p>
+                      <p className="text-xs text-stone-500 mt-0.5">
+                        {lang === "sw" ? "Imetumwa:" : "Filed:"} {new Date(agr.created_at).toLocaleDateString("sw-TZ")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* User's own agreements (filed by them) */}
+      {agreementApps.filter((a) => a.user_id === user?.id).length > 0 && (
+        <div className="bg-white border border-stone-200 rounded-2xl p-5 space-y-3">
+          <h2 className="text-base font-bold text-stone-800 flex items-center gap-2">
+            <FileSignature size={18} className="text-stone-600" />
+            {lang === "sw" ? "Makubaliano Niliyoanzisha" : "Agreements I Filed"}
+            <span className="text-xs font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">
+              {agreementApps.filter((a) => a.user_id === user?.id).length}
+            </span>
+          </h2>
+          <div className="space-y-2">
+            {agreementApps.filter((a) => a.user_id === user?.id).map((agr) => {
+              const statusColor =
+                agr.status === "issued" ? "bg-emerald-100 text-emerald-800"
+                  : agr.status === "rejected" ? "bg-red-100 text-red-800"
+                  : agr.status === "submitted" ? "bg-amber-100 text-amber-800"
+                  : "bg-blue-100 text-blue-800";
+              return (
+                <div key={agr.id} className="bg-stone-50 rounded-xl p-4 border border-stone-100">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-mono text-stone-400">{agr.application_number}</span>
+                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", statusColor)}>
+                      {agr.status}
+                    </span>
+                    {agr.agreement_status && (
+                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-stone-100 text-stone-600 uppercase">
+                        {agr.agreement_status}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm font-bold text-stone-900">
+                    {(agr.service_name || "").replace("Makubaliano ya ", "")}
+                  </p>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    {new Date(agr.created_at).toLocaleDateString("sw-TZ")}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* APPROVED — Dashboard with initiate buttons */}
       {approvedRegs.length > 0 && (
