@@ -31,6 +31,7 @@ import { LocationManagement } from "./pages/admin/LocationManagement";
 import { ServiceManagement } from "./pages/admin/ServiceManagement";
 import { AdminLogs } from "./pages/admin/AdminLogs";
 import { DepartmentManagement } from "./pages/admin/DepartmentManagement";
+import { DepartmentPortal } from "./pages/department/DepartmentPortal";
 import { CitizenManagement } from "./pages/admin/CitizenManagement";
 
 // Staff pages
@@ -633,6 +634,16 @@ export default function App() {
           />
 
           {/* Admin routes */}
+          <Route
+            path="/department"
+            element={
+              <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                <AppShell>
+                  <DepartmentPortal />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin"
             element={

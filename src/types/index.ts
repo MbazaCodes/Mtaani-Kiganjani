@@ -28,6 +28,7 @@ export type ViewName =
   | "service_management"
   | "admin_logs"
   | "departments"
+  | "department_portal"
   | "citizen_management";
 
 // ─── Application status ────────────────────────────────────────────────────────

@@ -31,6 +31,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
   const { user, session } = useAuth();
   const { lang, t } = useLanguage();
   const [actualRole, setActualRole] = useState<string | null>(null);
+  const [isDeptMember, setIsDeptMember] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Direct database check for actual role using RPC (bypasses RLS)
@@ -61,6 +62,22 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
     };
 
     fetchActualRole();
+
+    // Check if user is a department member
+    const checkDeptMembership = async () => {
+      try {
+        const { data } = await supabase
+          .from("department_users")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .limit(1)
+          .maybeSingle();
+        setIsDeptMember(!!data);
+      } catch {
+        setIsDeptMember(false);
+      }
+    };
+    checkDeptMembership();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id, user?.role]);
 
@@ -176,6 +193,23 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
             label={lang === "sw" ? "Kumbukumbu" : "Activity Logs"}
             active={currentView === "admin_logs"}
             onClick={() => setView("admin_logs")}
+          />
+        </>
+      )}
+
+      {/* Department Portal — shown for any staff/admin who is a department member */}
+      {isDeptMember && (
+        <>
+          <div className="px-3 pt-4 pb-1">
+            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+              {lang === "sw" ? "Idara" : "Department"}
+            </p>
+          </div>
+          <SidebarItem
+            icon={<Building2 size={20} />}
+            label={lang === "sw" ? "Portal ya Idara" : "Department Portal"}
+            active={currentView === "department_portal"}
+            onClick={() => setView("department_portal")}
           />
         </>
       )}
