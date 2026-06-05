@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { Check, Eye, EyeOff, Loader2, Lock, User as UserIcon } from "lucide-react";
 
 import { useAuth } from "./context/AuthContext";
 import { useLanguage } from "./context/LanguageContext";
@@ -52,7 +53,7 @@ import { useAppContext } from "./context/AppContext";
 import { HARDCODED_SERVICES } from "./constants/services";
 import { useRouterView } from "./components/layout/AppShell";
 
-// ─── Authenticated root: redirects to role-based home ─────────────────────────
+// Authenticated root: redirects to role-based home
 function AuthenticatedRoot() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/" replace />;
@@ -61,7 +62,7 @@ function AuthenticatedRoot() {
   return <Navigate to="/dashboard" replace />;
 }
 
-// ─── Loading screen ────────────────────────────────────────────────────────────
+// Loading screen
 function LoadingScreen() {
   return (
     <div className="min-h-screen bg-stone-50 flex items-center justify-center">
@@ -73,7 +74,7 @@ function LoadingScreen() {
   );
 }
 
-// ─── Public landing with auth modal ───────────────────────────────────────────
+// Public landing with auth modal
 function PublicHome() {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -119,11 +120,10 @@ function PublicHome() {
   );
 }
 
-// ─── Apply page wrapper (needs AppContext state) ───────────────────────────────
+// Apply page wrapper (needs AppContext state)
 function ApplyRoute() {
   const { selectedService, selectedDraft, submitApplication, setSelectedDraft } = useAppContext();
   const { setView } = useRouterView();
-  const { lang } = useLanguage();
 
   if (!selectedService) return <Navigate to="/services" replace />;
 
@@ -143,7 +143,7 @@ function ApplyRoute() {
   );
 }
 
-// ─── Applications page wrapper ─────────────────────────────────────────────────
+// Applications page wrapper
 function ApplicationsRoute() {
   const {
     applications,
@@ -153,7 +153,6 @@ function ApplicationsRoute() {
     setSelectedDraft,
     setSelectedService,
   } = useAppContext();
-  const { setView } = useRouterView();
   const navigate = useNavigate();
 
   return (
@@ -183,14 +182,14 @@ function ApplicationsRoute() {
   );
 }
 
-// ─── Dashboard wrapper ─────────────────────────────────────────────────────────
+// Dashboard wrapper
 function DashboardRoute() {
   const { applications, fetchApplications } = useAppContext();
   const { setView } = useRouterView();
   return <Dashboard applications={applications} setView={setView} onRefresh={fetchApplications} />;
 }
 
-// ─── Services wrapper ──────────────────────────────────────────────────────────
+// Services wrapper
 function ServicesRoute() {
   const { setSelectedService, fetchApplications } = useAppContext();
   const navigate = useNavigate();
@@ -205,7 +204,7 @@ function ServicesRoute() {
   );
 }
 
-// ─── Admin routes with setView shim ───────────────────────────────────────────
+// Admin routes with setView shim
 function AdminDashboardRoute() {
   const { setView } = useRouterView();
   return <AdminDashboard setView={setView as (v: string) => void} />;
@@ -216,7 +215,7 @@ function StaffDashboardRoute() {
   return <StaffDashboard setView={setView as (v: string) => void} />;
 }
 
-// ─── Citizens route (admin sees admin version, staff sees staff version) ────────
+// Citizens route (admin sees admin version, staff sees staff version)
 function CitizensRoute() {
   const { user } = useAuth();
   if (user?.role === "admin") return <CitizenManagement />;
@@ -224,7 +223,7 @@ function CitizensRoute() {
   return null;
 }
 
-// ─── Page transition wrapper ───────────────────────────────────────────────────
+// Page transition wrapper
 const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
     initial={{ opacity: 0, x: 16 }}
@@ -236,9 +235,9 @@ const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) =
   </motion.div>
 );
 
-// ─── Main router ───────────────────────────────────────────────────────────────
+// Main router
 
-// ─── Force password change for new staff accounts ─────────────────────────────
+// Force password change for new staff accounts
 function ForcePasswordChange() {
   const { user, refreshProfile, signOut } = useAuth();
   const { lang } = useLanguage();
@@ -247,8 +246,6 @@ function ForcePasswordChange() {
   const [showPwd, setShowPwd] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
-
-  const { supabase: _supabase } = {} as { supabase: unknown }; // use import directly
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -303,7 +300,7 @@ function ForcePasswordChange() {
         {/* Header */}
         <div className="bg-emerald-600 px-8 py-7 text-center">
           <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-            <span className="text-3xl">🔐</span>
+            <Lock className="h-8 w-8 text-white" aria-hidden="true" />
           </div>
           <h1 className="text-xl font-black text-white">
             {lang === "sw" ? "Badilisha Nywila Yako" : "Change Your Password"}
@@ -318,12 +315,12 @@ function ForcePasswordChange() {
         <form onSubmit={handleSubmit} className="p-8 space-y-5">
           {/* Account info */}
           <div className="bg-stone-50 rounded-xl p-3 text-sm text-stone-600 flex items-center gap-2">
-            <span className="text-base">👤</span>
+            <UserIcon className="h-4 w-4 shrink-0 text-stone-400" aria-hidden="true" />
             <span>
               <strong>
                 {user?.first_name} {user?.last_name}
               </strong>{" "}
-              · {user?.email}
+              &middot; {user?.email}
             </span>
           </div>
 
@@ -347,9 +344,14 @@ function ForcePasswordChange() {
               <button
                 type="button"
                 onClick={() => setShowPwd((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 text-xs font-bold"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                aria-label={showPwd ? "Hide password" : "Show password"}
               >
-                {showPwd ? "🙈" : "👁"}
+                {showPwd ? (
+                  <EyeOff className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Eye className="h-4 w-4" aria-hidden="true" />
+                )}
               </button>
             </div>
           </div>
@@ -386,11 +388,11 @@ function ForcePasswordChange() {
             >
               {newPwd.length >= 8 && /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd)
                 ? lang === "sw"
-                  ? "✓ Nywila imara"
-                  : "✓ Strong password"
+                  ? "Nywila imara"
+                  : "Strong password"
                 : lang === "sw"
-                  ? "⚠ Ongeza namba na herufi kubwa kwa usalama zaidi"
-                  : "⚠ Add numbers & uppercase for a stronger password"}
+                  ? "Ongeza namba na herufi kubwa kwa usalama zaidi"
+                  : "Add numbers and uppercase for a stronger password"}
             </p>
           )}
 
@@ -401,13 +403,17 @@ function ForcePasswordChange() {
           >
             {loading ? (
               <>
-                <span className="animate-spin">⏳</span>{" "}
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />{" "}
                 {lang === "sw" ? "Inabadilisha..." : "Updating..."}
               </>
             ) : lang === "sw" ? (
-              "✓ Badilisha na Ingia"
+              <>
+                <Check className="h-4 w-4" aria-hidden="true" /> Badilisha na Ingia
+              </>
             ) : (
-              "✓ Change Password & Continue"
+              <>
+                <Check className="h-4 w-4" aria-hidden="true" /> Change Password and Continue
+              </>
             )}
           </button>
 
@@ -461,7 +467,7 @@ export default function App() {
             }
           />
 
-          {/* Authenticated root — redirects by role */}
+          {/* Authenticated root: redirects by role */}
           <Route
             path="/app"
             element={
@@ -749,7 +755,7 @@ export default function App() {
             }
           />
 
-          {/* Shared: citizens — renders admin or staff version based on role */}
+          {/* Shared: citizens: renders admin or staff version based on role */}
           <Route
             path="/citizens"
             element={

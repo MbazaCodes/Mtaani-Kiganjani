@@ -40,6 +40,7 @@ import { FormProps, labels } from "./types";
 import { ProgressFill } from "../ui/ProgressFill";
 import { supabase } from "../../lib/supabase";
 import { createAgreementNotification, createNotification } from "../../lib/notifications";
+import { findAgreementCounterparty } from "../../lib/agreementLookup";
 
 // ─── Fee calculator ──────────────────────────────────────────────────────────
 const FEE_RATE = 0.03;
@@ -210,12 +211,11 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
     setBuyerError("");
     setBuyerFound(null);
     try {
-      let query = supabase.from("profiles").select("*");
-      if (vals.buyer_search_type === "NIDA") query = query.eq("nida_number", term);
-      if (vals.buyer_search_type === "PHONE") query = query.eq("phone", term);
-      if (vals.buyer_search_type === "CT_ID") query = query.eq("citizen_id", term);
-      const { data, error } = await query.single();
-      if (error || !data) {
+      const data = await findAgreementCounterparty(
+        vals.buyer_search_type as "NIDA" | "PHONE" | "CT_ID",
+        term,
+      );
+      if (!data) {
         setBuyerError(
           L(
             "Mtu huyu hayupo kwenye mfumo. Lazima awe mwananchi aliyesajiliwa na kuthibitishwa.",
@@ -243,7 +243,8 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
         return;
       }
       setBuyerFound(data as BuyerProfile);
-    } catch {
+    } catch (error) {
+      console.error("buyer lookup failed", error);
       setBuyerError(L("Hitilafu ya mtandao. Jaribu tena.", "Network error. Please try again."));
     } finally {
       setBuyerSearching(false);

@@ -41,6 +41,7 @@ import { FormProps, labels } from "./types";
 import { ProgressFill } from "../ui/ProgressFill";
 import { supabase } from "../../lib/supabase";
 import { createAgreementNotification, createNotification } from "../../lib/notifications";
+import { findAgreementCounterparty } from "../../lib/agreementLookup";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const PROPERTY_TYPES = [
@@ -239,12 +240,11 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
     setTenantError("");
     setTenantFound(null);
     try {
-      let query = supabase.from("profiles").select("*");
-      if (vals.tenant_search_type === "NIDA") query = query.eq("nida_number", term);
-      if (vals.tenant_search_type === "PHONE") query = query.eq("phone", term);
-      if (vals.tenant_search_type === "CT_ID") query = query.eq("citizen_id", term);
-      const { data, error } = await query.single();
-      if (error || !data) {
+      const data = await findAgreementCounterparty(
+        vals.tenant_search_type as "NIDA" | "PHONE" | "CT_ID",
+        term,
+      );
+      if (!data) {
         setTenantError(
           L(
             "Mtu huyu hayupo kwenye mfumo. Lazima awe mwananchi aliyesajiliwa na kuthibitishwa.",
@@ -272,7 +272,8 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
         return;
       }
       setTenantFound(data as TenantProfile);
-    } catch {
+    } catch (error) {
+      console.error("tenant lookup failed", error);
       setTenantError(L("Hitilafu ya mtandao. Jaribu tena.", "Network error. Please try again."));
     } finally {
       setTenantSearching(false);
