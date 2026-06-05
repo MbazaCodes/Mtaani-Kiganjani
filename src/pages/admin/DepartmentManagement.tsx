@@ -437,29 +437,25 @@ export function DepartmentManagement() {
         const firstName = nameParts[0] || "Department";
         const lastName = nameParts.slice(1).join(" ") || "Staff";
 
-        // Force-refresh the session so the JWT we send is fresh
-        // (long disconnections can leave a stale token even when getSession returns one)
-        let token: string | undefined;
-        try {
-          const { data: refreshed } = await supabase.auth.refreshSession();
-          token = refreshed.session?.access_token;
-        } catch {
-          // Refresh failed — fall through to getSession below
-        }
-        if (!token) {
-          const { data: sess } = await supabase.auth.getSession();
-          token = sess.session?.access_token;
-        }
-        if (!token) {
+        // Force-refresh the session before calling the admin API. refreshSession()
+        // returns an error object (not a throw) when the refresh token is invalid.
+        const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
+        if (refreshErr || !refreshed.session) {
+          // Refresh token is dead — force a clean sign-out so the next sign-in works
+          await supabase.auth.signOut();
           showToast(
             L(
-              "Kipindi kimeisha. Tafadhali ingia tena.",
-              "Session expired. Please sign out and sign in again.",
+              "Kipindi kimeisha. Umetolewa, ingia tena.",
+              "Session expired. You have been signed out — please sign in again.",
             ),
             "error",
           );
+          setTimeout(() => {
+            window.location.href = "/auth";
+          }, 1500);
           return;
         }
+        const token = refreshed.session.access_token;
 
         const res = await fetch("/api/admin", {
           method: "POST",
