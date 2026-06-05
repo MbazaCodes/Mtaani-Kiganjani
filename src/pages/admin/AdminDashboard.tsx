@@ -78,6 +78,14 @@ interface DashboardStats {
   staffTrend: number;
   applicationsTrend: number;
   revenueTrend: number;
+
+  // Department stats
+  totalDepartments: number;
+  activeDepartments: number;
+  departmentStaff: number;
+  totalEscalations: number;
+  pendingEscalations: number;
+  resolvedEscalations: number;
 }
 
 interface ActivityItem {
@@ -136,6 +144,13 @@ const INITIAL_STATS: DashboardStats = {
   staffTrend: 0,
   applicationsTrend: 0,
   revenueTrend: 0,
+
+  totalDepartments: 0,
+  activeDepartments: 0,
+  departmentStaff: 0,
+  totalEscalations: 0,
+  pendingEscalations: 0,
+  resolvedEscalations: 0,
 };
 
 export function AdminDashboard({ setView }: { setView?: (view: string) => void }) {
@@ -391,6 +406,42 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
       const applicationsTrend = calcTrend(appsNow, prevApplicationsCount.count || 0);
       const revenueTrend = calcTrend(monthRev, prevMonthRev);
 
+      // Department analytics (graceful if tables don't exist yet)
+      let deptTotal = 0,
+        deptActive = 0,
+        deptStaffCount = 0,
+        escTotal = 0,
+        escPending = 0,
+        escResolved = 0;
+      try {
+        const [deptAll, deptActiveRes, deptStaffRes, escAll, escPend, escResolvedRes] =
+          await Promise.all([
+            supabase.from("government_departments").select("id", { count: "exact", head: true }),
+            supabase
+              .from("government_departments")
+              .select("id", { count: "exact", head: true })
+              .eq("active", true),
+            supabase.from("department_users").select("id", { count: "exact", head: true }),
+            supabase.from("escalations").select("id", { count: "exact", head: true }),
+            supabase
+              .from("escalations")
+              .select("id", { count: "exact", head: true })
+              .eq("status", "pending"),
+            supabase
+              .from("escalations")
+              .select("id", { count: "exact", head: true })
+              .eq("status", "resolved"),
+          ]);
+        deptTotal = deptAll.count || 0;
+        deptActive = deptActiveRes.count || 0;
+        deptStaffCount = deptStaffRes.count || 0;
+        escTotal = escAll.count || 0;
+        escPending = escPend.count || 0;
+        escResolved = escResolvedRes.count || 0;
+      } catch {
+        // Department tables not migrated yet — leave zeros
+      }
+
       const newStats: DashboardStats = {
         totalUsers: usersCount.count || 0,
         totalCitizens: citizensCount.count || 0,
@@ -433,6 +484,13 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
         staffTrend,
         applicationsTrend,
         revenueTrend,
+
+        totalDepartments: deptTotal,
+        activeDepartments: deptActive,
+        departmentStaff: deptStaffCount,
+        totalEscalations: escTotal,
+        pendingEscalations: escPending,
+        resolvedEscalations: escResolved,
       };
       setStats(newStats);
 
@@ -1021,6 +1079,137 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Department Network Overview */}
+          <div className="bg-white rounded-4xl p-6 border border-stone-100 shadow-xl">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <Building2 size={18} className="text-emerald-600" />
+                <h3 className="text-sm font-bold text-stone-500 uppercase tracking-widest">
+                  {lang === "sw" ? "Mtandao wa Idara za Serikali" : "Government Department Network"}
+                </h3>
+              </div>
+              {setView && (
+                <button
+                  onClick={() => setView("departments")}
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                >
+                  {lang === "sw" ? "Simamia" : "Manage"}
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Total departments */}
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4 border border-emerald-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <Building2 size={16} className="text-emerald-600" />
+                  <span className="text-2xl font-black text-stone-900">
+                    {stats.totalDepartments}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-stone-500">
+                  {lang === "sw" ? "Jumla ya Idara" : "Total Departments"}
+                </p>
+                <p className="text-[10px] text-emerald-600 mt-0.5">
+                  {stats.activeDepartments} {lang === "sw" ? "zinazotumika" : "active"}
+                </p>
+              </div>
+
+              {/* Department staff */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield size={16} className="text-blue-600" />
+                  <span className="text-2xl font-black text-stone-900">
+                    {stats.departmentStaff}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-stone-500">
+                  {lang === "sw" ? "Watumishi wa Idara" : "Department Staff"}
+                </p>
+                <p className="text-[10px] text-blue-600 mt-0.5">
+                  {lang === "sw" ? "wamepewa idara" : "assigned to departments"}
+                </p>
+              </div>
+
+              {/* Total escalations */}
+              <div className="bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-2xl p-4 border border-purple-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <ArrowUpRight size={16} className="text-purple-600" />
+                  <span className="text-2xl font-black text-stone-900">
+                    {stats.totalEscalations}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-stone-500">
+                  {lang === "sw" ? "Maombi Yaliyopandishwa" : "Total Escalations"}
+                </p>
+                <p className="text-[10px] text-purple-600 mt-0.5">
+                  {lang === "sw" ? "kwa idara" : "to departments"}
+                </p>
+              </div>
+
+              {/* Pending escalations */}
+              <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock size={16} className="text-amber-600" />
+                  <span className="text-2xl font-black text-stone-900">
+                    {stats.pendingEscalations}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-stone-500">
+                  {lang === "sw" ? "Zinazosubiri" : "Pending"}
+                </p>
+              </div>
+
+              {/* Resolved escalations */}
+              <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle size={16} className="text-emerald-600" />
+                  <span className="text-2xl font-black text-stone-900">
+                    {stats.resolvedEscalations}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-stone-500">
+                  {lang === "sw" ? "Zimemalizika" : "Resolved"}
+                </p>
+              </div>
+
+              {/* Resolution rate */}
+              <div className="bg-stone-50 rounded-2xl p-4 border border-stone-100 flex flex-col justify-center">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-bold text-stone-500">
+                    {lang === "sw" ? "Kiwango cha Kumaliza" : "Resolution Rate"}
+                  </span>
+                  <span className="text-sm font-black text-emerald-600">
+                    {stats.totalEscalations > 0
+                      ? Math.round((stats.resolvedEscalations / stats.totalEscalations) * 100)
+                      : 0}
+                    %
+                  </span>
+                </div>
+                <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all"
+                    style={{
+                      width: `${
+                        stats.totalEscalations > 0
+                          ? Math.round((stats.resolvedEscalations / stats.totalEscalations) * 100)
+                          : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {stats.totalDepartments === 0 && (
+              <p className="text-xs text-stone-400 mt-4 text-center">
+                {lang === "sw"
+                  ? "Hakuna idara bado. Endesha uhamishaji wa SQL kuongeza idara 52 za Tanzania."
+                  : "No departments yet. Run the SQL migration to add the 52 Tanzania departments."}
+              </p>
+            )}
           </div>
 
           {/* Quick Actions */}
