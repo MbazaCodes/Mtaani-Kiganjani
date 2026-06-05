@@ -524,7 +524,36 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           id: item.id,
           type: determineActivityType(item.action),
           action: item.action,
-          description: typeof item.details === "object" && item.details ? JSON.stringify(item.details) : String(item.details || item.action || ""),
+          description: (() => {
+            // Build a human-readable description from action + details
+            const d = (item.details ?? {}) as Record<string, unknown>;
+            const num = d.number as string | undefined;
+            const svc = d.service as string | undefined;
+            const action = item.action || "";
+            switch (action) {
+              case "submit_application":
+                return svc && num ? `Submitted ${svc} (${num})` : "Submitted an application";
+              case "approve_application":
+                return svc && num ? `Approved ${svc} (${num})` : "Approved an application";
+              case "reject_application":
+                return svc && num ? `Rejected ${svc} (${num})` : "Rejected an application";
+              case "login":
+                return "Signed in";
+              case "logout":
+                return "Signed out";
+              case "payment":
+                return svc && num ? `Payment for ${svc} (${num})` : "Payment processed";
+              default:
+                // Fallback — if details is a plain object, show key fields; otherwise stringify
+                if (typeof item.details === "object" && item.details) {
+                  const parts: string[] = [];
+                  if (num) parts.push(num);
+                  if (svc) parts.push(svc);
+                  return parts.length > 0 ? parts.join(" — ") : action.replace(/_/g, " ");
+                }
+                return String(item.details || action.replace(/_/g, " "));
+            }
+          })(),
           user:
             item.users && Array.isArray(item.users) && item.users.length > 0
               ? `${item.users[0].first_name} ${item.users[0].last_name}`
