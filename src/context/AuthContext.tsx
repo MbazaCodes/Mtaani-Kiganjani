@@ -99,20 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshProfile = async () => {
     if (session?.user?.id) {
       const profile = await fetchUserProfile(session.user.id);
-      // Check department membership (uses same query as DepartmentPortal)
-      if (profile && (profile.role === "staff" || profile.role === "admin")) {
-        try {
-          const { data: deptLink } = await supabase
-            .from("department_users")
-            .select("department_id")
-            .eq("user_id", profile.id)
-            .limit(1)
-            .maybeSingle();
-          if (deptLink) profile.is_department_member = true;
-        } catch {
-          // Ignore — dept tables may not exist
-        }
-      }
+      // Department membership: just check if department_id is set on the profile
+      if (profile?.department_id) profile.is_department_member = true;
       setUser(profile);
     }
   };
@@ -145,20 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (currentSession?.user) {
           const profile = await withProfileTimeout(fetchUserProfile(currentSession.user.id));
           if (!isMounted) return;
-          // Check department membership
-          if (profile && (profile.role === "staff" || profile.role === "admin")) {
-            try {
-              const { data: deptLink } = await supabase
-                .from("department_users")
-                .select("department_id")
-                .eq("user_id", profile.id)
-                .limit(1)
-                .maybeSingle();
-              if (deptLink) profile.is_department_member = true;
-            } catch {
-              // Ignore
-            }
-          }
+          if (profile?.department_id) profile.is_department_member = true;
           setUser(profile ?? buildFallbackUser(currentSession.user));
         } else {
           setUser(null);

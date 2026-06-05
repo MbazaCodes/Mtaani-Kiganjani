@@ -200,8 +200,8 @@ export default async function handler(req: VercelReq, res: VercelRes) {
           }
         }
 
-        // 3. Ensure a public.users row exists (the auth trigger usually creates it,
-        //    but upsert here guarantees it and sets the name + staff role).
+        // 3. Ensure a public.users row exists AND set department_id on the profile.
+        //    This is the KEY field the client reads to detect dept membership.
         await admin.from("users").upsert(
           {
             id: userId,
@@ -210,6 +210,7 @@ export default async function handler(req: VercelReq, res: VercelRes) {
             last_name: lastName,
             role: "staff",
             account_status: "active",
+            department_id: body.departmentId,
           },
           { onConflict: "id" },
         );

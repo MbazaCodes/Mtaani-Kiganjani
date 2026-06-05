@@ -40,6 +40,7 @@ export interface UserProfile {
   is_diaspora?: boolean;
   account_status: string;
   is_department_member?: boolean;
+  department_id?: string;
 
   // Location fields
   region?: string;
