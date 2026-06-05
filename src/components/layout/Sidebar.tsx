@@ -42,7 +42,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
       return;
     }
 
-    const fetchActualRole = async () => {
+    const fetchActualRole = async (): Promise<void> => {
       try {
         const { data, error } = await supabase.rpc("get_user_profile", {
           user_id: session.user.id,
@@ -63,21 +63,40 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
 
     fetchActualRole();
 
-    // Check if user is a department member
-    const checkDeptMembership = async () => {
+    // Department membership check — try multiple approaches for reliability.
+    // RLS can block the query if auth isn't fully warmed up, so we retry.
+    const uid = session.user.id;
+    const checkDept = async (): Promise<boolean> => {
       try {
+        // Approach 1: count query (works with minimal RLS)
+        const { count } = await supabase
+          .from("department_users")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", uid);
+        if (count && count > 0) return true;
+        // Approach 2: data query (different RLS path)
         const { data } = await supabase
           .from("department_users")
           .select("id")
-          .eq("user_id", session.user.id)
-          .limit(1)
-          .maybeSingle();
-        setIsDeptMember(!!data);
+          .eq("user_id", uid)
+          .limit(1);
+        if (data && data.length > 0) return true;
       } catch {
-        setIsDeptMember(false);
+        // RLS blocked or table doesn't exist
       }
+      return false;
     };
-    checkDeptMembership();
+
+    // Try immediately, then retry after 1.5s if false (auth warmup delay)
+    checkDept().then((found) => {
+      if (found) {
+        setIsDeptMember(true);
+      } else {
+        setTimeout(() => {
+          checkDept().then((retry) => setIsDeptMember(retry));
+        }, 1500);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id, user?.role]);
 
