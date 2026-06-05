@@ -408,40 +408,105 @@ export function DepartmentManagement() {
   // ── Add staff to department ──────────────────────────────────────────────
   const handleAddStaff = async () => {
     if (!staffEmail.trim() || !expandedId) return;
+    if (!staffPassword.trim() || staffPassword.length < 6) {
+      showToast(
+        L("Nenosiri lazima liwe angalau herufi 6", "Password must be at least 6 characters"),
+        "error",
+      );
+      return;
+    }
     setAddingStaff(true);
     try {
-      // Find user by email
-      const { data: found, error: findErr } = await supabase
+      const email = staffEmail.trim().toLowerCase();
+
+      // Try to find existing user first
+      const { data: found } = await supabase
         .from("users")
         .select("id, first_name, last_name, email")
-        .eq("email", staffEmail.trim().toLowerCase())
+        .eq("email", email)
         .maybeSingle();
-      if (findErr || !found) {
-        showToast(L("Mtumiaji hajapatikana", "User not found with that email"), "error");
-        return;
+
+      let userId: string;
+
+      if (found) {
+        // Existing user — just link to department
+        userId = found.id;
+      } else {
+        // Create new user account via the secure admin API
+        const nameParts = staffName.trim().split(" ");
+        const firstName = nameParts[0] || "Department";
+        const lastName = nameParts.slice(1).join(" ") || "Staff";
+
+        const session = await supabase.auth.getSession();
+        const token = session.data.session?.access_token;
+        if (!token) {
+          showToast(L("Hujaingia", "Not authenticated"), "error");
+          return;
+        }
+
+        const res = await fetch("/api/admin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            action: "createUser",
+            email,
+            password: staffPassword,
+            role: "staff",
+          }),
+        });
+        const result = await res.json();
+        if (!res.ok || !result.userId) {
+          showToast(
+            result.error || L("Imeshindwa kuunda akaunti", "Failed to create account"),
+            "error",
+          );
+          return;
+        }
+        userId = result.userId;
+
+        // Update the user profile with name
+        await supabase
+          .from("users")
+          .update({ first_name: firstName, last_name: lastName })
+          .eq("id", userId);
       }
+
+      // Link user to department
       const { error } = await supabase.from("department_users").insert({
-        user_id: found.id,
+        user_id: userId,
         department_id: expandedId,
         role: staffRole,
       });
       if (error) {
         if (error.message?.includes("duplicate")) {
-          showToast(L("Mtumiaji tayari yupo", "User already assigned"), "warning");
+          showToast(
+            L("Mtumiaji tayari yupo kwenye idara hii", "User already in this department"),
+            "warning",
+          );
         } else throw error;
         return;
       }
-      showToast(L("Mtumiaji ameongezwa!", "Staff added to department!"), "success");
+      showToast(
+        found
+          ? L("Mtumiaji ameongezwa kwenye idara!", "Existing user added to department!")
+          : L("Akaunti imeundwa na kuongezwa!", "Account created and added to department!"),
+        "success",
+      );
       setStaffEmail("");
       setStaffName("");
       setStaffPassword("Mtaani@2026");
-      fetchStaff(expandedId);
+      setShowAddStaff(false);
+      // Refresh staff list
+      setExpandedId(null);
+      setTimeout(() => fetchStaff(expandedId!), 300);
     } catch (err: unknown) {
       const e = err as { message?: string };
       showToast(e.message || "Error", "error");
     } finally {
       setAddingStaff(false);
-      setShowAddStaff(false);
     }
   };
 
