@@ -10,6 +10,7 @@ import {
   Users,
   User,
   Building2,
+  MessageSquare,
   MapPin,
   Settings,
   HelpCircle,
@@ -259,6 +260,15 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         </>
       )}
 
+      {/* Citizen Support — shown for citizens and ward staff */}
+      {(displayRole === "citizen" || (displayRole === "staff" && !(user?.is_department_member || localDeptCheck))) && (
+        <SidebarItem
+          icon={<MessageSquare size={20} />}
+          label={lang === "sw" ? "Msaada" : "Support"}
+          active={currentView === "citizen_support" || currentView === "staff_tickets"}
+          onClick={() => setView(displayRole === "citizen" ? "citizen_support" : "staff_tickets")}
+        />
+      )}
       <SidebarItem
         icon={<Search size={20} />}
         label={lang === "sw" ? "Hakiki Hati" : "Verify Document"}

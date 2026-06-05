@@ -32,6 +32,8 @@ import { ServiceManagement } from "./pages/admin/ServiceManagement";
 import { AdminLogs } from "./pages/admin/AdminLogs";
 import { DepartmentManagement } from "./pages/admin/DepartmentManagement";
 import { DepartmentPortal } from "./pages/department/DepartmentPortal";
+import { CitizenSupport } from "./pages/CitizenSupport";
+import { StaffTicketInbox } from "./pages/staff/StaffTicketInbox";
 import { CitizenManagement } from "./pages/admin/CitizenManagement";
 
 // Staff pages
@@ -634,6 +636,26 @@ export default function App() {
           />
 
           {/* Admin routes */}
+          <Route
+            path="/support"
+            element={
+              <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                <AppShell>
+                  <CitizenSupport />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/tickets"
+            element={
+              <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                <AppShell>
+                  <StaffTicketInbox />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/department"
             element={
