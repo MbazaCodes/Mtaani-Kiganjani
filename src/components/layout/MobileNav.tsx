@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import type { ViewName } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +20,7 @@ import {
   Bell,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,19 @@ interface MobileNavProps {
 export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavProps) {
   const { user, signOut } = useAuth();
   const { lang, t } = useLanguage();
+
+  // Department membership: AuthContext flag + direct query fallback
+  const [localDeptCheck, setLocalDeptCheck] = useState(false);
+  useEffect(() => {
+    if (user?.is_department_member) { setLocalDeptCheck(true); return; }
+    if (!user?.id || user?.role === "citizen") return;
+    const timer = setTimeout(() => {
+      supabase.from("department_users").select("department_id").eq("user_id", user.id)
+        .limit(1).maybeSingle().then(({ data }) => { if (data) setLocalDeptCheck(true); });
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.is_department_member]);
 
   const menuItems = [
     {
@@ -169,7 +183,7 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
     },
   ];
 
-  const isDept = user?.is_department_member && user?.role === "staff";
+  const isDept = (user?.is_department_member || localDeptCheck) && user?.role === "staff";
   const filteredItems = menuItems.filter((item) => {
     if (!item.roles.includes(user?.role || "")) return false;
     // Department officers: hide regular staff items, show dept-only items

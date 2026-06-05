@@ -31,7 +31,29 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
   const { user, session } = useAuth();
   const { lang, t } = useLanguage();
   const [actualRole, setActualRole] = useState<string | null>(null);
-  // Department membership is now on user.is_department_member (set in AuthContext)
+  // Department membership: read from AuthContext flag, with direct query fallback
+  const [localDeptCheck, setLocalDeptCheck] = useState(false);
+  useEffect(() => {
+    if (user?.is_department_member) {
+      setLocalDeptCheck(true);
+      return;
+    }
+    if (!user?.id || user?.role === "citizen") return;
+    // Fallback: same query as DepartmentPortal (which works)
+    const timer = setTimeout(() => {
+      supabase
+        .from("department_users")
+        .select("department_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) setLocalDeptCheck(true);
+        });
+    }, 800); // Small delay to ensure auth is warmed up
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.is_department_member]);
   const [loading, setLoading] = useState(true);
 
   // Direct database check for actual role using RPC (bypasses RLS)
@@ -91,7 +113,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         }
         onClick={() => {
           if (displayRole === "admin") setView("admin_dashboard");
-          else if (displayRole === "staff" && user?.is_department_member) setView("department_portal");
+          else if (displayRole === "staff" && (user?.is_department_member || localDeptCheck)) setView("department_portal");
           else if (displayRole === "staff") setView("staff_dashboard");
           else setView("dashboard");
         }}
@@ -186,7 +208,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
       )}
 
       {/* Department Portal — shown for any staff/admin who is a department member */}
-      {user?.is_department_member && displayRole !== "staff" && (
+      {(user?.is_department_member || localDeptCheck) && displayRole !== "staff" && (
         <>
           <div className="px-3 pt-4 pb-1">
             <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
@@ -202,7 +224,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         </>
       )}
 
-      {displayRole === "staff" && !user?.is_department_member && (
+      {displayRole === "staff" && !(user?.is_department_member || localDeptCheck) && (
         <>
           <SidebarItem
             icon={<Users size={20} />}
