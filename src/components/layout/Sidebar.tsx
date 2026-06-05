@@ -100,10 +100,12 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         active={
           currentView === "dashboard" ||
           currentView === "admin_dashboard" ||
-          currentView === "staff_dashboard"
+          currentView === "staff_dashboard" ||
+          currentView === "department_portal"
         }
         onClick={() => {
           if (displayRole === "admin") setView("admin_dashboard");
+          else if (displayRole === "staff" && isDeptMember) setView("department_portal");
           else if (displayRole === "staff") setView("staff_dashboard");
           else setView("dashboard");
         }}
@@ -198,7 +200,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
       )}
 
       {/* Department Portal — shown for any staff/admin who is a department member */}
-      {isDeptMember && (
+      {isDeptMember && displayRole !== "staff" && (
         <>
           <div className="px-3 pt-4 pb-1">
             <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
@@ -214,7 +216,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         </>
       )}
 
-      {displayRole === "staff" && (
+      {displayRole === "staff" && !isDeptMember && (
         <>
           <SidebarItem
             icon={<Users size={20} />}

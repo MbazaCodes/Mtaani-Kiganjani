@@ -38,6 +38,21 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
     pendingBusiness: 0, // Pending business registration applications
   });
 
+  // Auto-redirect department officers to their portal
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("department_users")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data && setView) setView("department_portal");
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
