@@ -43,9 +43,11 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
       view:
         user?.role === "admin"
           ? "admin_dashboard"
-          : user?.role === "staff"
-            ? "staff_dashboard"
-            : "dashboard",
+          : user?.role === "staff" && user?.is_department_member
+            ? "department_portal"
+            : user?.role === "staff"
+              ? "staff_dashboard"
+              : "dashboard",
     },
     {
       id: "services",
@@ -74,6 +76,15 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
       label: lang === "sw" ? "Arifa" : "Notifications",
       roles: ["citizen", "staff", "admin"],
       view: "notifications",
+      hideForDept: true,
+    },
+    {
+      id: "department_portal",
+      icon: <Building2 size={20} />,
+      label: lang === "sw" ? "Portal ya Idara" : "Department Portal",
+      roles: ["staff"],
+      view: "department_portal",
+      deptOnly: true,
     },
     {
       id: "staff_management",
@@ -112,6 +123,7 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
     },
     {
       id: "application_review",
+      hideForDept: true,
       icon: <Search size={20} />,
       label: lang === "sw" ? "Uhakiki wa Maombi" : "Application Review",
       roles: ["staff", "admin"],
@@ -119,6 +131,7 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
     },
     {
       id: "customer_support",
+      hideForDept: true,
       icon: <HelpCircle size={20} />,
       label: lang === "sw" ? "Huduma kwa Wateja" : "Customer Support",
       roles: ["staff", "admin"],
@@ -126,6 +139,7 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
     },
     {
       id: "manual_verification",
+      hideForDept: true,
       icon: <UserCheck size={20} />,
       label: lang === "sw" ? "Uhakiki wa Mwongozo" : "Manual Verification",
       roles: ["staff", "admin"],
@@ -133,6 +147,7 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
     },
     {
       id: "business_approval",
+      hideForDept: true,
       icon: <Building2 size={20} />,
       label: lang === "sw" ? "Idhini ya Biashara" : "Business Approval",
       roles: ["staff", "admin"],
@@ -154,7 +169,14 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
     },
   ];
 
-  const filteredItems = menuItems.filter((item) => item.roles.includes(user?.role || ""));
+  const isDept = user?.is_department_member && user?.role === "staff";
+  const filteredItems = menuItems.filter((item) => {
+    if (!item.roles.includes(user?.role || "")) return false;
+    // Department officers: hide regular staff items, show dept-only items
+    if (isDept && (item as any).hideForDept) return false;
+    if (!isDept && (item as any).deptOnly) return false;
+    return true;
+  });
 
   return (
     <AnimatePresence>
