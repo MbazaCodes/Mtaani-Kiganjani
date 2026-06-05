@@ -123,7 +123,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           >
             <Bell size={20} aria-hidden="true" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow ring-2 ring-white">
+              <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow ring-2 ring-white">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}
@@ -140,17 +140,17 @@ export function Header({ onMenuClick }: HeaderProps) {
                 {user.role} {user.is_diaspora && "(Diaspora)"}
               </span>
               {user.seller_id && (
-                <span className="text-[9px] bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
+                <span className="text-[9px] bg-linear-to-r from-blue-500 to-indigo-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
                   ✓ {lang === "sw" ? "Muuzaji" : "Seller"}
                 </span>
               )}
               {user.landlord_id && (
-                <span className="text-[9px] bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
+                <span className="text-[9px] bg-linear-to-r from-emerald-500 to-teal-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
                   ✓ {lang === "sw" ? "Mpangishaji" : "Landlord"}
                 </span>
               )}
               {user.broker_id && (
-                <span className="text-[9px] bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
+                <span className="text-[9px] bg-linear-to-r from-purple-500 to-fuchsia-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">
                   ✓ {lang === "sw" ? "Dalali" : "Broker"}
                 </span>
               )}

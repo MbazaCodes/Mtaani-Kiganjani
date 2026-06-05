@@ -1303,7 +1303,7 @@ export function Profile() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-2 font-medium text-xs sm:text-sm whitespace-nowrap rounded-t-lg transition-all flex-shrink-0 border-b-2 ${
+            className={`flex items-center gap-1.5 px-3 py-2 font-medium text-xs sm:text-sm whitespace-nowrap rounded-t-lg transition-all shrink-0 border-b-2 ${
               activeTab === tab.id
                 ? "bg-emerald-50 text-emerald-700 border-emerald-500"
                 : "text-stone-500 hover:text-stone-900 hover:bg-stone-50 border-transparent"

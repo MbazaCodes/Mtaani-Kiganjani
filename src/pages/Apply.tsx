@@ -172,7 +172,7 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
 
           <button
             onClick={() => setView("agreement")}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-stone-700 to-stone-900 hover:from-stone-800 hover:to-stone-950 text-white rounded-xl font-bold text-sm shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-stone-700 to-stone-900 hover:from-stone-800 hover:to-stone-950 text-white rounded-xl font-bold text-sm shadow-lg transition-all"
           >
             <Briefcase size={16} />
             {gateReason === "none"

@@ -515,7 +515,7 @@ export function Agreement() {
           <div className="w-full bg-stone-200 h-1.5 rounded-full overflow-hidden">
             <ProgressFill
               progress={progress}
-              className="bg-gradient-to-r from-stone-600 to-stone-700 h-1.5 rounded-full transition-all duration-500"
+              className="bg-linear-to-r from-stone-600 to-stone-700 h-1.5 rounded-full transition-all duration-500"
             />
           </div>
         </div>
@@ -563,7 +563,7 @@ export function Agreement() {
                     >
                       <div className="flex items-start gap-3">
                         <div
-                          className={`w-10 h-10 rounded-xl bg-gradient-to-br ${t.color} flex items-center justify-center shrink-0`}
+                          className={`w-10 h-10 rounded-xl bg-linear-to-br ${t.color} flex items-center justify-center shrink-0`}
                         >
                           <Icon size={20} className="text-white" />
                         </div>
@@ -1243,7 +1243,7 @@ export function Agreement() {
             <button
               type="button"
               onClick={goNext}
-              className="flex-1 py-3.5 bg-gradient-to-r from-stone-700 to-stone-800 hover:from-stone-800 hover:to-stone-900 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
+              className="flex-1 py-3.5 bg-linear-to-r from-stone-700 to-stone-800 hover:from-stone-800 hover:to-stone-900 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
             >
               {step === "documents" ? (
                 <>
@@ -1260,7 +1260,7 @@ export function Agreement() {
               type="button"
               onClick={handleSubmit}
               disabled={submitting}
-              className="flex-1 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-60"
+              className="flex-1 py-3.5 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-60"
             >
               {submitting ? (
                 <>
@@ -1283,7 +1283,7 @@ export function Agreement() {
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-6">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-stone-800 via-stone-700 to-stone-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl">
+      <div className="bg-linear-to-br from-stone-800 via-stone-700 to-stone-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center shrink-0">
             <Briefcase size={24} className="text-white" />
@@ -1331,7 +1331,7 @@ export function Agreement() {
                 >
                   <div className="flex items-start gap-3">
                     <div
-                      className={`w-10 h-10 rounded-xl bg-gradient-to-br ${meta.color} flex items-center justify-center shrink-0`}
+                      className={`w-10 h-10 rounded-xl bg-linear-to-br ${meta.color} flex items-center justify-center shrink-0`}
                     >
                       <Icon size={20} className="text-white" />
                     </div>

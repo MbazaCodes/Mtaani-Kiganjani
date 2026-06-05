@@ -398,7 +398,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
   );
   const lbl = "block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5";
   const secHdr =
-    "bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 rounded-xl border-l-4 border-blue-500 mb-4";
+    "bg-linear-to-r from-blue-50 to-indigo-50 px-4 py-3 rounded-xl border-l-4 border-blue-500 mb-4";
 
   const Field = useCallback(
     ({
@@ -446,6 +446,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
       placeholder?: string;
     }) => (
       <select
+        aria-label={lbl}
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
@@ -514,7 +515,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
       <div className="w-full bg-stone-200 h-2 rounded-full overflow-hidden">
         <ProgressFill
           progress={progress}
-          className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
+          className="bg-linear-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
         />
       </div>
       <div className="flex justify-between mt-1.5">
@@ -560,7 +561,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
   const PRow = ({ label, value }: { label: string; value: string | undefined }) => (
     <>
       <p className="text-xs text-stone-500">{label}</p>
-      <p className="text-xs font-bold text-stone-800 text-right break-words">{value || "—"}</p>
+      <p className="text-xs font-bold text-stone-800 text-right wrap-break-word">{value || "—"}</p>
     </>
   );
 
@@ -1035,6 +1036,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                         </div>
                         <button
                           type="button"
+                          aria-label="Remove document"
                           onClick={(e) => {
                             e.stopPropagation();
                             removeDoc(i);
@@ -1062,6 +1064,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
               <input
                 ref={docRef}
                 type="file"
+                aria-label="Upload documents"
                 multiple
                 accept="image/jpeg,image/png,image/webp,application/pdf"
                 onChange={(e) => {
@@ -1353,7 +1356,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
   return (
     <div className="space-y-6">
       {!submitted && <ProgressBar />}
-      <div className="min-h-[280px]">{renderStep()}</div>
+      <div className="min-h-70">{renderStep()}</div>
       {!submitted && (
         <div className="flex gap-3 pt-4 border-t border-stone-100">
           {stepIdx > 0 && (
@@ -1369,7 +1372,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
             <button
               type="button"
               onClick={goNext}
-              className="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
+              className="flex-1 py-3.5 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
             >
               {step === "terms" ? (
                 <>
@@ -1386,7 +1389,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
               type="button"
               onClick={handleSubmit}
               disabled={submitting || isLoading}
-              className="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex-1 py-3.5 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting || isLoading ? (
                 <>
