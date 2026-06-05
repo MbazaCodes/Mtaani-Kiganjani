@@ -406,6 +406,24 @@ export function DepartmentManagement() {
   };
 
   // ── Add staff to department ──────────────────────────────────────────────
+  // Refresh the staff list for a department WITHOUT toggling the panel
+  const refreshStaffList = async (deptId: string) => {
+    setLoadingStaff(true);
+    try {
+      const { data, error } = await supabase
+        .from("department_users")
+        .select("*, users:user_id(id, first_name, last_name, email, phone, role, position)")
+        .eq("department_id", deptId)
+        .order("assigned_at");
+      if (error) throw error;
+      setDeptStaff((data as DeptUser[]) || []);
+    } catch {
+      setDeptStaff([]);
+    } finally {
+      setLoadingStaff(false);
+    }
+  };
+
   const handleAddStaff = async () => {
     if (!staffEmail.trim() || !expandedId) return;
     if (!staffPassword.trim() || staffPassword.length < 6) {
@@ -415,106 +433,67 @@ export function DepartmentManagement() {
       );
       return;
     }
+    const deptId = expandedId; // capture before any async state changes
     setAddingStaff(true);
     try {
-      const email = staffEmail.trim().toLowerCase();
-
-      // Try to find existing user first
-      const { data: found } = await supabase
-        .from("users")
-        .select("id, first_name, last_name, email")
-        .eq("email", email)
-        .maybeSingle();
-
-      let userId: string;
-
-      if (found) {
-        // Existing user — just link to department
-        userId = found.id;
-      } else {
-        // Create new user account via the secure admin API
-        const nameParts = staffName.trim().split(" ");
-        const firstName = nameParts[0] || "Department";
-        const lastName = nameParts.slice(1).join(" ") || "Staff";
-
-        // Force-refresh the session before calling the admin API. refreshSession()
-        // returns an error object (not a throw) when the refresh token is invalid.
-        const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
-        if (refreshErr || !refreshed.session) {
-          // Refresh token is dead — force a clean sign-out so the next sign-in works
-          await supabase.auth.signOut();
-          showToast(
-            L(
-              "Kipindi kimeisha. Umetolewa, ingia tena.",
-              "Session expired. You have been signed out — please sign in again.",
-            ),
-            "error",
-          );
-          setTimeout(() => {
-            window.location.href = "/auth";
-          }, 1500);
-          return;
-        }
-        const token = refreshed.session.access_token;
-
-        const res = await fetch("/api/admin", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            action: "createUser",
-            email,
-            password: staffPassword,
-            role: "staff",
-          }),
-        });
-        const result = await res.json();
-        if (!res.ok || !result.userId) {
-          showToast(
-            result.error || L("Imeshindwa kuunda akaunti", "Failed to create account"),
-            "error",
-          );
-          return;
-        }
-        userId = result.userId;
-
-        // Update the user profile with name
-        await supabase
-          .from("users")
-          .update({ first_name: firstName, last_name: lastName })
-          .eq("id", userId);
-      }
-
-      // Link user to department
-      const { error } = await supabase.from("department_users").insert({
-        user_id: userId,
-        department_id: expandedId,
-        role: staffRole,
-      });
-      if (error) {
-        if (error.message?.includes("duplicate")) {
-          showToast(
-            L("Mtumiaji tayari yupo kwenye idara hii", "User already in this department"),
-            "warning",
-          );
-        } else throw error;
+      // Fresh token (refreshSession returns { error } rather than throwing)
+      const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
+      if (refreshErr || !refreshed.session) {
+        await supabase.auth.signOut();
+        showToast(
+          L(
+            "Kipindi kimeisha. Umetolewa, ingia tena.",
+            "Session expired. You have been signed out — please sign in again.",
+          ),
+          "error",
+        );
+        setTimeout(() => {
+          window.location.href = "/auth";
+        }, 1500);
         return;
       }
+      const token = refreshed.session.access_token;
+
+      const nameParts = staffName.trim().split(" ");
+      const firstName = nameParts[0] || "Department";
+      const lastName = nameParts.slice(1).join(" ") || "Staff";
+
+      // Single atomic server-side operation: find-or-create user + link to department
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          action: "addDepartmentStaff",
+          email: staffEmail.trim().toLowerCase(),
+          password: staffPassword,
+          departmentId: deptId,
+          deptRole: staffRole,
+          firstName,
+          lastName,
+        }),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        showToast(result.error || L("Imeshindwa", "Failed to add staff"), "error");
+        return;
+      }
+
       showToast(
-        found
-          ? L("Mtumiaji ameongezwa kwenye idara!", "Existing user added to department!")
-          : L("Akaunti imeundwa na kuongezwa!", "Account created and added to department!"),
+        result.created
+          ? L("Akaunti imeundwa na kuongezwa!", "Account created and added to department!")
+          : L("Mtumiaji ameongezwa kwenye idara!", "User added to department!"),
         "success",
       );
       setStaffEmail("");
       setStaffName("");
       setStaffPassword("Mtaani@2026");
       setShowAddStaff(false);
-      // Refresh staff list
-      setExpandedId(null);
-      setTimeout(() => fetchStaff(expandedId!), 300);
+      // Refresh the staff list in place (panel stays open)
+      await refreshStaffList(deptId);
     } catch (err: unknown) {
       const e = err as { message?: string };
       showToast(e.message || "Error", "error");

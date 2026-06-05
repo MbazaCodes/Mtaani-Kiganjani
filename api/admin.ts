@@ -17,7 +17,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 interface RequestBody {
-  action: "createUser" | "resetPassword" | "confirmEmail";
+  action: "createUser" | "resetPassword" | "confirmEmail" | "addDepartmentStaff";
   // createUser
   email?: string;
   password?: string;
@@ -26,6 +26,11 @@ interface RequestBody {
   // resetPassword / confirmEmail
   userId?: string;
   newPassword?: string;
+  // addDepartmentStaff
+  departmentId?: string;
+  deptRole?: "head" | "officer" | "clerk";
+  firstName?: string;
+  lastName?: string;
 }
 
 // Minimal Vercel handler signature (no @vercel/node types needed)
@@ -129,6 +134,100 @@ export default async function handler(req: VercelReq, res: VercelRes) {
         });
         if (error) return res.status(400).json({ error: error.message });
         return res.status(200).json({ ok: true });
+      }
+
+      case "addDepartmentStaff": {
+        // Atomic: find-or-create the user, set their name, link to the department.
+        // Runs with the service role so it bypasses RLS and avoids client races.
+        if (!body.email || !body.departmentId) {
+          return res.status(400).json({ error: "Missing email or departmentId" });
+        }
+        if (profile.role !== "admin") {
+          return res.status(403).json({ error: "Only admins can add department staff" });
+        }
+
+        const email = body.email.trim().toLowerCase();
+        const deptRole = body.deptRole || "officer";
+        const firstName = body.firstName?.trim() || "Department";
+        const lastName = body.lastName?.trim() || "Staff";
+
+        // 1. Look for an existing public.users row by email
+        const { data: existing } = await admin
+          .from("users")
+          .select("id, first_name, last_name, email")
+          .eq("email", email)
+          .maybeSingle();
+
+        let userId: string;
+        let created = false;
+
+        if (existing) {
+          userId = existing.id;
+        } else {
+          // 2a. Maybe the auth user exists but has no public.users row, or is brand new.
+          //     Try to create the auth user; if it already exists, look it up.
+          if (!body.password || body.password.length < 6) {
+            return res
+              .status(400)
+              .json({ error: "Password (min 6 chars) required to create a new account" });
+          }
+          const { data: createdUser, error: createErr } = await admin.auth.admin.createUser({
+            email,
+            password: body.password,
+            email_confirm: true,
+            user_metadata: { role: "staff", first_name: firstName, last_name: lastName },
+          });
+
+          if (createErr) {
+            // If the auth user already exists, find them via listUsers and proceed
+            const alreadyExists =
+              createErr.message?.toLowerCase().includes("already") ||
+              createErr.message?.toLowerCase().includes("registered");
+            if (!alreadyExists) {
+              return res.status(400).json({ error: createErr.message });
+            }
+            const { data: list } = await admin.auth.admin.listUsers();
+            const match = list?.users.find((u) => u.email?.toLowerCase() === email);
+            if (!match) {
+              return res
+                .status(400)
+                .json({ error: "Account exists but could not be located. Try again." });
+            }
+            userId = match.id;
+          } else {
+            userId = createdUser.user!.id;
+            created = true;
+          }
+        }
+
+        // 3. Ensure a public.users row exists (the auth trigger usually creates it,
+        //    but upsert here guarantees it and sets the name + staff role).
+        await admin.from("users").upsert(
+          {
+            id: userId,
+            email,
+            first_name: firstName,
+            last_name: lastName,
+            role: "staff",
+            account_status: "active",
+          },
+          { onConflict: "id" },
+        );
+
+        // 4. Link to department (ignore duplicate)
+        const { error: linkErr } = await admin.from("department_users").insert({
+          user_id: userId,
+          department_id: body.departmentId,
+          role: deptRole,
+        });
+        if (linkErr) {
+          if (linkErr.message?.toLowerCase().includes("duplicate")) {
+            return res.status(409).json({ error: "User already in this department" });
+          }
+          return res.status(400).json({ error: linkErr.message });
+        }
+
+        return res.status(200).json({ userId, created });
       }
 
       default:
