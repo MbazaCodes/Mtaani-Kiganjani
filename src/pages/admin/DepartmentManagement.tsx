@@ -478,7 +478,10 @@ export function DepartmentManagement() {
       const result = await res.json();
 
       if (!res.ok) {
-        showToast(result.error || L("Imeshindwa", "Failed to add staff"), "error");
+        const msg = result.error || L("Imeshindwa", "Failed to add staff");
+        const detail = result.detail ? ` (${result.detail})` : "";
+        showToast(msg + detail, "error");
+        console.error("addDepartmentStaff failed:", result);
         return;
       }
 
