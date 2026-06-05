@@ -12,6 +12,7 @@ import {
   formatCurrency,
 } from "./types";
 import { ApplicantSignatureBox, OfficerSignatureBox } from "./SignatureBlocks";
+import { ReceiptPage } from "./ReceiptPage";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
@@ -250,6 +251,8 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={s.metadata}>{`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}</Text>
         </View>
       </Page>
+        {/* Page 2: Payment Receipt */}
+        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };

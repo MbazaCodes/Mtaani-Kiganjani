@@ -11,6 +11,7 @@ import {
   formatFullName,
   formatDate,
 } from "./types";
+import { ReceiptPage } from "./ReceiptPage";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
@@ -21,7 +22,10 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
 }) => {
   const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
-  const photo = photoUrl || user?.photo_url || fd.photo_url || null;
+  // Photo: check uploaded_documents for selfie, then fallbacks
+  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string }[];
+  const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
+  const photo = photoUrl || selfieDoc?.dataUrl || user?.photo_url || fd.photo_url || null;
   const applicantSig = fd.applicant_signature;
   const weoSig = fd.weo_signature;
   const weoStamp = fd.weo_stamp;
@@ -232,6 +236,8 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
           </Text>
         </View>
       </Page>
+        {/* Page 2: Payment Receipt */}
+        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };

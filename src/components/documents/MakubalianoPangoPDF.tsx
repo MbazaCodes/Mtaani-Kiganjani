@@ -13,6 +13,7 @@ import {
   formatDate,
   formatCurrency,
 } from "./types";
+import { ReceiptPage } from "./ReceiptPage";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
@@ -334,6 +335,8 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={s.metadata}>{`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}</Text>
         </View>
       </Page>
+        {/* Page 2: Payment Receipt */}
+        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };
