@@ -437,10 +437,27 @@ export function DepartmentManagement() {
         const firstName = nameParts[0] || "Department";
         const lastName = nameParts.slice(1).join(" ") || "Staff";
 
-        const session = await supabase.auth.getSession();
-        const token = session.data.session?.access_token;
+        // Force-refresh the session so the JWT we send is fresh
+        // (long disconnections can leave a stale token even when getSession returns one)
+        let token: string | undefined;
+        try {
+          const { data: refreshed } = await supabase.auth.refreshSession();
+          token = refreshed.session?.access_token;
+        } catch {
+          // Refresh failed — fall through to getSession below
+        }
         if (!token) {
-          showToast(L("Hujaingia", "Not authenticated"), "error");
+          const { data: sess } = await supabase.auth.getSession();
+          token = sess.session?.access_token;
+        }
+        if (!token) {
+          showToast(
+            L(
+              "Kipindi kimeisha. Tafadhali ingia tena.",
+              "Session expired. Please sign out and sign in again.",
+            ),
+            "error",
+          );
           return;
         }
 
