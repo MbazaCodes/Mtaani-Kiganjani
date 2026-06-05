@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { SignaturePad } from "@/components/ui/SignaturePad";
 /**
  * Agreement / Business Portal
  *
@@ -191,6 +192,8 @@ export function Agreement() {
   const [agrSearch, setAgrSearch] = useState("");
   const [agrTypeFilter, setAgrTypeFilter] = useState<"all" | "sales" | "rental">("all");
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [signingAgr, setSigningAgr] = useState<AgreementApp | null>(null);
+  const [buyerSignature, setBuyerSignature] = useState("");
 
   // Application mode
   const [applying, setApplying] = useState(false);
@@ -242,17 +245,32 @@ export function Agreement() {
   }, [user?.id]);
 
   // ─── Fetch user's agreements ─────────────────────────────────────────────
-  const handleAgreementAction = async (agr: AgreementApp, action: "accept" | "reject") => {
+  const handleAgreementAction = async (agr: AgreementApp, action: "accept" | "reject", signature?: string) => {
     if (!user) return;
     setProcessingId(agr.id);
     try {
       const newStatus = action === "accept" ? "buyer_accepted" : "buyer_rejected";
       
-      // Update agreement_status on the application
+      // Update agreement_status + buyer signature on the application
+      const patch: Record<string, unknown> = { agreement_status: newStatus };
       const { error } = await supabase
         .from("applications")
-        .update({ agreement_status: newStatus })
+        .update(patch)
         .eq("id", agr.id);
+      
+      // Also save buyer signature into form_data via a separate update
+      if (action === "accept" && signature) {
+        // Fetch current form_data, merge buyer_signature, update
+        const { data: current } = await supabase
+          .from("applications")
+          .select("form_data")
+          .eq("id", agr.id)
+          .single();
+        if (current?.form_data) {
+          const updatedFormData = { ...current.form_data, buyer_signature: signature };
+          await supabase.from("applications").update({ form_data: updatedFormData }).eq("id", agr.id);
+        }
+      }
       if (error) throw error;
 
       // Notify the seller
@@ -1431,12 +1449,12 @@ export function Agreement() {
                     {!agr.agreement_status && (
                       <div className="flex gap-2 shrink-0">
                         <button
-                          onClick={() => handleAgreementAction(agr, "accept")}
+                          onClick={() => { setSigningAgr(agr); setBuyerSignature(""); }}
                           disabled={processingId === agr.id}
                           className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
                         >
-                          {processingId === agr.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
-                          {lang === "sw" ? "Kubali" : "Accept"}
+                          <CheckCircle size={12} />
+                          {lang === "sw" ? "Kubali na Saini" : "Accept & Sign"}
                         </button>
                         <button
                           onClick={() => handleAgreementAction(agr, "reject")}
@@ -1507,6 +1525,57 @@ export function Agreement() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Buyer Signature Modal */}
+      {signingAgr && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-black text-stone-900">
+                {lang === "sw" ? "Saini Kukubali Makubaliano" : "Sign to Accept Agreement"}
+              </h3>
+              <button onClick={() => setSigningAgr(null)} className="p-1.5 text-stone-400 hover:text-stone-600">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="bg-stone-50 rounded-xl p-3 text-sm text-stone-600">
+              <p className="font-bold">{signingAgr.application_number}</p>
+              <p className="text-xs text-stone-500 mt-0.5">
+                {(signingAgr.service_name || "").replace("Makubaliano ya ", "")}
+              </p>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2">
+                {lang === "sw" ? "Saini Yako" : "Your Signature"} *
+              </label>
+              <SignaturePad value={buyerSignature} onChange={(v: string | null) => setBuyerSignature(v || "")} lang={lang} />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSigningAgr(null)}
+                className="flex-1 py-3 border border-stone-200 rounded-xl font-bold text-sm text-stone-600 hover:bg-stone-50"
+              >
+                {lang === "sw" ? "Ghairi" : "Cancel"}
+              </button>
+              <button
+                onClick={async () => {
+                  if (!buyerSignature) {
+                    showToast(lang === "sw" ? "Tafadhali saini kwanza" : "Please sign first", "error");
+                    return;
+                  }
+                  await handleAgreementAction(signingAgr, "accept", buyerSignature);
+                  setSigningAgr(null);
+                }}
+                disabled={!buyerSignature || processingId === signingAgr.id}
+                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {processingId === signingAgr.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                {lang === "sw" ? "Kubali na Saini" : "Accept & Sign"}
+              </button>
+            </div>
           </div>
         </div>
       )}
