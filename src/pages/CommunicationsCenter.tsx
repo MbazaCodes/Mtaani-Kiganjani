@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail, Send, Inbox, ArrowLeft, Search, Loader2, ChevronRight,
   User, Shield, Building2, Plus, Reply, Paperclip, X, Clock, CheckCircle2,
-  FileText, Download,
+  FileText, Download, MessageSquare,
   AlertCircle, Star,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -71,6 +71,8 @@ export function CommunicationsCenter() {
   const [body, setBody] = useState("");
   const [priority, setPriority] = useState("normal");
   const [caseRef, setCaseRef] = useState("");
+  const [userCases, setUserCases] = useState<{ ref: string; label: string; type: string }[]>([]);
+  const [showCaseDropdown, setShowCaseDropdown] = useState(false);
   const [attachments, setAttachments] = useState<{ name: string; type: string; dataUrl: string; size: number }[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [sending, setSending] = useState(false);
@@ -114,6 +116,46 @@ export function CommunicationsCenter() {
     fetchInbox();
     fetchSent();
   }, [fetchInbox, fetchSent]);
+
+  // Fetch user's cases for the reference lookup
+  useEffect(() => {
+    if (!user?.id) return;
+    const loadCases = async () => {
+      const cases: { ref: string; label: string; type: string }[] = [];
+      // Applications
+      const { data: apps } = await supabase
+        .from("applications")
+        .select("application_number, service_name")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(30);
+      (apps || []).forEach((a) => {
+        if (a.application_number) cases.push({ ref: a.application_number, label: a.service_name || "Application", type: "application" });
+      });
+      // Tickets
+      const { data: tickets } = await supabase
+        .from("support_tickets")
+        .select("ticket_number, subject")
+        .eq("citizen_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      (tickets || []).forEach((t) => {
+        if (t.ticket_number) cases.push({ ref: t.ticket_number, label: t.subject || "Ticket", type: "ticket" });
+      });
+      // Reports
+      const { data: reports } = await supabase
+        .from("community_reports")
+        .select("report_number, title")
+        .eq("citizen_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      (reports || []).forEach((r) => {
+        if (r.report_number) cases.push({ ref: r.report_number, label: r.title || "Report", type: "report" });
+      });
+      setUserCases(cases);
+    };
+    loadCases();
+  }, [user?.id]);
 
   // ── Search recipients ──────────────────────────────────────────────────
   useEffect(() => {
@@ -591,9 +633,44 @@ export function CommunicationsCenter() {
               <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
                 {L("Nambari ya Kesi", "Case Reference")}
               </label>
-              <input value={caseRef} onChange={(e) => setCaseRef(e.target.value)}
-                placeholder="TK-..., CR-..., TZ-..."
-                className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm font-mono" />
+              <div className="relative">
+                <input
+                  value={caseRef}
+                  onChange={(e) => setCaseRef(e.target.value)}
+                  onFocus={() => setShowCaseDropdown(true)}
+                  placeholder={L("Chagua au andika...", "Select or type...")}
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm font-mono"
+                />
+                {showCaseDropdown && userCases.length > 0 && (
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-lg max-h-52 overflow-y-auto">
+                    {userCases
+                      .filter((cs) => !caseRef.trim() || cs.ref.toLowerCase().includes(caseRef.toLowerCase()) || cs.label.toLowerCase().includes(caseRef.toLowerCase()))
+                      .map((cs, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => { setCaseRef(cs.ref); setShowCaseDropdown(false); }}
+                          className="w-full px-3 py-2 text-left hover:bg-stone-50 border-b border-stone-50 last:border-0"
+                        >
+                          <div className="flex items-center gap-2">
+                            {cs.type === "ticket" ? <MessageSquare size={12} className="text-blue-500 shrink-0" />
+                              : cs.type === "report" ? <AlertCircle size={12} className="text-amber-500 shrink-0" />
+                              : <FileText size={12} className="text-emerald-500 shrink-0" />}
+                            <span className="text-xs font-mono font-bold text-stone-700">{cs.ref}</span>
+                          </div>
+                          <p className="text-[10px] text-stone-400 truncate ml-5">{cs.label}</p>
+                        </button>
+                      ))}
+                    <button
+                      type="button"
+                      onClick={() => setShowCaseDropdown(false)}
+                      className="w-full px-3 py-2 text-center text-[10px] text-stone-400 hover:bg-stone-50 border-t border-stone-100"
+                    >
+                      {L("Funga", "Close")}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
