@@ -28,6 +28,7 @@ import {
   Star,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { ApplicationChat } from "@/components/ApplicationChat";
 import { useLanguage } from "@/context/LanguageContext";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -48,6 +49,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingAgreements, setPendingAgreements] = useState(0);
+  const [selectedDashApp, setSelectedDashApp] = useState<Application | null>(null);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -443,7 +445,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
               return (
                 <div
                   key={app.id}
-                  onClick={() => setView("applications")}
+                  onClick={() => setSelectedDashApp(app)}
                   className="px-5 py-3.5 hover:bg-stone-50 cursor-pointer transition-colors flex items-center gap-3"
                 >
                   <div className="w-9 h-9 rounded-xl bg-stone-100 flex items-center justify-center text-base shrink-0">
