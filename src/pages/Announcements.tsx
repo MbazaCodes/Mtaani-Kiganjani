@@ -21,6 +21,52 @@ const CATEGORIES = [
   { value: "infrastructure_update", en: "Infrastructure Update", sw: "Habari za Miundombinu", icon: "🏗️" },
 ];
 
+// Preset title templates per category — user picks one or writes custom
+const TITLE_TEMPLATES: Record<string, { sw: string; en: string }[]> = {
+  public_notice: [
+    { sw: "Tangazo la Huduma za Ofisi", en: "Office Service Notice" },
+    { sw: "Mabadiliko ya Saa za Kazi", en: "Change in Working Hours" },
+    { sw: "Usajili wa Wakazi", en: "Resident Registration" },
+    { sw: "Tangazo la Malipo ya Ushuru", en: "Tax Payment Notice" },
+  ],
+  community_meeting: [
+    { sw: "Mkutano wa Mtaa/Kitongoji", en: "Street/Neighborhood Meeting" },
+    { sw: "Mkutano Mkuu wa Kata", en: "Ward General Meeting" },
+    { sw: "Mkutano wa Maendeleo ya Jamii", en: "Community Development Meeting" },
+    { sw: "Mkutano wa Dharura", en: "Emergency Meeting" },
+  ],
+  emergency_alert: [
+    { sw: "Tahadhari ya Mafuriko", en: "Flood Warning" },
+    { sw: "Tahadhari ya Hali ya Hewa", en: "Weather Alert" },
+    { sw: "Dharura ya Moto", en: "Fire Emergency" },
+    { sw: "Tahadhari ya Jumla", en: "General Emergency Alert" },
+  ],
+  security_alert: [
+    { sw: "Tahadhari ya Usalama Mtaani", en: "Neighborhood Security Alert" },
+    { sw: "Onyo la Wizi", en: "Theft Warning" },
+    { sw: "Doria za Usalama", en: "Security Patrol Notice" },
+    { sw: "Tahadhari ya Watu Wenye Mashaka", en: "Suspicious Persons Alert" },
+  ],
+  health_notice: [
+    { sw: "Kampeni ya Chanjo", en: "Vaccination Campaign" },
+    { sw: "Tahadhari ya Mlipuko wa Ugonjwa", en: "Disease Outbreak Alert" },
+    { sw: "Huduma za Afya za Bure", en: "Free Health Services" },
+    { sw: "Usafi wa Mazingira", en: "Environmental Sanitation" },
+  ],
+  education_notice: [
+    { sw: "Usajili wa Wanafunzi", en: "Student Registration" },
+    { sw: "Ratiba ya Mitihani", en: "Examination Schedule" },
+    { sw: "Ufadhili wa Masomo", en: "Scholarship Opportunity" },
+    { sw: "Mkutano wa Wazazi", en: "Parents Meeting" },
+  ],
+  infrastructure_update: [
+    { sw: "Ukarabati wa Barabara", en: "Road Maintenance" },
+    { sw: "Kukatika kwa Maji", en: "Water Supply Interruption" },
+    { sw: "Kukatika kwa Umeme", en: "Power Outage" },
+    { sw: "Mradi wa Maendeleo", en: "Development Project" },
+  ],
+};
+
 const PRIORITY_STYLES: Record<string, { bg: string; border: string; badge: string }> = {
   normal: { bg: "bg-white", border: "border-stone-200", badge: "bg-stone-100 text-stone-600" },
   important: { bg: "bg-blue-50/50", border: "border-blue-200", badge: "bg-blue-100 text-blue-700" },
@@ -61,6 +107,7 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [category, setCategory] = useState("public_notice");
+  const [titleMode, setTitleMode] = useState<"preset" | "custom">("preset");
   const [level, setLevel] = useState("ward");
   const [priority, setPriority] = useState("normal");
   const [region, setRegion] = useState(user?.assigned_region || user?.region || "");
@@ -143,6 +190,7 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
       if (error) throw error;
       showToast(L("Tangazo limechapishwa!", "Announcement published!"), "success");
       setTitle("");
+      setTitleMode("preset");
       setBody("");
       setShowCreate(false);
       fetchAnnouncements();
@@ -217,27 +265,65 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
             className="bg-white rounded-2xl border border-stone-200 p-6 space-y-4 overflow-hidden"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* STEP 1: Category first */}
               <div className="sm:col-span-2">
                 <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                  {L("Kichwa", "Title")} *
+                  1. {L("Aina ya Tangazo", "Category")} *
                 </label>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={L("Kichwa cha tangazo...", "Announcement title...")} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm" />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                  {L("Ujumbe", "Message")} *
-                </label>
-                <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} placeholder={L("Maelezo ya tangazo...", "Announcement details...")} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm resize-none" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                  {L("Aina", "Category")}
-                </label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white" aria-label="Category">
+                <select
+                  value={category}
+                  onChange={(e) => { setCategory(e.target.value); setTitle(""); setTitleMode("preset"); }}
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
+                  aria-label="Category"
+                >
                   {CATEGORIES.map((c) => (
-                    <option key={c.value} value={c.value}>{sw ? c.sw : c.en}</option>
+                    <option key={c.value} value={c.value}>{c.icon} {sw ? c.sw : c.en}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* STEP 2: Title — pick a preset for this category or write custom */}
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                  2. {L("Kichwa", "Title")} *
+                </label>
+                <select
+                  value={titleMode === "custom" ? "__custom__" : title}
+                  onChange={(e) => {
+                    if (e.target.value === "__custom__") {
+                      setTitleMode("custom");
+                      setTitle("");
+                    } else {
+                      setTitleMode("preset");
+                      setTitle(e.target.value);
+                    }
+                  }}
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
+                  aria-label="Title preset"
+                >
+                  <option value="">{L("-- Chagua Kichwa --", "-- Select Title --")}</option>
+                  {(TITLE_TEMPLATES[category] || []).map((t, i) => (
+                    <option key={i} value={sw ? t.sw : t.en}>{sw ? t.sw : t.en}</option>
+                  ))}
+                  <option value="__custom__">{L("✏️ Andika kichwa chako...", "✏️ Write custom title...")}</option>
+                </select>
+                {titleMode === "custom" && (
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder={L("Andika kichwa cha tangazo...", "Type announcement title...")}
+                    className="w-full mt-2 px-4 py-3 border border-stone-200 rounded-xl text-sm"
+                    autoFocus
+                  />
+                )}
+              </div>
+
+              {/* STEP 3: Message */}
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                  3. {L("Ujumbe", "Message")} *
+                </label>
+                <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} placeholder={L("Maelezo ya tangazo...", "Announcement details...")} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm resize-none" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
