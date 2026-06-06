@@ -11,6 +11,7 @@ import {
   MessageCircle,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
 } from "lucide-react";
 
 interface ChatMessage {
