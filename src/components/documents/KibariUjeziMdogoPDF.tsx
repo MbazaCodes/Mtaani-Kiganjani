@@ -17,38 +17,42 @@ import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
   banner: {
-    backgroundColor: "#d97706",
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 0.75,
+    borderBottomColor: "#111111",
     paddingVertical: 10,
     paddingHorizontal: 14,
     marginBottom: 14,
     alignItems: "center",
   },
   bannerTitle: {
-    color: "#ffffff",
+    color: "#111111",
     fontSize: 11,
     fontWeight: "bold",
     textTransform: "uppercase",
     marginBottom: 2,
   },
-  bannerSub: { color: "#fef3c7", fontSize: 9, fontStyle: "italic" },
+  bannerSub: { color: "#6b6b6b", fontSize: 8, fontStyle: "italic" },
   costBox: {
-    backgroundColor: "#fef3c7",
-    borderWidth: 2,
-    borderColor: "#d97706",
+    backgroundColor: "#f7f7f7",
+    borderWidth: 0.5,
+    borderColor: "#c0c0c0",
     padding: 10,
     alignItems: "center",
     marginVertical: 10,
   },
-  costAmount: { fontSize: 14, fontWeight: "bold", color: "#92400e" },
-  costLabel: { fontSize: 8, color: "#a16207" },
+  costAmount: { fontSize: 14, fontWeight: "bold", color: "#111111" },
+  costLabel: { fontSize: 7, color: "#6b6b6b" },
   noticeBox: {
-    backgroundColor: "#fef3c7",
+    backgroundColor: "#f7f7f7",
+    borderWidth: 0.5,
+    borderColor: "#c0c0c0",
     borderLeftWidth: 3,
     borderLeftColor: "#d97706",
     padding: 8,
     marginVertical: 8,
   },
-  noticeText: { fontSize: 8, color: "#92400e", lineHeight: 1.5 },
+  noticeText: { fontSize: 8, color: "#3a3a3a", lineHeight: 1.5 },
 });
 
 const CONSTRUCTION_LABELS: Record<string, { sw: string; en: string }> = {

@@ -27,13 +27,15 @@ const ls = StyleSheet.create({
   salutation: { fontSize: 10, marginBottom: 8, fontWeight: "bold" },
   signoff: { marginTop: 18, fontSize: 9.5 },
   multiNotice: {
-    backgroundColor: "#fef3c7",
+    backgroundColor: "#f7f7f7",
+    borderWidth: 0.5,
+    borderColor: "#c0c0c0",
     borderLeftWidth: 3,
     borderLeftColor: "#d97706",
     padding: 8,
     marginVertical: 10,
   },
-  multiText: { fontSize: 8, color: "#92400e", lineHeight: 1.4 },
+  multiText: { fontSize: 8, color: "#3a3a3a", lineHeight: 1.4 },
 });
 
 const PURPOSE_LABELS: Record<string, { sw: string; en: string }> = {

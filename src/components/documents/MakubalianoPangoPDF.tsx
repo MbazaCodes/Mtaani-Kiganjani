@@ -14,17 +14,20 @@ import {
   formatCurrency,
 } from "./types";
 import { ReceiptPage } from "./ReceiptPage";
+import { GovernmentStamp } from "./GovernmentStamp";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
   banner: {
-    backgroundColor: "#0d9488",
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 0.75,
+    borderBottomColor: "#111111",
     paddingVertical: 10,
     paddingHorizontal: 14,
     marginBottom: 14,
     alignItems: "center",
   },
-  bannerTitle: { color: "#ffffff", fontSize: 11, fontWeight: "bold", textTransform: "uppercase" },
+  bannerTitle: { color: "#111111", fontSize: 11, fontWeight: "bold", textTransform: "uppercase", letterSpacing: 1 },
   partyBox: {
     borderWidth: 1,
     borderColor: "#0d9488",
@@ -40,15 +43,15 @@ const ls = StyleSheet.create({
     textTransform: "uppercase",
   },
   rentSummary: {
-    backgroundColor: "#ccfbf1",
-    borderWidth: 2,
-    borderColor: "#0d9488",
+    backgroundColor: "#f7f7f7",
+    borderWidth: 0.5,
+    borderColor: "#c0c0c0",
     padding: 10,
     marginVertical: 4,
     alignItems: "center",
   },
-  rentAmount: { fontSize: 14, fontWeight: "bold", color: "#115e59" },
-  rentLabel: { fontSize: 8, color: "#0f766e" },
+  rentAmount: { fontSize: 14, fontWeight: "bold", color: "#111111" },
+  rentLabel: { fontSize: 7, color: "#6b6b6b" },
   fourSigGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -297,9 +300,11 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
             {weoStamp ? (
               <Image src={weoStamp} style={s.stampImg} />
             ) : (
-              <View style={s.stampBox}>
-                <Text style={s.stampText}>{sw ? "MUHURI WA OFISI" : "OFFICE SEAL"}</Text>
-              </View>
+              <GovernmentStamp
+                date={application.approved_at || application.issued_at}
+                reference={application.application_number}
+                lang={lang}
+              />
             )}
             {weoSig ? (
               <Image src={weoSig} style={s.signatureImg} />

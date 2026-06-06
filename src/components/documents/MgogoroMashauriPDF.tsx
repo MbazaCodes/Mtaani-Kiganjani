@@ -20,13 +20,13 @@ import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 const ls = StyleSheet.create({
   banner: { paddingVertical: 6, paddingHorizontal: 10, marginBottom: 8, alignItems: "center" },
   bannerTitle: {
-    color: "#ffffff",
+    color: "#111111",
     fontSize: 11,
     fontWeight: "bold",
     textTransform: "uppercase",
     marginBottom: 2,
   },
-  bannerSub: { color: "#fecaca", fontSize: 9, fontStyle: "italic" },
+  bannerSub: { color: "#6b6b6b", fontSize: 8, fontStyle: "italic" },
   partyBox: { borderWidth: 1, borderRadius: 4, padding: 5, marginVertical: 2 },
   partyLabel: { fontSize: 7.5, fontWeight: "bold", marginBottom: 3, textTransform: "uppercase" },
   urgencyBadge: {
@@ -35,7 +35,7 @@ const ls = StyleSheet.create({
     alignSelf: "center",
     marginVertical: 8,
   },
-  urgencyText: { fontSize: 8, fontWeight: "bold", color: "#ffffff" },
+  urgencyText: { fontSize: 7.5, fontWeight: "bold" },
   descBox: {
     backgroundColor: "#fafaf8",
     borderWidth: 0.5,
@@ -86,9 +86,9 @@ const RESOLUTION_LABELS: Record<string, { sw: string; en: string }> = {
 };
 
 const URGENCY_COLORS: Record<string, { bg: string; sw: string; en: string }> = {
-  NORMAL: { bg: "#78716c", sw: "KAWAIDA", en: "NORMAL" },
-  URGENT: { bg: "#d97706", sw: "HARAKA", en: "URGENT" },
-  EMERGENCY: { bg: "#dc2626", sw: "DHARURA", en: "EMERGENCY" },
+  NORMAL: { bg: "#6b6b6b", sw: "KAWAIDA", en: "NORMAL" },
+  URGENT: { bg: "#b45309", sw: "HARAKA", en: "URGENT" },
+  EMERGENCY: { bg: "#b91c1c", sw: "DHARURA", en: "EMERGENCY" },
 };
 
 export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
@@ -159,14 +159,14 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* Type banner */}
-        <View style={[ls.banner, { backgroundColor: isDispute ? "#e11d48" : "#d97706" }]}>
+        <View style={[ls.banner, { borderBottomWidth: 0.75, borderBottomColor: "#111111" }]}>
           <Text style={ls.bannerTitle}>{typeLabel}</Text>
           {fd.title ? <Text style={ls.bannerSub}>{String(fd.title)}</Text> : <View />}
         </View>
 
         {/* Urgency badge */}
-        <View style={[ls.urgencyBadge, { backgroundColor: urgMeta.bg }]}>
-          <Text style={ls.urgencyText}>{sw ? urgMeta.sw : urgMeta.en}</Text>
+        <View style={[ls.urgencyBadge, { borderWidth: 1, borderColor: urgMeta.bg }]}>
+          <Text style={[ls.urgencyText, { color: urgMeta.bg }]}>{sw ? urgMeta.sw : urgMeta.en}</Text>
         </View>
 
         {/* Complainant */}

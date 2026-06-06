@@ -11,30 +11,33 @@ import {
   formatDate,
   formatCurrency,
 } from "./types";
+import { GovernmentStamp } from "./GovernmentStamp";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
   paidBanner: {
-    backgroundColor: "#059669",
+    backgroundColor: "#ffffff",
+    borderWidth: 1.5,
+    borderColor: "#1a5632",
     padding: 12,
     alignItems: "center",
     marginBottom: 8,
     borderRadius: 2,
   },
-  paidText: { color: "#ffffff", fontSize: 16, fontWeight: "bold", letterSpacing: 3 },
-  receiptNo: { color: "#d1fae5", fontSize: 8, marginTop: 4, fontFamily: "Courier" },
+  paidText: { color: "#1a5632", fontSize: 16, fontWeight: "bold", letterSpacing: 3 },
+  receiptNo: { color: "#6b6b6b", fontSize: 8, marginTop: 4, fontFamily: "Courier" },
   amountCard: {
-    backgroundColor: "#f0fdf4",
-    borderWidth: 2,
-    borderColor: "#059669",
+    backgroundColor: "#f7f7f7",
+    borderWidth: 0.5,
+    borderColor: "#c0c0c0",
     padding: 14,
     alignItems: "center",
     marginVertical: 12,
     borderRadius: 2,
   },
-  amtLabel: { fontSize: 8, color: "#065f46", marginBottom: 4 },
-  amtValue: { fontSize: 22, fontWeight: "bold", color: "#059669", marginBottom: 3 },
-  amtWords: { fontSize: 8, color: "#065f46", fontStyle: "italic" },
+  amtLabel: { fontSize: 7, color: "#6b6b6b", marginBottom: 4 },
+  amtValue: { fontSize: 22, fontWeight: "bold", color: "#111111", marginBottom: 3 },
+  amtWords: { fontSize: 7, color: "#6b6b6b", fontStyle: "italic" },
   tableRow: {
     flexDirection: "row",
     paddingVertical: 6,
@@ -154,6 +157,15 @@ export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang,
         <TRow label={sw ? "Simu" : "Phone"} value={payerPhone} alt />
 
         {/* QR */}
+        {/* Official Stamp */}
+        <View style={{ alignItems: "center", marginVertical: 8 }}>
+          <GovernmentStamp
+            date={application.approved_at || application.issued_at}
+            reference={application.application_number}
+            lang={lang}
+          />
+        </View>
+
         <View style={s.qrSection}>
           <View style={s.qrInner}>
             <View style={s.qrBorder}>

@@ -16,30 +16,32 @@ import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
   eventBanner: {
-    backgroundColor: "#7c3aed",
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 0.75,
+    borderBottomColor: "#111111",
     paddingVertical: 10,
     paddingHorizontal: 14,
     marginBottom: 10,
     alignItems: "center",
   },
   bannerTitle: {
-    color: "#ffffff",
+    color: "#111111",
     fontSize: 14,
     fontWeight: "bold",
     textTransform: "uppercase",
     marginBottom: 3,
   },
-  bannerSub: { color: "#ede9fe", fontSize: 9, fontStyle: "italic" },
+  bannerSub: { color: "#6b6b6b", fontSize: 8, fontStyle: "italic" },
   guestsBox: {
-    backgroundColor: "#f5f3ff",
-    borderWidth: 2,
-    borderColor: "#7c3aed",
+    backgroundColor: "#f7f7f7",
+    borderWidth: 0.5,
+    borderColor: "#c0c0c0",
     padding: 8,
     alignItems: "center",
     marginBottom: 10,
   },
-  guestsNum: { fontSize: 16, fontWeight: "bold", color: "#5b21b6" },
-  guestsLabel: { fontSize: 8, color: "#6d28d9" },
+  guestsNum: { fontSize: 16, fontWeight: "bold", color: "#111111" },
+  guestsLabel: { fontSize: 7, color: "#6b6b6b" },
   // QR placed inline (not absolute) so it never overlaps content
   qrRow: {
     flexDirection: "row",
