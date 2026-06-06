@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SignaturePad } from "@/components/ui/SignaturePad";
+import { ApplicationChat } from "@/components/ApplicationChat";
 /**
  * Agreement / Business Portal
  *
@@ -1486,7 +1487,7 @@ export function Agreement() {
                         </p>
                       </div>
                       {/* Accept/Reject buttons — only show if not already responded */}
-                      {!agr.agreement_status && (
+                      {(!agr.agreement_status || agr.agreement_status === "pending") && (
                         <div className="flex gap-2 shrink-0">
                           <button
                             onClick={() => {
@@ -1515,6 +1516,15 @@ export function Agreement() {
                           {lang === "sw" ? "Umekubali" : "Accepted"}
                         </span>
                       )}
+                      {/* Chat thread for this agreement */}
+                      <div className="w-full mt-3">
+                        <ApplicationChat
+                          applicationId={agr.id}
+                          applicationNumber={agr.application_number || ""}
+                          applicantId={agr.user_id || ""}
+                          lang={lang}
+                        />
+                      </div>
                       {agr.agreement_status === "buyer_rejected" && (
                         <span className="px-3 py-1.5 bg-red-100 text-red-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
                           <X size={12} />
