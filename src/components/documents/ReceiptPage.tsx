@@ -103,8 +103,18 @@ interface ReceiptPageProps {
 }
 
 export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrDataUrl }) => {
-  const fd = (application.form_data || {}) as Record<string, any>;
-  const pd = (application.payment_data || {}) as Record<string, any>;
+  const fd = (application.form_data || {}) as {
+    service_fee?: number;
+    amount?: number;
+    applicant_name?: string;
+  };
+  const pd = (application.payment_data || {}) as {
+    amount?: number;
+    receipt_number?: string;
+    payment_method?: string;
+    transaction_id?: string;
+    paid_at?: string;
+  };
   const sw = lang === "sw";
   const qr = qrDataUrl || generateQRCodeUrl(application, "RCP");
 

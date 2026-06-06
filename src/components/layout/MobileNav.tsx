@@ -261,8 +261,8 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
   const filteredItems = menuItems.filter((item) => {
     if (!item.roles.includes(user?.role || "")) return false;
     // Department officers: hide regular staff items, show dept-only items
-    if (isDept && (item as any).hideForDept) return false;
-    if (!isDept && (item as any).deptOnly) return false;
+    if (isDept && (item as { hideForDept?: boolean }).hideForDept) return false;
+    if (!isDept && (item as { deptOnly?: boolean }).deptOnly) return false;
     return true;
   });
 

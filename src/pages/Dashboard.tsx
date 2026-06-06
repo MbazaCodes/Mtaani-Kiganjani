@@ -100,7 +100,8 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
         const t = data || [];
         setTicketStats({
           total: t.length,
-          open: t.filter((x: any) => !["resolved", "closed"].includes(x.status)).length,
+          open: t.filter((x: { status: string }) => !["resolved", "closed"].includes(x.status))
+            .length,
         });
       });
     // Reports
@@ -112,7 +113,8 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
         const r = data || [];
         setReportStats({
           total: r.length,
-          open: r.filter((x: any) => !["resolved", "closed"].includes(x.status)).length,
+          open: r.filter((x: { status: string }) => !["resolved", "closed"].includes(x.status))
+            .length,
         });
       });
     // Payments
@@ -124,8 +126,10 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
       .then(({ data }) => {
         const outstanding = data || [];
         const total = outstanding.reduce(
-          (s: number, a: any) =>
-            s + Number(a.form_data?.service_fee || a.payment_data?.amount || 0),
+          (
+            s: number,
+            a: { form_data?: { service_fee?: number }; payment_data?: { amount?: number } },
+          ) => s + Number(a.form_data?.service_fee || a.payment_data?.amount || 0),
           0,
         );
         setPaymentStats({ outstanding: outstanding.length, amount: total });

@@ -34,9 +34,7 @@ export async function processPayment(
   return processPaymentMock(req);
 }
 
-async function processPaymentMock(
-  req: PaymentRequest,
-): Promise<IntegrationResult<PaymentResult>> {
+async function processPaymentMock(req: PaymentRequest): Promise<IntegrationResult<PaymentResult>> {
   // Demo: instantly "complete" the payment without moving money.
   const now = new Date().toISOString();
   return {
@@ -53,9 +51,7 @@ async function processPaymentMock(
   };
 }
 
-async function processPaymentLive(
-  req: PaymentRequest,
-): Promise<IntegrationResult<PaymentResult>> {
+async function processPaymentLive(req: PaymentRequest): Promise<IntegrationResult<PaymentResult>> {
   // TODO: Real payment via server-side route. Most gateways are ASYNC:
   //   1. Request a control number / push prompt from the gateway.
   //   2. Return status "pending" here.

@@ -94,11 +94,17 @@ export function MyPayments() {
 
       if (paidApps) {
         for (const app of paidApps) {
-          const pd = (app.payment_data || {}) as Record<string, any>;
-          const fd = (app.form_data || {}) as Record<string, any>;
+          const pd = (app.payment_data || {}) as Record<string, unknown> & {
+            amount?: number;
+            payment_method?: string;
+            transaction_id?: string;
+            receipt_number?: string;
+          };
+          const fd = (app.form_data || {}) as Record<string, unknown> & { service_fee?: number };
           const amount = pd.amount || fd.service_fee || 0;
           // Skip if already in payments table
-          if (finalPayments.find((p) => (p.application as any)?.id === app.id)) continue;
+          if (finalPayments.find((p) => (p.application as { id?: string })?.id === app.id))
+            continue;
           if (Number(amount) > 0) {
             finalPayments.push({
               id: app.id,

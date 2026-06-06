@@ -71,6 +71,31 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 // ── Component ────────────────────────────────────────────────────────────────
+interface DeptTicket {
+  id: string;
+  ticket_number?: string;
+  subject?: string;
+  description?: string;
+  status?: string;
+  priority?: string;
+  ward?: string;
+  district?: string;
+  created_at: string;
+  citizen?: { first_name?: string; last_name?: string };
+}
+
+interface DeptReport {
+  id: string;
+  report_number?: string;
+  title?: string;
+  description?: string;
+  status?: string;
+  ward?: string;
+  district?: string;
+  created_at: string;
+  citizen?: { first_name?: string; last_name?: string };
+}
+
 export function DepartmentPortal() {
   const { lang } = useLanguage();
   const { showToast } = useToast();
@@ -84,8 +109,8 @@ export function DepartmentPortal() {
   const [selectedEsc, setSelectedEsc] = useState<Escalation | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<"escalations" | "tickets" | "reports">("escalations");
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [reports, setReports] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<DeptTicket[]>([]);
+  const [reports, setReports] = useState<DeptReport[]>([]);
 
   // Response modal
   const [showResponseModal, setShowResponseModal] = useState(false);
@@ -341,7 +366,7 @@ export function DepartmentPortal() {
               <p className="text-stone-500 font-bold">{L("Hakuna tiketi", "No tickets")}</p>
             </div>
           ) : (
-            tickets.map((t: any) => (
+            tickets.map((t) => (
               <div key={t.id} className="bg-white border border-stone-200 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-mono text-stone-400">{t.ticket_number}</span>
@@ -372,7 +397,7 @@ export function DepartmentPortal() {
               <p className="text-stone-500 font-bold">{L("Hakuna taarifa", "No reports")}</p>
             </div>
           ) : (
-            reports.map((r: any) => (
+            reports.map((r) => (
               <div key={r.id} className="bg-white border border-stone-200 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-mono text-stone-400">{r.report_number}</span>

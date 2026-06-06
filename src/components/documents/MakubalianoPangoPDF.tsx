@@ -348,9 +348,9 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
         {/* Footer */}
         <View style={s.footer}>
           <Text style={s.disclaimer}>
-            {(lang === "sw"
+            {lang === "sw"
               ? "MAONYESHO PEKEE — Si mfumo rasmi wa serikali, haujaidhinishwa kwa matumizi rasmi"
-              : "DEMONSTRATION ONLY — Not an official, approved government system")}
+              : "DEMONSTRATION ONLY — Not an official, approved government system"}
           </Text>
           <Text style={s.footerText}>
             {sw

@@ -233,7 +233,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.assigned_region, user?.assigned_district]);
+  }, [user?.assigned_region, user?.assigned_district, user?.role, user?.ward]);
 
   useEffect(() => {
     fetchApps();

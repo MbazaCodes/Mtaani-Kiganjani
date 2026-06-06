@@ -17,9 +17,7 @@ import { INTEGRATIONS } from "../config";
 import type { IntegrationResult, NidaVerification } from "../types";
 
 /** Public entry point — automatically routes to live or mock. */
-export async function verifyNida(
-  nidaNumber: string,
-): Promise<IntegrationResult<NidaVerification>> {
+export async function verifyNida(nidaNumber: string): Promise<IntegrationResult<NidaVerification>> {
   if (INTEGRATIONS.nida.enabled) {
     return verifyNidaLive(nidaNumber);
   }
@@ -27,9 +25,7 @@ export async function verifyNida(
 }
 
 /** MOCK — demonstration mode. Treats any 20-digit NIDA as structurally valid. */
-async function verifyNidaMock(
-  nidaNumber: string,
-): Promise<IntegrationResult<NidaVerification>> {
+async function verifyNidaMock(nidaNumber: string): Promise<IntegrationResult<NidaVerification>> {
   const clean = (nidaNumber || "").replace(/\D/g, "");
   return {
     ok: true,
@@ -43,9 +39,7 @@ async function verifyNidaMock(
 }
 
 /** LIVE — implement the real NIDA API call here when credentials are ready. */
-async function verifyNidaLive(
-  nidaNumber: string,
-): Promise<IntegrationResult<NidaVerification>> {
+async function verifyNidaLive(nidaNumber: string): Promise<IntegrationResult<NidaVerification>> {
   // TODO: Replace with the real NIDA API request via a SERVER-SIDE route.
   //   const res = await fetch("/api/nida/verify", {
   //     method: "POST",
