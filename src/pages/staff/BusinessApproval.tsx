@@ -29,6 +29,7 @@ import {
   User,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { ApplicationChat } from "@/components/ApplicationChat";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
@@ -158,6 +159,7 @@ export const BusinessApproval: React.FC = () => {
   // Agreements state
   const [agreements, setAgreements] = useState<AgreementRow[]>([]);
   const [loadingAgreements, setLoadingAgreements] = useState(false);
+  const [selectedAgreement, setSelectedAgreement] = useState<AgreementRow | null>(null);
   const [agrSearchQuery, setAgrSearchQuery] = useState("");
 
   // All applications state
@@ -706,7 +708,7 @@ export const BusinessApproval: React.FC = () => {
                         );
                       })
                       .map((agr) => (
-                        <tr key={agr.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={agr.id} onClick={() => setSelectedAgreement(agr)} className="hover:bg-gray-50 transition-colors cursor-pointer">
                           <td className="px-6 py-4">
                             <p className="font-medium text-gray-900">
                               {agr.user ? `${agr.user.first_name} ${agr.user.last_name}` : "—"}
@@ -1355,6 +1357,62 @@ export const BusinessApproval: React.FC = () => {
                 })()}
               </motion.div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+
+        {/* Agreement Detail Slide-over */}
+        <AnimatePresence>
+          {selectedAgreement && (
+            <>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                onClick={() => setSelectedAgreement(null)}
+                className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40" />
+              <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+                transition={{ type: "tween", duration: 0.25 }}
+                className="fixed inset-y-0 right-0 w-full sm:w-[560px] max-w-full bg-white shadow-2xl z-50 flex flex-col">
+                <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between shrink-0">
+                  <div>
+                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{selectedAgreement.service_name || "Agreement"}</p>
+                    <p className="text-base font-black text-stone-900">{selectedAgreement.application_number}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${selectedAgreement.status === "issued" ? "bg-green-50 text-green-700 border border-green-200" : "bg-stone-100 text-stone-600 border border-stone-200"}`}>{selectedAgreement.status}</span>
+                    <button onClick={() => setSelectedAgreement(null)} className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg"><X size={20} /></button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-stone-50 border border-stone-200 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-stone-400 uppercase mb-1">{lang === "sw" ? "Mwanzilishi" : "Initiator"}</p>
+                      <p className="font-black text-stone-900 text-sm">{selectedAgreement.user ? `${selectedAgreement.user.first_name} ${selectedAgreement.user.last_name}` : "\u2014"}</p>
+                      <p className="text-xs text-emerald-600 font-mono">{selectedAgreement.user?.citizen_id || ""}</p>
+                    </div>
+                    <div className="bg-stone-50 border border-stone-200 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-stone-400 uppercase mb-1">{lang === "sw" ? "Pande ya Pili" : "Second Party"}</p>
+                      <p className="font-black text-stone-900 text-sm">{selectedAgreement.second_party ? `${selectedAgreement.second_party.first_name} ${selectedAgreement.second_party.last_name}` : "\u2014"}</p>
+                      <p className="text-xs text-emerald-600 font-mono">{selectedAgreement.second_party?.citizen_id || ""}</p>
+                    </div>
+                  </div>
+                  <div className={`border rounded-xl p-4 ${!selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending" ? "bg-amber-50 border-amber-200" : selectedAgreement.agreement_status === "buyer_accepted" ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
+                    <p className="text-xs font-bold text-stone-600 uppercase mb-1">{lang === "sw" ? "Hali ya Mnunuzi" : "Buyer Acceptance Status"}</p>
+                    <p className={`text-sm font-black ${!selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending" ? "text-amber-700" : selectedAgreement.agreement_status === "buyer_accepted" ? "text-emerald-700" : "text-red-700"}`}>
+                      {!selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending" ? (lang === "sw" ? "\u23F3 Inasubiri Kukubaliwa" : "\u23F3 Awaiting Acceptance") : selectedAgreement.agreement_status === "buyer_accepted" ? (lang === "sw" ? "\u2705 Amekubali na Kusaini" : "\u2705 Accepted & Signed") : (lang === "sw" ? "\u274C Amekataa" : "\u274C Rejected")}
+                    </p>
+                    {(!selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending") && selectedAgreement.second_party_user_id && (
+                      <button onClick={async () => { await supabase.from("notifications").insert({ user_id: selectedAgreement.second_party_user_id, title: lang === "sw" ? "Kumbusho: Makubaliano" : "Reminder: Agreement Awaiting", message: `${selectedAgreement.application_number}`, type: "agreement" }); alert(lang === "sw" ? "Kumbusho limetumwa!" : "Reminder sent!"); }}
+                        className="mt-2 w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold">
+                        {lang === "sw" ? "\uD83D\uDCE9 Tuma Kumbusho" : "\uD83D\uDCE9 Send Reminder to Buyer"}
+                      </button>
+                    )}
+                  </div>
+                  <ApplicationChat applicationId={selectedAgreement.id} applicationNumber={selectedAgreement.application_number || ""} applicantId={selectedAgreement.user_id || ""} lang={lang} defaultExpanded />
+                </div>
+                <div className="px-5 py-3 border-t border-stone-100 bg-stone-50">
+                  <button onClick={() => setSelectedAgreement(null)} className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{lang === "sw" ? "Funga" : "Close"}</button>
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
 
