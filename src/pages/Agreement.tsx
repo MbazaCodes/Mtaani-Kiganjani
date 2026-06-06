@@ -23,6 +23,7 @@ import {
   Building2,
   Briefcase,
   FileText,
+  Download,
   Loader2,
   CheckCircle2,
   CheckCircle,
@@ -102,6 +103,11 @@ interface AgreementApp {
   user_id: string | null;
   second_party_user_id: string | null;
   created_at: string;
+  form_data?: Record<string, unknown>;
+  payment_data?: Record<string, unknown>;
+  approved_at?: string | null;
+  issued_at?: string | null;
+  initiator?: { first_name: string; last_name: string; phone?: string; citizen_id?: string } | null;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -194,6 +200,7 @@ export function Agreement() {
   const [agrTypeFilter, setAgrTypeFilter] = useState<"all" | "sales" | "rental">("all");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [signingAgr, setSigningAgr] = useState<AgreementApp | null>(null);
+  const [viewingAgr, setViewingAgr] = useState<AgreementApp | null>(null);
   const [buyerSignature, setBuyerSignature] = useState("");
 
   // Application mode
@@ -326,25 +333,25 @@ export function Agreement() {
     const { data: d1 } = await supabase
       .from("applications")
       .select(
-        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at, form_data, payment_data, approved_at, issued_at, initiator:user_id(first_name, last_name, phone, citizen_id)",
       )
       .or(`user_id.eq.${user.id},second_party_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
       .or(
         "service_name.ilike.%Makubaliano%,service_name.ilike.%Agreement%,service_name.ilike.%Mauzo%,service_name.ilike.%Pango%",
       )
       .order("created_at", { ascending: false });
-    if (d1) results.push(...(d1 as AgreementApp[]));
+    if (d1) results.push(...(d1 as unknown as AgreementApp[]));
 
     // Query 2: where buyer_id in form_data matches this user (fallback if second_party_user_id wasn't set)
     const { data: d2 } = await supabase
       .from("applications")
       .select(
-        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at, form_data, payment_data, approved_at, issued_at, initiator:user_id(first_name, last_name, phone, citizen_id)",
       )
       .contains("form_data", { buyer_id: user.id })
       .order("created_at", { ascending: false });
     if (d2) {
-      for (const app of d2 as AgreementApp[]) {
+      for (const app of d2 as unknown as AgreementApp[]) {
         if (!results.find((r) => r.id === app.id)) results.push(app);
       }
     }
@@ -353,12 +360,12 @@ export function Agreement() {
     const { data: d3 } = await supabase
       .from("applications")
       .select(
-        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at, form_data, payment_data, approved_at, issued_at, initiator:user_id(first_name, last_name, phone, citizen_id)",
       )
       .contains("form_data", { tenant_id: user.id })
       .order("created_at", { ascending: false });
     if (d3) {
-      for (const app of d3 as AgreementApp[]) {
+      for (const app of d3 as unknown as AgreementApp[]) {
         if (!results.find((r) => r.id === app.id)) results.push(app);
       }
     }
@@ -1440,7 +1447,7 @@ export function Agreement() {
                         ? "bg-amber-100 text-amber-800"
                         : "bg-blue-100 text-blue-800";
                 return (
-                  <div key={agr.id} className="bg-white rounded-xl p-4 border border-amber-100">
+                  <div key={agr.id} onClick={() => setViewingAgr(agr)} className="bg-white rounded-xl p-4 border border-amber-100 cursor-pointer hover:border-amber-300 hover:shadow-sm transition-all">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -1490,7 +1497,8 @@ export function Agreement() {
                       {(!agr.agreement_status || agr.agreement_status === "pending") && (
                         <div className="flex gap-2 shrink-0">
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setSigningAgr(agr);
                               setBuyerSignature("");
                             }}
@@ -1501,7 +1509,7 @@ export function Agreement() {
                             {lang === "sw" ? "Kubali na Saini" : "Accept & Sign"}
                           </button>
                           <button
-                            onClick={() => handleAgreementAction(agr, "reject")}
+                            onClick={(e) => { e.stopPropagation(); handleAgreementAction(agr, "reject"); }}
                             disabled={processingId === agr.id}
                             className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
                           >
@@ -1587,6 +1595,160 @@ export function Agreement() {
           </div>
         </div>
       )}
+
+      {/* ── Agreement Detail View (Second Party / Buyer) ── */}
+      {viewingAgr && (() => {
+        const fd = (viewingAgr.form_data || {}) as Record<string, string>;
+        const isPending = !viewingAgr.agreement_status || viewingAgr.agreement_status === "pending";
+        const isAccepted = viewingAgr.agreement_status === "buyer_accepted";
+        const isSale = (viewingAgr.service_name || "").includes("Mauzo") || (viewingAgr.service_name || "").includes("Sale");
+        const L2 = (s: string, e: string) => (lang === "sw" ? s : e);
+        const fmtCurrency = (v: unknown) => {
+          const n = Number(v);
+          return isNaN(n) ? String(v || "—") : `TSh ${n.toLocaleString()}`;
+        };
+        return (
+          <>
+            <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40" onClick={() => setViewingAgr(null)} />
+            <div className="fixed inset-y-0 right-0 w-full sm:w-[600px] max-w-full bg-white shadow-2xl z-50 flex flex-col">
+              {/* Header */}
+              <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between shrink-0 bg-emerald-50">
+                <div>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{viewingAgr.service_name}</p>
+                  <p className="text-lg font-black text-stone-900">{viewingAgr.application_number}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${isPending ? "bg-amber-50 text-amber-700 border-amber-200" : isAccepted ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-red-50 text-red-700 border-red-200"}`}>
+                    {isPending ? L2("Inasubiri", "Pending") : isAccepted ? L2("Imekubaliwa", "Accepted") : L2("Imekataliwa", "Rejected")}
+                  </span>
+                  <button onClick={() => setViewingAgr(null)} className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg"><X size={20} /></button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                {/* Parties */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                    <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">{isSale ? L2("Muuzaji", "Seller") : L2("Mwenye Nyumba", "Landlord")}</p>
+                    <p className="font-black text-stone-900 text-sm">{fd.seller_name || fd.landlord_name || (viewingAgr.initiator ? `${viewingAgr.initiator.first_name} ${viewingAgr.initiator.last_name}` : "—")}</p>
+                    {viewingAgr.initiator?.phone && <p className="text-xs text-stone-500 mt-1">{viewingAgr.initiator.phone}</p>}
+                    {viewingAgr.initiator?.citizen_id && <p className="text-xs text-blue-600 font-mono">{viewingAgr.initiator.citizen_id}</p>}
+                  </div>
+                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                    <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">{isSale ? L2("Mnunuzi (Wewe)", "Buyer (You)") : L2("Mpangaji (Wewe)", "Tenant (You)")}</p>
+                    <p className="font-black text-stone-900 text-sm">{fd.buyer_name || fd.tenant_name || user?.first_name || "—"}</p>
+                  </div>
+                </div>
+
+                {/* Agreement Details */}
+                <div className="bg-white border border-stone-200 rounded-xl p-4">
+                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("Maelezo ya Makubaliano", "Agreement Details")}</p>
+                  <div className="space-y-2.5">
+                    {fd.asset_type && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Aina ya Mali", "Asset Type")}</span><span className="text-sm font-bold text-right">{fd.asset_type}</span></div>}
+                    {(fd.price || fd.monthly_rent) && <div className="flex justify-between"><span className="text-xs text-stone-500">{isSale ? L2("Bei", "Price") : L2("Kodi/Mwezi", "Monthly Rent")}</span><span className="text-sm font-black text-emerald-700">{fmtCurrency(fd.price || fd.monthly_rent)}</span></div>}
+                    {fd.asset_description && <div><span className="text-xs text-stone-500 block mb-1">{L2("Maelezo", "Description")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2">{fd.asset_description}</p></div>}
+                    {fd.location && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Mahali", "Location")}</span><span className="text-sm font-bold text-right">{fd.location}</span></div>}
+                    {fd.duration && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Muda", "Duration")}</span><span className="text-sm font-bold">{fd.duration}</span></div>}
+                    {fd.start_date && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Tarehe ya Kuanza", "Start Date")}</span><span className="text-sm font-bold">{fd.start_date}</span></div>}
+                    {fd.end_date && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Tarehe ya Mwisho", "End Date")}</span><span className="text-sm font-bold">{fd.end_date}</span></div>}
+                    {fd.terms && <div><span className="text-xs text-stone-500 block mb-1">{L2("Masharti", "Terms")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2 whitespace-pre-wrap">{fd.terms}</p></div>}
+                    {fd.witness_1 && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Shahidi 1", "Witness 1")}</span><span className="text-sm font-bold">{fd.witness_1}</span></div>}
+                    {fd.witness_2 && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Shahidi 2", "Witness 2")}</span><span className="text-sm font-bold">{fd.witness_2}</span></div>}
+                  </div>
+                </div>
+
+                {/* Financials */}
+                {(fd.total_amount || fd.service_fee || fd.vat_amount) && (
+                  <div className="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">{L2("Fedha", "Financials")}</p>
+                    {fd.total_amount && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Jumla", "Total")}</span><span className="text-sm font-black">{fmtCurrency(fd.total_amount)}</span></div>}
+                    {fd.vat_amount && <div className="flex justify-between"><span className="text-xs text-stone-500">VAT</span><span className="text-sm font-bold">{fmtCurrency(fd.vat_amount)}</span></div>}
+                    {fd.service_fee && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Ada", "Fee")}</span><span className="text-sm font-bold">{fmtCurrency(fd.service_fee)}</span></div>}
+                  </div>
+                )}
+
+                {/* Attachments from form_data */}
+                {fd.uploaded_documents && (() => {
+                  try {
+                    const docs = typeof fd.uploaded_documents === "string" ? JSON.parse(fd.uploaded_documents) : fd.uploaded_documents;
+                    if (!Array.isArray(docs) || docs.length === 0) return null;
+                    return (
+                      <div className="bg-white border border-stone-200 rounded-xl p-4">
+                        <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">{L2("Viambatisho", "Attachments")} ({docs.length})</p>
+                        <div className="space-y-1.5">
+                          {docs.map((doc: { name?: string; type?: string; dataUrl?: string }, i: number) => (
+                            <a key={i} href={doc.dataUrl || "#"} download={doc.name || `document-${i}`} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-2 bg-stone-50 rounded-lg px-3 py-2 text-sm hover:bg-stone-100">
+                              {doc.type?.startsWith("image/") ? <img src={doc.dataUrl} alt="" className="w-8 h-8 rounded object-cover" /> : <FileText size={16} className="text-stone-400" />}
+                              <span className="flex-1 truncate text-stone-700">{doc.name || `Document ${i + 1}`}</span>
+                              <Download size={14} className="text-emerald-600" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
+
+                {/* Download Agreement PDF (if issued) */}
+                {viewingAgr.status === "issued" && (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mb-2">{L2("Hati ya Makubaliano", "Agreement Document")}</p>
+                    <p className="text-xs text-stone-500 mb-3">{L2("Soma hati kamili ya makubaliano kabla ya kukubali au kukataa.", "Read the full agreement document before accepting or rejecting.")}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setViewingAgr(null); /* Navigate to applications to download */ }}
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                    >
+                      <FileText size={16} />
+                      {L2("Fungua kwenye Maombi Yangu kupakua", "Open in My Applications to download")}
+                    </button>
+                  </div>
+                )}
+
+                {/* Application Chat */}
+                <ApplicationChat
+                  applicationId={viewingAgr.id}
+                  applicationNumber={viewingAgr.application_number || ""}
+                  applicantId={viewingAgr.user_id || ""}
+                  lang={lang}
+                  defaultExpanded
+                />
+              </div>
+
+              {/* Action Footer */}
+              {isPending && (
+                <div className="px-5 py-4 border-t border-stone-200 bg-stone-50 shrink-0 space-y-2">
+                  <p className="text-[10px] text-stone-500 text-center">{L2("Soma makubaliano kwa makini kabla ya kukubali.", "Read the agreement carefully before accepting.")}</p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => { setViewingAgr(null); setSigningAgr(viewingAgr); setBuyerSignature(""); }}
+                      disabled={processingId === viewingAgr.id}
+                      className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <CheckCircle size={16} />
+                      {L2("Kubali na Saini", "Accept & Sign")}
+                    </button>
+                    <button
+                      onClick={() => { setViewingAgr(null); handleAgreementAction(viewingAgr, "reject"); }}
+                      disabled={processingId === viewingAgr.id}
+                      className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <X size={16} />
+                      {L2("Kataa", "Reject")}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {!isPending && (
+                <div className="px-5 py-3 border-t border-stone-100 bg-stone-50 shrink-0">
+                  <button onClick={() => setViewingAgr(null)} className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{L2("Funga", "Close")}</button>
+                </div>
+              )}
+            </div>
+          </>
+        );
+      })()}
 
       {/* Buyer Signature Modal */}
       {signingAgr && (
