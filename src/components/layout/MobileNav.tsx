@@ -159,6 +159,14 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
       view: "application_review",
     },
     {
+      id: "citizen_management",
+      icon: <Users size={20} />,
+      label: lang === "sw" ? "Usimamizi wa Wananchi" : "Citizen Management",
+      roles: ["staff", "admin"],
+      view: "citizen_management",
+      hideForDept: true,
+    },
+    {
       id: "customer_support",
       hideForDept: true,
       icon: <HelpCircle size={20} />,
