@@ -183,7 +183,10 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
     if (!s) return m.sender_id === user?.id ? L("Wewe", "You") : "?";
     const name = `${s.first_name || ""} ${s.last_name || ""}`.trim();
     if (m.sender_id === user?.id) return L("Wewe", "You");
-    return name || (s.role === "staff" ? L("Afisa", "Officer") : L("Raia", "Citizen"));
+    const roleLabel = s.role === "admin" ? L("Msimamizi", "Admin")
+      : s.role === "staff" ? L("Afisa", "Officer")
+      : L("Raia", "Citizen");
+    return name ? `${name} (${roleLabel})` : roleLabel;
   };
 
   const isMe = (m: ChatMessage) => m.sender_id === user?.id;

@@ -24,6 +24,7 @@ import { supabase, Application } from "@/lib/supabase";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
+import { ApplicationChat } from "@/components/ApplicationChat";
 import { cn } from "@/lib/utils";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -647,6 +648,16 @@ export function DepartmentPortal() {
                                 </>
                               )}
                             </div>
+
+                            {/* Application Chat — department officers can chat with citizen */}
+                            {esc.application_id && (
+                              <ApplicationChat
+                                applicationId={esc.application_id}
+                                applicationNumber={app?.application_number || esc.application_id}
+                                applicantId={(app as { user_id?: string })?.user_id || ""}
+                                lang={lang}
+                              />
+                            )}
 
                             {/* Action buttons */}
                             {esc.status !== "resolved" && esc.status !== "rejected" && (
