@@ -133,8 +133,12 @@ interface AgreementRow {
   user_id: string | null;
   second_party_user_id: string | null;
   created_at: string;
-  user?: { first_name: string; last_name: string; citizen_id: string } | null;
-  second_party?: { first_name: string; last_name: string; citizen_id: string } | null;
+  form_data?: Record<string, unknown>;
+  payment_data?: Record<string, unknown>;
+  approved_at?: string | null;
+  issued_at?: string | null;
+  user?: { first_name: string; last_name: string; citizen_id: string; phone?: string; email?: string; nida_number?: string; region?: string; district?: string; ward?: string } | null;
+  second_party?: { first_name: string; last_name: string; citizen_id: string; phone?: string; email?: string; nida_number?: string; region?: string; district?: string; ward?: string } | null;
 }
 
 interface AppRow {
@@ -259,7 +263,7 @@ export const BusinessApproval: React.FC = () => {
       const { data, error } = await supabase
         .from("applications")
         .select(
-          "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+          "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at, form_data, payment_data, approved_at, issued_at",
         )
         .ilike("service_name", "%Makubaliano%")
         .order("created_at", { ascending: false });
@@ -269,13 +273,13 @@ export const BusinessApproval: React.FC = () => {
           const [{ data: u }, { data: sp }] = await Promise.all([
             supabase
               .from("users")
-              .select("first_name, last_name, citizen_id")
+              .select("first_name, last_name, citizen_id, phone, email, nida_number, region, district, ward")
               .eq("id", row.user_id)
               .maybeSingle(),
             row.second_party_user_id
               ? supabase
                   .from("users")
-                  .select("first_name, last_name, citizen_id")
+                  .select("first_name, last_name, citizen_id, phone, email, nida_number, region, district, ward")
                   .eq("id", row.second_party_user_id)
                   .maybeSingle()
               : Promise.resolve({ data: null }),
@@ -1365,59 +1369,110 @@ export const BusinessApproval: React.FC = () => {
         </AnimatePresence>
 
 
-        {/* Agreement Detail Slide-over */}
+        {/* Agreement Detail Slide-over — Full Details */}
         <AnimatePresence>
-          {selectedAgreement && (
-            <>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                onClick={() => setSelectedAgreement(null)}
-                className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40" />
-              <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
-                transition={{ type: "tween", duration: 0.25 }}
-                className="fixed inset-y-0 right-0 w-full sm:w-[560px] max-w-full bg-white shadow-2xl z-50 flex flex-col">
-                <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between shrink-0">
-                  <div>
-                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{selectedAgreement.service_name || "Agreement"}</p>
-                    <p className="text-base font-black text-stone-900">{selectedAgreement.application_number}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${selectedAgreement.status === "issued" ? "bg-green-50 text-green-700 border border-green-200" : "bg-stone-100 text-stone-600 border border-stone-200"}`}>{selectedAgreement.status}</span>
-                    <button onClick={() => setSelectedAgreement(null)} className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg"><X size={20} /></button>
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto p-5 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-stone-50 border border-stone-200 rounded-xl p-3">
-                      <p className="text-[10px] font-bold text-stone-400 uppercase mb-1">{lang === "sw" ? "Mwanzilishi" : "Initiator"}</p>
-                      <p className="font-black text-stone-900 text-sm">{selectedAgreement.user ? `${selectedAgreement.user.first_name} ${selectedAgreement.user.last_name}` : "\u2014"}</p>
-                      <p className="text-xs text-emerald-600 font-mono">{selectedAgreement.user?.citizen_id || ""}</p>
+          {selectedAgreement && (() => {
+            const fd = (selectedAgreement.form_data || {}) as Record<string, string>;
+            const isSale = (selectedAgreement.service_name || "").includes("Mauzo");
+            const isPending = !selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending";
+            const isAccepted = selectedAgreement.agreement_status === "buyer_accepted";
+            const fmtC = (v: unknown) => { const n = Number(v); return isNaN(n) ? String(v || "—") : `TSh ${n.toLocaleString()}`; };
+            const L2 = (s: string, e: string) => lang === "sw" ? s : e;
+            const PartyCard = ({ title, color, party, uid }: { title: string; color: string; party: typeof selectedAgreement.user; uid: string | null }) => (
+              <div className={`border rounded-xl p-3 ${color}`}>
+                <p className="text-[10px] font-bold uppercase mb-1.5">{title}</p>
+                <button onClick={() => { if (uid) setViewCitizenId(uid); }} className="font-black text-stone-900 text-sm hover:text-emerald-700 hover:underline text-left">{party ? `${party.first_name} ${party.last_name}` : "—"}</button>
+                {party?.citizen_id && <p className="text-xs text-emerald-600 font-mono mt-0.5">{party.citizen_id}</p>}
+                {party?.nida_number && <p className="text-[10px] text-stone-500">NIDA: {party.nida_number}</p>}
+                {party?.phone && <p className="text-[10px] text-stone-500">{party.phone}</p>}
+                {party?.email && <p className="text-[10px] text-stone-500">{party.email}</p>}
+                {party?.ward && <p className="text-[10px] text-stone-400">{party.ward}, {party?.district || ""}</p>}
+              </div>
+            );
+            return (
+              <>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  onClick={() => setSelectedAgreement(null)} className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40" />
+                <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+                  transition={{ type: "tween", duration: 0.25 }}
+                  className="fixed inset-y-0 right-0 w-full sm:w-[620px] max-w-full bg-white shadow-2xl z-50 flex flex-col">
+                  {/* Header */}
+                  <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between shrink-0 bg-stone-50">
+                    <div>
+                      <p className="text-[10px] font-bold text-stone-400 uppercase">{selectedAgreement.service_name}</p>
+                      <p className="text-lg font-black text-stone-900">{selectedAgreement.application_number}</p>
                     </div>
-                    <div className="bg-stone-50 border border-stone-200 rounded-xl p-3">
-                      <p className="text-[10px] font-bold text-stone-400 uppercase mb-1">{lang === "sw" ? "Pande ya Pili" : "Second Party"}</p>
-                      <p className="font-black text-stone-900 text-sm">{selectedAgreement.second_party ? `${selectedAgreement.second_party.first_name} ${selectedAgreement.second_party.last_name}` : "\u2014"}</p>
-                      <p className="text-xs text-emerald-600 font-mono">{selectedAgreement.second_party?.citizen_id || ""}</p>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${selectedAgreement.status === "issued" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : selectedAgreement.status === "approved" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-stone-100 text-stone-600 border-stone-200"}`}>{selectedAgreement.status}</span>
+                      <button onClick={() => setSelectedAgreement(null)} className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg"><X size={20} /></button>
                     </div>
                   </div>
-                  <div className={`border rounded-xl p-4 ${!selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending" ? "bg-amber-50 border-amber-200" : selectedAgreement.agreement_status === "buyer_accepted" ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
-                    <p className="text-xs font-bold text-stone-600 uppercase mb-1">{lang === "sw" ? "Hali ya Mnunuzi" : "Buyer Acceptance Status"}</p>
-                    <p className={`text-sm font-black ${!selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending" ? "text-amber-700" : selectedAgreement.agreement_status === "buyer_accepted" ? "text-emerald-700" : "text-red-700"}`}>
-                      {!selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending" ? (lang === "sw" ? "\u23F3 Inasubiri Kukubaliwa" : "\u23F3 Awaiting Acceptance") : selectedAgreement.agreement_status === "buyer_accepted" ? (lang === "sw" ? "\u2705 Amekubali na Kusaini" : "\u2705 Accepted & Signed") : (lang === "sw" ? "\u274C Amekataa" : "\u274C Rejected")}
-                    </p>
-                    {(!selectedAgreement.agreement_status || selectedAgreement.agreement_status === "pending") && selectedAgreement.second_party_user_id && (
-                      <button onClick={async () => { await supabase.from("notifications").insert({ user_id: selectedAgreement.second_party_user_id, title: lang === "sw" ? "Kumbusho: Makubaliano" : "Reminder: Agreement Awaiting", message: `${selectedAgreement.application_number}`, type: "agreement" }); alert(lang === "sw" ? "Kumbusho limetumwa!" : "Reminder sent!"); }}
-                        className="mt-2 w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold">
-                        {lang === "sw" ? "\uD83D\uDCE9 Tuma Kumbusho" : "\uD83D\uDCE9 Send Reminder to Buyer"}
-                      </button>
+
+                  {/* Body */}
+                  <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                    {/* Parties — clickable to open full citizen profile */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <PartyCard title={isSale ? L2("Muuzaji / Seller", "Seller / Initiator") : L2("Mwenye Nyumba", "Landlord")} color="bg-blue-50 border-blue-100 text-blue-600" party={selectedAgreement.user} uid={selectedAgreement.user_id} />
+                      <PartyCard title={isSale ? L2("Mnunuzi / Buyer", "Buyer / Second Party") : L2("Mpangaji / Tenant", "Tenant")} color="bg-emerald-50 border-emerald-100 text-emerald-600" party={selectedAgreement.second_party} uid={selectedAgreement.second_party_user_id} />
+                    </div>
+
+                    {/* Buyer Acceptance Status */}
+                    <div className={`border rounded-xl p-4 ${isPending ? "bg-amber-50 border-amber-200" : isAccepted ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-stone-600 uppercase">{L2("Hali ya Upande wa Pili", "Second Party Status")}</p>
+                        <span className={`text-xs font-black ${isPending ? "text-amber-700" : isAccepted ? "text-emerald-700" : "text-red-700"}`}>
+                          {isPending ? L2("⏳ Inasubiri", "⏳ Pending") : isAccepted ? L2("✅ Amekubali", "✅ Accepted") : L2("❌ Amekataa", "❌ Rejected")}
+                        </span>
+                      </div>
+                      {isPending && selectedAgreement.second_party_user_id && (
+                        <button onClick={async () => { await supabase.from("notifications").insert({ user_id: selectedAgreement.second_party_user_id, title: L2("Kumbusho", "Reminder"), message: selectedAgreement.application_number || "", type: "agreement" }); alert(L2("Kumbusho limetumwa!", "Reminder sent!")); }}
+                          className="mt-2 w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold">
+                          {L2("📩 Tuma Kumbusho kwa Mnunuzi", "📩 Send Reminder to Buyer")}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Full Agreement Details */}
+                    <div className="bg-white border border-stone-200 rounded-xl p-4">
+                      <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("Maelezo ya Makubaliano", "Agreement Details")}</p>
+                      <div className="space-y-2">
+                        {fd.asset_type && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Aina ya Mali", "Asset Type")}</span><span className="text-sm font-bold text-right">{fd.asset_type}</span></div>}
+                        {(fd.price || fd.monthly_rent) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{isSale ? L2("Bei", "Price") : L2("Kodi/Mwezi", "Rent/Month")}</span><span className="text-sm font-black text-emerald-700">{fmtC(fd.price || fd.monthly_rent)}</span></div>}
+                        {fd.asset_description && <div className="border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500 block mb-1">{L2("Maelezo", "Description")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2">{fd.asset_description}</p></div>}
+                        {fd.location && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mahali", "Location")}</span><span className="text-sm font-bold text-right">{fd.location}</span></div>}
+                        {fd.duration && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Muda", "Duration")}</span><span className="text-sm font-bold">{fd.duration}</span></div>}
+                        {fd.start_date && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Kuanza", "Start")}</span><span className="text-sm font-bold">{fd.start_date}</span></div>}
+                        {fd.end_date && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mwisho", "End")}</span><span className="text-sm font-bold">{fd.end_date}</span></div>}
+                        {fd.terms && <div className="border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500 block mb-1">{L2("Masharti", "Terms")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2 whitespace-pre-wrap">{fd.terms}</p></div>}
+                        {fd.witness_1 && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Shahidi 1", "Witness 1")}</span><span className="text-sm font-bold">{fd.witness_1}</span></div>}
+                        {fd.witness_2 && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Shahidi 2", "Witness 2")}</span><span className="text-sm font-bold">{fd.witness_2}</span></div>}
+                      </div>
+                    </div>
+
+                    {/* Financials */}
+                    {(fd.total_amount || fd.service_fee || fd.vat_amount) && (
+                      <div className="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                        <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">{L2("Fedha", "Financials")}</p>
+                        {fd.total_amount && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Jumla", "Total")}</span><span className="text-sm font-black">{fmtC(fd.total_amount)}</span></div>}
+                        {fd.vat_amount && <div className="flex justify-between"><span className="text-xs text-stone-500">VAT</span><span className="text-sm font-bold">{fmtC(fd.vat_amount)}</span></div>}
+                        {fd.service_fee && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Ada", "Fee")}</span><span className="text-sm font-bold">{fmtC(fd.service_fee)}</span></div>}
+                      </div>
                     )}
+
+                    {/* Application Chat */}
+                    <ApplicationChat applicationId={selectedAgreement.id} applicationNumber={selectedAgreement.application_number || ""} applicantId={selectedAgreement.user_id || ""} lang={lang} defaultExpanded />
                   </div>
-                  <ApplicationChat applicationId={selectedAgreement.id} applicationNumber={selectedAgreement.application_number || ""} applicantId={selectedAgreement.user_id || ""} lang={lang} defaultExpanded />
-                </div>
-                <div className="px-5 py-3 border-t border-stone-100 bg-stone-50">
-                  <button onClick={() => setSelectedAgreement(null)} className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{lang === "sw" ? "Funga" : "Close"}</button>
-                </div>
-              </motion.div>
-            </>
-          )}
+
+                  {/* Staff Actions Footer */}
+                  <div className="px-5 py-3 border-t border-stone-200 bg-stone-50 shrink-0 space-y-2">
+                    <div className="flex gap-2">
+                      <button onClick={() => setSelectedAgreement(null)} className="flex-1 py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{L2("Funga", "Close")}</button>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            );
+          })()}
         </AnimatePresence>
 
         {/* Rejection Modal */}
