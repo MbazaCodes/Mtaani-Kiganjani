@@ -279,17 +279,19 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* Footer — inline (not absolute) to avoid forcing overflow page */}
-        <View
-          style={{
-            marginTop: 14,
-            borderTopWidth: 0.5,
-            borderTopColor: "#c0c0c0",
-            paddingTop: 5,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <View style={{ marginTop: 14, borderTopWidth: 0.5, borderTopColor: "#c0c0c0", paddingTop: 5 }}>
+          <Text style={{ fontSize: 6, color: "#999999", fontWeight: "bold", textAlign: "center", textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 3 }}>
+            {sw
+              ? "MAONYESHO PEKEE — Si mfumo rasmi wa serikali, haujaidhinishwa kwa matumizi rasmi"
+              : "DEMONSTRATION ONLY — Not an official, approved government system"}
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
           <Text style={{ fontSize: 7, color: "#6b6b6b", fontStyle: "italic", flex: 1 }}>
             {sw
               ? "Barua hii ni rasmi. Inafaa kwa taasisi iliyoainishwa pekee."
@@ -300,6 +302,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
           >
             {`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}
           </Text>
+          </View>
         </View>
       </Page>
       {/* Page 2: Payment Receipt */}

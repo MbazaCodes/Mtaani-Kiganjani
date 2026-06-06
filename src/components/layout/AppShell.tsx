@@ -101,7 +101,20 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar currentView={currentView} setView={setView} />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+          {children}
+          {/* Demonstration disclaimer footer */}
+          <footer className="mt-8 pt-4 border-t border-stone-200">
+            <p className="text-center text-[11px] leading-relaxed text-stone-400 max-w-3xl mx-auto px-4">
+              {lang === "sw"
+                ? "Mfumo huu ni wa MAONYESHO pekee. Si mfumo rasmi wa serikali na haujaidhinishwa kwa matumizi rasmi. Nyaraka, malipo, na huduma zote ni za majaribio na hazina nguvu za kisheria."
+                : "This system is for DEMONSTRATION purposes only. It is not an official government system and is not approved for official operation. All documents, payments, and services are for testing and carry no legal authority."}
+            </p>
+            <p className="text-center text-[10px] text-stone-300 mt-1">
+              Mtaani Kiganjani · E-Mtaa · {new Date().getFullYear()}
+            </p>
+          </footer>
+        </main>
       </div>
 
       <AnimatePresence>

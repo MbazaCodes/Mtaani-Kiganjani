@@ -321,9 +321,23 @@ export const commonStyles = StyleSheet.create({
     borderTopWidth: 0.5,
     borderTopColor: C.rule,
     paddingTop: 5,
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  footerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    width: "100%",
+  },
+  disclaimer: {
+    fontSize: 6,
+    color: "#999999",
+    textAlign: "center",
+    fontWeight: "bold",
+    marginBottom: 3,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
   },
   footerText: {
     fontSize: 7,

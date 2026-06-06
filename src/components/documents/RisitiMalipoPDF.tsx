@@ -178,6 +178,11 @@ export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang,
 
         {/* Footer */}
         <View style={s.footer}>
+          <Text style={s.disclaimer}>
+            {(lang === "sw"
+              ? "MAONYESHO PEKEE — Si mfumo rasmi wa serikali, haujaidhinishwa kwa matumizi rasmi"
+              : "DEMONSTRATION ONLY — Not an official, approved government system")}
+          </Text>
           <Text style={s.footerText}>{L.footer}</Text>
           <Text style={s.metadata}>{formatDate(paidAt)}</Text>
         </View>

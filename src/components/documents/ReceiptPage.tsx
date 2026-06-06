@@ -202,6 +202,11 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
             ? "Risiti hii ni stakabadhi rasmi ya serikali. Thibitisha kupitia QR code au tovuti ya E-Mtaa."
             : "This receipt is an official government document. Verify via QR code or E-Mtaa portal."}
         </Text>
+        <Text style={[rs.footerText, { marginTop: 2, fontWeight: "bold" }]}>
+          {sw
+            ? "MAONYESHO PEKEE — Si mfumo rasmi wa serikali, haujaidhinishwa."
+            : "DEMONSTRATION ONLY — Not an official, approved government system."}
+        </Text>
       </View>
     </Page>
   );
