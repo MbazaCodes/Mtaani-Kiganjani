@@ -35,6 +35,7 @@ import { Language } from "@/lib/i18n";
 import { useTranslation } from "@/lib/i18n";
 import { supabase, UserRole } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { verifyUrl } from "@/constants/site";
 
 // ─── Verified document result shape ──────────────────────────────────────────
 interface VerifiedDocument {
@@ -819,7 +820,7 @@ export function VerifyDocuments({
                   {/* QR Code */}
                   <div className="bg-white p-3 rounded-xl shadow-lg">
                     <QRCodeSVG
-                      value={`https://e-serikali-mtaa.vercel.app/verify?doc=${vf(verifiedDocument, "verificationCode")}&type=${verifiedDocument.documentType || "application"}`}
+                      value={verifyUrl(vf(verifiedDocument, "verificationCode"), verifiedDocument.documentType || "application")}
                       size={120}
                       level="H"
                       includeMargin={false}

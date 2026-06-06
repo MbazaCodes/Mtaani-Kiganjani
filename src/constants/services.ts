@@ -1,3 +1,4 @@
+import { COAT_OF_ARMS_URL } from "./site";
 import { Service } from "@/lib/supabase";
 
 export const TANZANIA_LOGO_URL = "/tz-coat-of-arms.png";
@@ -166,7 +167,7 @@ export const HARDCODED_SERVICES: Service[] = [
       header: {
         country: "JAMHURI YA MUUNGANO WA TANZANIA",
         office: "OFISI YA RAIS - TAMISEMI",
-        logo_url: "https://e-serikali-mtaa.vercel.app/tz-coat-of-arms.png",
+        logo_url: COAT_OF_ARMS_URL,
       },
       footer:
         "Cheti hiki ni rasmi na kinaweza kuthibitishwa kwa kuchanganua QR code. Hati hii ina muda wa miezi 12 tangu tarehe ya kutolewa.",
@@ -205,7 +206,7 @@ export const HARDCODED_SERVICES: Service[] = [
       header: {
         country: "JAMHURI YA MUUNGANO WA TANZANIA",
         office: "OFISI YA RAIS - TAMISEMI",
-        logo_url: "https://e-serikali-mtaa.vercel.app/tz-coat-of-arms.png",
+        logo_url: COAT_OF_ARMS_URL,
       },
       subject: "YAH: TAARIFA YA MSIBA NA MAZISHI YA [DECEASED_FULL_NAME]",
       body_template:
@@ -254,7 +255,7 @@ export const HARDCODED_SERVICES: Service[] = [
       header: {
         country: "JAMHURI YA MUUNGANO WA TANZANIA",
         office: "OFISI YA RAIS - TAMISEMI",
-        logo_url: "https://e-serikali-mtaa.vercel.app/tz-coat-of-arms.png",
+        logo_url: COAT_OF_ARMS_URL,
       },
       subject: "YAH: KIBALI CHA KUFANYA SHEREHE YA [EVENT_TYPE]",
       body_template:
@@ -340,7 +341,7 @@ export const HARDCODED_SERVICES: Service[] = [
       header: {
         country: "JAMHURI YA MUUNGANO WA TANZANIA",
         office: "OFISI YA RAIS - TAMISEMI",
-        logo_url: "https://e-serikali-mtaa.vercel.app/tz-coat-of-arms.png",
+        logo_url: COAT_OF_ARMS_URL,
       },
       subject: "YAH: KIBALI CHA UJENZI MDOGO - [CONSTRUCTION_TYPE]",
       body_template:
@@ -454,7 +455,7 @@ export const HARDCODED_SERVICES: Service[] = [
       header: {
         country: "JAMHURI YA MUUNGANO WA TANZANIA",
         office: "OFISI YA RAIS - TAMISEMI",
-        logo_url: "https://e-serikali-mtaa.vercel.app/tz-coat-of-arms.png",
+        logo_url: COAT_OF_ARMS_URL,
       },
       subject: "YAH: UTAMBULISHO WA NDUGU [FULL_NAME]",
       body_template:
