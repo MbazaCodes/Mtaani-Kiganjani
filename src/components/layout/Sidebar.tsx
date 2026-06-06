@@ -307,8 +307,8 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
           onClick={() => setView(displayRole === "citizen" ? "citizen_support" : "staff_tickets")}
         />
       )}
-      {/* Staff/Admin Announcements — create & manage */}
-      {(displayRole === "admin" || (displayRole === "staff" && !(user?.is_department_member || localDeptCheck))) && (
+      {/* Staff/Admin Announcements — create & manage (all staff + admin) */}
+      {(displayRole === "admin" || displayRole === "staff") && (
         <SidebarItem
           icon={<Megaphone size={20} />}
           label={lang === "sw" ? "Matangazo" : "Announcements"}
