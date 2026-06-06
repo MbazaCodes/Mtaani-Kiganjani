@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Eye, EyeOff, Loader2, Lock, User as UserIcon } from "lucide-react";
 
 import { useAuth } from "./context/AuthContext";
+import { supabase } from "./lib/supabase";
 import { useLanguage } from "./context/LanguageContext";
 import { AppProvider } from "./context/AppContext";
 import { AppShell } from "./components/layout/AppShell";
@@ -271,22 +272,20 @@ function ForcePasswordChange() {
 
     setLoading(true);
     try {
-      // Update password in Supabase Auth
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const supabaseKey = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-        import.meta.env.VITE_SUPABASE_ANON_KEY) as string;
-      const sb = createClient(supabaseUrl, supabaseKey);
-
-      const { error: pwdError } = await sb.auth.updateUser({ password: newPwd });
+      // Update password using the AUTHENTICATED client (has the user's session)
+      const { error: pwdError } = await supabase.auth.updateUser({ password: newPwd });
       if (pwdError) throw pwdError;
 
-      // Mark account as verified
+      // Mark account as verified — must use the authenticated client so RLS
+      // (auth.uid() = id) allows the update; a fresh anon client would be
+      // blocked and the flag would never persist (causing the prompt to
+      // reappear on every load).
       if (user?.id) {
-        await sb
+        const { error: updErr } = await supabase
           .from("users")
           .update({ is_verified: true, account_status: "active" })
           .eq("id", user.id);
+        if (updErr) throw updErr;
       }
 
       // Refresh profile so the gate lifts
