@@ -14,8 +14,10 @@ import {
   Search,
   Menu,
   X,
+  Eye,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useOnlineCount, useSiteVisits } from "@/hooks/useSiteStats";
 import { TANZANIA_LOGO_URL } from "@/constants/services";
 
 interface LandingProps {
@@ -25,6 +27,8 @@ interface LandingProps {
 
 export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
   const { lang, setLang, t } = useLanguage();
+  const onlineCount = useOnlineCount();
+  const siteVisits = useSiteVisits();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -270,6 +274,25 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
       {/* ── Stats Section ───────────────────────────────────────────────── */}
       <section className="py-10 sm:py-16 bg-stone-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {/* Live stats: online now + total visits */}
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mb-8 sm:mb-10">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+              </span>
+              <span className="text-sm font-bold text-emerald-300">
+                {onlineCount} {lang === "sw" ? "mtandaoni sasa" : "online now"}
+              </span>
+            </div>
+            {siteVisits !== null && (
+              <div className="flex items-center gap-2 text-sm font-bold text-stone-300">
+                <Eye size={15} className="text-stone-400" />
+                {siteVisits.toLocaleString()} {lang === "sw" ? "matembezi ya tovuti" : "site visits"}
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10">
             {[
               { num: "26", lbl: lang === "sw" ? "Mikoa" : "Regions" },

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { LogOut, Menu, Loader2, Bell } from "lucide-react";
+import { LogOut, Menu, Loader2, Bell, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { cn, TanzanianBranding } from "../../lib/utils";
 import { TANZANIA_LOGO_URL } from "@/constants/services";
 import { countUnreadNotifications } from "@/lib/notifications";
 import { useRouterView } from "./AppShell";
+import { useOnlineCount } from "@/hooks/useSiteStats";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -17,6 +18,8 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { setView } = useRouterView();
   const [signingOut, setSigningOut] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const onlineCount = useOnlineCount();
+  const isStaffOrAdmin = user?.role === "staff" || user?.role === "admin";
 
   // Poll unread count every 30s
   useEffect(() => {
@@ -77,6 +80,21 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
+        {isStaffOrAdmin && (
+          <div
+            className="hidden sm:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1"
+            title={lang === "sw" ? "Watumiaji mtandaoni sasa" : "Users online now"}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <Users size={13} className="text-emerald-600" />
+            <span className="text-xs font-bold text-emerald-700">
+              {onlineCount} <span className="font-medium text-emerald-600">{lang === "sw" ? "mtandaoni" : "online"}</span>
+            </span>
+          </div>
+        )}
         <div
           className="flex items-center gap-1 sm:gap-2 bg-stone-100 rounded-full p-1 mr-1 sm:mr-2"
           role="group"
