@@ -54,31 +54,63 @@ export function MyPayments() {
     setLoading(true);
 
     const fetchAll = async () => {
-      // 1. Payment records (from payments table)
-      const { data: paymentData } = await supabase
-        .from("payments")
-        .select("*, application:application_id(id, application_number, service_name, status)")
-        .eq("application.user_id", user.id)
-        .order("created_at", { ascending: false });
+      // 1. Get user's application IDs first
+      const { data: apps } = await supabase
+        .from("applications")
+        .select("id")
+        .eq("user_id", user.id);
+      const appIds = (apps || []).map((a) => a.id);
 
-      // Fallback: if the join fails, fetch payments via application IDs
-      let finalPayments = paymentData || [];
-      if (finalPayments.length === 0) {
-        const { data: apps } = await supabase
-          .from("applications")
-          .select("id")
-          .eq("user_id", user.id);
-        if (apps && apps.length > 0) {
-          const appIds = apps.map((a) => a.id);
-          const { data: p2 } = await supabase
-            .from("payments")
-            .select("*, application:application_id(id, application_number, service_name, status)")
-            .in("application_id", appIds)
-            .order("created_at", { ascending: false });
-          finalPayments = p2 || [];
+      // 2. Fetch payments for those applications
+      let finalPayments: PaymentRecord[] = [];
+      if (appIds.length > 0) {
+        const { data: paymentData } = await supabase
+          .from("payments")
+          .select("*, application:application_id(id, application_number, service_name, status)")
+          .in("application_id", appIds)
+          .order("created_at", { ascending: false });
+        finalPayments = (paymentData as PaymentRecord[]) || [];
+      }
+
+      // 3. Also build payment-like records from paid/issued applications
+      //    (covers cases where payment was processed but no payments table entry)
+      const { data: paidApps } = await supabase
+        .from("applications")
+        .select("id, application_number, service_name, status, form_data, payment_data, created_at, updated_at")
+        .eq("user_id", user.id)
+        .in("status", ["paid", "issued", "approved", "verified"]);
+      
+      if (paidApps) {
+        for (const app of paidApps) {
+          const pd = (app.payment_data || {}) as Record<string, any>;
+          const fd = (app.form_data || {}) as Record<string, any>;
+          const amount = pd.amount || fd.service_fee || 0;
+          // Skip if already in payments table
+          if (finalPayments.find((p) => (p.application as any)?.id === app.id)) continue;
+          if (Number(amount) > 0) {
+            finalPayments.push({
+              id: app.id,
+              amount: Number(amount),
+              currency: "TZS",
+              payment_method: pd.payment_method || "E-Mtaa",
+              transaction_id: pd.transaction_id,
+              receipt_number: pd.receipt_number || `RCP-${app.application_number}`,
+              status: "completed",
+              created_at: app.updated_at || app.created_at,
+              application: {
+                id: app.id,
+                application_number: app.application_number,
+                service_name: app.service_name,
+                status: app.status,
+              },
+            });
+          }
         }
       }
-      setPayments(finalPayments as PaymentRecord[]);
+
+      // Sort by date
+      finalPayments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setPayments(finalPayments);
 
       // 2. Issued applications (receipt vault)
       const { data: issued } = await supabase

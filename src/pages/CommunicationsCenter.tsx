@@ -59,7 +59,7 @@ export function CommunicationsCenter() {
   const [threadReplies, setThreadReplies] = useState<Message[]>([]);
 
   // Compose state
-  const [recipientType, setRecipientType] = useState<"user" | "department">("user");
+  const [recipientType, setRecipientType] = useState<"user" | "department" | "regional" | "district" | "ward" | "support">("user");
   const [recipientSearch, setRecipientSearch] = useState("");
   const [searchResults, setSearchResults] = useState<UserResult[]>([]);
   const [deptResults, setDeptResults] = useState<DeptResult[]>([]);
@@ -113,30 +113,62 @@ export function CommunicationsCenter() {
 
   // ── Search recipients ──────────────────────────────────────────────────
   useEffect(() => {
-    if (!recipientSearch.trim() || recipientSearch.length < 2) {
-      setSearchResults([]);
-      setDeptResults([]);
-      return;
+    if (recipientType === "department") {
+      // Fetch departments
+      if (!recipientSearch.trim() || recipientSearch.length < 1) {
+        // Show all departments
+        supabase.from("government_departments").select("id, name, code").eq("active", true).order("name").limit(20)
+          .then(({ data }) => { setDeptResults((data as DeptResult[]) || []); setSearching(false); });
+        return;
+      }
+      setSearching(true);
+      const timer = setTimeout(async () => {
+        const { data } = await supabase.from("government_departments").select("id, name, code")
+          .or(`name.ilike.%${recipientSearch}%,code.ilike.%${recipientSearch}%`).eq("active", true).limit(10);
+        setDeptResults((data as DeptResult[]) || []);
+        setSearching(false);
+      }, 300);
+      return () => clearTimeout(timer);
     }
+
+    // Staff categories
     setSearching(true);
     const timer = setTimeout(async () => {
-      if (recipientType === "user") {
-        const { data } = await supabase
-          .from("users")
-          .select("id, first_name, last_name, email, role, position")
-          .or(`first_name.ilike.%${recipientSearch}%,last_name.ilike.%${recipientSearch}%,email.ilike.%${recipientSearch}%`)
-          .neq("id", user?.id || "")
-          .limit(8);
-        setSearchResults((data as UserResult[]) || []);
+      let query = supabase.from("users").select("id, first_name, last_name, email, role, position")
+        .eq("role", "staff").neq("id", user?.id || "");
+
+      if (recipientType === "regional") {
+        query = query.not("assigned_region", "is", null);
+        if (recipientSearch && recipientSearch !== "regional") {
+          query = query.or(`first_name.ilike.%${recipientSearch}%,last_name.ilike.%${recipientSearch}%,assigned_region.ilike.%${recipientSearch}%`);
+        }
+      } else if (recipientType === "district") {
+        query = query.not("assigned_district", "is", null);
+        if (recipientSearch && recipientSearch !== "district") {
+          query = query.or(`first_name.ilike.%${recipientSearch}%,last_name.ilike.%${recipientSearch}%,assigned_district.ilike.%${recipientSearch}%`);
+        }
+      } else if (recipientType === "ward") {
+        query = query.not("ward", "is", null);
+        if (recipientSearch && recipientSearch !== "ward") {
+          query = query.or(`first_name.ilike.%${recipientSearch}%,last_name.ilike.%${recipientSearch}%,ward.ilike.%${recipientSearch}%`);
+        }
+      } else if (recipientType === "support") {
+        // Support team = any staff
+        if (recipientSearch && recipientSearch !== "support") {
+          query = query.or(`first_name.ilike.%${recipientSearch}%,last_name.ilike.%${recipientSearch}%`);
+        }
       } else {
-        const { data } = await supabase
-          .from("government_departments")
-          .select("id, name, code")
-          .or(`name.ilike.%${recipientSearch}%,code.ilike.%${recipientSearch}%`)
-          .eq("active", true)
-          .limit(8);
-        setDeptResults((data as DeptResult[]) || []);
+        // Generic user search
+        if (!recipientSearch.trim() || recipientSearch.length < 2) {
+          setSearchResults([]); setSearching(false); return;
+        }
+        query = supabase.from("users").select("id, first_name, last_name, email, role, position")
+          .or(`first_name.ilike.%${recipientSearch}%,last_name.ilike.%${recipientSearch}%,email.ilike.%${recipientSearch}%`)
+          .neq("id", user?.id || "");
       }
+
+      const { data } = await query.limit(10);
+      setSearchResults((data as UserResult[]) || []);
       setSearching(false);
     }, 300);
     return () => clearTimeout(timer);
@@ -166,7 +198,7 @@ export function CommunicationsCenter() {
       showToast(L("Jaza sehemu zote", "Fill all fields"), "error");
       return;
     }
-    if (recipientType === "user" && !selectedRecipient) {
+    if (recipientType !== "department" && !selectedRecipient) {
       showToast(L("Chagua mpokeaji", "Select a recipient"), "error");
       return;
     }
@@ -178,7 +210,7 @@ export function CommunicationsCenter() {
     try {
       const { error } = await supabase.from("messages").insert({
         sender_id: user.id,
-        recipient_id: recipientType === "user" ? selectedRecipient?.id : null,
+        recipient_id: recipientType !== "department" ? selectedRecipient?.id : null,
         recipient_department_id: recipientType === "department" ? selectedDept?.id : null,
         subject: subject.trim(),
         body: body.trim(),
@@ -189,7 +221,7 @@ export function CommunicationsCenter() {
       if (error) throw error;
 
       // Notify recipient
-      if (recipientType === "user" && selectedRecipient) {
+      if (recipientType !== "department" && selectedRecipient) {
         await supabase.from("notifications").insert({
           user_id: selectedRecipient.id,
           title: L("Ujumbe Mpya", "New Message"),
@@ -398,20 +430,35 @@ export function CommunicationsCenter() {
       {view === "compose" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="bg-white rounded-2xl border border-stone-200 p-6 space-y-4">
-          {/* Recipient type toggle */}
-          <div className="flex gap-2">
-            <button onClick={() => { setRecipientType("user"); setRecipientSearch(""); setSelectedRecipient(null); setSelectedDept(null); }}
-              className={cn("flex-1 py-2 rounded-xl text-sm font-bold border transition-colors",
-                recipientType === "user" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "border-stone-200 text-stone-500")}>
-              <User size={14} className="inline mr-1.5" />
-              {L("Mtu", "Person")}
-            </button>
-            <button onClick={() => { setRecipientType("department"); setRecipientSearch(""); setSelectedRecipient(null); setSelectedDept(null); }}
-              className={cn("flex-1 py-2 rounded-xl text-sm font-bold border transition-colors",
-                recipientType === "department" ? "bg-indigo-50 border-indigo-200 text-indigo-700" : "border-stone-200 text-stone-500")}>
-              <Building2 size={14} className="inline mr-1.5" />
-              {L("Idara", "Department")}
-            </button>
+          {/* Recipient category */}
+          <div>
+            <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+              {L("Aina ya Mpokeaji", "Recipient Type")} *
+            </label>
+            <select
+              value={recipientType}
+              onChange={(e) => {
+                setRecipientType(e.target.value as typeof recipientType);
+                setRecipientSearch("");
+                setSelectedRecipient(null);
+                setSelectedDept(null);
+                // Auto-search for staff categories
+                const cat = e.target.value;
+                if (cat === "regional") setRecipientSearch("regional");
+                else if (cat === "district") setRecipientSearch("district");
+                else if (cat === "ward") setRecipientSearch("ward");
+                else if (cat === "support") setRecipientSearch("support");
+              }}
+              className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
+              aria-label="Recipient type"
+            >
+              <option value="user">{L("-- Chagua Aina --", "-- Select Type --")}</option>
+              <option value="regional">{L("Mtumishi wa Mkoa", "Regional Staff")}</option>
+              <option value="district">{L("Mtumishi wa Wilaya", "District Staff")}</option>
+              <option value="ward">{L("Afisa wa Kata", "Ward Officer")}</option>
+              <option value="support">{L("Timu ya Msaada", "Support Team")}</option>
+              <option value="department">{L("Idara ya Serikali", "Government Department")}</option>
+            </select>
           </div>
 
           {/* Recipient search */}
@@ -440,14 +487,23 @@ export function CommunicationsCenter() {
                 <div className="relative">
                   <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
                   <input value={recipientSearch} onChange={(e) => setRecipientSearch(e.target.value)}
-                    placeholder={recipientType === "user"
-                      ? L("Tafuta kwa jina au barua pepe...", "Search by name or email...")
-                      : L("Tafuta idara...", "Search department...")}
+                    placeholder={
+                      recipientType === "department"
+                        ? L("Tafuta idara...", "Search department...")
+                        : recipientType === "regional"
+                          ? L("Tafuta mtumishi wa mkoa...", "Search regional staff...")
+                          : recipientType === "district"
+                            ? L("Tafuta mtumishi wa wilaya...", "Search district staff...")
+                            : recipientType === "ward"
+                              ? L("Tafuta afisa wa kata...", "Search ward officer...")
+                              : recipientType === "support"
+                                ? L("Tafuta timu ya msaada...", "Search support team...")
+                                : L("Tafuta kwa jina...", "Search by name...")}
                     className="w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-sm" />
                   {searching && <Loader2 size={14} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-stone-400" />}
                 </div>
                 {/* Search results dropdown */}
-                {recipientType === "user" && searchResults.length > 0 && (
+                {recipientType !== "department" && searchResults.length > 0 && (
                   <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
                     {searchResults.map((u) => (
                       <button key={u.id} onClick={() => { setSelectedRecipient(u); setRecipientSearch(""); setSearchResults([]); }}
