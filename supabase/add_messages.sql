@@ -66,3 +66,6 @@ CREATE POLICY "Users send messages" ON public.messages
 DROP POLICY IF EXISTS "Users update own messages" ON public.messages;
 CREATE POLICY "Users update own messages" ON public.messages
   FOR UPDATE USING (recipient_id = auth.uid() OR sender_id = auth.uid());
+
+-- Add attachments support to messages (base64-encoded files)
+ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT '[]'::jsonb;

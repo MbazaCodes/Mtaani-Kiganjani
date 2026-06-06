@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail, Send, Inbox, ArrowLeft, Search, Loader2, ChevronRight,
   User, Shield, Building2, Plus, Reply, Paperclip, X, Clock, CheckCircle2,
+  FileText, Download,
   AlertCircle, Star,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -20,6 +21,7 @@ interface Message {
   case_type?: string;
   case_id?: string;
   case_ref?: string;
+  attachments?: { name: string; type: string; dataUrl: string; size: number }[];
   subject: string;
   body: string;
   priority: string;
@@ -69,6 +71,8 @@ export function CommunicationsCenter() {
   const [body, setBody] = useState("");
   const [priority, setPriority] = useState("normal");
   const [caseRef, setCaseRef] = useState("");
+  const [attachments, setAttachments] = useState<{ name: string; type: string; dataUrl: string; size: number }[]>([]);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [sending, setSending] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
@@ -192,6 +196,31 @@ export function CommunicationsCenter() {
     setView("thread");
   };
 
+  // ── File upload handler ──────────────────────────────────────────────────
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const newAttachments: typeof attachments = [];
+    for (const file of files) {
+      if (file.size > 3_000_000) {
+        showToast(L(`${file.name} ni kubwa sana (max 3MB)`, `${file.name} too large (max 3MB)`), "error");
+        continue;
+      }
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+      newAttachments.push({ name: file.name, type: file.type, dataUrl, size: file.size });
+    }
+    setAttachments((prev) => [...prev, ...newAttachments].slice(0, 5));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // ── Send message ───────────────────────────────────────────────────────
   const handleSend = async () => {
     if (!user || !subject.trim() || !body.trim()) {
@@ -217,6 +246,7 @@ export function CommunicationsCenter() {
         priority,
         case_ref: caseRef.trim() || null,
         case_type: caseRef.trim() ? "general" : null,
+        attachments: attachments.length > 0 ? attachments : [],
       });
       if (error) throw error;
 
@@ -297,6 +327,7 @@ export function CommunicationsCenter() {
     setBody("");
     setPriority("normal");
     setCaseRef("");
+    setAttachments([]);
   };
 
   const unreadCount = messages.filter((m) => !m.read).length;
@@ -384,7 +415,10 @@ export function CommunicationsCenter() {
                     {m.priority === "urgent" && <Star size={12} className="text-amber-500 fill-amber-500 shrink-0" />}
                     {!m.read && <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />}
                   </div>
-                  <p className="text-sm text-stone-700 truncate font-medium">{m.subject}</p>
+                  <p className="text-sm text-stone-700 truncate font-medium flex items-center gap-1">
+                    {m.attachments && m.attachments.length > 0 && <Paperclip size={11} className="text-stone-400 shrink-0" />}
+                    {m.subject}
+                  </p>
                   <p className="text-xs text-stone-400 truncate mt-0.5">{m.body}</p>
                 </div>
                 <div className="text-right shrink-0">
@@ -573,6 +607,50 @@ export function CommunicationsCenter() {
             </div>
           </div>
 
+          {/* Attachments */}
+          <div>
+            <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+              {L("Viambatisho", "Attachments")} ({attachments.length}/5)
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,application/pdf,.doc,.docx"
+              onChange={handleFileSelect}
+              className="hidden"
+              aria-label="Upload attachments"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={attachments.length >= 5}
+              className="w-full py-3 border-2 border-dashed border-stone-200 rounded-xl text-sm font-bold text-stone-500 hover:border-emerald-300 hover:text-emerald-600 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <Paperclip size={16} />
+              {L("Pakia Hati au Picha", "Upload Documents or Media")}
+            </button>
+            {attachments.length > 0 && (
+              <div className="mt-2 space-y-1.5">
+                {attachments.map((att, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-stone-50 rounded-lg px-3 py-2 text-sm">
+                    {att.type.startsWith("image/") ? (
+                      <img src={att.dataUrl} alt={att.name} className="w-8 h-8 rounded object-cover shrink-0" />
+                    ) : (
+                      <FileText size={16} className="text-stone-400 shrink-0" />
+                    )}
+                    <span className="flex-1 truncate text-stone-700">{att.name}</span>
+                    <span className="text-xs text-stone-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
+                    <button onClick={() => removeAttachment(i)} className="p-1 text-stone-400 hover:text-red-500 shrink-0" aria-label="Remove attachment">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-[10px] text-stone-400 mt-1">{L("Picha, PDF, Word. Max 3MB kila moja.", "Images, PDF, Word. Max 3MB each.")}</p>
+          </div>
+
           <button onClick={handleSend} disabled={sending || !subject.trim() || !body.trim()}
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
             {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
@@ -604,6 +682,23 @@ export function CommunicationsCenter() {
               <p className="text-xs text-blue-600 font-mono mt-2 flex items-center gap-1">
                 <Paperclip size={10} /> {selectedThread.case_ref}
               </p>
+            )}
+            {selectedThread.attachments && selectedThread.attachments.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-stone-100 space-y-1.5">
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{L("Viambatisho", "Attachments")}</p>
+                {selectedThread.attachments.map((att, i) => (
+                  <a key={i} href={att.dataUrl} download={att.name} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-stone-50 rounded-lg px-3 py-2 text-sm hover:bg-stone-100">
+                    {att.type.startsWith("image/") ? (
+                      <img src={att.dataUrl} alt={att.name} className="w-10 h-10 rounded object-cover shrink-0" />
+                    ) : (
+                      <FileText size={18} className="text-stone-400 shrink-0" />
+                    )}
+                    <span className="flex-1 truncate text-stone-700 font-medium">{att.name}</span>
+                    <Download size={14} className="text-emerald-600 shrink-0" />
+                  </a>
+                ))}
+              </div>
             )}
           </div>
 
