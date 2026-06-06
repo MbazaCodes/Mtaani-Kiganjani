@@ -101,7 +101,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = await fetchUserProfile(session.user.id);
       // Department membership detection
       if (profile) {
-        console.log("[AUTH] Profile loaded:", { id: profile.id, role: profile.role, department_id: profile.department_id });
+        console.log("[AUTH] Profile loaded:", {
+          id: profile.id,
+          role: profile.role,
+          department_id: profile.department_id,
+        });
         if (profile.department_id) {
           profile.is_department_member = true;
           console.log("[AUTH] Dept member via department_id column");

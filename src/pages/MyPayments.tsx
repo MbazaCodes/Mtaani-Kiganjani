@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-  Wallet, Download, Search, Receipt, TrendingUp, Clock,
-  CheckCircle2, AlertCircle, Loader2, Calendar, FileText, ChevronRight,
+  Wallet,
+  Download,
+  Search,
+  Receipt,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Calendar,
+  FileText,
+  ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -76,10 +86,12 @@ export function MyPayments() {
       //    (covers cases where payment was processed but no payments table entry)
       const { data: paidApps } = await supabase
         .from("applications")
-        .select("id, application_number, service_name, status, form_data, payment_data, created_at, updated_at")
+        .select(
+          "id, application_number, service_name, status, form_data, payment_data, created_at, updated_at",
+        )
         .eq("user_id", user.id)
         .in("status", ["paid", "issued", "approved", "verified"]);
-      
+
       if (paidApps) {
         for (const app of paidApps) {
           const pd = (app.payment_data || {}) as Record<string, any>;
@@ -109,7 +121,9 @@ export function MyPayments() {
       }
 
       // Sort by date
-      finalPayments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      finalPayments.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
       setPayments(finalPayments);
 
       // 2. Issued applications (receipt vault)
@@ -141,7 +155,11 @@ export function MyPayments() {
     const now = new Date();
     const thisMonth = payments.filter((p) => {
       const d = new Date(p.created_at);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && p.status === "completed";
+      return (
+        d.getMonth() === now.getMonth() &&
+        d.getFullYear() === now.getFullYear() &&
+        p.status === "completed"
+      );
     });
     const thisYear = payments.filter((p) => {
       const d = new Date(p.created_at);
@@ -162,7 +180,13 @@ export function MyPayments() {
     });
     const topService = Object.entries(serviceCounts).sort((a, b) => b[1] - a[1])[0];
 
-    return { totalMonth, totalYear, outstandingAmount, outstandingCount: outstandingApps.length, topService };
+    return {
+      totalMonth,
+      totalYear,
+      outstandingAmount,
+      outstandingCount: outstandingApps.length,
+      topService,
+    };
   }, [payments, outstandingApps]);
 
   // ── Search filter ──────────────────────────────────────────────────────
@@ -171,8 +195,12 @@ export function MyPayments() {
         (p) =>
           (p.receipt_number || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
           (p.transaction_id || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          ((p.application as PaymentRecord["application"])?.application_number || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          ((p.application as PaymentRecord["application"])?.service_name || "").toLowerCase().includes(searchQuery.toLowerCase()),
+          ((p.application as PaymentRecord["application"])?.application_number || "")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          ((p.application as PaymentRecord["application"])?.service_name || "")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()),
       )
     : payments;
 
@@ -188,7 +216,11 @@ export function MyPayments() {
 
   // ── RENDER ─────────────────────────────────────────────────────────────
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-stone-900 tracking-tight flex items-center gap-2">
@@ -196,7 +228,10 @@ export function MyPayments() {
           {L("Malipo Yangu", "My Payments")}
         </h1>
         <p className="text-sm text-stone-500 mt-0.5">
-          {L("Historia ya malipo, stakabadhi, na madeni", "Payment history, receipts, and obligations")}
+          {L(
+            "Historia ya malipo, stakabadhi, na madeni",
+            "Payment history, receipts, and obligations",
+          )}
         </p>
       </div>
 
@@ -220,17 +255,29 @@ export function MyPayments() {
           </div>
           <p className="text-lg font-black text-blue-700">{fmt(analytics.totalYear)}</p>
         </div>
-        <div className={cn(
-          "border rounded-2xl p-4",
-          analytics.outstandingCount > 0 ? "bg-amber-50 border-amber-100" : "bg-stone-50 border-stone-100"
-        )}>
+        <div
+          className={cn(
+            "border rounded-2xl p-4",
+            analytics.outstandingCount > 0
+              ? "bg-amber-50 border-amber-100"
+              : "bg-stone-50 border-stone-100",
+          )}
+        >
           <div className="flex items-center gap-2 mb-1">
-            <AlertCircle size={14} className={analytics.outstandingCount > 0 ? "text-amber-600" : "text-stone-400"} />
+            <AlertCircle
+              size={14}
+              className={analytics.outstandingCount > 0 ? "text-amber-600" : "text-stone-400"}
+            />
             <span className="text-[10px] font-bold text-stone-500 uppercase">
               {L("Madeni", "Outstanding")}
             </span>
           </div>
-          <p className={cn("text-lg font-black", analytics.outstandingCount > 0 ? "text-amber-700" : "text-stone-400")}>
+          <p
+            className={cn(
+              "text-lg font-black",
+              analytics.outstandingCount > 0 ? "text-amber-700" : "text-stone-400",
+            )}
+          >
             {analytics.outstandingCount > 0 ? fmt(analytics.outstandingAmount) : "—"}
           </p>
           {analytics.outstandingCount > 0 && (
@@ -258,25 +305,37 @@ export function MyPayments() {
       {/* Tabs + Search */}
       <div className="space-y-3">
         <div className="flex gap-1 bg-stone-100 rounded-xl p-1">
-          {([
-            { key: "history", label: L("Historia", "History"), count: payments.length },
-            { key: "receipts", label: L("Stakabadhi", "Receipts"), count: issuedApps.length },
-            { key: "outstanding", label: L("Madeni", "Outstanding"), count: outstandingApps.length },
-          ] as const).map((tab) => (
+          {(
+            [
+              { key: "history", label: L("Historia", "History"), count: payments.length },
+              { key: "receipts", label: L("Stakabadhi", "Receipts"), count: issuedApps.length },
+              {
+                key: "outstanding",
+                label: L("Madeni", "Outstanding"),
+                count: outstandingApps.length,
+              },
+            ] as const
+          ).map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
                 "flex-1 py-2.5 px-3 rounded-lg text-sm font-bold transition-colors",
-                activeTab === tab.key ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-700",
+                activeTab === tab.key
+                  ? "bg-white text-stone-900 shadow-sm"
+                  : "text-stone-500 hover:text-stone-700",
               )}
             >
               {tab.label}
               {tab.count > 0 && (
-                <span className={cn(
-                  "ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full",
-                  activeTab === tab.key ? "bg-emerald-100 text-emerald-700" : "bg-stone-200 text-stone-500"
-                )}>
+                <span
+                  className={cn(
+                    "ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full",
+                    activeTab === tab.key
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-stone-200 text-stone-500",
+                  )}
+                >
                   {tab.count}
                 </span>
               )}
@@ -290,7 +349,10 @@ export function MyPayments() {
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={L("Tafuta kwa nambari au huduma...", "Search by reference or service...")}
+              placeholder={L(
+                "Tafuta kwa nambari au huduma...",
+                "Search by reference or service...",
+              )}
               className="w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -310,17 +372,28 @@ export function MyPayments() {
               {filteredPayments.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-2xl border border-stone-200">
                   <Wallet size={40} className="mx-auto text-stone-300 mb-3" />
-                  <p className="font-bold text-stone-500">{L("Hakuna malipo bado", "No payments yet")}</p>
+                  <p className="font-bold text-stone-500">
+                    {L("Hakuna malipo bado", "No payments yet")}
+                  </p>
                 </div>
               ) : (
                 filteredPayments.map((p) => {
                   const app = p.application as PaymentRecord["application"];
                   return (
-                    <div key={p.id} className="bg-white border border-stone-200 rounded-2xl p-4 flex items-center gap-4">
-                      <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                        p.status === "completed" ? "bg-emerald-50" : p.status === "failed" ? "bg-red-50" : "bg-amber-50"
-                      )}>
+                    <div
+                      key={p.id}
+                      className="bg-white border border-stone-200 rounded-2xl p-4 flex items-center gap-4"
+                    >
+                      <div
+                        className={cn(
+                          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                          p.status === "completed"
+                            ? "bg-emerald-50"
+                            : p.status === "failed"
+                              ? "bg-red-50"
+                              : "bg-amber-50",
+                        )}
+                      >
                         {p.status === "completed" ? (
                           <CheckCircle2 size={18} className="text-emerald-600" />
                         ) : p.status === "failed" ? (
@@ -334,15 +407,27 @@ export function MyPayments() {
                           {app?.service_name || L("Malipo", "Payment")}
                         </p>
                         <p className="text-xs text-stone-400">
-                          {app?.application_number} · {new Date(p.created_at).toLocaleDateString("sw-TZ")}
+                          {app?.application_number} ·{" "}
+                          {new Date(p.created_at).toLocaleDateString("sw-TZ")}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-sm font-black text-stone-900">{fmt(Number(p.amount))}</p>
-                        <p className={cn("text-[10px] font-bold uppercase",
-                          p.status === "completed" ? "text-emerald-600" : p.status === "failed" ? "text-red-500" : "text-amber-600"
-                        )}>
-                          {p.status === "completed" ? L("Imelipwa", "Paid") : p.status === "failed" ? L("Imeshindwa", "Failed") : L("Inasubiri", "Pending")}
+                        <p
+                          className={cn(
+                            "text-[10px] font-bold uppercase",
+                            p.status === "completed"
+                              ? "text-emerald-600"
+                              : p.status === "failed"
+                                ? "text-red-500"
+                                : "text-amber-600",
+                          )}
+                        >
+                          {p.status === "completed"
+                            ? L("Imelipwa", "Paid")
+                            : p.status === "failed"
+                              ? L("Imeshindwa", "Failed")
+                              : L("Inasubiri", "Pending")}
                         </p>
                       </div>
                     </div>
@@ -358,18 +443,26 @@ export function MyPayments() {
               {filteredReceipts.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-2xl border border-stone-200">
                   <Receipt size={40} className="mx-auto text-stone-300 mb-3" />
-                  <p className="font-bold text-stone-500">{L("Hakuna stakabadhi", "No receipts yet")}</p>
+                  <p className="font-bold text-stone-500">
+                    {L("Hakuna stakabadhi", "No receipts yet")}
+                  </p>
                 </div>
               ) : (
                 filteredReceipts.map((app) => (
-                  <div key={app.id} className="bg-white border border-stone-200 rounded-2xl p-4 flex items-center gap-4">
+                  <div
+                    key={app.id}
+                    className="bg-white border border-stone-200 rounded-2xl p-4 flex items-center gap-4"
+                  >
                     <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
                       <FileText size={18} className="text-purple-600" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-stone-900 truncate">{app.service_name}</p>
+                      <p className="text-sm font-bold text-stone-900 truncate">
+                        {app.service_name}
+                      </p>
                       <p className="text-xs text-stone-400">
-                        {app.application_number} · {new Date(app.created_at).toLocaleDateString("sw-TZ")}
+                        {app.application_number} ·{" "}
+                        {new Date(app.created_at).toLocaleDateString("sw-TZ")}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -396,26 +489,37 @@ export function MyPayments() {
               {outstandingApps.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-2xl border border-stone-200">
                   <CheckCircle2 size={40} className="mx-auto text-emerald-300 mb-3" />
-                  <p className="font-bold text-emerald-600">{L("Hakuna madeni!", "No outstanding payments!")}</p>
-                  <p className="text-sm text-stone-400 mt-1">{L("Malipo yako yote yamelipwa", "All your payments are settled")}</p>
+                  <p className="font-bold text-emerald-600">
+                    {L("Hakuna madeni!", "No outstanding payments!")}
+                  </p>
+                  <p className="text-sm text-stone-400 mt-1">
+                    {L("Malipo yako yote yamelipwa", "All your payments are settled")}
+                  </p>
                 </div>
               ) : (
                 outstandingApps.map((app) => {
                   const fee = app.form_data?.service_fee || app.payment_data?.amount || 0;
                   return (
-                    <div key={app.id} className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-4">
+                    <div
+                      key={app.id}
+                      className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-4"
+                    >
                       <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
                         <Clock size={18} className="text-amber-700" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-stone-900 truncate">{app.service_name}</p>
+                        <p className="text-sm font-bold text-stone-900 truncate">
+                          {app.service_name}
+                        </p>
                         <p className="text-xs text-stone-500">
                           {app.application_number} · {L("Inasubiri malipo", "Pending payment")}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-sm font-black text-amber-800">{fmt(Number(fee))}</p>
-                        <p className="text-[10px] font-bold text-amber-600 uppercase">{L("Madeni", "Due")}</p>
+                        <p className="text-[10px] font-bold text-amber-600 uppercase">
+                          {L("Madeni", "Due")}
+                        </p>
                       </div>
                     </div>
                   );

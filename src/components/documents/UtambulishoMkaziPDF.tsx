@@ -239,8 +239,8 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
           </Text>
         </View>
       </Page>
-        {/* Page 2: Payment Receipt */}
-        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
+      {/* Page 2: Payment Receipt */}
+      <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };

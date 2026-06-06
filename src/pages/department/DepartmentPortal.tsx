@@ -311,11 +311,13 @@ export function DepartmentPortal() {
 
       {/* Tabs: Escalations | Tickets | Reports */}
       <div className="flex gap-1 bg-stone-100 rounded-xl p-1 mb-4">
-        {([
-          { key: "escalations", label: L("Maombi", "Escalations"), count: escalations.length },
-          { key: "tickets", label: L("Tiketi", "Tickets"), count: tickets.length },
-          { key: "reports", label: L("Taarifa", "Reports"), count: reports.length },
-        ] as const).map((tab) => (
+        {(
+          [
+            { key: "escalations", label: L("Maombi", "Escalations"), count: escalations.length },
+            { key: "tickets", label: L("Tiketi", "Tickets"), count: tickets.length },
+            { key: "reports", label: L("Taarifa", "Reports"), count: reports.length },
+          ] as const
+        ).map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
@@ -338,20 +340,27 @@ export function DepartmentPortal() {
             <div className="text-center py-12 bg-stone-50 rounded-2xl">
               <p className="text-stone-500 font-bold">{L("Hakuna tiketi", "No tickets")}</p>
             </div>
-          ) : tickets.map((t: any) => (
-            <div key={t.id} className="bg-white border border-stone-200 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-mono text-stone-400">{t.ticket_number}</span>
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-blue-100 text-blue-800">{t.status?.replace(/_/g, " ")}</span>
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-amber-50 text-amber-700">{t.priority}</span>
+          ) : (
+            tickets.map((t: any) => (
+              <div key={t.id} className="bg-white border border-stone-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-mono text-stone-400">{t.ticket_number}</span>
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-blue-100 text-blue-800">
+                    {t.status?.replace(/_/g, " ")}
+                  </span>
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-amber-50 text-amber-700">
+                    {t.priority}
+                  </span>
+                </div>
+                <p className="font-bold text-stone-900 text-sm">{t.subject}</p>
+                <p className="text-xs text-stone-500 mt-1 line-clamp-2">{t.description}</p>
+                <p className="text-xs text-stone-400 mt-1">
+                  {t.citizen?.first_name} {t.citizen?.last_name} · {t.ward || t.district} ·{" "}
+                  {new Date(t.created_at).toLocaleDateString("sw-TZ")}
+                </p>
               </div>
-              <p className="font-bold text-stone-900 text-sm">{t.subject}</p>
-              <p className="text-xs text-stone-500 mt-1 line-clamp-2">{t.description}</p>
-              <p className="text-xs text-stone-400 mt-1">
-                {t.citizen?.first_name} {t.citizen?.last_name} · {t.ward || t.district} · {new Date(t.created_at).toLocaleDateString("sw-TZ")}
-              </p>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 
@@ -362,297 +371,303 @@ export function DepartmentPortal() {
             <div className="text-center py-12 bg-stone-50 rounded-2xl">
               <p className="text-stone-500 font-bold">{L("Hakuna taarifa", "No reports")}</p>
             </div>
-          ) : reports.map((r: any) => (
-            <div key={r.id} className="bg-white border border-stone-200 rounded-2xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-mono text-stone-400">{r.report_number}</span>
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-blue-100 text-blue-800">{r.status?.replace(/_/g, " ")}</span>
+          ) : (
+            reports.map((r: any) => (
+              <div key={r.id} className="bg-white border border-stone-200 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-mono text-stone-400">{r.report_number}</span>
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-blue-100 text-blue-800">
+                    {r.status?.replace(/_/g, " ")}
+                  </span>
+                </div>
+                <p className="font-bold text-stone-900 text-sm">{r.title}</p>
+                <p className="text-xs text-stone-500 mt-1 line-clamp-2">{r.description}</p>
+                <p className="text-xs text-stone-400 mt-1">
+                  {r.citizen?.first_name} {r.citizen?.last_name} · {r.ward || r.district} ·{" "}
+                  {new Date(r.created_at).toLocaleDateString("sw-TZ")}
+                </p>
               </div>
-              <p className="font-bold text-stone-900 text-sm">{r.title}</p>
-              <p className="text-xs text-stone-500 mt-1 line-clamp-2">{r.description}</p>
-              <p className="text-xs text-stone-400 mt-1">
-                {r.citizen?.first_name} {r.citizen?.last_name} · {r.ward || r.district} · {new Date(r.created_at).toLocaleDateString("sw-TZ")}
-              </p>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 
       {/* Escalations tab */}
       {activeTab === "escalations" && (
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-black text-stone-700 uppercase tracking-wider flex items-center gap-2">
-            <Inbox size={16} />
-            {L("Maombi Yaliyopandishwa", "Escalation Inbox")} ({filtered.length})
-          </h2>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-stone-200 rounded-xl text-sm bg-white"
-          >
-            <option value="all">
-              {L("Zote", "All")} ({stats.total})
-            </option>
-            <option value="pending">
-              {L("Zinazosubiri", "Pending")} ({stats.pending})
-            </option>
-            <option value="accepted">
-              {L("Zimekubaliwa", "Accepted")} ({stats.accepted})
-            </option>
-            <option value="responded">
-              {L("Zimejibiwa", "Responded")} ({stats.responded})
-            </option>
-            <option value="resolved">
-              {L("Zimemalizika", "Resolved")} ({stats.resolved})
-            </option>
-          </select>
-        </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-16 text-stone-400">
-            <Loader2 size={24} className="animate-spin mr-2" />
-            {L("Inapakia...", "Loading...")}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-black text-stone-700 uppercase tracking-wider flex items-center gap-2">
+              <Inbox size={16} />
+              {L("Maombi Yaliyopandishwa", "Escalation Inbox")} ({filtered.length})
+            </h2>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-stone-200 rounded-xl text-sm bg-white"
+            >
+              <option value="all">
+                {L("Zote", "All")} ({stats.total})
+              </option>
+              <option value="pending">
+                {L("Zinazosubiri", "Pending")} ({stats.pending})
+              </option>
+              <option value="accepted">
+                {L("Zimekubaliwa", "Accepted")} ({stats.accepted})
+              </option>
+              <option value="responded">
+                {L("Zimejibiwa", "Responded")} ({stats.responded})
+              </option>
+              <option value="resolved">
+                {L("Zimemalizika", "Resolved")} ({stats.resolved})
+              </option>
+            </select>
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-16 bg-stone-50 rounded-2xl">
-            <Inbox size={40} className="mx-auto text-stone-300 mb-3" />
-            <p className="text-stone-500 font-bold">
-              {statusFilter === "all"
-                ? L("Hakuna maombi yaliyopandishwa bado", "No escalations yet")
-                : L("Hakuna maombi katika hali hii", "No escalations with this status")}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filtered.map((esc) => {
-              const app = esc.applications as Partial<Application> | undefined;
-              const fd = (app?.form_data || {}) as Record<string, string>;
-              const from = esc.from_user as Escalation["from_user"];
-              const isExpanded = selectedEsc?.id === esc.id && !showResponseModal;
 
-              return (
-                <div
-                  key={esc.id}
-                  className="bg-white border border-stone-200 rounded-2xl overflow-hidden"
-                >
-                  {/* Row */}
+          {loading ? (
+            <div className="flex items-center justify-center py-16 text-stone-400">
+              <Loader2 size={24} className="animate-spin mr-2" />
+              {L("Inapakia...", "Loading...")}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16 bg-stone-50 rounded-2xl">
+              <Inbox size={40} className="mx-auto text-stone-300 mb-3" />
+              <p className="text-stone-500 font-bold">
+                {statusFilter === "all"
+                  ? L("Hakuna maombi yaliyopandishwa bado", "No escalations yet")
+                  : L("Hakuna maombi katika hali hii", "No escalations with this status")}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((esc) => {
+                const app = esc.applications as Partial<Application> | undefined;
+                const fd = (app?.form_data || {}) as Record<string, string>;
+                const from = esc.from_user as Escalation["from_user"];
+                const isExpanded = selectedEsc?.id === esc.id && !showResponseModal;
+
+                return (
                   <div
-                    className="flex items-center justify-between px-4 sm:px-5 py-4 cursor-pointer hover:bg-stone-50/50 transition-colors"
-                    onClick={() => setSelectedEsc(isExpanded ? null : esc)}
+                    key={esc.id}
+                    className="bg-white border border-stone-200 rounded-2xl overflow-hidden"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div
-                        className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                          esc.status === "pending"
-                            ? "bg-amber-50 text-amber-600"
-                            : esc.status === "resolved"
-                              ? "bg-emerald-50 text-emerald-600"
-                              : "bg-blue-50 text-blue-600",
-                        )}
-                      >
-                        {esc.status === "pending" ? (
-                          <Clock size={20} />
-                        ) : esc.status === "resolved" ? (
-                          <CheckCircle2 size={20} />
-                        ) : (
-                          <ArrowUpRight size={20} />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-bold text-stone-900 text-sm truncate">
-                          {app?.service_name || "—"}{" "}
-                          <span className="font-mono text-xs text-stone-400">
-                            {app?.application_number}
-                          </span>
-                        </p>
-                        <p className="text-xs text-stone-400 truncate">
-                          {L("Kutoka", "From")}: {from?.first_name} {from?.last_name} ·{" "}
-                          {new Date(esc.created_at).toLocaleDateString("sw-TZ")}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
-                          PRIORITY_COLORS[esc.priority],
-                        )}
-                      >
-                        {esc.priority}
-                      </span>
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
-                          STATUS_COLORS[esc.status],
-                        )}
-                      >
-                        {esc.status}
-                      </span>
-                      {isExpanded ? (
-                        <ChevronDown size={16} className="text-stone-400" />
-                      ) : (
-                        <ChevronRight size={16} className="text-stone-400" />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Expanded Detail */}
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-stone-100"
-                      >
-                        <div className="p-5 space-y-4">
-                          {/* Escalation note */}
-                          {esc.escalation_note && (
-                            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
-                              <p className="text-xs font-bold text-amber-700 mb-1 flex items-center gap-1">
-                                <MessageSquare size={12} />
-                                {L("Maelezo ya Kupandisha", "Escalation Note")}
-                              </p>
-                              <p className="text-sm text-stone-700">{esc.escalation_note}</p>
-                            </div>
+                    {/* Row */}
+                    <div
+                      className="flex items-center justify-between px-4 sm:px-5 py-4 cursor-pointer hover:bg-stone-50/50 transition-colors"
+                      onClick={() => setSelectedEsc(isExpanded ? null : esc)}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div
+                          className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                            esc.status === "pending"
+                              ? "bg-amber-50 text-amber-600"
+                              : esc.status === "resolved"
+                                ? "bg-emerald-50 text-emerald-600"
+                                : "bg-blue-50 text-blue-600",
                           )}
-
-                          {/* Response note */}
-                          {esc.response_note && (
-                            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
-                              <p className="text-xs font-bold text-emerald-700 mb-1 flex items-center gap-1">
-                                <Send size={12} />
-                                {L("Jibu la Idara", "Department Response")}
-                              </p>
-                              <p className="text-sm text-stone-700">{esc.response_note}</p>
-                            </div>
-                          )}
-
-                          {/* Application details */}
-                          <div className="bg-stone-50 rounded-xl p-4">
-                            <p className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                              <FileText size={12} />
-                              {L("Taarifa za Maombi", "Application Details")}
-                            </p>
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                              <div>
-                                <span className="text-stone-400 text-xs">
-                                  {L("Huduma", "Service")}
-                                </span>
-                                <p className="font-bold text-stone-800">{app?.service_name}</p>
-                              </div>
-                              <div>
-                                <span className="text-stone-400 text-xs">
-                                  {L("Nambari", "Number")}
-                                </span>
-                                <p className="font-mono text-stone-800">
-                                  {app?.application_number}
-                                </p>
-                              </div>
-                              <div>
-                                <span className="text-stone-400 text-xs">
-                                  {L("Hali ya Maombi", "App Status")}
-                                </span>
-                                <p className="font-bold text-stone-800 capitalize">{app?.status}</p>
-                              </div>
-                              <div>
-                                <span className="text-stone-400 text-xs">
-                                  {L("Tarehe", "Date")}
-                                </span>
-                                <p className="text-stone-800">
-                                  {app?.created_at
-                                    ? new Date(app.created_at).toLocaleDateString("sw-TZ")
-                                    : "—"}
-                                </p>
-                              </div>
-                              {fd.applicant_name && (
-                                <div className="col-span-2">
-                                  <span className="text-stone-400 text-xs flex items-center gap-1">
-                                    <User size={10} /> {L("Mwombaji", "Applicant")}
-                                  </span>
-                                  <p className="font-bold text-stone-800">
-                                    {fd.applicant_name ||
-                                      fd.complainant_name ||
-                                      fd.payer_name ||
-                                      fd.owner_name ||
-                                      "—"}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* From staff */}
-                          <div className="flex items-center gap-3 text-xs text-stone-400">
-                            <User size={12} />
-                            <span>
-                              {L("Imepandishwa na", "Escalated by")}:{" "}
-                              <span className="font-bold text-stone-600">
-                                {from?.first_name} {from?.last_name}
-                              </span>
-                            </span>
-                            {from?.email && (
-                              <>
-                                <Mail size={11} />
-                                <span>{from.email}</span>
-                              </>
-                            )}
-                            {from?.phone && (
-                              <>
-                                <Phone size={11} />
-                                <span>{from.phone}</span>
-                              </>
-                            )}
-                          </div>
-
-                          {/* Action buttons */}
-                          {esc.status !== "resolved" && esc.status !== "rejected" && (
-                            <div className="flex flex-wrap gap-2 pt-2 border-t border-stone-100">
-                              {esc.status === "pending" && (
-                                <button
-                                  onClick={() => openResponseModal("accepted", esc)}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
-                                >
-                                  <CheckCircle2 size={13} />
-                                  {L("Kubali", "Accept")}
-                                </button>
-                              )}
-                              <button
-                                onClick={() => openResponseModal("responded", esc)}
-                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
-                              >
-                                <MessageSquare size={13} />
-                                {L("Jibu", "Respond")}
-                              </button>
-                              <button
-                                onClick={() => openResponseModal("resolved", esc)}
-                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
-                              >
-                                <CheckCircle2 size={13} />
-                                {L("Maliza", "Resolve")}
-                              </button>
-                              <button
-                                onClick={() => openResponseModal("rejected", esc)}
-                                className="px-4 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
-                              >
-                                <X size={13} />
-                                {L("Kataa", "Reject")}
-                              </button>
-                            </div>
+                        >
+                          {esc.status === "pending" ? (
+                            <Clock size={20} />
+                          ) : esc.status === "resolved" ? (
+                            <CheckCircle2 size={20} />
+                          ) : (
+                            <ArrowUpRight size={20} />
                           )}
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-stone-900 text-sm truncate">
+                            {app?.service_name || "—"}{" "}
+                            <span className="font-mono text-xs text-stone-400">
+                              {app?.application_number}
+                            </span>
+                          </p>
+                          <p className="text-xs text-stone-400 truncate">
+                            {L("Kutoka", "From")}: {from?.first_name} {from?.last_name} ·{" "}
+                            {new Date(esc.created_at).toLocaleDateString("sw-TZ")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <span
+                          className={cn(
+                            "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                            PRIORITY_COLORS[esc.priority],
+                          )}
+                        >
+                          {esc.priority}
+                        </span>
+                        <span
+                          className={cn(
+                            "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                            STATUS_COLORS[esc.status],
+                          )}
+                        >
+                          {esc.status}
+                        </span>
+                        {isExpanded ? (
+                          <ChevronDown size={16} className="text-stone-400" />
+                        ) : (
+                          <ChevronRight size={16} className="text-stone-400" />
+                        )}
+                      </div>
+                    </div>
 
+                    {/* Expanded Detail */}
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="border-t border-stone-100"
+                        >
+                          <div className="p-5 space-y-4">
+                            {/* Escalation note */}
+                            {esc.escalation_note && (
+                              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+                                <p className="text-xs font-bold text-amber-700 mb-1 flex items-center gap-1">
+                                  <MessageSquare size={12} />
+                                  {L("Maelezo ya Kupandisha", "Escalation Note")}
+                                </p>
+                                <p className="text-sm text-stone-700">{esc.escalation_note}</p>
+                              </div>
+                            )}
+
+                            {/* Response note */}
+                            {esc.response_note && (
+                              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                                <p className="text-xs font-bold text-emerald-700 mb-1 flex items-center gap-1">
+                                  <Send size={12} />
+                                  {L("Jibu la Idara", "Department Response")}
+                                </p>
+                                <p className="text-sm text-stone-700">{esc.response_note}</p>
+                              </div>
+                            )}
+
+                            {/* Application details */}
+                            <div className="bg-stone-50 rounded-xl p-4">
+                              <p className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                <FileText size={12} />
+                                {L("Taarifa za Maombi", "Application Details")}
+                              </p>
+                              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                <div>
+                                  <span className="text-stone-400 text-xs">
+                                    {L("Huduma", "Service")}
+                                  </span>
+                                  <p className="font-bold text-stone-800">{app?.service_name}</p>
+                                </div>
+                                <div>
+                                  <span className="text-stone-400 text-xs">
+                                    {L("Nambari", "Number")}
+                                  </span>
+                                  <p className="font-mono text-stone-800">
+                                    {app?.application_number}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-stone-400 text-xs">
+                                    {L("Hali ya Maombi", "App Status")}
+                                  </span>
+                                  <p className="font-bold text-stone-800 capitalize">
+                                    {app?.status}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-stone-400 text-xs">
+                                    {L("Tarehe", "Date")}
+                                  </span>
+                                  <p className="text-stone-800">
+                                    {app?.created_at
+                                      ? new Date(app.created_at).toLocaleDateString("sw-TZ")
+                                      : "—"}
+                                  </p>
+                                </div>
+                                {fd.applicant_name && (
+                                  <div className="col-span-2">
+                                    <span className="text-stone-400 text-xs flex items-center gap-1">
+                                      <User size={10} /> {L("Mwombaji", "Applicant")}
+                                    </span>
+                                    <p className="font-bold text-stone-800">
+                                      {fd.applicant_name ||
+                                        fd.complainant_name ||
+                                        fd.payer_name ||
+                                        fd.owner_name ||
+                                        "—"}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* From staff */}
+                            <div className="flex items-center gap-3 text-xs text-stone-400">
+                              <User size={12} />
+                              <span>
+                                {L("Imepandishwa na", "Escalated by")}:{" "}
+                                <span className="font-bold text-stone-600">
+                                  {from?.first_name} {from?.last_name}
+                                </span>
+                              </span>
+                              {from?.email && (
+                                <>
+                                  <Mail size={11} />
+                                  <span>{from.email}</span>
+                                </>
+                              )}
+                              {from?.phone && (
+                                <>
+                                  <Phone size={11} />
+                                  <span>{from.phone}</span>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Action buttons */}
+                            {esc.status !== "resolved" && esc.status !== "rejected" && (
+                              <div className="flex flex-wrap gap-2 pt-2 border-t border-stone-100">
+                                {esc.status === "pending" && (
+                                  <button
+                                    onClick={() => openResponseModal("accepted", esc)}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                  >
+                                    <CheckCircle2 size={13} />
+                                    {L("Kubali", "Accept")}
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => openResponseModal("responded", esc)}
+                                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                >
+                                  <MessageSquare size={13} />
+                                  {L("Jibu", "Respond")}
+                                </button>
+                                <button
+                                  onClick={() => openResponseModal("resolved", esc)}
+                                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                >
+                                  <CheckCircle2 size={13} />
+                                  {L("Maliza", "Resolve")}
+                                </button>
+                                <button
+                                  onClick={() => openResponseModal("rejected", esc)}
+                                  className="px-4 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                                >
+                                  <X size={13} />
+                                  {L("Kataa", "Reject")}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Response Modal */}

@@ -228,8 +228,8 @@ export const KibariSherehePDF: React.FC<DocumentPDFProps> = ({ application, lang
           </Text>
         </View>
       </Page>
-        {/* Page 2: Payment Receipt */}
-        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
+      {/* Page 2: Payment Receipt */}
+      <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };

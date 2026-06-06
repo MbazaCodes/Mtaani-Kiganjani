@@ -402,8 +402,16 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
 
   const resetForm = () => {
     setNewStaff({
-      email: "", firstName: "", lastName: "", phone: "", employeeNumber: "",
-      role: "staff", password: "", staffLevel: "ward", ward: "", departmentId: "",
+      email: "",
+      firstName: "",
+      lastName: "",
+      phone: "",
+      employeeNumber: "",
+      role: "staff",
+      password: "",
+      staffLevel: "ward",
+      ward: "",
+      departmentId: "",
     });
     setSelectedRegion("");
     setSelectedDistrict("");
@@ -727,20 +735,33 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                             {s.ward ? ` / ${s.ward}` : ""}
                           </span>
                         </div>
-                        <span className={cn(
-                          "text-[10px] font-bold uppercase tracking-wider mt-0.5 inline-block px-1.5 py-0.5 rounded",
-                          s.department_id ? "bg-indigo-50 text-indigo-600"
-                            : s.ward ? "bg-emerald-50 text-emerald-600"
-                            : s.assigned_district ? "bg-blue-50 text-blue-600"
-                            : "bg-amber-50 text-amber-600"
-                        )}>
+                        <span
+                          className={cn(
+                            "text-[10px] font-bold uppercase tracking-wider mt-0.5 inline-block px-1.5 py-0.5 rounded",
+                            s.department_id
+                              ? "bg-indigo-50 text-indigo-600"
+                              : s.ward
+                                ? "bg-emerald-50 text-emerald-600"
+                                : s.assigned_district
+                                  ? "bg-blue-50 text-blue-600"
+                                  : "bg-amber-50 text-amber-600",
+                          )}
+                        >
                           {s.department_id
-                            ? (lang === "sw" ? "Idara" : "Department")
+                            ? lang === "sw"
+                              ? "Idara"
+                              : "Department"
                             : s.ward
-                              ? (lang === "sw" ? "Kata" : "Ward")
+                              ? lang === "sw"
+                                ? "Kata"
+                                : "Ward"
                               : s.assigned_district
-                                ? (lang === "sw" ? "Wilaya" : "District")
-                                : (lang === "sw" ? "Mkoa" : "Regional")}
+                                ? lang === "sw"
+                                  ? "Wilaya"
+                                  : "District"
+                                : lang === "sw"
+                                  ? "Mkoa"
+                                  : "Regional"}
                         </span>
                       </div>
                     </td>
@@ -1030,9 +1051,15 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                         }
                       }}
                     >
-                      <option value="regional">{lang === "sw" ? "Mtumishi wa Mkoa (Regional)" : "Regional Staff"}</option>
-                      <option value="district">{lang === "sw" ? "Mtumishi wa Wilaya (District)" : "District Staff"}</option>
-                      <option value="ward">{lang === "sw" ? "Afisa wa Kata (Ward Officer)" : "Ward Officer"}</option>
+                      <option value="regional">
+                        {lang === "sw" ? "Mtumishi wa Mkoa (Regional)" : "Regional Staff"}
+                      </option>
+                      <option value="district">
+                        {lang === "sw" ? "Mtumishi wa Wilaya (District)" : "District Staff"}
+                      </option>
+                      <option value="ward">
+                        {lang === "sw" ? "Afisa wa Kata (Ward Officer)" : "Ward Officer"}
+                      </option>
                     </select>
                   </div>
 

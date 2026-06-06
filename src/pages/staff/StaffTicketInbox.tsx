@@ -220,10 +220,7 @@ export function StaffTicketInbox() {
         patch.resolution_note = resolutionNote.trim() || null;
       }
 
-      const { error } = await supabase
-        .from("support_tickets")
-        .update(patch)
-        .eq("id", ticket.id);
+      const { error } = await supabase.from("support_tickets").update(patch).eq("id", ticket.id);
       if (error) throw error;
 
       // Notify citizen about status change
@@ -252,13 +249,19 @@ export function StaffTicketInbox() {
   const stats = {
     total: tickets.length,
     submitted: tickets.filter((t) => t.status === "submitted").length,
-    in_progress: tickets.filter((t) => ["under_review", "assigned", "in_progress"].includes(t.status)).length,
+    in_progress: tickets.filter((t) =>
+      ["under_review", "assigned", "in_progress"].includes(t.status),
+    ).length,
     resolved: tickets.filter((t) => ["resolved", "closed"].includes(t.status)).length,
   };
 
   // ── Render ─────────────────────────────────────────────────────────────
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
       <h1 className="text-2xl font-black text-stone-900 tracking-tight flex items-center gap-2">
         <Inbox size={24} className="text-emerald-600" />
         {L("Tiketi za Msaada", "Support Tickets")}
@@ -282,13 +285,17 @@ export function StaffTicketInbox() {
 
       {/* Filter */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-stone-500">{filtered.length} {L("tiketi", "tickets")}</span>
+        <span className="text-sm font-bold text-stone-500">
+          {filtered.length} {L("tiketi", "tickets")}
+        </span>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-3 py-2 border border-stone-200 rounded-xl text-sm bg-white"
         >
-          <option value="all">{L("Zote", "All")} ({stats.total})</option>
+          <option value="all">
+            {L("Zote", "All")} ({stats.total})
+          </option>
           {STATUS_OPTIONS.map((s) => (
             <option key={s.value} value={s.value}>
               {sw ? s.sw : s.en} ({tickets.filter((t) => t.status === s.value).length})
@@ -313,11 +320,16 @@ export function StaffTicketInbox() {
             const isExpanded = expandedId === ticket.id;
             const citizen = ticket.citizen as Ticket["citizen"];
             const catLabel = CATEGORIES[ticket.category]
-              ? sw ? CATEGORIES[ticket.category].sw : CATEGORIES[ticket.category].en
+              ? sw
+                ? CATEGORIES[ticket.category].sw
+                : CATEGORIES[ticket.category].en
               : ticket.category;
 
             return (
-              <div key={ticket.id} className="bg-white border border-stone-200 rounded-2xl overflow-hidden">
+              <div
+                key={ticket.id}
+                className="bg-white border border-stone-200 rounded-2xl overflow-hidden"
+              >
                 {/* Row */}
                 <div
                   className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-stone-50/50 transition-colors"
@@ -325,20 +337,37 @@ export function StaffTicketInbox() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-mono text-stone-400">{ticket.ticket_number}</span>
-                      <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", STATUS_COLORS[ticket.status])}>
+                      <span className="text-xs font-mono text-stone-400">
+                        {ticket.ticket_number}
+                      </span>
+                      <span
+                        className={cn(
+                          "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                          STATUS_COLORS[ticket.status],
+                        )}
+                      >
                         {ticket.status.replace(/_/g, " ")}
                       </span>
-                      <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", PRIORITY_COLORS[ticket.priority])}>
+                      <span
+                        className={cn(
+                          "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                          PRIORITY_COLORS[ticket.priority],
+                        )}
+                      >
                         {ticket.priority}
                       </span>
                     </div>
                     <p className="font-bold text-stone-900 text-sm truncate">{ticket.subject}</p>
                     <p className="text-xs text-stone-400">
-                      {citizen?.first_name} {citizen?.last_name} · {catLabel} · {new Date(ticket.created_at).toLocaleDateString("sw-TZ")}
+                      {citizen?.first_name} {citizen?.last_name} · {catLabel} ·{" "}
+                      {new Date(ticket.created_at).toLocaleDateString("sw-TZ")}
                     </p>
                   </div>
-                  {isExpanded ? <ChevronDown size={16} className="text-stone-400" /> : <ChevronRight size={16} className="text-stone-400" />}
+                  {isExpanded ? (
+                    <ChevronDown size={16} className="text-stone-400" />
+                  ) : (
+                    <ChevronRight size={16} className="text-stone-400" />
+                  )}
                 </div>
 
                 {/* Expanded */}
@@ -353,9 +382,13 @@ export function StaffTicketInbox() {
                       <div className="p-5 space-y-4">
                         {/* Description */}
                         <div className="bg-stone-50 rounded-xl p-4">
-                          <p className="text-sm text-stone-700 whitespace-pre-wrap">{ticket.description}</p>
+                          <p className="text-sm text-stone-700 whitespace-pre-wrap">
+                            {ticket.description}
+                          </p>
                           <div className="flex gap-4 mt-2 text-xs text-stone-400">
-                            <span>{ticket.region} / {ticket.district} / {ticket.ward}</span>
+                            <span>
+                              {ticket.region} / {ticket.district} / {ticket.ward}
+                            </span>
                             {citizen?.phone && <span>📞 {citizen.phone}</span>}
                             {citizen?.email && <span>✉ {citizen.email}</span>}
                           </div>
@@ -384,7 +417,9 @@ export function StaffTicketInbox() {
                                     {r.users?.first_name} {r.users?.last_name}
                                   </span>
                                   {r.is_internal_note && (
-                                    <span className="text-[10px] text-amber-600 font-bold">[INTERNAL]</span>
+                                    <span className="text-[10px] text-amber-600 font-bold">
+                                      [INTERNAL]
+                                    </span>
                                   )}
                                   <span className="text-[10px] text-stone-400">
                                     {new Date(r.created_at).toLocaleString("sw-TZ")}
@@ -410,7 +445,11 @@ export function StaffTicketInbox() {
                               disabled={sending || !replyText.trim()}
                               className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold disabled:opacity-50 flex items-center gap-1.5"
                             >
-                              {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                              {sending ? (
+                                <Loader2 size={14} className="animate-spin" />
+                              ) : (
+                                <Send size={14} />
+                              )}
                             </button>
                           </div>
                           <label className="flex items-center gap-2 cursor-pointer">
@@ -421,7 +460,10 @@ export function StaffTicketInbox() {
                               className="w-3.5 h-3.5 rounded border-stone-300 text-amber-600"
                             />
                             <span className="text-xs text-stone-500">
-                              {L("Maoni ya ndani (raia hataona)", "Internal note (citizen won't see)")}
+                              {L(
+                                "Maoni ya ndani (raia hataona)",
+                                "Internal note (citizen won't see)",
+                              )}
                             </span>
                           </label>
                         </div>
@@ -462,7 +504,11 @@ export function StaffTicketInbox() {
                             disabled={updating || newStatus === ticket.status}
                             className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold disabled:opacity-50 flex items-center gap-1.5"
                           >
-                            {updating ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                            {updating ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <CheckCircle2 size={14} />
+                            )}
                             {L("Sasisha", "Update")}
                           </button>
                         </div>

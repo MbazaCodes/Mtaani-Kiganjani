@@ -235,9 +235,19 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* QR verification — compact, inline above footer */}
-        <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center", marginTop: 6, gap: 8 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            marginTop: 6,
+            gap: 8,
+          }}
+        >
           <Text style={{ fontSize: 6, color: "#6b6b6b", textAlign: "right" }}>
-            {sw ? "Changanua kuthibitisha:" : "Scan to verify:"}{"\n"}{application.application_number}
+            {sw ? "Changanua kuthibitisha:" : "Scan to verify:"}
+            {"\n"}
+            {application.application_number}
           </Text>
           <View style={{ borderWidth: 0.5, borderColor: "#c0c0c0", padding: 2 }}>
             <Image src={qr} style={{ width: 46, height: 46 }} />
@@ -254,8 +264,8 @@ export const KibariUjeziMdogoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={s.metadata}>{`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}</Text>
         </View>
       </Page>
-        {/* Page 2: Payment Receipt */}
-        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
+      {/* Page 2: Payment Receipt */}
+      <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };

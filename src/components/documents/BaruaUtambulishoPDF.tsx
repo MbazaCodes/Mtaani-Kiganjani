@@ -253,7 +253,14 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
         {/* Signature + QR side by side */}
         <Text style={ls.signoff}>{sw ? "Wenu Mwaminifu," : "Yours faithfully,"}</Text>
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 10 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginTop: 10,
+          }}
+        >
           <View style={{ width: "55%" }}>
             <OfficerSignatureBox
               signature={weoSig}
@@ -272,19 +279,31 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* Footer — inline (not absolute) to avoid forcing overflow page */}
-        <View style={{ marginTop: 14, borderTopWidth: 0.5, borderTopColor: "#c0c0c0", paddingTop: 5, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <View
+          style={{
+            marginTop: 14,
+            borderTopWidth: 0.5,
+            borderTopColor: "#c0c0c0",
+            paddingTop: 5,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Text style={{ fontSize: 7, color: "#6b6b6b", fontStyle: "italic", flex: 1 }}>
             {sw
               ? "Barua hii ni rasmi. Inafaa kwa taasisi iliyoainishwa pekee."
               : "This letter is official. It is valid only for the institution stated above."}
           </Text>
-          <Text style={{ fontSize: 5.5, color: "#c0c0c0", fontFamily: "Courier", textAlign: "right" }}>
+          <Text
+            style={{ fontSize: 5.5, color: "#c0c0c0", fontFamily: "Courier", textAlign: "right" }}
+          >
             {`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}
           </Text>
         </View>
       </Page>
-        {/* Page 2: Payment Receipt */}
-        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
+      {/* Page 2: Payment Receipt */}
+      <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };

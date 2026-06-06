@@ -92,31 +92,52 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   useEffect(() => {
     if (!user?.id) return;
     // Tickets
-    supabase.from("support_tickets").select("id, status").eq("citizen_id", user.id)
+    supabase
+      .from("support_tickets")
+      .select("id, status")
+      .eq("citizen_id", user.id)
       .then(({ data }) => {
         const t = data || [];
-        setTicketStats({ total: t.length, open: t.filter((x: any) => !["resolved","closed"].includes(x.status)).length });
+        setTicketStats({
+          total: t.length,
+          open: t.filter((x: any) => !["resolved", "closed"].includes(x.status)).length,
+        });
       });
     // Reports
-    supabase.from("community_reports").select("id, status").eq("citizen_id", user.id)
+    supabase
+      .from("community_reports")
+      .select("id, status")
+      .eq("citizen_id", user.id)
       .then(({ data }) => {
         const r = data || [];
-        setReportStats({ total: r.length, open: r.filter((x: any) => !["resolved","closed"].includes(x.status)).length });
+        setReportStats({
+          total: r.length,
+          open: r.filter((x: any) => !["resolved", "closed"].includes(x.status)).length,
+        });
       });
     // Payments
-    supabase.from("applications")
+    supabase
+      .from("applications")
       .select("id, form_data, payment_data")
       .eq("user_id", user.id)
       .eq("status", "pending_payment")
       .then(({ data }) => {
         const outstanding = data || [];
-        const total = outstanding.reduce((s: number, a: any) => s + Number(a.form_data?.service_fee || a.payment_data?.amount || 0), 0);
+        const total = outstanding.reduce(
+          (s: number, a: any) =>
+            s + Number(a.form_data?.service_fee || a.payment_data?.amount || 0),
+          0,
+        );
         setPaymentStats({ outstanding: outstanding.length, amount: total });
       });
     // Announcements
-    supabase.from("announcements").select("id", { count: "exact", head: true })
+    supabase
+      .from("announcements")
+      .select("id", { count: "exact", head: true })
       .eq("is_active", true)
-      .or(`level.eq.national,ward.eq.${user.ward || "NONE"},district.eq.${user.district || "NONE"},region.eq.${user.region || "NONE"}`)
+      .or(
+        `level.eq.national,ward.eq.${user.ward || "NONE"},district.eq.${user.district || "NONE"},region.eq.${user.region || "NONE"}`,
+      )
       .then(({ count }) => setAnnouncementCount(count || 0));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
@@ -318,7 +339,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
             "border rounded-2xl p-4 cursor-pointer transition-colors",
             paymentStats.outstanding > 0
               ? "bg-red-50 border-red-100 hover:border-red-300"
-              : "bg-emerald-50 border-emerald-100 hover:border-emerald-300"
+              : "bg-emerald-50 border-emerald-100 hover:border-emerald-300",
           )}
         >
           <p className="text-xl font-black text-stone-900">
@@ -326,8 +347,12 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
           </p>
           <p className="text-xs font-bold text-stone-500 mt-0.5">
             {paymentStats.outstanding > 0
-              ? (lang === "sw" ? `${paymentStats.outstanding} Madeni` : `${paymentStats.outstanding} Due`)
-              : (lang === "sw" ? "Hakuna Madeni" : "No Dues")}
+              ? lang === "sw"
+                ? `${paymentStats.outstanding} Madeni`
+                : `${paymentStats.outstanding} Due`
+              : lang === "sw"
+                ? "Hakuna Madeni"
+                : "No Dues"}
           </p>
         </div>
         <div
@@ -338,7 +363,9 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
           <p className="text-xs font-bold text-stone-500 mt-0.5">
             {lang === "sw" ? "Tiketi Wazi" : "Open Tickets"}
           </p>
-          <p className="text-[10px] text-stone-400">{ticketStats.total} {lang === "sw" ? "jumla" : "total"}</p>
+          <p className="text-[10px] text-stone-400">
+            {ticketStats.total} {lang === "sw" ? "jumla" : "total"}
+          </p>
         </div>
         <div
           onClick={() => setView("community_reports")}
@@ -348,7 +375,9 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
           <p className="text-xs font-bold text-stone-500 mt-0.5">
             {lang === "sw" ? "Taarifa Wazi" : "Open Reports"}
           </p>
-          <p className="text-[10px] text-stone-400">{reportStats.total} {lang === "sw" ? "jumla" : "total"}</p>
+          <p className="text-[10px] text-stone-400">
+            {reportStats.total} {lang === "sw" ? "jumla" : "total"}
+          </p>
         </div>
         <div
           onClick={() => setView("announcements")}

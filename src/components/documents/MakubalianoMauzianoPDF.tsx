@@ -219,10 +219,23 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         </View>
 
         {/* Financials — compact strip */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "#f7f7f7", borderWidth: 0.5, borderColor: "#c0c0c0", padding: 5, marginTop: 6, marginBottom: 4 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            backgroundColor: "#f7f7f7",
+            borderWidth: 0.5,
+            borderColor: "#c0c0c0",
+            padding: 5,
+            marginTop: 6,
+            marginBottom: 4,
+          }}
+        >
           <Text style={{ fontSize: 8 }}>
             <Text style={{ color: "#6b6b6b" }}>{sw ? "Jumla: " : "Total: "}</Text>
-            <Text style={{ fontWeight: "bold" }}>{formatCurrency(Number(fd.total_amount || fd.total_rent || price))}</Text>
+            <Text style={{ fontWeight: "bold" }}>
+              {formatCurrency(Number(fd.total_amount || fd.total_rent || price))}
+            </Text>
           </Text>
           <Text style={{ fontSize: 8 }}>
             <Text style={{ color: "#6b6b6b" }}>VAT: </Text>
@@ -230,7 +243,9 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           </Text>
           <Text style={{ fontSize: 8 }}>
             <Text style={{ color: "#6b6b6b" }}>{sw ? "Ada: " : "Fee: "}</Text>
-            <Text style={{ fontWeight: "bold" }}>{formatCurrency(Number(fd.service_fee || 0))}</Text>
+            <Text style={{ fontWeight: "bold" }}>
+              {formatCurrency(Number(fd.service_fee || 0))}
+            </Text>
           </Text>
         </View>
 
@@ -282,8 +297,8 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           </Text>
         </View>
       </Page>
-        {/* Page 2: Payment Receipt */}
-        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
+      {/* Page 2: Payment Receipt */}
+      <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };

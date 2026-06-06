@@ -43,11 +43,21 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
   // Department membership: AuthContext flag + direct query fallback
   const [localDeptCheck, setLocalDeptCheck] = useState(false);
   useEffect(() => {
-    if (user?.is_department_member) { setLocalDeptCheck(true); return; }
+    if (user?.is_department_member) {
+      setLocalDeptCheck(true);
+      return;
+    }
     if (!user?.id || user?.role === "citizen") return;
     const timer = setTimeout(() => {
-      supabase.from("department_users").select("department_id").eq("user_id", user.id)
-        .limit(1).maybeSingle().then(({ data }) => { if (data) setLocalDeptCheck(true); });
+      supabase
+        .from("department_users")
+        .select("department_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) setLocalDeptCheck(true);
+        });
     }, 800);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -326,18 +336,28 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
                     {user?.first_name} {user?.last_name}
                   </p>
                   <p className="text-xs text-stone-500 capitalize truncate">
-                  {isDept
-                    ? (lang === "sw" ? "Afisa wa Idara" : "Department Officer")
-                    : user?.ward && user?.role === "staff"
-                      ? (lang === "sw" ? "Afisa wa Kata" : "Ward Officer")
-                      : user?.assigned_district && user?.role === "staff"
-                        ? (lang === "sw" ? "Mtumishi wa Wilaya" : "District Staff")
-                        : user?.assigned_region && user?.role === "staff"
-                          ? (lang === "sw" ? "Mtumishi wa Mkoa" : "Regional Staff")
-                          : user?.role === "admin"
-                            ? (lang === "sw" ? "Msimamizi" : "Admin")
-                            : user?.role}
-                </p>
+                    {isDept
+                      ? lang === "sw"
+                        ? "Afisa wa Idara"
+                        : "Department Officer"
+                      : user?.ward && user?.role === "staff"
+                        ? lang === "sw"
+                          ? "Afisa wa Kata"
+                          : "Ward Officer"
+                        : user?.assigned_district && user?.role === "staff"
+                          ? lang === "sw"
+                            ? "Mtumishi wa Wilaya"
+                            : "District Staff"
+                          : user?.assigned_region && user?.role === "staff"
+                            ? lang === "sw"
+                              ? "Mtumishi wa Mkoa"
+                              : "Regional Staff"
+                            : user?.role === "admin"
+                              ? lang === "sw"
+                                ? "Msimamizi"
+                                : "Admin"
+                              : user?.role}
+                  </p>
                 </div>
               </div>
               <button

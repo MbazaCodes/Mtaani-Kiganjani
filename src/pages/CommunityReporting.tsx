@@ -225,13 +225,17 @@ export function CommunityReporting() {
       await supabase.from("notifications").insert({
         user_id: user.id,
         title: lang === "sw" ? "Taarifa Imetumwa" : "Report Submitted",
-        message: lang === "sw"
-          ? `Taarifa yako ${reportNumber} imetumwa. Tutashughulikia hivi karibuni.`
-          : `Your report ${reportNumber} has been submitted. We will address it shortly.`,
+        message:
+          lang === "sw"
+            ? `Taarifa yako ${reportNumber} imetumwa. Tutashughulikia hivi karibuni.`
+            : `Your report ${reportNumber} has been submitted. We will address it shortly.`,
         type: "report_submitted",
       });
 
-      showToast(L(`Taarifa ${reportNumber} imetumwa!`, `Report ${reportNumber} submitted!`), "success");
+      showToast(
+        L(`Taarifa ${reportNumber} imetumwa!`, `Report ${reportNumber} submitted!`),
+        "success",
+      );
       setCategory("");
       setTitle("");
       setDescription("");
@@ -303,7 +307,11 @@ export function CommunityReporting() {
 
   // ── RENDER ─────────────────────────────────────────────────────────────
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -316,17 +324,26 @@ export function CommunityReporting() {
           </h1>
           {view === "list" && (
             <p className="text-sm text-stone-500 mt-0.5">
-              {L("Ripoti masuala ya miundombinu na jamii", "Report infrastructure and community issues")}
+              {L(
+                "Ripoti masuala ya miundombinu na jamii",
+                "Report infrastructure and community issues",
+              )}
             </p>
           )}
         </div>
         {view === "list" ? (
-          <button onClick={() => setView("create")} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center gap-2">
+          <button
+            onClick={() => setView("create")}
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center gap-2"
+          >
             <AlertTriangle size={16} />
             {L("Taarifa Mpya", "New Report")}
           </button>
         ) : (
-          <button onClick={() => setView("list")} className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-bold text-sm flex items-center gap-2">
+          <button
+            onClick={() => setView("list")}
+            className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-bold text-sm flex items-center gap-2"
+          >
             <ArrowLeft size={16} />
             {L("Rudi", "Back")}
           </button>
@@ -335,7 +352,11 @@ export function CommunityReporting() {
 
       {/* ── CREATE ──────────────────────────────────────────────────────── */}
       {view === "create" && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-2xl border border-stone-200 p-6 space-y-5">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-white rounded-2xl border border-stone-200 p-6 space-y-5"
+        >
           {/* Category grid */}
           <div>
             <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2">
@@ -365,14 +386,25 @@ export function CommunityReporting() {
             <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
               {L("Kichwa cha Taarifa", "Report Title")} *
             </label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={L("mfano: Shimo kubwa barabarani", "e.g. Large pothole on road")} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm" />
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={L("mfano: Shimo kubwa barabarani", "e.g. Large pothole on road")}
+              className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm"
+            />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
               {L("Maelezo Kamili", "Full Description")} *
             </label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder={L("Eleza tatizo kwa undani...", "Describe the issue in detail...")} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm resize-none" />
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              placeholder={L("Eleza tatizo kwa undani...", "Describe the issue in detail...")}
+              className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm resize-none"
+            />
           </div>
 
           {/* Location */}
@@ -381,7 +413,12 @@ export function CommunityReporting() {
               <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
                 {L("Mtaa / Eneo", "Street / Area")}
               </label>
-              <input value={street} onChange={(e) => setStreet(e.target.value)} placeholder={L("mfano: Barabara ya Morogoro", "e.g. Morogoro Road")} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm" />
+              <input
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
+                placeholder={L("mfano: Barabara ya Morogoro", "e.g. Morogoro Road")}
+                className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm"
+              />
             </div>
             <div>
               <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
@@ -422,7 +459,10 @@ export function CommunityReporting() {
             </label>
             <div className="flex flex-wrap gap-2 mb-2">
               {photos.map((p, i) => (
-                <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-stone-200">
+                <div
+                  key={i}
+                  className="relative w-20 h-20 rounded-xl overflow-hidden border border-stone-200"
+                >
                   <img src={p.data} alt="" className="w-full h-full object-cover" />
                   <button
                     type="button"
@@ -437,7 +477,13 @@ export function CommunityReporting() {
                 <label className="w-20 h-20 rounded-xl border-2 border-dashed border-stone-200 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-300 transition-colors">
                   <Camera size={20} className="text-stone-400" />
                   <span className="text-[10px] text-stone-400 mt-0.5">{L("Ongeza", "Add")}</span>
-                  <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="hidden" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
                 </label>
               )}
             </div>
@@ -446,7 +492,9 @@ export function CommunityReporting() {
           {/* Profile location */}
           <div className="bg-stone-50 rounded-xl p-3 text-xs text-stone-500">
             <p className="font-bold mb-1">{L("Eneo lako", "Your location")}</p>
-            <p>{user?.region || "—"} / {user?.district || "—"} / {user?.ward || "—"}</p>
+            <p>
+              {user?.region || "—"} / {user?.district || "—"} / {user?.ward || "—"}
+            </p>
           </div>
 
           <button
@@ -485,25 +533,43 @@ export function CommunityReporting() {
           ) : reports.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-stone-200">
               <AlertTriangle size={40} className="mx-auto text-stone-300 mb-3" />
-              <p className="font-bold text-stone-600">{L("Hakuna taarifa bado", "No reports yet")}</p>
-              <p className="text-sm text-stone-400 mt-1">{L("Ripoti tatizo la kwanza", "Report your first issue")}</p>
+              <p className="font-bold text-stone-600">
+                {L("Hakuna taarifa bado", "No reports yet")}
+              </p>
+              <p className="text-sm text-stone-400 mt-1">
+                {L("Ripoti tatizo la kwanza", "Report your first issue")}
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
               {reports.map((report) => {
                 const s = STATUS_CONFIG[report.status] || STATUS_CONFIG.submitted;
                 return (
-                  <div key={report.id} onClick={() => openDetail(report)} className="bg-white border border-stone-200 rounded-2xl p-4 hover:border-emerald-200 cursor-pointer transition-colors">
+                  <div
+                    key={report.id}
+                    onClick={() => openDetail(report)}
+                    className="bg-white border border-stone-200 rounded-2xl p-4 hover:border-emerald-200 cursor-pointer transition-colors"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-mono text-stone-400">{report.report_number}</span>
-                          <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", s.color)}>
+                          <span className="text-xs font-mono text-stone-400">
+                            {report.report_number}
+                          </span>
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                              s.color,
+                            )}
+                          >
                             {sw ? s.sw : s.en}
                           </span>
                         </div>
                         <p className="font-bold text-stone-900 text-sm truncate">{report.title}</p>
-                        <p className="text-xs text-stone-400 mt-0.5">{getCatLabel(report.category)} · {new Date(report.created_at).toLocaleDateString("sw-TZ")}</p>
+                        <p className="text-xs text-stone-400 mt-0.5">
+                          {getCatLabel(report.category)} ·{" "}
+                          {new Date(report.created_at).toLocaleDateString("sw-TZ")}
+                        </p>
                       </div>
                       <ChevronRight size={16} className="text-stone-300 shrink-0 mt-2" />
                     </div>
@@ -520,19 +586,45 @@ export function CommunityReporting() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
           <div className="bg-white border border-stone-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-mono text-stone-400">{selectedReport.report_number}</span>
-              <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", (STATUS_CONFIG[selectedReport.status] || STATUS_CONFIG.submitted).color)}>
-                {sw ? (STATUS_CONFIG[selectedReport.status] || STATUS_CONFIG.submitted).sw : (STATUS_CONFIG[selectedReport.status] || STATUS_CONFIG.submitted).en}
+              <span className="text-xs font-mono text-stone-400">
+                {selectedReport.report_number}
+              </span>
+              <span
+                className={cn(
+                  "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                  (STATUS_CONFIG[selectedReport.status] || STATUS_CONFIG.submitted).color,
+                )}
+              >
+                {sw
+                  ? (STATUS_CONFIG[selectedReport.status] || STATUS_CONFIG.submitted).sw
+                  : (STATUS_CONFIG[selectedReport.status] || STATUS_CONFIG.submitted).en}
               </span>
             </div>
             <h2 className="text-lg font-black text-stone-900">{selectedReport.title}</h2>
-            <p className="text-sm text-stone-600 mt-2 whitespace-pre-wrap">{selectedReport.description}</p>
+            <p className="text-sm text-stone-600 mt-2 whitespace-pre-wrap">
+              {selectedReport.description}
+            </p>
             <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-stone-400">
               <span>{getCatLabel(selectedReport.category)}</span>
               <span>·</span>
               <span>{new Date(selectedReport.created_at).toLocaleDateString("sw-TZ")}</span>
-              {selectedReport.ward && (<><span>·</span><span className="flex items-center gap-1"><MapPin size={10} />{selectedReport.ward}</span></>)}
-              {selectedReport.gps_lat && (<><span>·</span><span>📍 {selectedReport.gps_lat.toFixed(4)}, {selectedReport.gps_lng?.toFixed(4)}</span></>)}
+              {selectedReport.ward && (
+                <>
+                  <span>·</span>
+                  <span className="flex items-center gap-1">
+                    <MapPin size={10} />
+                    {selectedReport.ward}
+                  </span>
+                </>
+              )}
+              {selectedReport.gps_lat && (
+                <>
+                  <span>·</span>
+                  <span>
+                    📍 {selectedReport.gps_lat.toFixed(4)}, {selectedReport.gps_lng?.toFixed(4)}
+                  </span>
+                </>
+              )}
             </div>
             {selectedReport.resolution_note && (
               <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 mt-3">
@@ -548,17 +640,33 @@ export function CommunityReporting() {
               <MessageSquare size={14} /> {L("Mazungumzo", "Conversation")} ({responses.length})
             </h3>
             {responses.length === 0 ? (
-              <p className="text-sm text-stone-400 py-4 text-center">{L("Hakuna majibu bado", "No responses yet")}</p>
+              <p className="text-sm text-stone-400 py-4 text-center">
+                {L("Hakuna majibu bado", "No responses yet")}
+              </p>
             ) : (
               <div className="space-y-3 mb-4">
                 {responses.map((r) => {
                   const isStaff = r.users?.role !== "citizen";
                   return (
-                    <div key={r.id} className={cn("p-3 rounded-xl text-sm", isStaff ? "bg-blue-50 border border-blue-100 ml-4" : "bg-stone-50 mr-4")}>
+                    <div
+                      key={r.id}
+                      className={cn(
+                        "p-3 rounded-xl text-sm",
+                        isStaff ? "bg-blue-50 border border-blue-100 ml-4" : "bg-stone-50 mr-4",
+                      )}
+                    >
                       <div className="flex items-center gap-2 mb-1">
-                        {isStaff ? <Shield size={12} className="text-blue-600" /> : <User size={12} className="text-stone-500" />}
-                        <span className="text-xs font-bold text-stone-600">{r.users?.first_name} {r.users?.last_name}</span>
-                        <span className="text-[10px] text-stone-400">{new Date(r.created_at).toLocaleString("sw-TZ")}</span>
+                        {isStaff ? (
+                          <Shield size={12} className="text-blue-600" />
+                        ) : (
+                          <User size={12} className="text-stone-500" />
+                        )}
+                        <span className="text-xs font-bold text-stone-600">
+                          {r.users?.first_name} {r.users?.last_name}
+                        </span>
+                        <span className="text-[10px] text-stone-400">
+                          {new Date(r.created_at).toLocaleString("sw-TZ")}
+                        </span>
                       </div>
                       <p className="text-stone-700 whitespace-pre-wrap">{r.message}</p>
                     </div>
@@ -568,9 +676,28 @@ export function CommunityReporting() {
             )}
             {selectedReport.status !== "closed" && (
               <div className="flex gap-2 pt-3 border-t border-stone-100">
-                <input value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder={L("Andika jibu...", "Type a reply...")} className="flex-1 px-4 py-2.5 border border-stone-200 rounded-xl text-sm" onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }} />
-                <button onClick={handleSendReply} disabled={sendingReply || !replyText.trim()} className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center gap-1.5">
-                  {sendingReply ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                <input
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder={L("Andika jibu...", "Type a reply...")}
+                  className="flex-1 px-4 py-2.5 border border-stone-200 rounded-xl text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendReply();
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleSendReply}
+                  disabled={sendingReply || !replyText.trim()}
+                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {sendingReply ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Send size={14} />
+                  )}
                 </button>
               </div>
             )}

@@ -90,10 +90,19 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
 
         // Ticket + report counts for this area
         let tQuery = supabase.from("support_tickets").select("id", { count: "exact", head: true });
-        let rQuery = supabase.from("community_reports").select("id", { count: "exact", head: true });
-        if (user?.ward) { tQuery = tQuery.eq("ward", user.ward); rQuery = rQuery.eq("ward", user.ward); }
-        else if (user?.assigned_district) { tQuery = tQuery.eq("district", user.assigned_district); rQuery = rQuery.eq("district", user.assigned_district); }
-        else if (user?.assigned_region) { tQuery = tQuery.eq("region", user.assigned_region); rQuery = rQuery.eq("region", user.assigned_region); }
+        let rQuery = supabase
+          .from("community_reports")
+          .select("id", { count: "exact", head: true });
+        if (user?.ward) {
+          tQuery = tQuery.eq("ward", user.ward);
+          rQuery = rQuery.eq("ward", user.ward);
+        } else if (user?.assigned_district) {
+          tQuery = tQuery.eq("district", user.assigned_district);
+          rQuery = rQuery.eq("district", user.assigned_district);
+        } else if (user?.assigned_region) {
+          tQuery = tQuery.eq("region", user.assigned_region);
+          rQuery = rQuery.eq("region", user.assigned_region);
+        }
         tQuery.then(({ count }) => setTicketCount(count || 0));
         rQuery.then(({ count }) => setReportCount(count || 0));
 
@@ -149,10 +158,19 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       if (allApps) {
         // Ticket + report counts for this area
         let tQuery = supabase.from("support_tickets").select("id", { count: "exact", head: true });
-        let rQuery = supabase.from("community_reports").select("id", { count: "exact", head: true });
-        if (user?.ward) { tQuery = tQuery.eq("ward", user.ward); rQuery = rQuery.eq("ward", user.ward); }
-        else if (user?.assigned_district) { tQuery = tQuery.eq("district", user.assigned_district); rQuery = rQuery.eq("district", user.assigned_district); }
-        else if (user?.assigned_region) { tQuery = tQuery.eq("region", user.assigned_region); rQuery = rQuery.eq("region", user.assigned_region); }
+        let rQuery = supabase
+          .from("community_reports")
+          .select("id", { count: "exact", head: true });
+        if (user?.ward) {
+          tQuery = tQuery.eq("ward", user.ward);
+          rQuery = rQuery.eq("ward", user.ward);
+        } else if (user?.assigned_district) {
+          tQuery = tQuery.eq("district", user.assigned_district);
+          rQuery = rQuery.eq("district", user.assigned_district);
+        } else if (user?.assigned_region) {
+          tQuery = tQuery.eq("region", user.assigned_region);
+          rQuery = rQuery.eq("region", user.assigned_region);
+        }
         tQuery.then(({ count }) => setTicketCount(count || 0));
         rQuery.then(({ count }) => setReportCount(count || 0));
 

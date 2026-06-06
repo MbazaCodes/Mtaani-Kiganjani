@@ -245,19 +245,20 @@ export function Agreement() {
   }, [user?.id]);
 
   // ─── Fetch user's agreements ─────────────────────────────────────────────
-  const handleAgreementAction = async (agr: AgreementApp, action: "accept" | "reject", signature?: string) => {
+  const handleAgreementAction = async (
+    agr: AgreementApp,
+    action: "accept" | "reject",
+    signature?: string,
+  ) => {
     if (!user) return;
     setProcessingId(agr.id);
     try {
       const newStatus = action === "accept" ? "buyer_accepted" : "buyer_rejected";
-      
+
       // Update agreement_status + buyer signature on the application
       const patch: Record<string, unknown> = { agreement_status: newStatus };
-      const { error } = await supabase
-        .from("applications")
-        .update(patch)
-        .eq("id", agr.id);
-      
+      const { error } = await supabase.from("applications").update(patch).eq("id", agr.id);
+
       // Also save buyer signature into form_data via a separate update
       if (action === "accept" && signature) {
         // Fetch current form_data, merge buyer_signature, update
@@ -268,25 +269,34 @@ export function Agreement() {
           .single();
         if (current?.form_data) {
           const updatedFormData = { ...current.form_data, buyer_signature: signature };
-          await supabase.from("applications").update({ form_data: updatedFormData }).eq("id", agr.id);
+          await supabase
+            .from("applications")
+            .update({ form_data: updatedFormData })
+            .eq("id", agr.id);
         }
       }
       if (error) throw error;
 
       // Notify the seller
-      const sellerMsg = action === "accept"
-        ? (lang === "sw"
+      const sellerMsg =
+        action === "accept"
+          ? lang === "sw"
             ? `Mnunuzi amekubali makubaliano ${agr.application_number}`
-            : `Buyer has accepted agreement ${agr.application_number}`)
-        : (lang === "sw"
+            : `Buyer has accepted agreement ${agr.application_number}`
+          : lang === "sw"
             ? `Mnunuzi amekataa makubaliano ${agr.application_number}`
-            : `Buyer has rejected agreement ${agr.application_number}`);
-      
+            : `Buyer has rejected agreement ${agr.application_number}`;
+
       await supabase.from("notifications").insert({
         user_id: agr.user_id,
-        title: action === "accept"
-          ? (lang === "sw" ? "Makubaliano Yamekubaliwa" : "Agreement Accepted")
-          : (lang === "sw" ? "Makubaliano Yamekataliwa" : "Agreement Rejected"),
+        title:
+          action === "accept"
+            ? lang === "sw"
+              ? "Makubaliano Yamekubaliwa"
+              : "Agreement Accepted"
+            : lang === "sw"
+              ? "Makubaliano Yamekataliwa"
+              : "Agreement Rejected",
         message: sellerMsg,
         type: "agreement_update",
       });
@@ -310,20 +320,26 @@ export function Agreement() {
     // Fetch agreements: try both Swahili and English service names
     // Also check form_data->buyer_id for this user
     const results: AgreementApp[] = [];
-    
+
     // Query 1: where user is applicant, second party, or target AND service is agreement-type
     const { data: d1 } = await supabase
       .from("applications")
-      .select("id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at")
+      .select(
+        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+      )
       .or(`user_id.eq.${user.id},second_party_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
-      .or("service_name.ilike.%Makubaliano%,service_name.ilike.%Agreement%,service_name.ilike.%Mauzo%,service_name.ilike.%Pango%")
+      .or(
+        "service_name.ilike.%Makubaliano%,service_name.ilike.%Agreement%,service_name.ilike.%Mauzo%,service_name.ilike.%Pango%",
+      )
       .order("created_at", { ascending: false });
     if (d1) results.push(...(d1 as AgreementApp[]));
-    
+
     // Query 2: where buyer_id in form_data matches this user (fallback if second_party_user_id wasn't set)
     const { data: d2 } = await supabase
       .from("applications")
-      .select("id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at")
+      .select(
+        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+      )
       .contains("form_data", { buyer_id: user.id })
       .order("created_at", { ascending: false });
     if (d2) {
@@ -335,7 +351,9 @@ export function Agreement() {
     // Query 3: also check tenant_id in form_data
     const { data: d3 } = await supabase
       .from("applications")
-      .select("id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at")
+      .select(
+        "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at",
+      )
       .contains("form_data", { tenant_id: user.id })
       .order("created_at", { ascending: false });
     if (d3) {
@@ -1409,79 +1427,104 @@ export function Agreement() {
             {lang === "sw" ? "Makubaliano Yanayokusubiri" : "Agreements Pending Your Action"}
           </h2>
           <div className="space-y-2">
-            {agreementApps.filter((a) => a.user_id !== user?.id).map((agr) => {
-              const statusColor =
-                agr.status === "issued" ? "bg-emerald-100 text-emerald-800"
-                  : agr.status === "rejected" ? "bg-red-100 text-red-800"
-                  : agr.status === "submitted" ? "bg-amber-100 text-amber-800"
-                  : "bg-blue-100 text-blue-800";
-              return (
-                <div key={agr.id} className="bg-white rounded-xl p-4 border border-amber-100">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-mono text-stone-400">{agr.application_number}</span>
-                        <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", statusColor)}>
-                          {agr.status}
-                        </span>
-                        {agr.agreement_status && (
-                          <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
-                            agr.agreement_status === "buyer_accepted" ? "bg-emerald-100 text-emerald-800"
-                              : agr.agreement_status === "buyer_rejected" ? "bg-red-100 text-red-800"
-                              : "bg-stone-100 text-stone-600"
-                          )}>
-                            {agr.agreement_status === "buyer_accepted"
-                              ? (lang === "sw" ? "Umekubali" : "Accepted")
-                              : agr.agreement_status === "buyer_rejected"
-                                ? (lang === "sw" ? "Umekataa" : "Rejected")
-                                : agr.agreement_status}
+            {agreementApps
+              .filter((a) => a.user_id !== user?.id)
+              .map((agr) => {
+                const statusColor =
+                  agr.status === "issued"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : agr.status === "rejected"
+                      ? "bg-red-100 text-red-800"
+                      : agr.status === "submitted"
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-blue-100 text-blue-800";
+                return (
+                  <div key={agr.id} className="bg-white rounded-xl p-4 border border-amber-100">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-mono text-stone-400">
+                            {agr.application_number}
                           </span>
-                        )}
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                              statusColor,
+                            )}
+                          >
+                            {agr.status}
+                          </span>
+                          {agr.agreement_status && (
+                            <span
+                              className={cn(
+                                "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                                agr.agreement_status === "buyer_accepted"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : agr.agreement_status === "buyer_rejected"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-stone-100 text-stone-600",
+                              )}
+                            >
+                              {agr.agreement_status === "buyer_accepted"
+                                ? lang === "sw"
+                                  ? "Umekubali"
+                                  : "Accepted"
+                                : agr.agreement_status === "buyer_rejected"
+                                  ? lang === "sw"
+                                    ? "Umekataa"
+                                    : "Rejected"
+                                  : agr.agreement_status}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm font-bold text-stone-900">
+                          {(agr.service_name || "").replace("Makubaliano ya ", "")}
+                        </p>
+                        <p className="text-xs text-stone-500 mt-0.5">
+                          {lang === "sw" ? "Imetumwa:" : "Filed:"}{" "}
+                          {new Date(agr.created_at).toLocaleDateString("sw-TZ")}
+                        </p>
                       </div>
-                      <p className="text-sm font-bold text-stone-900">
-                        {(agr.service_name || "").replace("Makubaliano ya ", "")}
-                      </p>
-                      <p className="text-xs text-stone-500 mt-0.5">
-                        {lang === "sw" ? "Imetumwa:" : "Filed:"} {new Date(agr.created_at).toLocaleDateString("sw-TZ")}
-                      </p>
-                    </div>
-                    {/* Accept/Reject buttons — only show if not already responded */}
-                    {!agr.agreement_status && (
-                      <div className="flex gap-2 shrink-0">
-                        <button
-                          onClick={() => { setSigningAgr(agr); setBuyerSignature(""); }}
-                          disabled={processingId === agr.id}
-                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
-                        >
+                      {/* Accept/Reject buttons — only show if not already responded */}
+                      {!agr.agreement_status && (
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => {
+                              setSigningAgr(agr);
+                              setBuyerSignature("");
+                            }}
+                            disabled={processingId === agr.id}
+                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                          >
+                            <CheckCircle size={12} />
+                            {lang === "sw" ? "Kubali na Saini" : "Accept & Sign"}
+                          </button>
+                          <button
+                            onClick={() => handleAgreementAction(agr, "reject")}
+                            disabled={processingId === agr.id}
+                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                          >
+                            <X size={12} />
+                            {lang === "sw" ? "Kataa" : "Reject"}
+                          </button>
+                        </div>
+                      )}
+                      {agr.agreement_status === "buyer_accepted" && (
+                        <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
                           <CheckCircle size={12} />
-                          {lang === "sw" ? "Kubali na Saini" : "Accept & Sign"}
-                        </button>
-                        <button
-                          onClick={() => handleAgreementAction(agr, "reject")}
-                          disabled={processingId === agr.id}
-                          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
-                        >
+                          {lang === "sw" ? "Umekubali" : "Accepted"}
+                        </span>
+                      )}
+                      {agr.agreement_status === "buyer_rejected" && (
+                        <span className="px-3 py-1.5 bg-red-100 text-red-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
                           <X size={12} />
-                          {lang === "sw" ? "Kataa" : "Reject"}
-                        </button>
-                      </div>
-                    )}
-                    {agr.agreement_status === "buyer_accepted" && (
-                      <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                        <CheckCircle size={12} />
-                        {lang === "sw" ? "Umekubali" : "Accepted"}
-                      </span>
-                    )}
-                    {agr.agreement_status === "buyer_rejected" && (
-                      <span className="px-3 py-1.5 bg-red-100 text-red-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                        <X size={12} />
-                        {lang === "sw" ? "Umekataa" : "Rejected"}
-                      </span>
-                    )}
+                          {lang === "sw" ? "Umekataa" : "Rejected"}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       )}
@@ -1497,34 +1540,46 @@ export function Agreement() {
             </span>
           </h2>
           <div className="space-y-2">
-            {agreementApps.filter((a) => a.user_id === user?.id).map((agr) => {
-              const statusColor =
-                agr.status === "issued" ? "bg-emerald-100 text-emerald-800"
-                  : agr.status === "rejected" ? "bg-red-100 text-red-800"
-                  : agr.status === "submitted" ? "bg-amber-100 text-amber-800"
-                  : "bg-blue-100 text-blue-800";
-              return (
-                <div key={agr.id} className="bg-stone-50 rounded-xl p-4 border border-stone-100">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-mono text-stone-400">{agr.application_number}</span>
-                    <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", statusColor)}>
-                      {agr.status}
-                    </span>
-                    {agr.agreement_status && (
-                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-stone-100 text-stone-600 uppercase">
-                        {agr.agreement_status}
+            {agreementApps
+              .filter((a) => a.user_id === user?.id)
+              .map((agr) => {
+                const statusColor =
+                  agr.status === "issued"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : agr.status === "rejected"
+                      ? "bg-red-100 text-red-800"
+                      : agr.status === "submitted"
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-blue-100 text-blue-800";
+                return (
+                  <div key={agr.id} className="bg-stone-50 rounded-xl p-4 border border-stone-100">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-mono text-stone-400">
+                        {agr.application_number}
                       </span>
-                    )}
+                      <span
+                        className={cn(
+                          "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                          statusColor,
+                        )}
+                      >
+                        {agr.status}
+                      </span>
+                      {agr.agreement_status && (
+                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-stone-100 text-stone-600 uppercase">
+                          {agr.agreement_status}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm font-bold text-stone-900">
+                      {(agr.service_name || "").replace("Makubaliano ya ", "")}
+                    </p>
+                    <p className="text-xs text-stone-500 mt-0.5">
+                      {new Date(agr.created_at).toLocaleDateString("sw-TZ")}
+                    </p>
                   </div>
-                  <p className="text-sm font-bold text-stone-900">
-                    {(agr.service_name || "").replace("Makubaliano ya ", "")}
-                  </p>
-                  <p className="text-xs text-stone-500 mt-0.5">
-                    {new Date(agr.created_at).toLocaleDateString("sw-TZ")}
-                  </p>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       )}
@@ -1537,7 +1592,10 @@ export function Agreement() {
               <h3 className="text-lg font-black text-stone-900">
                 {lang === "sw" ? "Saini Kukubali Makubaliano" : "Sign to Accept Agreement"}
               </h3>
-              <button onClick={() => setSigningAgr(null)} className="p-1.5 text-stone-400 hover:text-stone-600">
+              <button
+                onClick={() => setSigningAgr(null)}
+                className="p-1.5 text-stone-400 hover:text-stone-600"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -1551,7 +1609,11 @@ export function Agreement() {
               <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2">
                 {lang === "sw" ? "Saini Yako" : "Your Signature"} *
               </label>
-              <SignaturePad value={buyerSignature} onChange={(v: string | null) => setBuyerSignature(v || "")} lang={lang} />
+              <SignaturePad
+                value={buyerSignature}
+                onChange={(v: string | null) => setBuyerSignature(v || "")}
+                lang={lang}
+              />
             </div>
             <div className="flex gap-3">
               <button
@@ -1563,7 +1625,10 @@ export function Agreement() {
               <button
                 onClick={async () => {
                   if (!buyerSignature) {
-                    showToast(lang === "sw" ? "Tafadhali saini kwanza" : "Please sign first", "error");
+                    showToast(
+                      lang === "sw" ? "Tafadhali saini kwanza" : "Please sign first",
+                      "error",
+                    );
                     return;
                   }
                   await handleAgreementAction(signingAgr, "accept", buyerSignature);
@@ -1572,7 +1637,11 @@ export function Agreement() {
                 disabled={!buyerSignature || processingId === signingAgr.id}
                 className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {processingId === signingAgr.id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                {processingId === signingAgr.id ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <CheckCircle size={16} />
+                )}
                 {lang === "sw" ? "Kubali na Saini" : "Accept & Sign"}
               </button>
             </div>
@@ -1878,12 +1947,24 @@ export function Agreement() {
                 <table className="w-full text-left">
                   <thead className="bg-stone-50 border-b border-stone-200">
                     <tr>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Aina", "Type")}</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Namba", "Ref #")}</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Nafsi Yako", "Your Role")}</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Hali", "Status")}</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Hali ya Makubaliano", "Agreement Status")}</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">{L("Tarehe", "Date")}</th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
+                        {L("Aina", "Type")}
+                      </th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
+                        {L("Namba", "Ref #")}
+                      </th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
+                        {L("Nafsi Yako", "Your Role")}
+                      </th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
+                        {L("Hali", "Status")}
+                      </th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
+                        {L("Hali ya Makubaliano", "Agreement Status")}
+                      </th>
+                      <th className="px-5 py-3 text-[10px] font-black text-stone-500 uppercase tracking-wider">
+                        {L("Tarehe", "Date")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
@@ -1891,44 +1972,74 @@ export function Agreement() {
                       <tr>
                         <td colSpan={6} className="px-5 py-10 text-center text-stone-400">
                           <FileSignature size={28} className="mx-auto mb-2 opacity-30" />
-                          <p className="text-sm">{L("Hakuna makubaliano yaliyopatikana.", "No agreements found.")}</p>
+                          <p className="text-sm">
+                            {L("Hakuna makubaliano yaliyopatikana.", "No agreements found.")}
+                          </p>
                           {agreementApps.length === 0 && (
                             <p className="text-xs mt-1 text-stone-300">
-                              {L("Makubaliano yataonekana hapa baada ya kuanzisha.", "Agreements will appear here once initiated.")}
+                              {L(
+                                "Makubaliano yataonekana hapa baada ya kuanzisha.",
+                                "Agreements will appear here once initiated.",
+                              )}
                             </p>
                           )}
                         </td>
                       </tr>
-                    ) : filtered.map((agr) => {
-                      const isInitiator = isInitiatorOf(agr);
-                      const isSales = (agr.service_name || "").includes("Mauzo");
-                      const st = agr.status || "submitted";
-                      const stStyle = AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";
-                      const stLabel = AGR_STATUS_LABEL[st]?.[lang === "sw" ? "sw" : "en"] || st;
-                      return (
-                        <tr key={agr.id} className="hover:bg-stone-50 transition-colors">
-                          <td className="px-5 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSales ? "bg-blue-100" : "bg-emerald-100"}`}>
-                                {isSales ? <ShoppingCart size={13} className="text-blue-600" /> : <Key size={13} className="text-emerald-600" />}
+                    ) : (
+                      filtered.map((agr) => {
+                        const isInitiator = isInitiatorOf(agr);
+                        const isSales = (agr.service_name || "").includes("Mauzo");
+                        const st = agr.status || "submitted";
+                        const stStyle =
+                          AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";
+                        const stLabel = AGR_STATUS_LABEL[st]?.[lang === "sw" ? "sw" : "en"] || st;
+                        return (
+                          <tr key={agr.id} className="hover:bg-stone-50 transition-colors">
+                            <td className="px-5 py-3">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSales ? "bg-blue-100" : "bg-emerald-100"}`}
+                                >
+                                  {isSales ? (
+                                    <ShoppingCart size={13} className="text-blue-600" />
+                                  ) : (
+                                    <Key size={13} className="text-emerald-600" />
+                                  )}
+                                </div>
+                                <span className="text-xs font-bold text-stone-700">
+                                  {agr.service_name || L("Makubaliano", "Agreement")}
+                                </span>
                               </div>
-                              <span className="text-xs font-bold text-stone-700">{agr.service_name || L("Makubaliano", "Agreement")}</span>
-                            </div>
-                          </td>
-                          <td className="px-5 py-3 font-mono text-xs text-stone-500">{agr.application_number || "—"}</td>
-                          <td className="px-5 py-3">
-                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isInitiator ? "bg-stone-100 text-stone-600 border-stone-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}>
-                              {isInitiator ? L("Mwanzilishi", "Initiator") : L("Pande ya Pili", "Second Party")}
-                            </span>
-                          </td>
-                          <td className="px-5 py-3">
-                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${stStyle}`}>{stLabel}</span>
-                          </td>
-                          <td className="px-5 py-3 text-xs text-stone-500">{agr.agreement_status || "—"}</td>
-                          <td className="px-5 py-3 text-xs text-stone-400">{new Date(agr.created_at).toLocaleDateString()}</td>
-                        </tr>
-                      );
-                    })}
+                            </td>
+                            <td className="px-5 py-3 font-mono text-xs text-stone-500">
+                              {agr.application_number || "—"}
+                            </td>
+                            <td className="px-5 py-3">
+                              <span
+                                className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isInitiator ? "bg-stone-100 text-stone-600 border-stone-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}
+                              >
+                                {isInitiator
+                                  ? L("Mwanzilishi", "Initiator")
+                                  : L("Pande ya Pili", "Second Party")}
+                              </span>
+                            </td>
+                            <td className="px-5 py-3">
+                              <span
+                                className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${stStyle}`}
+                              >
+                                {stLabel}
+                              </span>
+                            </td>
+                            <td className="px-5 py-3 text-xs text-stone-500">
+                              {agr.agreement_status || "—"}
+                            </td>
+                            <td className="px-5 py-3 text-xs text-stone-400">
+                              {new Date(agr.created_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1938,34 +2049,61 @@ export function Agreement() {
                     <FileSignature size={28} className="mx-auto mb-2 opacity-30" />
                     <p className="text-sm">{L("Hakuna makubaliano.", "No agreements found.")}</p>
                   </div>
-                ) : filtered.map((agr) => {
-                  const isInitiator = agr.user_id === user?.id;
-                  const isSales = (agr.service_name || "").includes("Mauzo");
-                  const st = agr.status || "submitted";
-                  const stStyle = AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";
-                  const stLabel = AGR_STATUS_LABEL[st]?.[lang === "sw" ? "sw" : "en"] || st;
-                  return (
-                    <div key={agr.id} className="p-4 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSales ? "bg-blue-100" : "bg-emerald-100"}`}>
-                            {isSales ? <ShoppingCart size={13} className="text-blue-600" /> : <Key size={13} className="text-emerald-600" />}
+                ) : (
+                  filtered.map((agr) => {
+                    const isInitiator = agr.user_id === user?.id;
+                    const isSales = (agr.service_name || "").includes("Mauzo");
+                    const st = agr.status || "submitted";
+                    const stStyle =
+                      AGR_STATUS_STYLE[st] || "bg-stone-50 text-stone-600 border-stone-200";
+                    const stLabel = AGR_STATUS_LABEL[st]?.[lang === "sw" ? "sw" : "en"] || st;
+                    return (
+                      <div key={agr.id} className="p-4 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSales ? "bg-blue-100" : "bg-emerald-100"}`}
+                            >
+                              {isSales ? (
+                                <ShoppingCart size={13} className="text-blue-600" />
+                              ) : (
+                                <Key size={13} className="text-emerald-600" />
+                              )}
+                            </div>
+                            <p className="text-xs font-black text-stone-800">
+                              {agr.service_name || L("Makubaliano", "Agreement")}
+                            </p>
                           </div>
-                          <p className="text-xs font-black text-stone-800">{agr.service_name || L("Makubaliano", "Agreement")}</p>
+                          <span
+                            className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${stStyle}`}
+                          >
+                            {stLabel}
+                          </span>
                         </div>
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${stStyle}`}>{stLabel}</span>
+                        <p className="text-[10px] font-mono text-stone-400">
+                          {agr.application_number}
+                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isInitiator ? "bg-stone-100 text-stone-600 border-stone-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}
+                          >
+                            {isInitiator
+                              ? L("Mwanzilishi", "Initiator")
+                              : L("Pande ya Pili", "Second Party")}
+                          </span>
+                          {agr.agreement_status && (
+                            <span className="text-[10px] text-stone-500">
+                              {agr.agreement_status}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-stone-400 ml-auto">
+                            {new Date(agr.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-[10px] font-mono text-stone-400">{agr.application_number}</p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${isInitiator ? "bg-stone-100 text-stone-600 border-stone-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}>
-                          {isInitiator ? L("Mwanzilishi", "Initiator") : L("Pande ya Pili", "Second Party")}
-                        </span>
-                        {agr.agreement_status && <span className="text-[10px] text-stone-500">{agr.agreement_status}</span>}
-                        <span className="text-[10px] text-stone-400 ml-auto">{new Date(agr.created_at).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>

@@ -90,7 +90,6 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
 
     fetchActualRole();
 
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id, user?.role]);
 
@@ -118,7 +117,8 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         }
         onClick={() => {
           if (displayRole === "admin") setView("admin_dashboard");
-          else if (displayRole === "staff" && (user?.is_department_member || localDeptCheck)) setView("department_portal");
+          else if (displayRole === "staff" && (user?.is_department_member || localDeptCheck))
+            setView("department_portal");
           else if (displayRole === "staff") setView("staff_dashboard");
           else setView("dashboard");
         }}
@@ -299,7 +299,8 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         onClick={() => setView("messages")}
       />
       {/* Citizen Support — shown for citizens and ward staff */}
-      {(displayRole === "citizen" || (displayRole === "staff" && !(user?.is_department_member || localDeptCheck))) && (
+      {(displayRole === "citizen" ||
+        (displayRole === "staff" && !(user?.is_department_member || localDeptCheck))) && (
         <SidebarItem
           icon={<MessageSquare size={20} />}
           label={lang === "sw" ? "Msaada" : "Support"}

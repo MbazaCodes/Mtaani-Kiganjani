@@ -232,10 +232,14 @@ export function Notifications() {
     if (t === "announcement") return "bg-purple-50/70";
     if (t.includes("resolved")) return "bg-emerald-50/70";
     switch (t) {
-      case "success": return "bg-emerald-50/70";
-      case "warning": return "bg-amber-50/70";
-      case "error": return "bg-red-50/70";
-      default: return "bg-blue-50/70";
+      case "success":
+        return "bg-emerald-50/70";
+      case "warning":
+        return "bg-amber-50/70";
+      case "error":
+        return "bg-red-50/70";
+      default:
+        return "bg-blue-50/70";
     }
   };
 

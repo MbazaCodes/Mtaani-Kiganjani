@@ -558,21 +558,6 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("[Signup] === SUBMIT CLICKED ===");
-    console.log(
-      "[Signup] Form data:",
-      JSON.stringify({
-        firstName: regForm.firstName,
-        lastName: regForm.lastName,
-        email: regForm.email,
-        phone: regForm.phone,
-        sex: regForm.sex,
-        nationality: regForm.nationality,
-        hasNida: regForm.hasNida,
-        dateOfBirth: regForm.dateOfBirth,
-        region: regForm.region,
-      }),
-    );
 
     // --- Validation ---
     if (!regForm.firstName.trim() || !regForm.lastName.trim()) {
@@ -610,7 +595,6 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
     setLoading(true);
     try {
       // ── Step 1: Create auth user ──────────────────────────────────
-      console.log("[Signup] Step 1: Creating auth user...");
       const { data, error } = await supabase.auth.signUp({
         email: regForm.email,
         password: regForm.password,
@@ -649,12 +633,6 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
         },
       });
 
-      console.log("[Signup] signUp response:", {
-        userId: data?.user?.id,
-        session: !!data?.session,
-        error: error?.message,
-      });
-
       if (error) {
         console.error("[Signup] Auth error:", error.message);
         if (error.message.includes("already registered")) {
@@ -677,7 +655,6 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       }
 
       // ── Step 2: Create profile ────────────────────────────────────
-      console.log("[Signup] Step 2: Creating profile for user:", data.user.id);
       const isDiaspora = regForm.country !== "Tanzania";
       const profileRow = {
         id: data.user.id,
@@ -713,7 +690,6 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       // Try Method A: RPC function (bypasses RLS — works without session)
       let profileOk = false;
       try {
-        console.log("[Signup] Trying RPC create_citizen_profile...");
         const { error: rpcErr } = await supabase.rpc("create_citizen_profile", {
           p_id: profileRow.id,
           p_first_name: profileRow.first_name,
@@ -746,7 +722,6 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
           console.warn("[Signup] RPC failed:", rpcErr.message, "— trying direct INSERT");
         } else {
           profileOk = true;
-          console.log("[Signup] Profile created via RPC ✓");
         }
       } catch (rpcCatch) {
         console.warn("[Signup] RPC exception:", rpcCatch);
@@ -754,7 +729,6 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
 
       // Try Method B: Direct UPSERT (overwrites the minimal row the trigger created)
       if (!profileOk) {
-        console.log("[Signup] Trying direct UPSERT...");
         const { error: insertErr } = await supabase.from("users").upsert(profileRow, {
           onConflict: "id",
           ignoreDuplicates: false,
@@ -763,15 +737,12 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
           console.warn("[Signup] Direct INSERT failed:", insertErr.message);
           // Profile creation failed entirely — auth user exists but no profile.
           // This is OK — profile will be auto-created on first login.
-          console.log("[Signup] Profile will be created on first login instead");
         } else {
           profileOk = true;
-          console.log("[Signup] Profile created via direct INSERT ✓");
         }
       }
 
       // ── Step 3: Success ───────────────────────────────────────────
-      console.log("[Signup] ✅ DONE. Profile created:", profileOk);
       showToast(
         lang === "sw"
           ? "Usajili umekamilika! Tafadhali kagua barua pepe yako kisha ingia."
@@ -786,7 +757,6 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       showToast(_e.message ?? (lang === "sw" ? "Hitilafu imetokea" : "An error occurred"), "error");
     } finally {
       setLoading(false);
-      console.log("[Signup] Loading state reset");
     }
   };
 

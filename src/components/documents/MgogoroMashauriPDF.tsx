@@ -166,7 +166,9 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
 
         {/* Urgency badge */}
         <View style={[ls.urgencyBadge, { borderWidth: 1, borderColor: urgMeta.bg }]}>
-          <Text style={[ls.urgencyText, { color: urgMeta.bg }]}>{sw ? urgMeta.sw : urgMeta.en}</Text>
+          <Text style={[ls.urgencyText, { color: urgMeta.bg }]}>
+            {sw ? urgMeta.sw : urgMeta.en}
+          </Text>
         </View>
 
         {/* Complainant */}
@@ -358,8 +360,8 @@ export const MgogoroMashauriPDF: React.FC<DocumentPDFProps> = ({
           <Text style={s.metadata}>{`FILED: ${formatDate(application.created_at)} | E-MTAA`}</Text>
         </View>
       </Page>
-        {/* Page 2: Payment Receipt */}
-        <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
+      {/* Page 2: Payment Receipt */}
+      <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
 };

@@ -23,48 +23,75 @@ const rs = StyleSheet.create({
   country: { fontSize: 9, fontWeight: "bold", textAlign: "center", marginBottom: 1 },
   office: { fontSize: 7.5, color: "#3a3a3a", textAlign: "center", marginBottom: 4 },
   divider: { width: 40, height: 1, backgroundColor: "#111", marginBottom: 10 },
-  
+
   titleBlock: { alignItems: "center", marginBottom: 12 },
   title: { fontSize: 14, fontWeight: "bold", letterSpacing: 2, textTransform: "uppercase" },
   subtitle: { fontSize: 8, color: "#6b6b6b", marginTop: 2 },
-  
+
   receiptNo: {
-    textAlign: "center", fontSize: 9, fontFamily: "Courier", fontWeight: "bold",
-    color: "#3a3a3a", marginBottom: 12, letterSpacing: 1,
+    textAlign: "center",
+    fontSize: 9,
+    fontFamily: "Courier",
+    fontWeight: "bold",
+    color: "#3a3a3a",
+    marginBottom: 12,
+    letterSpacing: 1,
   },
-  
+
   statusBadge: {
-    alignSelf: "center", paddingVertical: 4, paddingHorizontal: 20,
-    borderWidth: 1.5, borderColor: "#1a5632", marginBottom: 14,
+    alignSelf: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 20,
+    borderWidth: 1.5,
+    borderColor: "#1a5632",
+    marginBottom: 14,
   },
   statusText: { fontSize: 11, fontWeight: "bold", color: "#1a5632", letterSpacing: 2 },
-  
+
   amountBlock: {
-    alignItems: "center", paddingVertical: 10, borderTopWidth: 0.5,
-    borderBottomWidth: 0.5, borderColor: "#c0c0c0", marginBottom: 14,
+    alignItems: "center",
+    paddingVertical: 10,
+    borderTopWidth: 0.5,
+    borderBottomWidth: 0.5,
+    borderColor: "#c0c0c0",
+    marginBottom: 14,
   },
-  amountLabel: { fontSize: 7, color: "#6b6b6b", marginBottom: 2, textTransform: "uppercase", letterSpacing: 1 },
+  amountLabel: {
+    fontSize: 7,
+    color: "#6b6b6b",
+    marginBottom: 2,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
   amountValue: { fontSize: 22, fontWeight: "bold", color: "#111" },
   amountWords: { fontSize: 7.5, color: "#6b6b6b", fontStyle: "italic", marginTop: 3 },
-  
+
   table: { marginBottom: 14 },
   tableRow: {
-    flexDirection: "row", borderBottomWidth: 0.3, borderBottomColor: "#e8e8e8",
-    paddingVertical: 5, paddingHorizontal: 6,
+    flexDirection: "row",
+    borderBottomWidth: 0.3,
+    borderBottomColor: "#e8e8e8",
+    paddingVertical: 5,
+    paddingHorizontal: 6,
   },
   tableRowAlt: { backgroundColor: "#f7f7f7" },
   tableLabel: { width: "40%", fontSize: 8.5, color: "#6b6b6b" },
   tableValue: { width: "60%", fontSize: 9, color: "#111", fontWeight: "bold" },
-  
+
   qrSection: { flexDirection: "row", justifyContent: "flex-end", marginTop: 8 },
   qrInner: { alignItems: "center", width: 72 },
   qrBorder: { borderWidth: 0.5, borderColor: "#c0c0c0", padding: 2, marginBottom: 2 },
   qrCode: { width: 56, height: 56 },
   qrLabel: { fontSize: 5, color: "#6b6b6b", textAlign: "center" },
-  
+
   footer: {
-    position: "absolute", bottom: 20, left: 40, right: 40,
-    borderTopWidth: 0.5, borderTopColor: "#c0c0c0", paddingTop: 4,
+    position: "absolute",
+    bottom: 20,
+    left: 40,
+    right: 40,
+    borderTopWidth: 0.5,
+    borderTopColor: "#c0c0c0",
+    paddingTop: 4,
   },
   footerText: { fontSize: 6.5, color: "#6b6b6b", fontStyle: "italic", textAlign: "center" },
 });
@@ -80,10 +107,10 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
   const pd = (application.payment_data || {}) as Record<string, any>;
   const sw = lang === "sw";
   const qr = qrDataUrl || generateQRCodeUrl(application, "RCP");
-  
+
   const amount = pd.amount || fd.service_fee || fd.amount || 0;
   const receiptNo = pd.receipt_number || `RCP-${application.application_number}`;
-  
+
   const TableRow = ({ label, value, alt }: { label: string; value: string; alt?: boolean }) => (
     <View style={[rs.tableRow, alt ? rs.tableRowAlt : {}]}>
       <Text style={rs.tableLabel}>{label}</Text>
@@ -92,7 +119,8 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
   );
 
   const user = application.users;
-  const payerName = fd.applicant_name || (user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : "N/A");
+  const payerName =
+    fd.applicant_name || (user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : "N/A");
 
   return (
     <Page size="A4" style={rs.page}>
@@ -100,14 +128,18 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
       <View style={rs.header}>
         <Image src={TANZANIA_LOGO_BASE64} style={rs.logo} />
         <Text style={rs.country}>JAMHURI YA MUUNGANO WA TANZANIA</Text>
-        <Text style={rs.office}>OFISI YA RAIS — TAWALA ZA MIKOA NA SERIKALI ZA MITAA (TAMISEMI)</Text>
+        <Text style={rs.office}>
+          OFISI YA RAIS — TAWALA ZA MIKOA NA SERIKALI ZA MITAA (TAMISEMI)
+        </Text>
         <View style={rs.divider} />
       </View>
 
       {/* Title */}
       <View style={rs.titleBlock}>
         <Text style={rs.title}>{sw ? "RISITI YA MALIPO" : "PAYMENT RECEIPT"}</Text>
-        <Text style={rs.subtitle}>{sw ? "Stakabadhi Rasmi ya Serikali" : "Official Government Receipt"}</Text>
+        <Text style={rs.subtitle}>
+          {sw ? "Stakabadhi Rasmi ya Serikali" : "Official Government Receipt"}
+        </Text>
       </View>
 
       <Text style={rs.receiptNo}>{receiptNo}</Text>
@@ -126,11 +158,24 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
       {/* Details table */}
       <View style={rs.table}>
         <TableRow label={sw ? "Nambari ya Risiti" : "Receipt Number"} value={receiptNo} />
-        <TableRow label={sw ? "Nambari ya Maombi" : "Application Ref"} value={application.application_number || "—"} alt />
+        <TableRow
+          label={sw ? "Nambari ya Maombi" : "Application Ref"}
+          value={application.application_number || "—"}
+          alt
+        />
         <TableRow label={sw ? "Huduma" : "Service"} value={application.service_name || "—"} />
         <TableRow label={sw ? "Mlipaji" : "Payer"} value={payerName} alt />
-        <TableRow label={sw ? "Njia ya Malipo" : "Payment Method"} value={pd.payment_method || "E-Mtaa Portal"} />
-        {pd.transaction_id && <TableRow label={sw ? "Nambari ya Muamala" : "Transaction ID"} value={pd.transaction_id} alt />}
+        <TableRow
+          label={sw ? "Njia ya Malipo" : "Payment Method"}
+          value={pd.payment_method || "E-Mtaa Portal"}
+        />
+        {pd.transaction_id && (
+          <TableRow
+            label={sw ? "Nambari ya Muamala" : "Transaction ID"}
+            value={pd.transaction_id}
+            alt
+          />
+        )}
         <TableRow
           label={sw ? "Tarehe ya Malipo" : "Payment Date"}
           value={formatDate(pd.paid_at || application.updated_at || application.created_at)}

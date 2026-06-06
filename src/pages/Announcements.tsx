@@ -1,8 +1,19 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Megaphone, Plus, Loader2, X, Clock, AlertTriangle, Bell, Shield,
-  MapPin, ChevronDown, ChevronRight, Trash2, CheckCircle2,
+  Megaphone,
+  Plus,
+  Loader2,
+  X,
+  Clock,
+  AlertTriangle,
+  Bell,
+  Shield,
+  MapPin,
+  ChevronDown,
+  ChevronRight,
+  Trash2,
+  CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -18,7 +29,12 @@ const CATEGORIES = [
   { value: "security_alert", en: "Security Alert", sw: "Tahadhari ya Usalama", icon: "🔒" },
   { value: "health_notice", en: "Health Notice", sw: "Tangazo la Afya", icon: "🏥" },
   { value: "education_notice", en: "Education Notice", sw: "Tangazo la Elimu", icon: "📚" },
-  { value: "infrastructure_update", en: "Infrastructure Update", sw: "Habari za Miundombinu", icon: "🏗️" },
+  {
+    value: "infrastructure_update",
+    en: "Infrastructure Update",
+    sw: "Habari za Miundombinu",
+    icon: "🏗️",
+  },
 ];
 
 // Preset title templates per category — user picks one or writes custom
@@ -87,7 +103,15 @@ interface Announcement {
   published_at: string;
   expires_at?: string;
   is_active: boolean;
-  publisher?: { first_name: string; last_name: string; position?: string; ward?: string; assigned_district?: string; assigned_region?: string; role?: string };
+  publisher?: {
+    first_name: string;
+    last_name: string;
+    position?: string;
+    ward?: string;
+    assigned_district?: string;
+    assigned_region?: string;
+    role?: string;
+  };
 }
 
 export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
@@ -120,7 +144,9 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
     try {
       let query = supabase
         .from("announcements")
-        .select("*, publisher:published_by(first_name, last_name, position, ward, assigned_district, assigned_region, role)")
+        .select(
+          "*, publisher:published_by(first_name, last_name, position, ward, assigned_district, assigned_region, role)",
+        )
         .eq("is_active", true)
         .order("published_at", { ascending: false })
         .limit(100);
@@ -134,9 +160,13 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
       } else {
         // Staff: show announcements in their area
         if (user.ward && user.role === "staff") {
-          query = query.or(`ward.eq.${user.ward},district.eq.${user.assigned_district},region.eq.${user.assigned_region},level.eq.national`);
+          query = query.or(
+            `ward.eq.${user.ward},district.eq.${user.assigned_district},region.eq.${user.assigned_region},level.eq.national`,
+          );
         } else if (user.assigned_district) {
-          query = query.or(`district.eq.${user.assigned_district},region.eq.${user.assigned_region},level.eq.national`);
+          query = query.or(
+            `district.eq.${user.assigned_district},region.eq.${user.assigned_region},level.eq.national`,
+          );
         } else if (user.assigned_region) {
           query = query.or(`region.eq.${user.assigned_region},level.eq.national`);
         }
@@ -218,9 +248,16 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
     // Determine office/role label
     let office = "";
     if (p.role === "admin") office = sw ? "Msimamizi wa Mfumo" : "System Administrator";
-    else if (p.ward) office = sw ? `Afisa Mtendaji wa Kata — ${p.ward}` : `Ward Executive Officer — ${p.ward}`;
-    else if (p.assigned_district) office = sw ? `Ofisi ya Wilaya — ${p.assigned_district}` : `District Office — ${p.assigned_district}`;
-    else if (p.assigned_region) office = sw ? `Ofisi ya Mkoa — ${p.assigned_region}` : `Regional Office — ${p.assigned_region}`;
+    else if (p.ward)
+      office = sw ? `Afisa Mtendaji wa Kata — ${p.ward}` : `Ward Executive Officer — ${p.ward}`;
+    else if (p.assigned_district)
+      office = sw
+        ? `Ofisi ya Wilaya — ${p.assigned_district}`
+        : `District Office — ${p.assigned_district}`;
+    else if (p.assigned_region)
+      office = sw
+        ? `Ofisi ya Mkoa — ${p.assigned_region}`
+        : `Regional Office — ${p.assigned_region}`;
     else office = p.position || (sw ? "Ofisi ya Serikali" : "Government Office");
     return { name, office };
   };
@@ -231,7 +268,11 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black text-stone-900 tracking-tight flex items-center gap-2">
@@ -272,12 +313,18 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                 </label>
                 <select
                   value={category}
-                  onChange={(e) => { setCategory(e.target.value); setTitle(""); setTitleMode("preset"); }}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    setTitle("");
+                    setTitleMode("preset");
+                  }}
                   className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
                   aria-label="Category"
                 >
                   {CATEGORIES.map((c) => (
-                    <option key={c.value} value={c.value}>{c.icon} {sw ? c.sw : c.en}</option>
+                    <option key={c.value} value={c.value}>
+                      {c.icon} {sw ? c.sw : c.en}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -303,9 +350,13 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                 >
                   <option value="">{L("-- Chagua Kichwa --", "-- Select Title --")}</option>
                   {(TITLE_TEMPLATES[category] || []).map((t, i) => (
-                    <option key={i} value={sw ? t.sw : t.en}>{sw ? t.sw : t.en}</option>
+                    <option key={i} value={sw ? t.sw : t.en}>
+                      {sw ? t.sw : t.en}
+                    </option>
                   ))}
-                  <option value="__custom__">{L("✏️ Andika kichwa chako...", "✏️ Write custom title...")}</option>
+                  <option value="__custom__">
+                    {L("✏️ Andika kichwa chako...", "✏️ Write custom title...")}
+                  </option>
                 </select>
                 {titleMode === "custom" && (
                   <input
@@ -323,13 +374,24 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                 <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
                   3. {L("Ujumbe", "Message")} *
                 </label>
-                <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} placeholder={L("Maelezo ya tangazo...", "Announcement details...")} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm resize-none" />
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  rows={4}
+                  placeholder={L("Maelezo ya tangazo...", "Announcement details...")}
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm resize-none"
+                />
               </div>
               <div>
                 <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
                   {L("Umuhimu", "Priority")}
                 </label>
-                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white" aria-label="Priority">
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
+                  aria-label="Priority"
+                >
                   <option value="normal">{L("Kawaida", "Normal")}</option>
                   <option value="important">{L("Muhimu", "Important")}</option>
                   <option value="urgent">{L("Haraka", "Urgent")}</option>
@@ -339,7 +401,17 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                 <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
                   {L("Kiwango", "Target Level")}
                 </label>
-                <select value={level} onChange={(e) => { setLevel(e.target.value); setRegion(""); setDistrict(""); setWard(""); }} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white" aria-label="Level">
+                <select
+                  value={level}
+                  onChange={(e) => {
+                    setLevel(e.target.value);
+                    setRegion("");
+                    setDistrict("");
+                    setWard("");
+                  }}
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
+                  aria-label="Level"
+                >
                   <option value="national">{L("Kitaifa", "National")}</option>
                   <option value="region">{L("Mkoa", "Region")}</option>
                   <option value="district">{L("Wilaya", "District")}</option>
@@ -355,13 +427,19 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                   </label>
                   <select
                     value={region}
-                    onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); }}
+                    onChange={(e) => {
+                      setRegion(e.target.value);
+                      setDistrict("");
+                      setWard("");
+                    }}
                     className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
                     aria-label="Region"
                   >
                     <option value="">{L("-- Chagua Mkoa --", "-- Select Region --")}</option>
                     {TANZANIA_ADDRESS_DATA.map((r) => (
-                      <option key={r.name} value={r.name}>{r.name}</option>
+                      <option key={r.name} value={r.name}>
+                        {r.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -374,14 +452,21 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                   </label>
                   <select
                     value={district}
-                    onChange={(e) => { setDistrict(e.target.value); setWard(""); }}
+                    onChange={(e) => {
+                      setDistrict(e.target.value);
+                      setWard("");
+                    }}
                     className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
                     aria-label="District"
                   >
                     <option value="">{L("-- Chagua Wilaya --", "-- Select District --")}</option>
-                    {(TANZANIA_ADDRESS_DATA.find((r) => r.name === region)?.districts || []).map((d) => (
-                      <option key={d.name} value={d.name}>{d.name}</option>
-                    ))}
+                    {(TANZANIA_ADDRESS_DATA.find((r) => r.name === region)?.districts || []).map(
+                      (d) => (
+                        <option key={d.name} value={d.name}>
+                          {d.name}
+                        </option>
+                      ),
+                    )}
                   </select>
                 </div>
               )}
@@ -398,8 +483,14 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                     aria-label="Ward"
                   >
                     <option value="">{L("-- Chagua Kata --", "-- Select Ward --")}</option>
-                    {(TANZANIA_ADDRESS_DATA.find((r) => r.name === region)?.districts.find((d) => d.name === district)?.wards || []).map((w) => (
-                      <option key={w} value={w}>{w}</option>
+                    {(
+                      TANZANIA_ADDRESS_DATA.find((r) => r.name === region)?.districts.find(
+                        (d) => d.name === district,
+                      )?.wards || []
+                    ).map((w) => (
+                      <option key={w} value={w}>
+                        {w}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -410,7 +501,11 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
               disabled={submitting || !title.trim() || !body.trim()}
               className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {submitting ? <Loader2 size={16} className="animate-spin" /> : <Megaphone size={16} />}
+              {submitting ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Megaphone size={16} />
+              )}
               {L("Chapisha Tangazo", "Publish Announcement")}
             </button>
           </motion.div>
@@ -426,7 +521,12 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
         <div className="text-center py-16 bg-white rounded-2xl border border-stone-200">
           <Megaphone size={40} className="mx-auto text-stone-300 mb-3" />
           <p className="font-bold text-stone-600">{L("Hakuna matangazo", "No announcements")}</p>
-          <p className="text-sm text-stone-400 mt-1">{L("Hakuna matangazo kwa eneo lako kwa sasa", "No announcements for your area right now")}</p>
+          <p className="text-sm text-stone-400 mt-1">
+            {L(
+              "Hakuna matangazo kwa eneo lako kwa sasa",
+              "No announcements for your area right now",
+            )}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -436,7 +536,11 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
             return (
               <div
                 key={a.id}
-                className={cn("rounded-2xl border overflow-hidden transition-colors", ps.bg, ps.border)}
+                className={cn(
+                  "rounded-2xl border overflow-hidden transition-colors",
+                  ps.bg,
+                  ps.border,
+                )}
               >
                 <div
                   className="flex items-start justify-between p-4 cursor-pointer hover:bg-stone-50/30"
@@ -444,7 +548,12 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", ps.badge)}>
+                      <span
+                        className={cn(
+                          "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                          ps.badge,
+                        )}
+                      >
                         {a.priority}
                       </span>
                       <span className="text-xs text-stone-400">{getCatLabel(a.category)}</span>
@@ -459,7 +568,8 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                       const off = getOffice(a);
                       return off ? (
                         <p className="text-xs text-emerald-700 font-bold mt-0.5">
-                          {sw ? "Imetolewa na: " : "Issued by: "}{off.office}
+                          {sw ? "Imetolewa na: " : "Issued by: "}
+                          {off.office}
                         </p>
                       ) : null;
                     })()}
@@ -485,7 +595,11 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                         <Trash2 size={14} />
                       </button>
                     )}
-                    {isExpanded ? <ChevronDown size={16} className="text-stone-400" /> : <ChevronRight size={16} className="text-stone-400" />}
+                    {isExpanded ? (
+                      <ChevronDown size={16} className="text-stone-400" />
+                    ) : (
+                      <ChevronRight size={16} className="text-stone-400" />
+                    )}
                   </div>
                 </div>
                 <AnimatePresence>

@@ -293,7 +293,9 @@ export const BusinessApproval: React.FC = () => {
     try {
       let query = supabase
         .from("applications")
-        .select("id, application_number, service_name, status, user_id, created_at, district, region")
+        .select(
+          "id, application_number, service_name, status, user_id, created_at, district, region",
+        )
         .not("service_name", "ilike", "%Makubaliano%")
         .order("created_at", { ascending: false });
       if (appStatusFilter !== "all") query = query.eq("status", appStatusFilter);
@@ -707,9 +709,7 @@ export const BusinessApproval: React.FC = () => {
                         <tr key={agr.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4">
                             <p className="font-medium text-gray-900">
-                              {agr.user
-                                ? `${agr.user.first_name} ${agr.user.last_name}`
-                                : "—"}
+                              {agr.user ? `${agr.user.first_name} ${agr.user.last_name}` : "—"}
                             </p>
                             <p className="text-xs text-emerald-600 font-mono">
                               {agr.user?.citizen_id || "—"}
@@ -793,8 +793,19 @@ export const BusinessApproval: React.FC = () => {
                 className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="all">{lang === "sw" ? "Hali Zote" : "All Statuses"}</option>
-                {["submitted", "approved", "pending_payment", "paid", "processing", "issued", "rejected", "refunded"].map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                {[
+                  "submitted",
+                  "approved",
+                  "pending_payment",
+                  "paid",
+                  "processing",
+                  "issued",
+                  "rejected",
+                  "refunded",
+                ].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -841,9 +852,7 @@ export const BusinessApproval: React.FC = () => {
                         <tr key={app.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4">
                             <p className="font-medium text-gray-900">
-                              {app.user
-                                ? `${app.user.first_name} ${app.user.last_name}`
-                                : "—"}
+                              {app.user ? `${app.user.first_name} ${app.user.last_name}` : "—"}
                             </p>
                             <p className="text-xs text-emerald-600 font-mono">
                               {app.user?.citizen_id || "—"}
@@ -895,172 +904,177 @@ export const BusinessApproval: React.FC = () => {
 
         {/* Filters & Table — registrations tab only */}
         {activeTab === "registrations" && (
-        <>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="flex flex-col md:flex-row gap-4 mb-6"
-        >
-          {/* Search */}
-          <div className="flex-1 relative">
-            <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={lang === "sw" ? "Tafuta kwa jina, CT ID..." : "Search by name, CT ID..."}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            />
-          </div>
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col md:flex-row gap-4 mb-6"
+            >
+              {/* Search */}
+              <div className="flex-1 relative">
+                <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={
+                    lang === "sw" ? "Tafuta kwa jina, CT ID..." : "Search by name, CT ID..."
+                  }
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+              </div>
 
-          {/* Type Filter */}
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as BusinessType | "all")}
-            aria-label={lang === "sw" ? "Chagua aina ya biashara" : "Filter by business type"}
-            className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-          >
-            <option value="all">{lang === "sw" ? "Aina Zote" : "All Types"}</option>
-            {BUSINESS_TYPES.map((type) => (
-              <option key={type.value} value={type.value}>
-                {lang === "sw" ? type.labelSw : type.labelEn}
-              </option>
-            ))}
-          </select>
-        </motion.div>
+              {/* Type Filter */}
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value as BusinessType | "all")}
+                aria-label={lang === "sw" ? "Chagua aina ya biashara" : "Filter by business type"}
+                className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="all">{lang === "sw" ? "Aina Zote" : "All Types"}</option>
+                {BUSINESS_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {lang === "sw" ? type.labelSw : type.labelEn}
+                  </option>
+                ))}
+              </select>
+            </motion.div>
 
-        {/* Registrations Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
-        >
-          {loading ? (
-            <div className="p-12 flex items-center justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-            </div>
-          ) : filteredRegistrations.length === 0 ? (
-            <div className="p-12 text-center">
-              <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">
-                {lang === "sw" ? "Hakuna maombi yaliyopatikana" : "No registrations found"}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      {lang === "sw" ? "Mwombaji" : "Applicant"}
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      {lang === "sw" ? "Aina" : "Type"}
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      {lang === "sw" ? "Biashara" : "Business"}
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      {lang === "sw" ? "Eneo" : "Location"}
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      {lang === "sw" ? "Hali" : "Status"}
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      {lang === "sw" ? "Tarehe" : "Date"}
-                    </th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      {lang === "sw" ? "Vitendo" : "Actions"}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredRegistrations.map((reg) => {
-                    const typeInfo = BUSINESS_TYPES.find((t) => t.value === reg.business_type);
-                    const TypeIcon = typeInfo?.icon || Building2;
-
-                    return (
-                      <tr key={reg.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                              {reg.user?.photo_url ? (
-                                <img
-                                  src={reg.user.photo_url}
-                                  alt=""
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <User className="w-5 h-5 text-gray-400" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900">
-                                {reg.user?.first_name} {reg.user?.middle_name} {reg.user?.last_name}
-                              </p>
-                              <p className="text-sm text-emerald-600 font-mono">
-                                {reg.user?.citizen_id}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <div className={`p-1.5 rounded-lg bg-linear-to-br ${typeInfo?.color}`}>
-                              <TypeIcon className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-sm text-gray-700">
-                              {lang === "sw" ? typeInfo?.labelSw : typeInfo?.labelEn}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div>
-                            <p className="font-medium text-gray-900">{reg.business_name}</p>
-                            <p className="text-sm text-gray-500">
-                              {SPECIALIZATIONS_LABELS[reg.specialization]?.[
-                                lang === "sw" ? "sw" : "en"
-                              ] || reg.specialization}
-                            </p>
-                            {reg.business_id && (
-                              <p className="text-sm font-mono text-emerald-600 mt-1">
-                                {reg.business_id}
-                              </p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-sm text-gray-700">
-                            {reg.district}, {reg.region}
-                          </p>
-                        </td>
-                        <td className="px-6 py-4">{getStatusBadge(reg.status)}</td>
-                        <td className="px-6 py-4">
-                          <p className="text-sm text-gray-500">
-                            {new Date(reg.created_at).toLocaleDateString()}
-                          </p>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedRegistration(reg)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
-                          >
-                            <Eye className="w-4 h-4" />
-                            {lang === "sw" ? "Angalia" : "View"}
-                          </button>
-                        </td>
+            {/* Registrations Table */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+            >
+              {loading ? (
+                <div className="p-12 flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                </div>
+              ) : filteredRegistrations.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">
+                    {lang === "sw" ? "Hakuna maombi yaliyopatikana" : "No registrations found"}
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          {lang === "sw" ? "Mwombaji" : "Applicant"}
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          {lang === "sw" ? "Aina" : "Type"}
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          {lang === "sw" ? "Biashara" : "Business"}
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          {lang === "sw" ? "Eneo" : "Location"}
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          {lang === "sw" ? "Hali" : "Status"}
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          {lang === "sw" ? "Tarehe" : "Date"}
+                        </th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          {lang === "sw" ? "Vitendo" : "Actions"}
+                        </th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </motion.div>
-        </>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {filteredRegistrations.map((reg) => {
+                        const typeInfo = BUSINESS_TYPES.find((t) => t.value === reg.business_type);
+                        const TypeIcon = typeInfo?.icon || Building2;
+
+                        return (
+                          <tr key={reg.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                                  {reg.user?.photo_url ? (
+                                    <img
+                                      src={reg.user.photo_url}
+                                      alt=""
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <User className="w-5 h-5 text-gray-400" />
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900">
+                                    {reg.user?.first_name} {reg.user?.middle_name}{" "}
+                                    {reg.user?.last_name}
+                                  </p>
+                                  <p className="text-sm text-emerald-600 font-mono">
+                                    {reg.user?.citizen_id}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className={`p-1.5 rounded-lg bg-linear-to-br ${typeInfo?.color}`}
+                                >
+                                  <TypeIcon className="w-4 h-4 text-white" />
+                                </div>
+                                <span className="text-sm text-gray-700">
+                                  {lang === "sw" ? typeInfo?.labelSw : typeInfo?.labelEn}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div>
+                                <p className="font-medium text-gray-900">{reg.business_name}</p>
+                                <p className="text-sm text-gray-500">
+                                  {SPECIALIZATIONS_LABELS[reg.specialization]?.[
+                                    lang === "sw" ? "sw" : "en"
+                                  ] || reg.specialization}
+                                </p>
+                                {reg.business_id && (
+                                  <p className="text-sm font-mono text-emerald-600 mt-1">
+                                    {reg.business_id}
+                                  </p>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <p className="text-sm text-gray-700">
+                                {reg.district}, {reg.region}
+                              </p>
+                            </td>
+                            <td className="px-6 py-4">{getStatusBadge(reg.status)}</td>
+                            <td className="px-6 py-4">
+                              <p className="text-sm text-gray-500">
+                                {new Date(reg.created_at).toLocaleDateString()}
+                              </p>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedRegistration(reg)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                                {lang === "sw" ? "Angalia" : "View"}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </motion.div>
+          </>
         )}
 
         {/* Detail Modal */}

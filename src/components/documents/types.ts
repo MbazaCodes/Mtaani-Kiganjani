@@ -26,13 +26,13 @@ const C = {
   inkFaint: "#6b6b6b",
   rule: "#c0c0c0",
   ruleLight: "#e8e8e8",
-  emerald: "#1a5632",     // Government green — used sparingly
+  emerald: "#1a5632", // Government green — used sparingly
   emeraldMid: "#1a5632",
-  emeraldBg: "#f7f7f7",   // Very subtle grey, not green
+  emeraldBg: "#f7f7f7", // Very subtle grey, not green
   gold: "#6b4c1e",
   goldBg: "#faf8f5",
   white: "#ffffff",
-  pageBg: "#ffffff",       // Clean white — prints perfectly
+  pageBg: "#ffffff", // Clean white — prints perfectly
 };
 
 // ─── Shared stylesheet ─────────────────────────────────────────────────────────

@@ -37,11 +37,23 @@ const TICKET_CATEGORIES = [
 
 const STATUS_CONFIG: Record<string, { color: string; label: { en: string; sw: string } }> = {
   submitted: { color: "bg-amber-100 text-amber-800", label: { en: "Submitted", sw: "Imetumwa" } },
-  under_review: { color: "bg-blue-100 text-blue-800", label: { en: "Under Review", sw: "Inakaguliwa" } },
+  under_review: {
+    color: "bg-blue-100 text-blue-800",
+    label: { en: "Under Review", sw: "Inakaguliwa" },
+  },
   assigned: { color: "bg-indigo-100 text-indigo-800", label: { en: "Assigned", sw: "Imepewa" } },
-  in_progress: { color: "bg-purple-100 text-purple-800", label: { en: "In Progress", sw: "Inaendelea" } },
-  escalated: { color: "bg-orange-100 text-orange-800", label: { en: "Escalated", sw: "Imepandishwa" } },
-  resolved: { color: "bg-emerald-100 text-emerald-800", label: { en: "Resolved", sw: "Imemalizika" } },
+  in_progress: {
+    color: "bg-purple-100 text-purple-800",
+    label: { en: "In Progress", sw: "Inaendelea" },
+  },
+  escalated: {
+    color: "bg-orange-100 text-orange-800",
+    label: { en: "Escalated", sw: "Imepandishwa" },
+  },
+  resolved: {
+    color: "bg-emerald-100 text-emerald-800",
+    label: { en: "Resolved", sw: "Imemalizika" },
+  },
   closed: { color: "bg-stone-100 text-stone-600", label: { en: "Closed", sw: "Imefungwa" } },
 };
 
@@ -171,9 +183,10 @@ export function CitizenSupport() {
       await supabase.from("notifications").insert({
         user_id: user.id,
         title: lang === "sw" ? "Tiketi Imetumwa" : "Ticket Submitted",
-        message: lang === "sw"
-          ? `Tiketi yako ${ticketNumber} imetumwa. Tutakujibu hivi karibuni.`
-          : `Your ticket ${ticketNumber} has been submitted. We will respond shortly.`,
+        message:
+          lang === "sw"
+            ? `Tiketi yako ${ticketNumber} imetumwa. Tutakujibu hivi karibuni.`
+            : `Your ticket ${ticketNumber} has been submitted. We will respond shortly.`,
         type: "ticket_created",
       });
 
@@ -253,7 +266,11 @@ export function CitizenSupport() {
 
   // ── RENDER ─────────────────────────────────────────────────────────────
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -266,7 +283,10 @@ export function CitizenSupport() {
           </h1>
           {view === "list" && (
             <p className="text-sm text-stone-500 mt-0.5">
-              {L("Tuma malalamiko, maswali, na masuala", "Submit complaints, enquiries, and issues")}
+              {L(
+                "Tuma malalamiko, maswali, na masuala",
+                "Submit complaints, enquiries, and issues",
+              )}
             </p>
           )}
         </div>
@@ -291,7 +311,11 @@ export function CitizenSupport() {
 
       {/* ── CREATE VIEW ─────────────────────────────────────────────────── */}
       {view === "create" && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-2xl border border-stone-200 p-6 space-y-5">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-white rounded-2xl border border-stone-200 p-6 space-y-5"
+        >
           {/* Category */}
           <div>
             <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
@@ -340,7 +364,9 @@ export function CitizenSupport() {
 
           {/* Location info */}
           <div className="bg-stone-50 rounded-xl p-3 text-xs text-stone-500">
-            <p className="font-bold mb-1">{L("Eneo lako (kutoka wasifu)", "Your location (from profile)")}</p>
+            <p className="font-bold mb-1">
+              {L("Eneo lako (kutoka wasifu)", "Your location (from profile)")}
+            </p>
             <p>
               {user?.region || "—"} / {user?.district || "—"} / {user?.ward || "—"}
             </p>
@@ -384,7 +410,9 @@ export function CitizenSupport() {
           ) : tickets.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-stone-200">
               <MessageSquare size={40} className="mx-auto text-stone-300 mb-3" />
-              <p className="font-bold text-stone-600">{L("Hakuna tiketi bado", "No tickets yet")}</p>
+              <p className="font-bold text-stone-600">
+                {L("Hakuna tiketi bado", "No tickets yet")}
+              </p>
               <p className="text-sm text-stone-400 mt-1">
                 {L("Tuma tiketi yako ya kwanza", "Submit your first ticket")}
               </p>
@@ -403,17 +431,32 @@ export function CitizenSupport() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-mono text-stone-400">{ticket.ticket_number}</span>
-                          <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", statusCfg.color)}>
+                          <span className="text-xs font-mono text-stone-400">
+                            {ticket.ticket_number}
+                          </span>
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                              statusCfg.color,
+                            )}
+                          >
                             {sw ? statusCfg.label.sw : statusCfg.label.en}
                           </span>
-                          <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", priorityCfg.color)}>
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                              priorityCfg.color,
+                            )}
+                          >
                             {priorityCfg.label}
                           </span>
                         </div>
-                        <p className="font-bold text-stone-900 text-sm truncate">{ticket.subject}</p>
+                        <p className="font-bold text-stone-900 text-sm truncate">
+                          {ticket.subject}
+                        </p>
                         <p className="text-xs text-stone-400 mt-0.5">
-                          {getCategoryLabel(ticket.category)} · {new Date(ticket.created_at).toLocaleDateString("sw-TZ")}
+                          {getCategoryLabel(ticket.category)} ·{" "}
+                          {new Date(ticket.created_at).toLocaleDateString("sw-TZ")}
                         </p>
                       </div>
                       <ChevronRight size={16} className="text-stone-300 shrink-0 mt-2" />
@@ -432,15 +475,24 @@ export function CitizenSupport() {
           {/* Ticket info card */}
           <div className="bg-white border border-stone-200 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-mono text-stone-400">{selectedTicket.ticket_number}</span>
-              <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-md uppercase", (STATUS_CONFIG[selectedTicket.status] || STATUS_CONFIG.submitted).color)}>
+              <span className="text-xs font-mono text-stone-400">
+                {selectedTicket.ticket_number}
+              </span>
+              <span
+                className={cn(
+                  "px-2 py-0.5 text-[10px] font-bold rounded-md uppercase",
+                  (STATUS_CONFIG[selectedTicket.status] || STATUS_CONFIG.submitted).color,
+                )}
+              >
                 {sw
                   ? (STATUS_CONFIG[selectedTicket.status] || STATUS_CONFIG.submitted).label.sw
                   : (STATUS_CONFIG[selectedTicket.status] || STATUS_CONFIG.submitted).label.en}
               </span>
             </div>
             <h2 className="text-lg font-black text-stone-900">{selectedTicket.subject}</h2>
-            <p className="text-sm text-stone-600 mt-2 whitespace-pre-wrap">{selectedTicket.description}</p>
+            <p className="text-sm text-stone-600 mt-2 whitespace-pre-wrap">
+              {selectedTicket.description}
+            </p>
             <div className="flex items-center gap-4 mt-3 text-xs text-stone-400">
               <span>{getCategoryLabel(selectedTicket.category)}</span>
               <span>·</span>
@@ -525,7 +577,11 @@ export function CitizenSupport() {
                   disabled={sendingReply || !replyText.trim()}
                   className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center gap-1.5 transition-colors"
                 >
-                  {sendingReply ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                  {sendingReply ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Send size={14} />
+                  )}
                 </button>
               </div>
             )}
