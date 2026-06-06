@@ -61,6 +61,7 @@ import { supabase, Application, UserProfile } from "@/lib/supabase";
 import { logActivity } from "@/lib/activity-log";
 import { createNotification } from "@/lib/notifications";
 import { useAuth } from "@/context/AuthContext";
+import { ApplicationChat } from "@/components/ApplicationChat";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -1204,6 +1205,16 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                   </div>
                 </div>
               </div>
+
+              {/* Application Chat Thread */}
+                <div className="px-4 sm:px-6 pb-2">
+                  <ApplicationChat
+                    applicationId={selected.id}
+                    applicationNumber={selected.application_number}
+                    applicantId={selected.user_id || ""}
+                    lang={lang}
+                  />
+                </div>
 
               {/* Action footer */}
               {!["approved", "issued", "rejected", "refunded"].includes(selected.status) && (

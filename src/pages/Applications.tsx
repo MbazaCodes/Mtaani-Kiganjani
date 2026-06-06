@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
+import { ApplicationChat } from "../components/ApplicationChat";
 import { useToast } from "../context/ToastContext";
 import { supabase, Application } from "../lib/supabase";
 import type { ApplicationDraft } from "../types";
@@ -985,6 +986,16 @@ export function Applications({
               </div>
 
               {/* Footer actions */}
+              {/* Application Chat Thread */}
+              <div className="px-4 pb-3">
+                <ApplicationChat
+                  applicationId={selectedApp.id}
+                  applicationNumber={selectedApp.application_number}
+                  applicantId={selectedApp.user_id || user?.id || ""}
+                  lang={lang}
+                />
+              </div>
+
               <div className="px-6 py-4 border-t border-stone-100 bg-stone-50 flex gap-3">
                 {(selectedApp.status === "pending_payment" ||
                   selectedApp.status === "approved") && (
