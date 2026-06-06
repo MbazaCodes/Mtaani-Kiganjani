@@ -1036,9 +1036,13 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                           <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-0.5">
                             {fmtKey(k)}
                           </p>
-                          <p className="text-xs text-stone-800 font-semibold break-words">
-                            {fmtVal(v)}
-                          </p>
+                          {typeof v === "string" && v.startsWith("data:image") ? (
+                            <img src={v} alt={k} className="h-10 w-auto rounded border border-stone-200" />
+                          ) : (
+                            <p className="text-xs text-stone-800 font-semibold break-words">
+                              {fmtVal(v)}
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>

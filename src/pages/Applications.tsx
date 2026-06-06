@@ -950,6 +950,14 @@ export function Applications({
                             "data_confirmed",
                             "document_types",
                             "children",
+                            "applicant_signature",
+                            "buyer_signature",
+                            "weo_signature",
+                            "weo_stamp",
+                            "signature",
+                            "stamp",
+                            "stamp_url",
+                            "signature_url",
                           ].includes(k),
                       )
                       .map(([key, val]) => {
