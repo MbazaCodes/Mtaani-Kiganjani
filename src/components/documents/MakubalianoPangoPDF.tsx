@@ -319,14 +319,13 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
           </View>
         </View>
 
-        {/* QR code */}
-        <View style={s.qrSection}>
-          <View style={s.qrInner}>
-            <View style={s.qrBorder}>
-              <Image src={qr} style={s.qrCode} />
-            </View>
-            <Text style={s.qrLabel}>{sw ? "Changanua kuthibitisha" : "Scan to verify"}</Text>
-            <Text style={s.qrRef}>{application.application_number}</Text>
+        {/* QR verification — compact, inline above footer */}
+        <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center", marginTop: 6, gap: 8 }}>
+          <Text style={{ fontSize: 6, color: "#6b6b6b", textAlign: "right" }}>
+            {sw ? "Changanua kuthibitisha:" : "Scan to verify:"}{"\n"}{application.application_number}
+          </Text>
+          <View style={{ borderWidth: 0.5, borderColor: "#c0c0c0", padding: 2 }}>
+            <Image src={qr} style={{ width: 46, height: 46 }} />
           </View>
         </View>
 

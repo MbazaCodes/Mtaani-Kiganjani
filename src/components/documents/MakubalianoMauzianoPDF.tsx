@@ -36,8 +36,8 @@ const ls = StyleSheet.create({
     backgroundColor: "#f7f7f7",
     borderWidth: 0.5,
     borderColor: "#c0c0c0",
-    padding: 12,
-    marginVertical: 4,
+    padding: 8,
+    marginVertical: 3,
     alignItems: "center",
   },
   priceLabel: { fontSize: 7, color: "#6b6b6b", marginBottom: 2 },
@@ -48,14 +48,14 @@ const ls = StyleSheet.create({
     borderColor: "#c0c0c0",
     borderLeftWidth: 3,
     borderLeftColor: "#059669",
-    padding: 10,
-    marginBottom: 10,
+    padding: 7,
+    marginBottom: 6,
   },
   assetLabel: { fontSize: 7, color: "#6b6b6b", fontWeight: "bold", marginBottom: 2 },
   assetValue: { fontSize: 9, color: "#111111" },
   termsText: { fontSize: 7.5, color: "#57534e", lineHeight: 1.6 },
   witnessBox: { borderTopWidth: 1, borderTopColor: "#d6d3d1", paddingTop: 10, marginTop: 8 },
-  witnessTitle: { fontSize: 7.5, fontWeight: "bold", color: "#78716c", marginBottom: 6 },
+  witnessTitle: { fontSize: 7.5, fontWeight: "bold", color: "#78716c", marginBottom: 3 },
 });
 
 const ASSET_LABELS: Record<string, { sw: string; en: string }> = {
@@ -180,8 +180,10 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={s.sectionTitle}>{L.assetDetails}</Text>
         </View>
         {fd.asset_description ? (
-          <Text style={{ fontSize: 9, color: "#1c1917", marginBottom: 10, lineHeight: 1.5 }}>
-            {String(fd.asset_description)}
+          <Text style={{ fontSize: 8.5, color: "#1c1917", marginBottom: 6, lineHeight: 1.35 }}>
+            {String(fd.asset_description).length > 220
+              ? String(fd.asset_description).slice(0, 220) + "…"
+              : String(fd.asset_description)}
           </Text>
         ) : (
           <View />
@@ -216,27 +218,20 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           </View>
         </View>
 
-        {/* Financials */}
-        <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>{L.financials}</Text>
-        </View>
-        <View style={s.twoCol}>
-          <View style={s.colLeft}>
-            <Row
-              label={sw ? "Jumla" : "Total"}
-              value={formatCurrency(Number(fd.total_amount || fd.total_rent || price))}
-            />
-            <Row
-              label={sw ? "VAT (18%)" : "VAT (18%)"}
-              value={formatCurrency(Number(fd.vat_amount || 0))}
-            />
-          </View>
-          <View style={s.colRight}>
-            <Row
-              label={sw ? "Ada ya Huduma" : "Service Fee"}
-              value={formatCurrency(Number(fd.service_fee || 0))}
-            />
-          </View>
+        {/* Financials — compact strip */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", backgroundColor: "#f7f7f7", borderWidth: 0.5, borderColor: "#c0c0c0", padding: 5, marginTop: 6, marginBottom: 4 }}>
+          <Text style={{ fontSize: 8 }}>
+            <Text style={{ color: "#6b6b6b" }}>{sw ? "Jumla: " : "Total: "}</Text>
+            <Text style={{ fontWeight: "bold" }}>{formatCurrency(Number(fd.total_amount || fd.total_rent || price))}</Text>
+          </Text>
+          <Text style={{ fontSize: 8 }}>
+            <Text style={{ color: "#6b6b6b" }}>VAT: </Text>
+            <Text style={{ fontWeight: "bold" }}>{formatCurrency(Number(fd.vat_amount || 0))}</Text>
+          </Text>
+          <Text style={{ fontSize: 8 }}>
+            <Text style={{ color: "#6b6b6b" }}>{sw ? "Ada: " : "Fee: "}</Text>
+            <Text style={{ fontWeight: "bold" }}>{formatCurrency(Number(fd.service_fee || 0))}</Text>
+          </Text>
         </View>
 
         {/* Signatures */}
@@ -257,7 +252,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           style={{
             flexDirection: "row",
             justifyContent: "center",
-            marginTop: 10,
+            marginTop: 4,
           }}
         >
           <OfficerSignatureBox

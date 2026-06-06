@@ -40,7 +40,7 @@ export const commonStyles = StyleSheet.create({
   // Page
   page: {
     paddingTop: 24,
-    paddingBottom: 44,
+    paddingBottom: 28,
     paddingHorizontal: 36,
     fontFamily: "Helvetica",
     fontSize: 10,
@@ -174,9 +174,9 @@ export const commonStyles = StyleSheet.create({
 
   // ── Section headers ────────────────────────────────────────────────────────
   sectionHeader: {
-    paddingBottom: 4,
-    marginBottom: 5,
-    marginTop: 8,
+    paddingBottom: 3,
+    marginBottom: 4,
+    marginTop: 6,
     borderBottomWidth: 0.75,
     borderBottomColor: C.ink,
     flexDirection: "row",
@@ -193,11 +193,11 @@ export const commonStyles = StyleSheet.create({
   // ── Info rows ──────────────────────────────────────────────────────────────
   infoRow: {
     flexDirection: "row",
-    marginBottom: 4,
-    paddingBottom: 3,
+    marginBottom: 2.5,
+    paddingBottom: 2,
     borderBottomWidth: 0.3,
     borderBottomColor: C.ruleLight,
-    minHeight: 14,
+    minHeight: 12,
   },
   infoLabel: {
     width: "36%",
@@ -317,13 +317,10 @@ export const commonStyles = StyleSheet.create({
 
   // ── Footer ─────────────────────────────────────────────────────────────────
   footer: {
-    position: "absolute",
-    bottom: 24,
-    left: 44,
-    right: 44,
+    marginTop: 12,
     borderTopWidth: 0.5,
     borderTopColor: C.rule,
-    paddingTop: 6,
+    paddingTop: 5,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -346,13 +343,13 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: C.emeraldBg,
     borderWidth: 0.5,
     borderColor: C.rule,
-    padding: 8,
-    marginVertical: 8,
+    padding: 5,
+    marginVertical: 5,
   },
   noticeText: {
-    fontSize: 8,
+    fontSize: 7.5,
     color: C.inkLight,
-    lineHeight: 1.5,
+    lineHeight: 1.35,
   },
 
   // ── Subject line (for letter-format docs) ─────────────────────────────────
