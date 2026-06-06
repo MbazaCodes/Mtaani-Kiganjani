@@ -1021,6 +1021,14 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                   );
                 })()}
 
+                {/* Application Chat Thread — right after buyer card for agreements */}
+                <ApplicationChat
+                  applicationId={selected.id}
+                  applicationNumber={selected.application_number}
+                  applicantId={selected.user_id || ""}
+                  lang={lang}
+                />
+
                 {/* Form Data */}
                 {formDataEntries.fields.length > 0 && (
                   <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden">
@@ -1208,13 +1216,6 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                       ))}
                   </div>
                 </div>
-              {/* Application Chat Thread */}
-                <ApplicationChat
-                  applicationId={selected.id}
-                  applicationNumber={selected.application_number}
-                  applicantId={selected.user_id || ""}
-                  lang={lang}
-                />
               </div>
 
               {/* Action footer */}
