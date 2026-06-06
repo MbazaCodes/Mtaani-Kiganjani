@@ -288,7 +288,8 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
             {siteVisits !== null && (
               <div className="flex items-center gap-2 text-sm font-bold text-stone-300">
                 <Eye size={15} className="text-stone-400" />
-                {siteVisits.toLocaleString()} {lang === "sw" ? "matembezi ya tovuti" : "site visits"}
+                {siteVisits.toLocaleString()}{" "}
+                {lang === "sw" ? "matembezi ya tovuti" : "site visits"}
               </div>
             )}
           </div>

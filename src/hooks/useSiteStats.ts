@@ -9,9 +9,7 @@ import { supabase } from "@/lib/supabase";
  */
 export function useOnlineCount(): number {
   const [count, setCount] = useState(0);
-  const idRef = useRef<string>(
-    `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-  );
+  const idRef = useRef<string>(`${Date.now()}-${Math.random().toString(36).slice(2, 9)}`);
 
   useEffect(() => {
     const channel = supabase.channel("online-users", {

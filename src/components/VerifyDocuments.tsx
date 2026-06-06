@@ -820,7 +820,10 @@ export function VerifyDocuments({
                   {/* QR Code */}
                   <div className="bg-white p-3 rounded-xl shadow-lg">
                     <QRCodeSVG
-                      value={verifyUrl(vf(verifiedDocument, "verificationCode"), verifiedDocument.documentType || "application")}
+                      value={verifyUrl(
+                        vf(verifiedDocument, "verificationCode"),
+                        verifiedDocument.documentType || "application",
+                      )}
                       size={120}
                       level="H"
                       includeMargin={false}

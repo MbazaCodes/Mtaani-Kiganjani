@@ -91,7 +91,10 @@ export function Header({ onMenuClick }: HeaderProps) {
             </span>
             <Users size={13} className="text-emerald-600" />
             <span className="text-xs font-bold text-emerald-700">
-              {onlineCount} <span className="font-medium text-emerald-600">{lang === "sw" ? "mtandaoni" : "online"}</span>
+              {onlineCount}{" "}
+              <span className="font-medium text-emerald-600">
+                {lang === "sw" ? "mtandaoni" : "online"}
+              </span>
             </span>
           </div>
         )}
