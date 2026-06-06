@@ -85,18 +85,53 @@ export function CommunicationsCenter() {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const { data } = await supabase
+      const results: Message[] = [];
+
+      // 1. Messages addressed directly to this user
+      const { data: direct } = await supabase
         .from("messages")
         .select("*, sender:sender_id(first_name, last_name, role), department:recipient_department_id(name, code)")
-        .or(`recipient_id.eq.${user.id}`)
+        .eq("recipient_id", user.id)
         .is("thread_id", null)
         .eq("archived", false)
         .order("created_at", { ascending: false })
         .limit(100);
-      setMessages((data as Message[]) || []);
+      if (direct) results.push(...(direct as Message[]));
+
+      // 2. If this user is a department member, also fetch messages to their department(s)
+      const deptIds: string[] = [];
+      if (user.department_id) deptIds.push(user.department_id);
+      // Also check department_users membership table
+      const { data: memberships } = await supabase
+        .from("department_users")
+        .select("department_id")
+        .eq("user_id", user.id);
+      (memberships || []).forEach((m: { department_id: string }) => {
+        if (m.department_id && !deptIds.includes(m.department_id)) deptIds.push(m.department_id);
+      });
+
+      if (deptIds.length > 0) {
+        const { data: deptMsgs } = await supabase
+          .from("messages")
+          .select("*, sender:sender_id(first_name, last_name, role), department:recipient_department_id(name, code)")
+          .in("recipient_department_id", deptIds)
+          .is("thread_id", null)
+          .eq("archived", false)
+          .order("created_at", { ascending: false })
+          .limit(100);
+        if (deptMsgs) {
+          for (const m of deptMsgs as Message[]) {
+            if (!results.find((r) => r.id === m.id)) results.push(m);
+          }
+        }
+      }
+
+      // Sort by date
+      results.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setMessages(results);
     } catch { setMessages([]); }
     finally { setLoading(false); }
-  }, [user?.id]);
+  }, [user?.id, user?.department_id]);
 
   const fetchSent = useCallback(async () => {
     if (!user?.id) return;
@@ -223,8 +258,8 @@ export function CommunicationsCenter() {
   // ── Open thread ────────────────────────────────────────────────────────
   const openThread = async (msg: Message) => {
     setSelectedThread(msg);
-    // Mark as read
-    if (!msg.read && msg.recipient_id === user?.id) {
+    // Mark as read (direct or department message)
+    if (!msg.read && (msg.recipient_id === user?.id || msg.recipient_department_id)) {
       await supabase.from("messages").update({ read: true }).eq("id", msg.id);
     }
     // Fetch replies
@@ -319,6 +354,8 @@ export function CommunicationsCenter() {
     if (!user || !selectedThread || !replyText.trim()) return;
     setSendingReply(true);
     try {
+      // Reply goes to the other party. For department messages received by an
+      // officer, reply to the original sender (citizen/staff).
       const replyTo = selectedThread.sender_id === user.id
         ? selectedThread.recipient_id
         : selectedThread.sender_id;
