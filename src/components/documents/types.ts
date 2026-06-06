@@ -283,8 +283,8 @@ export const commonStyles = StyleSheet.create({
   qrSection: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 10,
-    marginBottom: 4,
+    marginTop: 6,
+    marginBottom: 2,
   },
   qrInner: {
     alignItems: "center",

@@ -12,7 +12,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { TANZANIA_EMBLEM_BASE64 } from "@/constants/emblem";
 
-const STAMP_SIZE = 90;
+const STAMP_SIZE = 76;
 
 const ss = StyleSheet.create({
   // Outer container
@@ -44,51 +44,51 @@ const ss = StyleSheet.create({
   },
   // Top text
   topText: {
-    fontSize: 4.2,
+    fontSize: 3.8,
     fontWeight: "bold",
     color: "#1a3d6b",
     textAlign: "center",
     textTransform: "uppercase",
-    letterSpacing: 0.3,
-    marginBottom: 1,
+    letterSpacing: 0.2,
+    marginBottom: 0,
   },
   // Emblem
   emblem: {
-    width: 28,
-    height: 28,
-    marginVertical: 1,
+    width: 22,
+    height: 22,
+    marginVertical: 0,
   },
   // Certified text
   certifiedText: {
-    fontSize: 5.5,
+    fontSize: 5,
     fontWeight: "bold",
     color: "#1a3d6b",
     textAlign: "center",
     textTransform: "uppercase",
-    letterSpacing: 1.5,
-    marginTop: 1,
+    letterSpacing: 1.2,
+    marginTop: 0,
   },
   certifiedSw: {
-    fontSize: 3.8,
+    fontSize: 3.2,
     color: "#1a3d6b",
     textAlign: "center",
-    letterSpacing: 0.5,
-    marginTop: 0.5,
+    letterSpacing: 0.3,
+    marginTop: 0,
   },
   // Date/time
   dateText: {
-    fontSize: 3.5,
+    fontSize: 3,
     color: "#1a3d6b",
     textAlign: "center",
     fontFamily: "Courier",
-    marginTop: 1,
+    marginTop: 0,
   },
   // Stars decoration
   stars: {
-    fontSize: 4,
+    fontSize: 3.5,
     color: "#1a3d6b",
     textAlign: "center",
-    letterSpacing: 2,
+    letterSpacing: 1.5,
   },
 });
 
