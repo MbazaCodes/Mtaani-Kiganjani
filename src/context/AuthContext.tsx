@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     last_name: sessionUser.user_metadata?.last_name || "",
     phone: sessionUser.user_metadata?.phone || "",
     role: (sessionUser.user_metadata?.role as "citizen" | "staff" | "admin") || "citizen",
-    is_verified: false,
+    is_verified: true, // true in fallback — real profile from DB determines the gate
     account_status: "active",
   });
 
