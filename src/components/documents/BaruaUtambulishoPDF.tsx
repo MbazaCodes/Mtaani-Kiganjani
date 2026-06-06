@@ -18,22 +18,22 @@ import { ReceiptPage } from "./ReceiptPage";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
-  letterMeta: { marginTop: 14, marginBottom: 8, fontSize: 9.5 },
+  letterMeta: { marginTop: 8, marginBottom: 5, fontSize: 9 },
   metaRow: { flexDirection: "row", marginBottom: 3 },
   metaLabel: { fontWeight: "bold", width: 70 },
   metaValue: { flex: 1 },
-  recipientBlock: { marginVertical: 14 },
-  recipientLine: { fontSize: 10, lineHeight: 1.4 },
-  salutation: { fontSize: 10, marginBottom: 8, fontWeight: "bold" },
-  signoff: { marginTop: 18, fontSize: 9.5 },
+  recipientBlock: { marginVertical: 8 },
+  recipientLine: { fontSize: 9.5, lineHeight: 1.3 },
+  salutation: { fontSize: 9.5, marginBottom: 5, fontWeight: "bold" },
+  signoff: { marginTop: 10, fontSize: 9.5 },
   multiNotice: {
     backgroundColor: "#f7f7f7",
     borderWidth: 0.5,
     borderColor: "#c0c0c0",
     borderLeftWidth: 3,
     borderLeftColor: "#d97706",
-    padding: 8,
-    marginVertical: 10,
+    padding: 6,
+    marginVertical: 6,
   },
   multiText: { fontSize: 8, color: "#3a3a3a", lineHeight: 1.4 },
 });
@@ -271,14 +271,16 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
           </View>
         </View>
 
-        {/* Footer */}
-        <View style={s.footer}>
-          <Text style={s.footerText}>
+        {/* Footer — inline (not absolute) to avoid forcing overflow page */}
+        <View style={{ marginTop: 14, borderTopWidth: 0.5, borderTopColor: "#c0c0c0", paddingTop: 5, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={{ fontSize: 7, color: "#6b6b6b", fontStyle: "italic", flex: 1 }}>
             {sw
               ? "Barua hii ni rasmi. Inafaa kwa taasisi iliyoainishwa pekee."
               : "This letter is official. It is valid only for the institution stated above."}
           </Text>
-          <Text style={s.metadata}>{`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}</Text>
+          <Text style={{ fontSize: 5.5, color: "#c0c0c0", fontFamily: "Courier", textAlign: "right" }}>
+            {`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}
+          </Text>
         </View>
       </Page>
         {/* Page 2: Payment Receipt */}
