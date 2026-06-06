@@ -19,7 +19,7 @@ const ls = StyleSheet.create({
     backgroundColor: "#1c1917",
     paddingVertical: 10,
     paddingHorizontal: 14,
-    marginBottom: 10,
+    marginBottom: 5,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -34,7 +34,7 @@ const ls = StyleSheet.create({
     color: "#1c1917",
     marginBottom: 2,
   },
-  lifespan: { fontSize: 9, textAlign: "center", color: "#78716c", marginBottom: 12 },
+  lifespan: { fontSize: 9, textAlign: "center", color: "#78716c", marginBottom: 6 },
 });
 
 export const KibariMazishiPDF: React.FC<DocumentPDFProps> = ({ application, lang, qrDataUrl }) => {

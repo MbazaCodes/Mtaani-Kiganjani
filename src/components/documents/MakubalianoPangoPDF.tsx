@@ -24,7 +24,7 @@ const ls = StyleSheet.create({
     marginBottom: 14,
     alignItems: "center",
   },
-  bannerTitle: { color: "#ffffff", fontSize: 13, fontWeight: "bold", textTransform: "uppercase" },
+  bannerTitle: { color: "#ffffff", fontSize: 11, fontWeight: "bold", textTransform: "uppercase" },
   partyBox: {
     borderWidth: 1,
     borderColor: "#0d9488",
@@ -44,10 +44,10 @@ const ls = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#0d9488",
     padding: 10,
-    marginVertical: 10,
+    marginVertical: 4,
     alignItems: "center",
   },
-  rentAmount: { fontSize: 18, fontWeight: "bold", color: "#115e59" },
+  rentAmount: { fontSize: 14, fontWeight: "bold", color: "#115e59" },
   rentLabel: { fontSize: 8, color: "#0f766e" },
   fourSigGrid: {
     flexDirection: "row",

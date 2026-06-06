@@ -37,11 +37,11 @@ const ls = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#d97706",
     padding: 12,
-    marginVertical: 10,
+    marginVertical: 4,
     alignItems: "center",
   },
   priceLabel: { fontSize: 8, color: "#92400e", marginBottom: 3 },
-  priceAmt: { fontSize: 20, fontWeight: "bold", color: "#92400e" },
+  priceAmt: { fontSize: 14, fontWeight: "bold", color: "#92400e" },
   assetBox: {
     backgroundColor: "#f0fdf4",
     borderLeftWidth: 3,

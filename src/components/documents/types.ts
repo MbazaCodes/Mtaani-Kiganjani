@@ -39,9 +39,9 @@ const C = {
 export const commonStyles = StyleSheet.create({
   // Page
   page: {
-    paddingTop: 30,
-    paddingBottom: 50,
-    paddingHorizontal: 40,
+    paddingTop: 24,
+    paddingBottom: 44,
+    paddingHorizontal: 36,
     fontFamily: "Helvetica",
     fontSize: 10,
     color: C.ink,
@@ -144,12 +144,12 @@ export const commonStyles = StyleSheet.create({
 
   // ── Document title ─────────────────────────────────────────────────────────
   titleBlock: {
-    marginTop: 14,
-    marginBottom: 4,
+    marginTop: 6,
+    marginBottom: 2,
     alignItems: "center",
   },
   title: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "bold",
     textAlign: "center",
     textTransform: "uppercase",
@@ -175,8 +175,8 @@ export const commonStyles = StyleSheet.create({
   // ── Section headers ────────────────────────────────────────────────────────
   sectionHeader: {
     paddingBottom: 4,
-    marginBottom: 8,
-    marginTop: 12,
+    marginBottom: 5,
+    marginTop: 8,
     borderBottomWidth: 0.75,
     borderBottomColor: C.ink,
     flexDirection: "row",
@@ -224,7 +224,7 @@ export const commonStyles = StyleSheet.create({
   signatureSection: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginTop: 14,
     marginBottom: 6,
   },
   signatureBox: {
@@ -238,14 +238,14 @@ export const commonStyles = StyleSheet.create({
     width: "100%",
   },
   signatureImg: {
-    width: 110,
-    height: 44,
+    width: 90,
+    height: 36,
     objectFit: "contain",
     marginBottom: 2,
   },
   stampImg: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     objectFit: "contain",
     marginBottom: 4,
   },

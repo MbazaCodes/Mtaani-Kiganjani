@@ -38,7 +38,7 @@ const ls = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  guestsNum: { fontSize: 20, fontWeight: "bold", color: "#5b21b6" },
+  guestsNum: { fontSize: 16, fontWeight: "bold", color: "#5b21b6" },
   guestsLabel: { fontSize: 8, color: "#6d28d9" },
   // QR placed inline (not absolute) so it never overlaps content
   qrRow: {

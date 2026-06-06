@@ -18,16 +18,16 @@ import { ReceiptPage } from "./ReceiptPage";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
-  banner: { paddingVertical: 10, paddingHorizontal: 14, marginBottom: 14, alignItems: "center" },
+  banner: { paddingVertical: 6, paddingHorizontal: 10, marginBottom: 8, alignItems: "center" },
   bannerTitle: {
     color: "#ffffff",
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "bold",
     textTransform: "uppercase",
     marginBottom: 2,
   },
   bannerSub: { color: "#fecaca", fontSize: 9, fontStyle: "italic" },
-  partyBox: { borderWidth: 1, borderRadius: 4, padding: 8, marginVertical: 4 },
+  partyBox: { borderWidth: 1, borderRadius: 4, padding: 5, marginVertical: 2 },
   partyLabel: { fontSize: 7.5, fontWeight: "bold", marginBottom: 3, textTransform: "uppercase" },
   urgencyBadge: {
     paddingVertical: 3,
@@ -35,16 +35,16 @@ const ls = StyleSheet.create({
     alignSelf: "center",
     marginVertical: 8,
   },
-  urgencyText: { fontSize: 10, fontWeight: "bold", color: "#ffffff" },
+  urgencyText: { fontSize: 8, fontWeight: "bold", color: "#ffffff" },
   descBox: {
     backgroundColor: "#fafaf8",
     borderWidth: 0.5,
     borderColor: "#d6d3d1",
-    padding: 10,
-    marginVertical: 8,
+    padding: 6,
+    marginVertical: 4,
     minHeight: 60,
   },
-  descText: { fontSize: 9, lineHeight: 1.6, color: "#0f0f0f" },
+  descText: { fontSize: 8, lineHeight: 1.4, color: "#0f0f0f" },
 });
 
 const DISPUTE_LABELS: Record<string, { sw: string; en: string }> = {

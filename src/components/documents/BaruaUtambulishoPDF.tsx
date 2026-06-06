@@ -18,7 +18,7 @@ import { ReceiptPage } from "./ReceiptPage";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 
 const ls = StyleSheet.create({
-  letterMeta: { marginTop: 14, marginBottom: 14, fontSize: 9.5 },
+  letterMeta: { marginTop: 14, marginBottom: 8, fontSize: 9.5 },
   metaRow: { flexDirection: "row", marginBottom: 3 },
   metaLabel: { fontWeight: "bold", width: 70 },
   metaValue: { flex: 1 },

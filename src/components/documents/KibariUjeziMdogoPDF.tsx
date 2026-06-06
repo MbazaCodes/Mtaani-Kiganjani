@@ -25,7 +25,7 @@ const ls = StyleSheet.create({
   },
   bannerTitle: {
     color: "#ffffff",
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "bold",
     textTransform: "uppercase",
     marginBottom: 2,
@@ -39,7 +39,7 @@ const ls = StyleSheet.create({
     alignItems: "center",
     marginVertical: 10,
   },
-  costAmount: { fontSize: 18, fontWeight: "bold", color: "#92400e" },
+  costAmount: { fontSize: 14, fontWeight: "bold", color: "#92400e" },
   costLabel: { fontSize: 8, color: "#a16207" },
   noticeBox: {
     backgroundColor: "#fef3c7",

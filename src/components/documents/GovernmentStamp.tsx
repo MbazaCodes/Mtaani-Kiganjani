@@ -12,7 +12,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { TANZANIA_EMBLEM_BASE64 } from "@/constants/emblem";
 
-const STAMP_SIZE = 76;
+const STAMP_SIZE = 68;
 
 const ss = StyleSheet.create({
   // Outer container
@@ -54,8 +54,8 @@ const ss = StyleSheet.create({
   },
   // Emblem
   emblem: {
-    width: 22,
-    height: 22,
+    width: 18,
+    height: 18,
     marginVertical: 0,
   },
   // Certified text

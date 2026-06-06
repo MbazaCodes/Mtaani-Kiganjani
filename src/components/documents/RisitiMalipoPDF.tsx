@@ -18,10 +18,10 @@ const ls = StyleSheet.create({
     backgroundColor: "#059669",
     padding: 12,
     alignItems: "center",
-    marginBottom: 14,
+    marginBottom: 8,
     borderRadius: 2,
   },
-  paidText: { color: "#ffffff", fontSize: 20, fontWeight: "bold", letterSpacing: 3 },
+  paidText: { color: "#ffffff", fontSize: 16, fontWeight: "bold", letterSpacing: 3 },
   receiptNo: { color: "#d1fae5", fontSize: 8, marginTop: 4, fontFamily: "Courier" },
   amountCard: {
     backgroundColor: "#f0fdf4",
@@ -33,7 +33,7 @@ const ls = StyleSheet.create({
     borderRadius: 2,
   },
   amtLabel: { fontSize: 8, color: "#065f46", marginBottom: 4 },
-  amtValue: { fontSize: 28, fontWeight: "bold", color: "#059669", marginBottom: 3 },
+  amtValue: { fontSize: 22, fontWeight: "bold", color: "#059669", marginBottom: 3 },
   amtWords: { fontSize: 8, color: "#065f46", fontStyle: "italic" },
   tableRow: {
     flexDirection: "row",
