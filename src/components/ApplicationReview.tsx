@@ -1204,17 +1204,14 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                       ))}
                   </div>
                 </div>
-              </div>
-
               {/* Application Chat Thread */}
-                <div className="px-4 sm:px-6 pb-2">
-                  <ApplicationChat
-                    applicationId={selected.id}
-                    applicationNumber={selected.application_number}
-                    applicantId={selected.user_id || ""}
-                    lang={lang}
-                  />
-                </div>
+                <ApplicationChat
+                  applicationId={selected.id}
+                  applicationNumber={selected.application_number}
+                  applicantId={selected.user_id || ""}
+                  lang={lang}
+                />
+              </div>
 
               {/* Action footer */}
               {!["approved", "issued", "rejected", "refunded"].includes(selected.status) && (
