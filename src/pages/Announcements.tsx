@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { cn } from "@/lib/utils";
+import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
 
 const CATEGORIES = [
   { value: "public_notice", en: "Public Notice", sw: "Tangazo la Umma", icon: "📢" },
@@ -110,6 +111,19 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
   const handleCreate = async () => {
     if (!user || !title.trim() || !body.trim()) {
       showToast(L("Jaza sehemu zote", "Fill all fields"), "error");
+      return;
+    }
+    // Validate cascading location based on target level
+    if (level !== "national" && !region) {
+      showToast(L("Chagua mkoa", "Select a region"), "error");
+      return;
+    }
+    if ((level === "district" || level === "ward") && !district) {
+      showToast(L("Chagua wilaya", "Select a district"), "error");
+      return;
+    }
+    if (level === "ward" && !ward) {
+      showToast(L("Chagua kata", "Select a ward"), "error");
       return;
     }
     setSubmitting(true);
@@ -239,28 +253,69 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                 <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
                   {L("Kiwango", "Target Level")}
                 </label>
-                <select value={level} onChange={(e) => setLevel(e.target.value)} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white" aria-label="Level">
+                <select value={level} onChange={(e) => { setLevel(e.target.value); setRegion(""); setDistrict(""); setWard(""); }} className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white" aria-label="Level">
                   <option value="national">{L("Kitaifa", "National")}</option>
                   <option value="region">{L("Mkoa", "Region")}</option>
                   <option value="district">{L("Wilaya", "District")}</option>
                   <option value="ward">{L("Kata", "Ward")}</option>
                 </select>
               </div>
+
+              {/* Cascading location: Region → District → Ward */}
               {level !== "national" && (
                 <div>
                   <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
-                    {L("Eneo", "Location")}
+                    {L("Mkoa", "Region")} *
                   </label>
-                  <input
-                    value={level === "ward" ? ward : level === "district" ? district : region}
-                    onChange={(e) => {
-                      if (level === "ward") setWard(e.target.value);
-                      else if (level === "district") setDistrict(e.target.value);
-                      else setRegion(e.target.value);
-                    }}
-                    placeholder={level === "ward" ? "e.g. Buguruni" : level === "district" ? "e.g. Ilala" : "e.g. Dar es Salaam"}
-                    className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm"
-                  />
+                  <select
+                    value={region}
+                    onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); }}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
+                    aria-label="Region"
+                  >
+                    <option value="">{L("-- Chagua Mkoa --", "-- Select Region --")}</option>
+                    {TANZANIA_ADDRESS_DATA.map((r) => (
+                      <option key={r.name} value={r.name}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {(level === "district" || level === "ward") && region && (
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                    {L("Wilaya", "District")} *
+                  </label>
+                  <select
+                    value={district}
+                    onChange={(e) => { setDistrict(e.target.value); setWard(""); }}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
+                    aria-label="District"
+                  >
+                    <option value="">{L("-- Chagua Wilaya --", "-- Select District --")}</option>
+                    {(TANZANIA_ADDRESS_DATA.find((r) => r.name === region)?.districts || []).map((d) => (
+                      <option key={d.name} value={d.name}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {level === "ward" && region && district && (
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                    {L("Kata", "Ward")} *
+                  </label>
+                  <select
+                    value={ward}
+                    onChange={(e) => setWard(e.target.value)}
+                    className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm bg-white"
+                    aria-label="Ward"
+                  >
+                    <option value="">{L("-- Chagua Kata --", "-- Select Ward --")}</option>
+                    {(TANZANIA_ADDRESS_DATA.find((r) => r.name === region)?.districts.find((d) => d.name === district)?.wards || []).map((w) => (
+                      <option key={w} value={w}>{w}</option>
+                    ))}
+                  </select>
                 </div>
               )}
             </div>
