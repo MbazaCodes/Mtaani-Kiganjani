@@ -84,33 +84,49 @@ export function CustomerSupport() {
         .eq("application_number", term.toUpperCase())
         .single();
 
-      // If not found by app number, try by NIDA → get latest application
+      // If not found by app number, try by NIDA → look up user first, then app
       if ((err || !data) && term.length > 8) {
-        const { data: byNida } = await supabase
-          .from("applications")
-          .select("*, services(*), users:user_id!inner(*)")
-          .eq("users.nida_number", term)
-          .order("created_at", { ascending: false })
+        const { data: nidaUser } = await supabase
+          .from("users")
+          .select("id")
+          .eq("nida_number", term)
           .limit(1)
-          .single();
-        if (byNida) {
-          data = byNida;
-          err = null;
+          .maybeSingle();
+        if (nidaUser?.id) {
+          const { data: byNida } = await supabase
+            .from("applications")
+            .select("*, services(*), users:user_id(*)")
+            .eq("user_id", nidaUser.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (byNida) {
+            data = byNida;
+            err = null;
+          }
         }
       }
 
-      // Try by phone
-      if (((err || !data) && term.startsWith("+")) || term.startsWith("0")) {
-        const { data: byPhone } = await supabase
-          .from("applications")
-          .select("*, services(*), users:user_id!inner(*)")
-          .eq("users.phone", term)
-          .order("created_at", { ascending: false })
+      // Try by phone → look up user first, then app
+      if ((err || !data) && (term.startsWith("+") || term.startsWith("0"))) {
+        const { data: phoneUser } = await supabase
+          .from("users")
+          .select("id")
+          .eq("phone", term)
           .limit(1)
-          .single();
-        if (byPhone) {
-          data = byPhone;
-          err = null;
+          .maybeSingle();
+        if (phoneUser?.id) {
+          const { data: byPhone } = await supabase
+            .from("applications")
+            .select("*, services(*), users:user_id(*)")
+            .eq("user_id", phoneUser.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (byPhone) {
+            data = byPhone;
+            err = null;
+          }
         }
       }
 
