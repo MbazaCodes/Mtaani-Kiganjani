@@ -337,6 +337,65 @@ export function CommunicationsCenter() {
         });
       }
 
+      // ── Department message: notify officers + CC area staff for oversight ──
+      if (recipientType === "department" && selectedDept) {
+        // 1. Find department officers
+        const { data: deptOfficers } = await supabase
+          .from("department_users")
+          .select("user_id")
+          .eq("department_id", selectedDept.id);
+        const officerIds = (deptOfficers || []).map((o: { user_id: string }) => o.user_id);
+        // Also include users with department_id set directly
+        const { data: deptUsers } = await supabase
+          .from("users")
+          .select("id")
+          .eq("department_id", selectedDept.id);
+        (deptUsers || []).forEach((u: { id: string }) => {
+          if (!officerIds.includes(u.id)) officerIds.push(u.id);
+        });
+
+        // 2. Notify each department officer
+        for (const oid of officerIds) {
+          await supabase.from("notifications").insert({
+            user_id: oid,
+            title: L("Ujumbe kwa Idara", "Message to Department"),
+            message: `${user.first_name} ${user.last_name}: ${subject.trim()}`,
+            type: "message",
+          });
+        }
+
+        // 3. FALLBACK + STAFF OVERSIGHT: copy the citizen's area staff so they
+        //    can intervene if the department doesn't respond.
+        //    Find ward/district staff matching the sender's location.
+        let staffQuery = supabase
+          .from("users")
+          .select("id, ward, assigned_district, assigned_region")
+          .eq("role", "staff");
+        if (user.ward) {
+          staffQuery = staffQuery.eq("ward", user.ward);
+        } else if (user.district) {
+          staffQuery = staffQuery.eq("assigned_district", user.district);
+        } else if (user.region) {
+          staffQuery = staffQuery.eq("assigned_region", user.region);
+        }
+        const { data: areaStaff } = await staffQuery.limit(5);
+
+        // If no officers OR for oversight, notify area staff
+        const noOfficers = officerIds.length === 0;
+        for (const st of (areaStaff || [])) {
+          await supabase.from("notifications").insert({
+            user_id: st.id,
+            title: noOfficers
+              ? L("Idara haina afisa — Ingilia kati", "Department has no officer — Please intervene")
+              : L("Nakala: Ujumbe kwa Idara", "CC: Message to Department"),
+            message: noOfficers
+              ? `${user.first_name} ${user.last_name} → ${selectedDept.name}: ${subject.trim()}`
+              : `${user.first_name} ${user.last_name} → ${selectedDept.name} (${L("fuatilia", "monitor")}): ${subject.trim()}`,
+            type: "message",
+          });
+        }
+      }
+
       showToast(L("Ujumbe umetumwa!", "Message sent!"), "success");
       resetCompose();
       setView("sent");
