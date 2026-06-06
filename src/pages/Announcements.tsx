@@ -40,7 +40,7 @@ interface Announcement {
   published_at: string;
   expires_at?: string;
   is_active: boolean;
-  publisher?: { first_name: string; last_name: string };
+  publisher?: { first_name: string; last_name: string; position?: string; ward?: string; assigned_district?: string; assigned_region?: string; role?: string };
 }
 
 export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
@@ -72,7 +72,7 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
     try {
       let query = supabase
         .from("announcements")
-        .select("*, publisher:published_by(first_name, last_name)")
+        .select("*, publisher:published_by(first_name, last_name, position, ward, assigned_district, assigned_region, role)")
         .eq("is_active", true)
         .order("published_at", { ascending: false })
         .limit(100);
@@ -147,6 +147,20 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
     } catch (err: unknown) {
       showToast((err as { message?: string }).message || "Error", "error");
     }
+  };
+
+  const getOffice = (a: Announcement) => {
+    const p = a.publisher;
+    if (!p) return null;
+    const name = `${p.first_name || ""} ${p.last_name || ""}`.trim();
+    // Determine office/role label
+    let office = "";
+    if (p.role === "admin") office = sw ? "Msimamizi wa Mfumo" : "System Administrator";
+    else if (p.ward) office = sw ? `Afisa Mtendaji wa Kata — ${p.ward}` : `Ward Executive Officer — ${p.ward}`;
+    else if (p.assigned_district) office = sw ? `Ofisi ya Wilaya — ${p.assigned_district}` : `District Office — ${p.assigned_district}`;
+    else if (p.assigned_region) office = sw ? `Ofisi ya Mkoa — ${p.assigned_region}` : `Regional Office — ${p.assigned_region}`;
+    else office = p.position || (sw ? "Ofisi ya Serikali" : "Government Office");
+    return { name, office };
   };
 
   const getCatLabel = (val: string) => {
@@ -300,14 +314,21 @@ export function Announcements({ isStaff = false }: { isStaff?: boolean }) {
                       )}
                     </div>
                     <p className="font-bold text-stone-900 text-sm">{a.title}</p>
+                    {(() => {
+                      const off = getOffice(a);
+                      return off ? (
+                        <p className="text-xs text-emerald-700 font-bold mt-0.5">
+                          {sw ? "Imetolewa na: " : "Issued by: "}{off.office}
+                        </p>
+                      ) : null;
+                    })()}
                     <p className="text-xs text-stone-400 mt-0.5 flex items-center gap-1">
                       <Clock size={10} />
                       {new Date(a.published_at).toLocaleDateString("sw-TZ")}
-                      {a.publisher && (
-                        <span className="ml-1">
-                          · {a.publisher.first_name} {a.publisher.last_name}
-                        </span>
-                      )}
+                      {(() => {
+                        const off = getOffice(a);
+                        return off?.name ? <span className="ml-1">· {off.name}</span> : null;
+                      })()}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-2">
