@@ -813,6 +813,32 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                       </div>
                       <StatusBadge status={app.status} lang={lang} />
                     </div>
+                    {/* Agreement buyer status — show for Makubaliano services when issued */}
+                    {(app.service_name?.includes("Makubaliano") || app.service_name?.includes("Agreement")) &&
+                      app.status === "issued" && (
+                        <div className="mt-1.5">
+                          {(!app.agreement_status || app.agreement_status === "pending") ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                                {L("⏳ Inasubiri Mnunuzi", "⏳ Awaiting Buyer")}
+                              </span>
+                              {(app.form_data as Record<string, string> | undefined)?.buyer_name && (
+                                <span className="text-[10px] text-stone-400 truncate">
+                                  → {(app.form_data as Record<string, string>).buyer_name}
+                                </span>
+                              )}
+                            </div>
+                          ) : app.agreement_status === "buyer_accepted" ? (
+                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                              {L("✅ Mnunuzi Amekubali", "✅ Buyer Accepted")}
+                            </span>
+                          ) : app.agreement_status === "buyer_rejected" ? (
+                            <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                              {L("❌ Mnunuzi Amekataa", "❌ Buyer Rejected")}
+                            </span>
+                          ) : null}
+                        </div>
+                      )}
 
                     <div className="flex items-center gap-x-3 gap-y-1 mt-2 text-xs text-stone-400 flex-wrap">
                       <span className="font-mono font-bold text-stone-600">
@@ -943,6 +969,56 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                     )}
                   </div>
                 </div>
+
+                {/* Buyer / Second Party — for agreements only */}
+                {(selected.service_name?.includes("Makubaliano") || selected.service_name?.includes("Agreement")) && (() => {
+                  const fd = (selected.form_data || {}) as Record<string, string>;
+                  const buyerName = fd.buyer_name || fd.tenant_name || fd.second_party_name || "";
+                  const buyerPhone = fd.buyer_phone || fd.tenant_phone || "";
+                  const buyerNida = fd.buyer_nida || fd.tenant_nida || "";
+                  const agrStatus = selected.agreement_status || "pending";
+                  const isPending = !selected.agreement_status || selected.agreement_status === "pending";
+                  return (
+                    <div className={`border rounded-2xl p-4 ${isPending ? "bg-amber-50 border-amber-200" : agrStatus === "buyer_accepted" ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <User size={14} className="text-stone-600" />
+                          <p className="text-[10px] font-black text-stone-600 uppercase tracking-wider">
+                            {L("Mnunuzi / Upande wa Pili", "Buyer / Second Party")}
+                          </p>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isPending ? "bg-amber-100 text-amber-700" : agrStatus === "buyer_accepted" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                          {isPending ? L("⏳ Inasubiri", "⏳ Pending") : agrStatus === "buyer_accepted" ? L("✅ Amekubali", "✅ Accepted") : L("❌ Amekataa", "❌ Rejected")}
+                        </span>
+                      </div>
+                      {buyerName && <p className="font-black text-stone-900">{buyerName}</p>}
+                      <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                        {buyerPhone && <div><span className="text-stone-400">{L("Simu:", "Phone:")}</span> <span className="font-bold text-stone-700">{buyerPhone}</span></div>}
+                        {buyerNida && <div><span className="text-stone-400">NIDA:</span> <span className="font-bold text-stone-700">{buyerNida}</span></div>}
+                      </div>
+                      {isPending && selected.second_party_user_id && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await supabase.from("notifications").insert({
+                              user_id: selected.second_party_user_id,
+                              title: L("Kumbusho: Makubaliano Yanasubiri", "Reminder: Agreement Awaiting Your Acceptance"),
+                              message: L(
+                                `Makubaliano ${selected.application_number} yanasubiri uikubali. Fungua ukurasa wa Makubaliano kukubali au kukataa.`,
+                                `Agreement ${selected.application_number} is awaiting your acceptance. Open the Agreements page to accept or reject.`
+                              ),
+                              type: "agreement",
+                            });
+                            showToast(L("Kumbusho limetumwa kwa mnunuzi", "Reminder sent to buyer"), "success");
+                          }}
+                          className="mt-3 w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
+                        >
+                          {L("📩 Tuma Kumbusho kwa Mnunuzi", "📩 Send Reminder to Buyer")}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Form Data */}
                 {formDataEntries.fields.length > 0 && (
