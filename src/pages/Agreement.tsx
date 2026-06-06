@@ -1517,20 +1517,14 @@ export function Agreement() {
                         </span>
                       )}
                       {/* Chat thread for this agreement */}
-                      <div className="w-full mt-3">
-                        <ApplicationChat
-                          applicationId={agr.id}
-                          applicationNumber={agr.application_number || ""}
-                          applicantId={agr.user_id || ""}
-                          lang={lang}
-                        />
-                      </div>
-                      {agr.agreement_status === "buyer_rejected" && (
-                        <span className="px-3 py-1.5 bg-red-100 text-red-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                          <X size={12} />
-                          {lang === "sw" ? "Umekataa" : "Rejected"}
-                        </span>
-                      )}
+                    </div>
+                    <div className="mt-3">
+                      <ApplicationChat
+                        applicationId={agr.id}
+                        applicationNumber={agr.application_number || ""}
+                        applicantId={agr.user_id || ""}
+                        lang={lang}
+                      />
                     </div>
                   </div>
                 );
