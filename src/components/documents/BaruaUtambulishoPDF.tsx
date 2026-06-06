@@ -168,13 +168,13 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
         <Text style={ls.salutation}>{sw ? "Mpendwa Mhusika," : "Dear Sir/Madam,"}</Text>
 
         {/* Body */}
-        <Text style={s.body}>
+        <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
           {sw
             ? `Ofisi ya Serikali ya Mtaa, Kata ya ${user?.ward || fd.applicant_ward || "_______"}, Wilaya ya ${user?.district || fd.applicant_district || "_______"}, inathibitisha kuwa ndugu ${subjectName} ni mkazi halali wa mtaa huu, na ametambuliwa rasmi katika kumbukumbu za Ofisi hii.`
             : `The Local Government Office of ${user?.ward || fd.applicant_ward || "_______"} Ward, ${user?.district || fd.applicant_district || "_______"} District, hereby confirms that ${subjectName} is a legitimate resident of this locality and is officially registered in our records.`}
         </Text>
 
-        <Text style={s.body}>
+        <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
           {sw
             ? `Barua hii imetolewa kwa ajili ya ${purposeLabel}${firstInst.name ? ` katika taasisi ya ${firstInst.name}` : ""}. ${
                 !isSelf
@@ -188,7 +188,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
               }`}
         </Text>
 
-        <Text style={s.body}>
+        <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
           {sw
             ? "Tafadhali toa msaada wowote wa kisheria na kiutendaji unaohitajika kwa ndugu huyu. Ofisi yetu iko tayari kwa uthibitisho zaidi inapohitajika."
             : "Kindly extend any lawful and procedural assistance required to the bearer. Our office remains available for further verification if needed."}
@@ -250,21 +250,19 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
           <View />
         )}
 
-        {/* Signature section */}
+        {/* Signature + QR side by side */}
         <Text style={ls.signoff}>{sw ? "Wenu Mwaminifu," : "Yours faithfully,"}</Text>
 
-        <View style={s.signatureSection}>
-          <OfficerSignatureBox
-            signature={weoSig}
-            stamp={weoStamp}
-            name={weoName}
-            title={sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
-          />
-        </View>
-
-        {/* QR code */}
-        <View style={s.qrSection}>
-          <View style={s.qrInner}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 10 }}>
+          <View style={{ width: "55%" }}>
+            <OfficerSignatureBox
+              signature={weoSig}
+              stamp={weoStamp}
+              name={weoName}
+              title={sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
+            />
+          </View>
+          <View style={{ width: "35%", alignItems: "center", paddingTop: 8 }}>
             <View style={s.qrBorder}>
               <Image src={qr} style={s.qrCode} />
             </View>

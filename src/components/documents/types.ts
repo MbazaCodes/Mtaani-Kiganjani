@@ -224,7 +224,7 @@ export const commonStyles = StyleSheet.create({
   signatureSection: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 14,
+    marginTop: 10,
     marginBottom: 6,
   },
   signatureBox: {
@@ -283,8 +283,8 @@ export const commonStyles = StyleSheet.create({
   qrSection: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 6,
-    marginBottom: 2,
+    marginTop: 4,
+    marginBottom: 0,
   },
   qrInner: {
     alignItems: "center",
@@ -298,8 +298,8 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 3,
   },
   qrCode: {
-    width: 64,
-    height: 64,
+    width: 52,
+    height: 52,
   },
   qrLabel: {
     fontSize: 5.5,
