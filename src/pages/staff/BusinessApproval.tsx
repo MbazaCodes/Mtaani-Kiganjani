@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { ApplicationChat } from "@/components/ApplicationChat";
+import { CitizenProfileViewer } from "@/components/CitizenProfileViewer";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
@@ -160,6 +161,7 @@ export const BusinessApproval: React.FC = () => {
   const [agreements, setAgreements] = useState<AgreementRow[]>([]);
   const [loadingAgreements, setLoadingAgreements] = useState(false);
   const [selectedAgreement, setSelectedAgreement] = useState<AgreementRow | null>(null);
+  const [viewCitizenId, setViewCitizenId] = useState<string | null>(null);
   const [agrSearchQuery, setAgrSearchQuery] = useState("");
 
   // All applications state
@@ -710,22 +712,24 @@ export const BusinessApproval: React.FC = () => {
                       .map((agr) => (
                         <tr key={agr.id} onClick={() => setSelectedAgreement(agr)} className="hover:bg-gray-50 transition-colors cursor-pointer">
                           <td className="px-6 py-4">
-                            <p className="font-medium text-gray-900">
+                            <button onClick={(e) => { e.stopPropagation(); if (agr.user_id) setViewCitizenId(agr.user_id); }}
+                              className="font-medium text-emerald-700 hover:text-emerald-900 hover:underline text-left">
                               {agr.user ? `${agr.user.first_name} ${agr.user.last_name}` : "—"}
-                            </p>
-                            <p className="text-xs text-emerald-600 font-mono">
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); if (agr.user_id) setViewCitizenId(agr.user_id); }}
+                              className="text-xs text-emerald-600 font-mono hover:underline block">
                               {agr.user?.citizen_id || "—"}
-                            </p>
+                            </button>
                           </td>
                           <td className="px-6 py-4">
-                            <p className="font-medium text-gray-900">
-                              {agr.second_party
-                                ? `${agr.second_party.first_name} ${agr.second_party.last_name}`
-                                : "—"}
-                            </p>
-                            <p className="text-xs text-emerald-600 font-mono">
+                            <button onClick={(e) => { e.stopPropagation(); if (agr.second_party_user_id) setViewCitizenId(agr.second_party_user_id); }}
+                              className="font-medium text-emerald-700 hover:text-emerald-900 hover:underline text-left">
+                              {agr.second_party ? `${agr.second_party.first_name} ${agr.second_party.last_name}` : "—"}
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); if (agr.second_party_user_id) setViewCitizenId(agr.second_party_user_id); }}
+                              className="text-xs text-emerald-600 font-mono hover:underline block">
                               {agr.second_party?.citizen_id || "—"}
-                            </p>
+                            </button>
                           </td>
                           <td className="px-6 py-4">
                             <p className="text-sm text-gray-700">{agr.service_name || "—"}</p>
@@ -1481,6 +1485,16 @@ export const BusinessApproval: React.FC = () => {
       </div>
     </div>
   );
+
+      {/* Citizen Profile Viewer */}
+      {viewCitizenId && (
+        <CitizenProfileViewer
+          citizenId={viewCitizenId || undefined}
+          lang={lang}
+          onClose={() => setViewCitizenId(null)}
+        />
+      )}
+
 };
 
 export default BusinessApproval;

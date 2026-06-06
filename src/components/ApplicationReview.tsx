@@ -62,6 +62,7 @@ import { logActivity } from "@/lib/activity-log";
 import { createNotification } from "@/lib/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { ApplicationChat } from "@/components/ApplicationChat";
+import { CitizenProfileViewer } from "@/components/CitizenProfileViewer";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -177,6 +178,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
 
   // Detail panel state
   const [selected, setSelected] = useState<AppRecord | null>(null);
+  const [viewCitizenId, setViewCitizenId] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -1680,6 +1682,16 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
           </>
         )}
       </AnimatePresence>
+
+      {/* Citizen Profile Viewer */}
+      {viewCitizenId && (
+        <CitizenProfileViewer
+          citizenId={viewCitizenId}
+          lang={lang}
+          onClose={() => setViewCitizenId(null)}
+        />
+      )}
+
     </div>
   );
 }
