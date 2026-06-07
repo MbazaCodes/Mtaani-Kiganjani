@@ -301,3 +301,30 @@
     overflow-y: auto;
   }
 }
+
+/* ═══ Dark Mode ═══ */
+.dark {
+  --bg-primary: #0c0a09;
+  --bg-secondary: #1c1917;
+  --bg-card: #292524;
+  --text-primary: #fafaf9;
+  --text-secondary: #a8a29e;
+  --border: #44403c;
+}
+
+.dark body { background: var(--bg-primary); color: var(--text-primary); }
+.dark .bg-white { background: var(--bg-card) !important; }
+.dark .bg-stone-50 { background: var(--bg-secondary) !important; }
+.dark .bg-stone-100 { background: #292524 !important; }
+.dark .text-stone-900 { color: var(--text-primary) !important; }
+.dark .text-stone-800 { color: #e7e5e4 !important; }
+.dark .text-stone-700 { color: #d6d3d1 !important; }
+.dark .text-stone-600 { color: #a8a29e !important; }
+.dark .text-stone-500 { color: #78716c !important; }
+.dark .border-stone-200 { border-color: var(--border) !important; }
+.dark .border-stone-100 { border-color: #292524 !important; }
+.dark input, .dark textarea, .dark select {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
