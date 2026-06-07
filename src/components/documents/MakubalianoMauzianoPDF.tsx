@@ -306,20 +306,44 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>b) {L.buyerOb2}</Text>
         <Text style={[s.body, { marginBottom: 6, paddingLeft: 12 }]}>c) {L.buyerOb3}</Text>
 
-        {/* Payment Reference */}
+        {/* Payment Reference — Full Details */}
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{sw ? "KUMBUKUMBU YA MALIPO" : "PAYMENT REFERENCE"}</Text>
         </View>
-        <View style={s.twoCol}>
-          <View style={s.colLeft}>
-            <Row label={sw ? "Namba ya Maombi" : "Application No"} value={application.application_number ?? ""} />
-            <Row label={sw ? "Kiasi Kilicholipwa" : "Amount Paid"} value={formatCurrency(Number(application.payment_data?.amount || serviceFee))} />
-          </View>
-          <View style={s.colRight}>
-            <Row label={sw ? "Tarehe ya Malipo" : "Payment Date"} value={application.approved_at ? new Date(application.approved_at).toLocaleDateString("sw-TZ") : "N/A"} />
-            <Row label={sw ? "Njia" : "Method"} value={String(application.payment_data?.payment_method || "E-Mtaa Portal")} />
-          </View>
-        </View>
+        {(() => {
+          const pd = (application.payment_data || {}) as Record<string, unknown>;
+          const receiptNo = String(pd.receipt_number || `RCP-${application.application_number || ""}`);
+          const txnId = String(pd.transaction_id || `TXN-${(application.id || "").slice(0, 8).toUpperCase()}`);
+          const paidAt = pd.paid_at || application.approved_at || application.issued_at || application.created_at;
+          const payAmount = Number(pd.amount || serviceFee);
+          const payMethod = String(pd.payment_method || "E-Mtaa Portal");
+          return (
+            <View style={{ borderWidth: 0.5, borderColor: "#c0c0c0", borderRadius: 4, padding: 8, marginBottom: 6 }}>
+              <View style={s.twoCol}>
+                <View style={s.colLeft}>
+                  <Row label={sw ? "Namba ya Risiti" : "Receipt Number"} value={receiptNo} />
+                  <Row label={sw ? "Namba ya Muamala" : "Transaction ID"} value={txnId} />
+                  <Row label={sw ? "Namba ya Maombi" : "Application Ref"} value={application.application_number ?? ""} />
+                  <Row label={sw ? "Huduma" : "Service"} value={application.service_name ?? ""} />
+                </View>
+                <View style={s.colRight}>
+                  <Row label={sw ? "Kiasi" : "Amount"} value={formatCurrency(payAmount)} />
+                  <Row label={sw ? "Njia ya Malipo" : "Payment Method"} value={payMethod} />
+                  <Row label={sw ? "Tarehe ya Malipo" : "Payment Date"} value={paidAt ? new Date(String(paidAt)).toLocaleDateString("sw-TZ") : "N/A"} />
+                  <Row label={sw ? "Sarafu" : "Currency"} value="TZS (Shilingi ya Tanzania)" />
+                </View>
+              </View>
+              <View style={s.infoRow}>
+                <Text style={s.infoLabel}>{sw ? "Mlipaji:" : "Payer:"}</Text>
+                <Text style={s.infoValue}>{sellerName}</Text>
+              </View>
+              <View style={s.infoRow}>
+                <Text style={s.infoLabel}>{sw ? "Hali:" : "Status:"}</Text>
+                <Text style={[s.infoValue, { color: "#059669", fontWeight: "bold" }]}>{sw ? "IMELIPWA" : "PAID"}</Text>
+              </View>
+            </View>
+          );
+        })()}
 
         {/* Declaration */}
         <View style={{ backgroundColor: "#f7f7f7", borderWidth: 0.5, borderColor: "#c0c0c0", padding: 8, marginVertical: 6, borderRadius: 4 }}>
