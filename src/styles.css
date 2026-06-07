@@ -4,6 +4,19 @@
 /* Tailwind CSS v4 */
 @import "tailwindcss";
 
+/* Register custom colors as Tailwind utilities (v4 @theme) */
+@theme {
+  --color-primary: hsl(152 60% 28%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(210 65% 42%);
+  --color-secondary-foreground: hsl(0 0% 100%);
+  --color-accent: hsl(42 90% 55%);
+  --color-accent-foreground: hsl(42 90% 12%);
+  --color-tz-green: hsl(152 60% 28%);
+  --color-tz-blue: hsl(210 65% 42%);
+  --color-tz-gold: hsl(42 90% 55%);
+}
+
 /* Theme configuration */
 :root {
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
