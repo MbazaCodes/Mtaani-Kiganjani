@@ -326,15 +326,27 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           <Text style={[s.body, { fontStyle: "italic", lineHeight: 1.5 }]}>{L.declaration}</Text>
         </View>
 
-        {/* Signatures */}
-        <View style={s.signatureSection}>
-          <ApplicantSignatureBox signature={applicantSig} name={sellerName} title={L.sellerParty} />
-          <View style={s.signatureBox}>
+        {/* Signatures — both parties aligned side by side */}
+        <View style={[s.signatureSection, { alignItems: "flex-start" }]}>
+          <View style={[s.signatureBox, { width: "44%" }]}>
+            {applicantSig ? (
+              <Image src={applicantSig} style={{ width: 80, height: 40, marginBottom: 4 }} />
+            ) : (
+              <View style={s.signatureLine} />
+            )}
+            <View style={s.signatureLine} />
+            <Text style={s.signatureName}>{sellerName}</Text>
+            <Text style={s.signatureTitle}>{L.sellerParty}</Text>
+          </View>
+          <View style={[s.signatureBox, { width: "44%" }]}>
+            {fd.buyer_signature ? (
+              <Image src={fd.buyer_signature} style={{ width: 80, height: 40, marginBottom: 4 }} />
+            ) : (
+              <View style={s.signatureLine} />
+            )}
             <View style={s.signatureLine} />
             <Text style={s.signatureName}>
-              {String(
-                fd.second_party_name || fd.buyer_name || fd.tenant_name || "______________________",
-              )}
+              {String(fd.second_party_name || fd.buyer_name || fd.tenant_name || "______________________")}
             </Text>
             <Text style={s.signatureTitle}>{L.buyerParty}</Text>
           </View>

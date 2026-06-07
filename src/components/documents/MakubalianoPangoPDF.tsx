@@ -341,11 +341,21 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
         {/* Signature grid: Landlord, Tenant, 2 Witnesses, Office */}
         <View style={ls.fourSigGrid}>
           <View style={ls.fourSigBox}>
+            {fd.applicant_signature ? (
+              <Image src={fd.applicant_signature} style={{ width: 60, height: 30, marginBottom: 2 }} />
+            ) : (
+              <View />
+            )}
             <View style={ls.fourSigLine} />
             <Text style={ls.fourSigName}>{sw ? "MPANGISHAJI" : "LANDLORD"}</Text>
             <Text style={ls.fourSigSub}>{String(fd.landlord_name || "")}</Text>
           </View>
           <View style={ls.fourSigBox}>
+            {fd.buyer_signature ? (
+              <Image src={fd.buyer_signature} style={{ width: 60, height: 30, marginBottom: 2 }} />
+            ) : (
+              <View />
+            )}
             <View style={ls.fourSigLine} />
             <Text style={ls.fourSigName}>{sw ? "MPANGAJI" : "TENANT"}</Text>
             <Text style={ls.fourSigSub}>{String(fd.tenant_name || "")}</Text>
