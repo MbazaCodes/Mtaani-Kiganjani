@@ -1706,22 +1706,77 @@ export function Agreement() {
                   </div>
                 </div>
 
-                {/* Agreement Details */}
+                {/* Property / Asset Details */}
                 <div className="bg-white border border-stone-200 rounded-xl p-4">
-                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("Maelezo ya Makubaliano", "Agreement Details")}</p>
-                  <div className="space-y-2.5">
-                    {fd.asset_type && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Aina ya Mali", "Asset Type")}</span><span className="text-sm font-bold text-right">{fd.asset_type}</span></div>}
-                    {(fd.price || fd.monthly_rent) && <div className="flex justify-between"><span className="text-xs text-stone-500">{isSale ? L2("Bei", "Price") : L2("Kodi/Mwezi", "Monthly Rent")}</span><span className="text-sm font-black text-emerald-700">{fmtCurrency(fd.price || fd.monthly_rent)}</span></div>}
-                    {fd.asset_description && <div><span className="text-xs text-stone-500 block mb-1">{L2("Maelezo", "Description")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2">{fd.asset_description}</p></div>}
-                    {fd.location && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Mahali", "Location")}</span><span className="text-sm font-bold text-right">{fd.location}</span></div>}
-                    {fd.duration && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Muda", "Duration")}</span><span className="text-sm font-bold">{fd.duration}</span></div>}
-                    {fd.start_date && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Tarehe ya Kuanza", "Start Date")}</span><span className="text-sm font-bold">{fd.start_date}</span></div>}
-                    {fd.end_date && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Tarehe ya Mwisho", "End Date")}</span><span className="text-sm font-bold">{fd.end_date}</span></div>}
-                    {fd.terms && <div><span className="text-xs text-stone-500 block mb-1">{L2("Masharti", "Terms")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2 whitespace-pre-wrap">{fd.terms}</p></div>}
-                    {fd.witness_1 && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Shahidi 1", "Witness 1")}</span><span className="text-sm font-bold">{fd.witness_1}</span></div>}
-                    {fd.witness_2 && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Shahidi 2", "Witness 2")}</span><span className="text-sm font-bold">{fd.witness_2}</span></div>}
+                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{isSale ? L2("MAELEZO YA MALI", "ASSET DETAILS") : L2("MAELEZO YA NYUMBA/MALI", "PROPERTY DETAILS")}</p>
+                  <div className="space-y-2">
+                    {fd.property_type && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Aina", "Type")}</span><span className="text-sm font-bold">{fd.property_type}</span></div>}
+                    {fd.asset_type && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Aina ya Mali", "Asset Type")}</span><span className="text-sm font-bold">{fd.asset_type}</span></div>}
+                    {fd.num_rooms && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Vyumba", "Rooms")}</span><span className="text-sm font-bold">{fd.num_rooms}</span></div>}
+                    {fd.furnished && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Samani", "Furnished")}</span><span className="text-sm font-bold">{fd.furnished}</span></div>}
+                    {fd.parking && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Maegesho", "Parking")}</span><span className="text-sm font-bold">{fd.parking}</span></div>}
+                    {fd.location && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mahali", "Location")}</span><span className="text-sm font-bold text-right max-w-[60%]">{fd.location}</span></div>}
+                    {fd.address && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Anwani", "Address")}</span><span className="text-sm font-bold text-right max-w-[60%]">{fd.address}</span></div>}
+                    {fd.plot_number && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Kiwanja", "Plot No")}</span><span className="text-sm font-bold">{fd.plot_number}</span></div>}
+                    {fd.asset_description && <div className="pt-1"><span className="text-xs text-stone-500 block mb-1">{L2("Maelezo", "Description")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2.5">{fd.asset_description}</p></div>}
                   </div>
                 </div>
+
+                {/* Financial Terms */}
+                <div className="bg-white border border-stone-200 rounded-xl p-4">
+                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("MASHARTI YA FEDHA", "FINANCIAL TERMS")}</p>
+                  <div className="space-y-2">
+                    {(fd.price || fd.monthly_rent) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{isSale ? L2("Bei", "Price") : L2("Kodi ya Mwezi", "Monthly Rent")}</span><span className="text-sm font-black text-emerald-700">{fmtCurrency(fd.price || fd.monthly_rent)}</span></div>}
+                    {fd.security_deposit && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Amana ya Usalama", "Security Deposit")}</span><span className="text-sm font-bold">{fmtCurrency(fd.security_deposit)}</span></div>}
+                    {fd.payment_due_day && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Siku ya Malipo", "Payment Due Day")}</span><span className="text-sm font-bold">{L2("Tarehe", "Day")} {fd.payment_due_day}</span></div>}
+                    {fd.utilities_included && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Huduma", "Utilities")}</span><span className="text-sm font-bold text-right max-w-[60%]">{fd.utilities_included}</span></div>}
+                    {fd.payment_method && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Njia ya Malipo", "Payment Method")}</span><span className="text-sm font-bold">{fd.payment_method}</span></div>}
+                  </div>
+                </div>
+
+                {/* Lease Period / Duration */}
+                <div className="bg-white border border-stone-200 rounded-xl p-4">
+                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{isSale ? L2("TAREHE", "DATES") : L2("MUDA WA PANGO", "LEASE PERIOD")}</p>
+                  <div className="space-y-2">
+                    {fd.duration && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Muda", "Duration")}</span><span className="text-sm font-bold">{fd.duration}</span></div>}
+                    {(fd.start_date || fd.lease_start) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Kuanza", "Start Date")}</span><span className="text-sm font-bold">{fd.start_date || fd.lease_start}</span></div>}
+                    {(fd.end_date || fd.lease_end) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mwisho", "End Date")}</span><span className="text-sm font-bold">{fd.end_date || fd.lease_end}</span></div>}
+                    {fd.notice_period && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Notisi ya Kuondoka", "Notice Period")}</span><span className="text-sm font-bold">{fd.notice_period}</span></div>}
+                  </div>
+                </div>
+
+                {/* Terms, Rules & Conditions */}
+                {(fd.terms || fd.house_rules || fd.special_conditions) && (
+                  <div className="bg-white border border-stone-200 rounded-xl p-4">
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("MASHARTI NA SHERIA", "TERMS & CONDITIONS")}</p>
+                    <div className="space-y-3">
+                      {fd.terms && <div><span className="text-xs font-bold text-stone-600 block mb-1">{L2("Masharti", "Terms")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2.5 whitespace-pre-wrap">{fd.terms}</p></div>}
+                      {fd.house_rules && <div><span className="text-xs font-bold text-stone-600 block mb-1">{L2("Sheria za Nyumba", "House Rules")}</span><p className="text-sm text-stone-800 bg-amber-50 border border-amber-100 rounded-lg p-2.5 whitespace-pre-wrap">{fd.house_rules}</p></div>}
+                      {fd.special_conditions && <div><span className="text-xs font-bold text-stone-600 block mb-1">{L2("Masharti Maalum", "Special Conditions")}</span><p className="text-sm text-stone-800 bg-blue-50 border border-blue-100 rounded-lg p-2.5 whitespace-pre-wrap">{fd.special_conditions}</p></div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* Witnesses */}
+                {(fd.witness1_name || fd.witness_1) && (
+                  <div className="bg-white border border-stone-200 rounded-xl p-4">
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("MASHAHIDI", "WITNESSES")}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-stone-50 rounded-lg p-2.5">
+                        <p className="text-[10px] font-bold text-stone-400 uppercase">{L2("Shahidi 1", "Witness 1")}</p>
+                        <p className="text-sm font-bold text-stone-800">{fd.witness1_name || fd.witness_1 || "—"}</p>
+                        {(fd.witness1_phone) && <p className="text-xs text-stone-500">{fd.witness1_phone}</p>}
+                        {(fd.witness1_nida) && <p className="text-[10px] text-stone-400 font-mono">{fd.witness1_nida}</p>}
+                      </div>
+                      <div className="bg-stone-50 rounded-lg p-2.5">
+                        <p className="text-[10px] font-bold text-stone-400 uppercase">{L2("Shahidi 2", "Witness 2")}</p>
+                        <p className="text-sm font-bold text-stone-800">{fd.witness2_name || fd.witness_2 || "—"}</p>
+                        {(fd.witness2_phone) && <p className="text-xs text-stone-500">{fd.witness2_phone}</p>}
+                        {(fd.witness2_nida) && <p className="text-[10px] text-stone-400 font-mono">{fd.witness2_nida}</p>}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Financials */}
                 {(fd.total_amount || fd.service_fee || fd.vat_amount) && (

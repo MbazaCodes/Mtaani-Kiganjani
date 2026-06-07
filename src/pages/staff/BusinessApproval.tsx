@@ -1436,22 +1436,58 @@ export const BusinessApproval: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Full Agreement Details */}
+                    {/* Property / Asset Details */}
                     <div className="bg-white border border-stone-200 rounded-xl p-4">
-                      <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("Maelezo ya Makubaliano", "Agreement Details")}</p>
+                      <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{isSale ? L2("MAELEZO YA MALI", "ASSET DETAILS") : L2("MAELEZO YA NYUMBA", "PROPERTY DETAILS")}</p>
                       <div className="space-y-2">
-                        {fd.asset_type && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Aina ya Mali", "Asset Type")}</span><span className="text-sm font-bold text-right">{fd.asset_type}</span></div>}
-                        {(fd.price || fd.monthly_rent) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{isSale ? L2("Bei", "Price") : L2("Kodi/Mwezi", "Rent/Month")}</span><span className="text-sm font-black text-emerald-700">{fmtC(fd.price || fd.monthly_rent)}</span></div>}
-                        {fd.asset_description && <div className="border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500 block mb-1">{L2("Maelezo", "Description")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2">{fd.asset_description}</p></div>}
-                        {fd.location && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mahali", "Location")}</span><span className="text-sm font-bold text-right">{fd.location}</span></div>}
-                        {fd.duration && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Muda", "Duration")}</span><span className="text-sm font-bold">{fd.duration}</span></div>}
-                        {fd.start_date && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Kuanza", "Start")}</span><span className="text-sm font-bold">{fd.start_date}</span></div>}
-                        {fd.end_date && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mwisho", "End")}</span><span className="text-sm font-bold">{fd.end_date}</span></div>}
-                        {fd.terms && <div className="border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500 block mb-1">{L2("Masharti", "Terms")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2 whitespace-pre-wrap">{fd.terms}</p></div>}
-                        {fd.witness_1 && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Shahidi 1", "Witness 1")}</span><span className="text-sm font-bold">{fd.witness_1}</span></div>}
-                        {fd.witness_2 && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Shahidi 2", "Witness 2")}</span><span className="text-sm font-bold">{fd.witness_2}</span></div>}
+                        {fd.property_type && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Aina", "Type")}</span><span className="text-sm font-bold">{fd.property_type}</span></div>}
+                        {fd.asset_type && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mali", "Asset")}</span><span className="text-sm font-bold">{fd.asset_type}</span></div>}
+                        {fd.num_rooms && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Vyumba", "Rooms")}</span><span className="text-sm font-bold">{fd.num_rooms}</span></div>}
+                        {fd.location && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mahali", "Location")}</span><span className="text-sm font-bold text-right max-w-[60%]">{fd.location}</span></div>}
+                        {fd.asset_description && <div><span className="text-xs text-stone-500 block mb-1">{L2("Maelezo", "Description")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2.5">{fd.asset_description}</p></div>}
                       </div>
                     </div>
+
+                    {/* Financial Terms */}
+                    <div className="bg-white border border-stone-200 rounded-xl p-4">
+                      <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("FEDHA", "FINANCIALS")}</p>
+                      <div className="space-y-2">
+                        {(fd.price || fd.monthly_rent) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{isSale ? L2("Bei", "Price") : L2("Kodi/Mwezi", "Rent")}</span><span className="text-sm font-black text-emerald-700">{fmtC(fd.price || fd.monthly_rent)}</span></div>}
+                        {fd.security_deposit && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Amana", "Deposit")}</span><span className="text-sm font-bold">{fmtC(fd.security_deposit)}</span></div>}
+                        {fd.duration && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Muda", "Duration")}</span><span className="text-sm font-bold">{fd.duration}</span></div>}
+                        {(fd.start_date || fd.lease_start) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Kuanza", "Start")}</span><span className="text-sm font-bold">{fd.start_date || fd.lease_start}</span></div>}
+                        {(fd.end_date || fd.lease_end) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mwisho", "End")}</span><span className="text-sm font-bold">{fd.end_date || fd.lease_end}</span></div>}
+                      </div>
+                    </div>
+
+                    {/* Terms & Rules */}
+                    {(fd.terms || fd.house_rules || fd.special_conditions) && (
+                      <div className="bg-white border border-stone-200 rounded-xl p-4">
+                        <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("MASHARTI", "TERMS")}</p>
+                        {fd.terms && <p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2.5 mb-2 whitespace-pre-wrap">{fd.terms}</p>}
+                        {fd.house_rules && <p className="text-sm text-stone-800 bg-amber-50 border border-amber-100 rounded-lg p-2.5 mb-2 whitespace-pre-wrap">{fd.house_rules}</p>}
+                        {fd.special_conditions && <p className="text-sm text-stone-800 bg-blue-50 border border-blue-100 rounded-lg p-2.5 whitespace-pre-wrap">{fd.special_conditions}</p>}
+                      </div>
+                    )}
+
+                    {/* Witnesses */}
+                    {(fd.witness1_name || fd.witness_1) && (
+                      <div className="bg-white border border-stone-200 rounded-xl p-4">
+                        <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("MASHAHIDI", "WITNESSES")}</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-stone-50 rounded-lg p-2.5">
+                            <p className="text-[10px] font-bold text-stone-400">{L2("Shahidi 1", "Witness 1")}</p>
+                            <p className="text-sm font-bold">{fd.witness1_name || fd.witness_1 || "—"}</p>
+                            {fd.witness1_phone && <p className="text-xs text-stone-500">{fd.witness1_phone}</p>}
+                          </div>
+                          <div className="bg-stone-50 rounded-lg p-2.5">
+                            <p className="text-[10px] font-bold text-stone-400">{L2("Shahidi 2", "Witness 2")}</p>
+                            <p className="text-sm font-bold">{fd.witness2_name || fd.witness_2 || "—"}</p>
+                            {fd.witness2_phone && <p className="text-xs text-stone-500">{fd.witness2_phone}</p>}
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Financials */}
                     {(fd.total_amount || fd.service_fee || fd.vat_amount) && (
