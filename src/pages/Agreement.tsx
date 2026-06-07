@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { pdf } from "@react-pdf/renderer";
 import { CertificatePDFDocument } from "@/components/DocumentRenderer";
-import { generateQRCodeUrl } from "@/components/documents/types";
+import { generateQRDataUrl } from "@/lib/qr";
 import { ApplicationChat } from "@/components/ApplicationChat";
 import { MakubalianoMauzianoPDF } from "@/components/documents/MakubalianoMauzianoPDF";
 import { MakubalianoPangoPDF } from "@/components/documents/MakubalianoPangoPDF";
@@ -220,7 +220,7 @@ export function Agreement() {
       if (!fullApp) throw new Error("Application not found");
 
       // Generate QR
-      const qrUrl = generateQRCodeUrl(fullApp, "DOC");
+      const qrUrl = await generateQRDataUrl(fullApp, "DOC");
 
       // Choose the right PDF component
       const isSale = (agr.service_name || "").includes("Mauzo") || (agr.service_name || "").includes("Sale");

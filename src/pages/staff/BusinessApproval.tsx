@@ -33,7 +33,7 @@ import { ApplicationChat } from "@/components/ApplicationChat";
 import { pdf } from "@react-pdf/renderer";
 import { MakubalianoMauzianoPDF } from "@/components/documents/MakubalianoMauzianoPDF";
 import { MakubalianoPangoPDF } from "@/components/documents/MakubalianoPangoPDF";
-import { generateQRCodeUrl } from "@/components/documents/types";
+import { generateQRDataUrl } from "@/lib/qr";
 import { CitizenProfileViewer } from "@/components/CitizenProfileViewer";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -1479,7 +1479,7 @@ export const BusinessApproval: React.FC = () => {
                               .eq("id", selectedAgreement.id)
                               .maybeSingle();
                             if (!fullApp) return;
-                            const qrUrl = generateQRCodeUrl(fullApp, "DOC");
+                            const qrUrl = await generateQRDataUrl(fullApp, "DOC");
                             const isSale = (selectedAgreement.service_name || "").includes("Mauzo");
                             const Comp = isSale ? MakubalianoMauzianoPDF : MakubalianoPangoPDF;
                             const blob = await pdf(<Comp application={fullApp} lang={lang} qrDataUrl={qrUrl} />).toBlob();
