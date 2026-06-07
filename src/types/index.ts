@@ -13,6 +13,8 @@ export type ViewName =
   | "applications"
   | "notifications"
   | "profile"
+  | "help_faq"
+  | "legal"
   | "verify_documents"
   // Staff
   | "staff_dashboard"

@@ -8,6 +8,8 @@ import { supabase } from "./lib/supabase";
 import { useLanguage } from "./context/LanguageContext";
 import { AppProvider } from "./context/AppContext";
 import { AppShell } from "./components/layout/AppShell";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { SessionTimeout } from "./components/SessionTimeout";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 
 // Public pages
@@ -447,6 +449,7 @@ export default function App() {
   if (needsPasswordChange) return <ForcePasswordChange />;
 
   return (
+    <ErrorBoundary lang={lang}>
     <BrowserRouter>
       <AppProvider>
         <Routes>
@@ -841,5 +844,7 @@ export default function App() {
         </Routes>
       </AppProvider>
     </BrowserRouter>
+    <SessionTimeout lang={lang} />
+    </ErrorBoundary>
   );
 }

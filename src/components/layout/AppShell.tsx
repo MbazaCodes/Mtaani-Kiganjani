@@ -7,6 +7,8 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { PaymentGateway } from "@/components/PaymentGateway";
 import { useAuth } from "@/context/AuthContext";
+import { HelpPage } from "@/pages/HelpPage";
+import { LegalPage } from "@/pages/LegalPage";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAppContext } from "@/context/AppContext";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
@@ -45,6 +47,8 @@ export const VIEW_PATHS: Record<ViewName, string> = {
   my_payments: "/payments",
   messages: "/messages",
   citizen_management: "/citizens",
+  help_faq: "/help",
+  legal: "/legal",
 };
 
 /** Maps URL path → ViewName (reverse of VIEW_PATHS) */
@@ -102,7 +106,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar currentView={currentView} setView={setView} />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
-          {children}
+          {currentView === "help_faq" ? <HelpPage lang={lang} />
+              : currentView === "legal" ? <LegalPage lang={lang} />
+              : children}
           {/* Demonstration disclaimer footer */}
           <footer className="mt-8 pt-4 border-t border-stone-200">
             <p className="text-center text-[11px] leading-relaxed text-stone-400 max-w-3xl mx-auto px-4">

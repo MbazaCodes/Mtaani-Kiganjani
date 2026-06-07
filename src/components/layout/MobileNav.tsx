@@ -257,6 +257,20 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
       view: "verify_documents",
     },
     {
+      id: "help_faq",
+      icon: <HelpCircle size={20} />,
+      label: lang === "sw" ? "Msaada" : "Help & FAQ",
+      roles: ["citizen", "staff", "admin"],
+      view: "help_faq",
+    },
+    {
+      id: "legal",
+      icon: <Shield size={20} />,
+      label: lang === "sw" ? "Masharti" : "Terms & Privacy",
+      roles: ["citizen", "staff", "admin"],
+      view: "legal",
+    },
+    {
       id: "profile",
       icon: <User size={20} />,
       label: lang === "sw" ? "Wasifu" : "Profile",

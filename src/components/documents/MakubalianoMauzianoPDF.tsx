@@ -91,6 +91,10 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
   const isRental = assetType.startsWith("KODI");
   const assetLabel = (ASSET_LABELS[assetType] || { sw: assetType, en: assetType })[lang];
   const price = Number(fd.sale_price || fd.monthly_rent || 0);
+  const vatRate = 0.18;
+  const vatAmount = Number(fd.vat_amount) || Math.round(price * vatRate);
+  const serviceFee = Number(fd.service_fee) || 5000;
+  const totalAmount = Number(fd.total_amount || fd.total_rent) || (price + vatAmount + serviceFee);
 
   const L = {
     title: isRental

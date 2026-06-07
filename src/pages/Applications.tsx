@@ -23,6 +23,7 @@ import {
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { ApplicationChat } from "../components/ApplicationChat";
+import { StatusTimeline } from "../components/StatusTimeline";
 import { useToast } from "../context/ToastContext";
 import { supabase, Application } from "../lib/supabase";
 import type { ApplicationDraft } from "../types";

@@ -308,6 +308,14 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
           onClick={() => setView(displayRole === "citizen" ? "citizen_support" : "staff_tickets")}
         />
       )}
+      {/* Help & Legal — all roles */}
+      <SidebarItem
+        icon={<HelpCircle size={20} />}
+        label={lang === "sw" ? "Msaada" : "Help & FAQ"}
+        active={currentView === "help_faq"}
+        onClick={() => setView("help_faq")}
+      />
+
       {/* Staff/Admin Announcements — create & manage (all staff + admin) */}
       {(displayRole === "admin" || displayRole === "staff") && (
         <SidebarItem

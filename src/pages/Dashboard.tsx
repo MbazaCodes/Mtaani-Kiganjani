@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ApplicationChat } from "@/components/ApplicationChat";
+import { StatusTimeline } from "@/components/StatusTimeline";
 import { useLanguage } from "@/context/LanguageContext";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";

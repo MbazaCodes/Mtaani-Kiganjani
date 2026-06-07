@@ -1,0 +1,92 @@
+<!--
+  E-MTAA EMAIL TEMPLATES
+  ======================
+  Copy each template below into your Supabase Dashboard:
+  Authentication → Email Templates → Edit template
+
+  Variables available:
+  {{ .ConfirmationURL }}  - confirmation/reset link
+  {{ .Email }}            - user's email
+  {{ .SiteURL }}          - your site URL
+-->
+
+<!-- ============================================ -->
+<!-- TEMPLATE 1: Confirm Signup                   -->
+<!-- Paste into: Authentication → Email Templates → Confirm signup -->
+<!-- ============================================ -->
+
+<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
+  <div style="text-align: center; margin-bottom: 24px;">
+    <h1 style="font-size: 20px; font-weight: 900; color: #1B3A5C; margin: 0;">E-MTAA</h1>
+    <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0;">Mtaani Kiganjani · Huduma za Serikali za Mtaa</p>
+  </div>
+  <div style="background: white; border-radius: 16px; padding: 32px 24px; border: 1px solid #e5e7eb;">
+    <h2 style="font-size: 18px; font-weight: 800; color: #1c1917; margin: 0 0 8px;">Karibu! Welcome!</h2>
+    <p style="font-size: 14px; color: #57534e; line-height: 1.6; margin: 0 0 20px;">
+      Asante kwa kusajiliwa kwenye E-Mtaa. Bonyeza kitufe hapa chini kuthibitisha barua pepe yako.
+      <br><br>
+      Thank you for registering with E-Mtaa. Click the button below to confirm your email.
+    </p>
+    <a href="{{ .ConfirmationURL }}" style="display: block; text-align: center; background: #059669; color: white; padding: 14px 24px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px;">
+      Thibitisha Barua Pepe / Confirm Email
+    </a>
+    <p style="font-size: 12px; color: #a8a29e; margin: 20px 0 0; text-align: center;">
+      Kiungo hiki kitamalizika baada ya masaa 24. / This link expires in 24 hours.
+    </p>
+  </div>
+  <p style="font-size: 10px; color: #d4d4d4; text-align: center; margin: 16px 0 0;">
+    E-Mtaa · Mtaani Kiganjani · Demonstration System
+  </p>
+</div>
+
+
+<!-- ============================================ -->
+<!-- TEMPLATE 2: Reset Password                   -->
+<!-- Paste into: Authentication → Email Templates → Reset password -->
+<!-- ============================================ -->
+
+<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
+  <div style="text-align: center; margin-bottom: 24px;">
+    <h1 style="font-size: 20px; font-weight: 900; color: #1B3A5C; margin: 0;">E-MTAA</h1>
+    <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0;">Mtaani Kiganjani · Huduma za Serikali za Mtaa</p>
+  </div>
+  <div style="background: white; border-radius: 16px; padding: 32px 24px; border: 1px solid #e5e7eb;">
+    <h2 style="font-size: 18px; font-weight: 800; color: #1c1917; margin: 0 0 8px;">Badilisha Nenosiri / Reset Password</h2>
+    <p style="font-size: 14px; color: #57534e; line-height: 1.6; margin: 0 0 20px;">
+      Umepokea barua pepe hii kwa sababu umeomba kubadilisha nenosiri lako. Bonyeza kitufe hapa chini kuendelea.
+      <br><br>
+      You received this email because you requested a password reset. Click below to continue.
+    </p>
+    <a href="{{ .ConfirmationURL }}" style="display: block; text-align: center; background: #059669; color: white; padding: 14px 24px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px;">
+      Badilisha Nenosiri / Reset Password
+    </a>
+    <p style="font-size: 12px; color: #a8a29e; margin: 20px 0 0; text-align: center;">
+      Kama hukuomba hii, puuza barua pepe hii. / If you didn't request this, ignore this email.
+    </p>
+  </div>
+  <p style="font-size: 10px; color: #d4d4d4; text-align: center; margin: 16px 0 0;">
+    E-Mtaa · Mtaani Kiganjani · Demonstration System
+  </p>
+</div>
+
+
+<!-- ============================================ -->
+<!-- TEMPLATE 3: Magic Link                       -->
+<!-- Paste into: Authentication → Email Templates → Magic link -->
+<!-- ============================================ -->
+
+<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
+  <div style="text-align: center; margin-bottom: 24px;">
+    <h1 style="font-size: 20px; font-weight: 900; color: #1B3A5C; margin: 0;">E-MTAA</h1>
+    <p style="font-size: 12px; color: #9ca3af; margin: 4px 0 0;">Mtaani Kiganjani</p>
+  </div>
+  <div style="background: white; border-radius: 16px; padding: 32px 24px; border: 1px solid #e5e7eb;">
+    <h2 style="font-size: 18px; font-weight: 800; color: #1c1917; margin: 0 0 8px;">Ingia / Sign In</h2>
+    <p style="font-size: 14px; color: #57534e; line-height: 1.6; margin: 0 0 20px;">
+      Bonyeza kitufe hapa chini kuingia kwenye akaunti yako. / Click below to sign in to your account.
+    </p>
+    <a href="{{ .ConfirmationURL }}" style="display: block; text-align: center; background: #059669; color: white; padding: 14px 24px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px;">
+      Ingia Sasa / Sign In Now
+    </a>
+  </div>
+</div>
