@@ -15,6 +15,8 @@ import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 // Public pages
 import { Landing } from "./pages/Landing";
 import { NotFound } from "./pages/NotFound";
+import { HelpPage } from "./pages/HelpPage";
+import { LegalPage } from "./pages/LegalPage";
 import { EmailConfirm } from "./pages/EmailConfirm";
 
 // Citizen pages
@@ -840,6 +842,26 @@ export default function App() {
           <Route path="/confirm" element={<EmailConfirm />} />
 
           {/* Fallback */}
+          <Route
+            path="/help"
+            element={
+              <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                <AppShell>
+                  <HelpPage lang={lang} />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/legal"
+            element={
+              <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                <AppShell>
+                  <LegalPage lang={lang} />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AppProvider>
