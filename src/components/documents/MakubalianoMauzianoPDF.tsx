@@ -117,6 +117,27 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
       ? "Makubaliano haya ni rasmi na yamethibitishwa na E-Mtaa."
       : "This agreement is official and has been notarised via E-Mtaa.",
     issued: sw ? "Tarehe ya Makubaliano" : "Agreement Date",
+    preamble: sw
+      ? "Makubaliano haya yanafanywa kati ya wahusika walioainishwa hapa chini, kwa ridhaa yao wenyewe na kwa masharti yaliyoelezwa katika hati hii. Pande zote mbili zinakubaliana kutekeleza wajibu wao kama ilivyoainishwa."
+      : "This agreement is entered into by and between the parties identified below, of their own free will and subject to the terms and conditions set forth herein. Both parties agree to fulfil their respective obligations as outlined.",
+    termsIntro: sw ? "Pande zote zinakubaliana na masharti yafuatayo:" : "Both parties agree to the following terms and conditions:",
+    clause1: sw ? "Mali/kitu kilichoainishwa hapo juu kitahamishwa kutoka kwa muuzaji kwenda kwa mnunuzi baada ya malipo yote kukamilika." : "The asset/item described above shall be transferred from the seller to the buyer upon completion of all payments.",
+    clause2: sw ? "Muuzaji anadhibitisha kuwa mali/kitu hiki ni chake halali na hana deni lolote juu yake." : "The seller confirms that the asset/item is their lawful property and is free from any encumbrances, liens, or debts.",
+    clause3: sw ? "Mnunuzi amekagua mali/kitu na anakubali hali yake ya sasa." : "The buyer has inspected the asset/item and accepts it in its current condition.",
+    clause4: sw ? "Mgogoro wowote utatatuliwa kwanza kwa mazungumzo, kisha kwa usuluhishi kupitia ofisi ya serikali ya mtaa husika." : "Any disputes shall be resolved first through negotiation, then by mediation through the relevant local government office.",
+    clause5: sw ? "Makubaliano haya yanaongozwa na sheria za Jamhuri ya Muungano wa Tanzania." : "This agreement is governed by the laws of the United Republic of Tanzania.",
+    clause6: sw ? "Makubaliano haya yanafanya kazi tangu tarehe ya kusainiwa na pande zote mbili." : "This agreement becomes effective from the date of signing by both parties.",
+    sellerObligations: sw ? "WAJIBU WA MUUZAJI" : "SELLER OBLIGATIONS",
+    buyerObligations: sw ? "WAJIBU WA MNUNUZI" : "BUYER OBLIGATIONS",
+    sellerOb1: sw ? "Kuhamisha umiliki wa mali/kitu kwa mnunuzi baada ya malipo kukamilika." : "Transfer ownership of the asset/item to the buyer upon completion of payment.",
+    sellerOb2: sw ? "Kutoa nyaraka zote zinazohusiana na mali/kitu." : "Provide all documents related to the asset/item.",
+    sellerOb3: sw ? "Kuhakikisha mali/kitu hakina madeni au matatizo ya kisheria." : "Ensure the asset/item is free from debts or legal issues.",
+    buyerOb1: sw ? "Kulipa bei iliyokubaliwa kwa wakati." : "Pay the agreed price on time.",
+    buyerOb2: sw ? "Kupokea mali/kitu kwa hali iliyokubaliwa." : "Accept the asset/item in the agreed condition.",
+    buyerOb3: sw ? "Kuheshimu masharti yote ya makubaliano haya." : "Respect all terms of this agreement.",
+    declaration: sw
+      ? "Sisi wahusika tuliotajwa hapo juu tunashuhudia kwamba tumesoma, tumeelewa na tunakubaliana na masharti yote ya makubaliano haya. Tunasaini kwa hiari yetu wenyewe bila kulazimishwa."
+      : "We, the undersigned parties, hereby declare that we have read, understood, and agree to all terms and conditions of this agreement. We sign of our own free will without coercion.",
     priceLabel: isRental
       ? sw
         ? "KODI KWA MWEZI"
@@ -154,6 +175,9 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           </View>
         </View>
 
+        {/* Preamble */}
+        <Text style={[s.body, { marginVertical: 8, lineHeight: 1.5 }]}>{L.preamble}</Text>
+
         {/* Asset type banner */}
         <View style={ls.assetBox}>
           <Text style={ls.assetLabel}>{sw ? "AINA YA MALI" : "ASSET TYPE"}</Text>
@@ -181,9 +205,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         </View>
         {fd.asset_description ? (
           <Text style={{ fontSize: 8.5, color: "#1c1917", marginBottom: 6, lineHeight: 1.35 }}>
-            {String(fd.asset_description).length > 220
-              ? String(fd.asset_description).slice(0, 220) + "…"
-              : String(fd.asset_description)}
+            {String(fd.asset_description)}
           </Text>
         ) : (
           <View />
@@ -218,35 +240,53 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           </View>
         </View>
 
-        {/* Financials — compact strip */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            backgroundColor: "#f7f7f7",
-            borderWidth: 0.5,
-            borderColor: "#c0c0c0",
-            padding: 5,
-            marginTop: 6,
-            marginBottom: 4,
-          }}
-        >
-          <Text style={{ fontSize: 8 }}>
-            <Text style={{ color: "#6b6b6b" }}>{sw ? "Jumla: " : "Total: "}</Text>
-            <Text style={{ fontWeight: "bold" }}>
-              {formatCurrency(Number(fd.total_amount || fd.total_rent || price))}
-            </Text>
-          </Text>
-          <Text style={{ fontSize: 8 }}>
-            <Text style={{ color: "#6b6b6b" }}>VAT: </Text>
-            <Text style={{ fontWeight: "bold" }}>{formatCurrency(Number(fd.vat_amount || 0))}</Text>
-          </Text>
-          <Text style={{ fontSize: 8 }}>
-            <Text style={{ color: "#6b6b6b" }}>{sw ? "Ada: " : "Fee: "}</Text>
-            <Text style={{ fontWeight: "bold" }}>
-              {formatCurrency(Number(fd.service_fee || 0))}
-            </Text>
-          </Text>
+        {/* Financial Details — full section */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>{L.financials}</Text>
+        </View>
+        <View style={s.twoCol}>
+          <View style={s.colLeft}>
+            <Row label={sw ? "Bei / Kodi" : "Price / Rent"} value={formatCurrency(price)} />
+            <Row label={sw ? "Jumla" : "Total Amount"} value={formatCurrency(Number(fd.total_amount || fd.total_rent || price))} />
+          </View>
+          <View style={s.colRight}>
+            <Row label="VAT (18%)" value={formatCurrency(Number(fd.vat_amount || 0))} />
+            <Row label={sw ? "Ada ya Huduma" : "Service Fee"} value={formatCurrency(Number(fd.service_fee || 0))} />
+          </View>
+        </View>
+        {fd.payment_method && <Row label={sw ? "Njia ya Malipo" : "Payment Method"} value={fd.payment_method} />}
+        {fd.payment_schedule && <Row label={sw ? "Ratiba ya Malipo" : "Payment Schedule"} value={fd.payment_schedule} />}
+
+        {/* Terms & Conditions */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>{L.terms}</Text>
+        </View>
+        <Text style={[s.body, { marginBottom: 6 }]}>{L.termsIntro}</Text>
+        <Text style={[s.body, { marginBottom: 4, paddingLeft: 12 }]}>1. {L.clause1}</Text>
+        <Text style={[s.body, { marginBottom: 4, paddingLeft: 12 }]}>2. {L.clause2}</Text>
+        <Text style={[s.body, { marginBottom: 4, paddingLeft: 12 }]}>3. {L.clause3}</Text>
+        <Text style={[s.body, { marginBottom: 4, paddingLeft: 12 }]}>4. {L.clause4}</Text>
+        <Text style={[s.body, { marginBottom: 4, paddingLeft: 12 }]}>5. {L.clause5}</Text>
+        <Text style={[s.body, { marginBottom: 6, paddingLeft: 12 }]}>6. {L.clause6}</Text>
+
+        {/* Obligations */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>{L.sellerObligations}</Text>
+        </View>
+        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>a) {L.sellerOb1}</Text>
+        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>b) {L.sellerOb2}</Text>
+        <Text style={[s.body, { marginBottom: 6, paddingLeft: 12 }]}>c) {L.sellerOb3}</Text>
+
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>{L.buyerObligations}</Text>
+        </View>
+        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>a) {L.buyerOb1}</Text>
+        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>b) {L.buyerOb2}</Text>
+        <Text style={[s.body, { marginBottom: 6, paddingLeft: 12 }]}>c) {L.buyerOb3}</Text>
+
+        {/* Declaration */}
+        <View style={{ backgroundColor: "#f7f7f7", borderWidth: 0.5, borderColor: "#c0c0c0", padding: 8, marginVertical: 6, borderRadius: 4 }}>
+          <Text style={[s.body, { fontStyle: "italic", lineHeight: 1.5 }]}>{L.declaration}</Text>
         </View>
 
         {/* Signatures */}
