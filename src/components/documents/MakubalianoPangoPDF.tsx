@@ -193,11 +193,14 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
               label={sw ? "Jina" : "Name"}
               value={
                 (fd as any).landlord_name ||
+                (application.users
+                  ? `${application.users.first_name || ""} ${application.users.middle_name || ""} ${application.users.last_name || ""}`.replace(/\s+/g, " ").trim()
+                  : "") ||
                 `${(fd as any).first_name || ""} ${(fd as any).last_name || ""}`.trim()
               }
             />
-            <Row label="NIDA" value={(fd as any).landlord_nida} />
-            <Row label={sw ? "Simu" : "Phone"} value={(fd as any).landlord_phone} />
+            <Row label="NIDA" value={(fd as any).landlord_nida || application.users?.nida_number || ""} />
+            <Row label={sw ? "Simu" : "Phone"} value={(fd as any).landlord_phone || application.users?.phone || ""} />
           </View>
           <View style={[s.colRight, ls.partyBox]}>
             <Text style={ls.partyLabel}>{sw ? "MPANGAJI" : "TENANT"}</Text>
@@ -348,7 +351,7 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
             )}
             <View style={ls.fourSigLine} />
             <Text style={ls.fourSigName}>{sw ? "MPANGISHAJI" : "LANDLORD"}</Text>
-            <Text style={ls.fourSigSub}>{String(fd.landlord_name || "")}</Text>
+            <Text style={ls.fourSigSub}>{String(fd.landlord_name || (application.users ? `${application.users.first_name || ""} ${application.users.last_name || ""}`.trim() : ""))}</Text>
           </View>
           <View style={ls.fourSigBox}>
             {fd.buyer_signature ? (
