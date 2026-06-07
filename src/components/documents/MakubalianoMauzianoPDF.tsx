@@ -210,6 +210,24 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         ) : (
           <View />
         )}
+        {fd.location && (
+          <View style={s.infoRow}>
+            <Text style={s.infoLabel}>{sw ? "Mahali:" : "Location:"}</Text>
+            <Text style={s.infoValue}>{String(fd.location)}</Text>
+          </View>
+        )}
+        {fd.plot_number && (
+          <View style={s.infoRow}>
+            <Text style={s.infoLabel}>{sw ? "Namba ya Kiwanja:" : "Plot Number:"}</Text>
+            <Text style={s.infoValue}>{String(fd.plot_number)}</Text>
+          </View>
+        )}
+        {fd.title_deed_number && (
+          <View style={s.infoRow}>
+            <Text style={s.infoLabel}>{sw ? "Namba ya Hati:" : "Title Deed No:"}</Text>
+            <Text style={s.infoValue}>{String(fd.title_deed_number)}</Text>
+          </View>
+        )}
 
         {/* Parties */}
         <View style={s.sectionHeader}>
@@ -225,6 +243,8 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
               <Row label="NIDA" value={sellerNida} />
               <Row label={sw ? "Raia ID" : "Cit. ID"} value={sellerCitizenId} />
               {fd.seller_tin ? <Row label="TIN" value={fd.seller_tin ?? ""} /> : <View />}
+              {fd.seller_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.seller_phone} />}
+              {application.users?.ward && <Row label={sw ? "Kata" : "Ward"} value={`${application.users.ward}, ${application.users?.district || ""}`} />}
             </View>
           </View>
           <View style={s.colRight}>
@@ -236,6 +256,8 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
               />
               <Row label="NIDA" value={fd.buyer_nida || fd.tenant_nida || fd.target_user_nida} />
               <Row label={sw ? "Raia ID" : "Cit. ID"} value={fd.second_party_citizen_id ?? ""} />
+              {fd.buyer_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.buyer_phone} />}
+              {fd.buyer_ward && <Row label={sw ? "Kata" : "Ward"} value={`${fd.buyer_ward}, ${fd.buyer_district || ""}`} />}
             </View>
           </View>
         </View>
@@ -283,6 +305,21 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>a) {L.buyerOb1}</Text>
         <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>b) {L.buyerOb2}</Text>
         <Text style={[s.body, { marginBottom: 6, paddingLeft: 12 }]}>c) {L.buyerOb3}</Text>
+
+        {/* Payment Reference */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>{sw ? "KUMBUKUMBU YA MALIPO" : "PAYMENT REFERENCE"}</Text>
+        </View>
+        <View style={s.twoCol}>
+          <View style={s.colLeft}>
+            <Row label={sw ? "Namba ya Maombi" : "Application No"} value={application.application_number ?? ""} />
+            <Row label={sw ? "Kiasi Kilicholipwa" : "Amount Paid"} value={formatCurrency(Number(application.payment_data?.amount || fd.service_fee || 0))} />
+          </View>
+          <View style={s.colRight}>
+            <Row label={sw ? "Tarehe ya Malipo" : "Payment Date"} value={application.approved_at ? new Date(application.approved_at).toLocaleDateString("sw-TZ") : "N/A"} />
+            <Row label={sw ? "Njia" : "Method"} value={String(application.payment_data?.payment_method || "E-Mtaa Portal")} />
+          </View>
+        </View>
 
         {/* Declaration */}
         <View style={{ backgroundColor: "#f7f7f7", borderWidth: 0.5, borderColor: "#c0c0c0", padding: 8, marginVertical: 6, borderRadius: 4 }}>

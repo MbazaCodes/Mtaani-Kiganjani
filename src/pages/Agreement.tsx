@@ -321,7 +321,19 @@ export function Agreement() {
           .eq("id", agr.id)
           .single();
         if (current?.form_data) {
-          const updatedFormData = { ...current.form_data, buyer_signature: signature };
+          const updatedFormData = {
+            ...current.form_data,
+            buyer_signature: signature,
+            // Store buyer's profile data for the PDF
+            second_party_citizen_id: user.citizen_id || "",
+            buyer_nida: user.nida_number || (current.form_data as Record<string, string>)?.buyer_nida || "",
+            buyer_phone: user.phone || "",
+            buyer_email: user.email || "",
+            buyer_region: user.region || "",
+            buyer_district: user.district || "",
+            buyer_ward: user.ward || "",
+            buyer_accepted_at: new Date().toISOString(),
+          };
           await supabase
             .from("applications")
             .update({ form_data: updatedFormData })
