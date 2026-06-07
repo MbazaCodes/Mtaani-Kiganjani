@@ -30,6 +30,10 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { ApplicationChat } from "@/components/ApplicationChat";
+import { pdf } from "@react-pdf/renderer";
+import { MakubalianoMauzianoPDF } from "@/components/documents/MakubalianoMauzianoPDF";
+import { MakubalianoPangoPDF } from "@/components/documents/MakubalianoPangoPDF";
+import { generateQRCodeUrl } from "@/components/documents/types";
 import { CitizenProfileViewer } from "@/components/CitizenProfileViewer";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -1466,7 +1470,37 @@ export const BusinessApproval: React.FC = () => {
                   {/* Staff Actions Footer */}
                   <div className="px-5 py-3 border-t border-stone-200 bg-stone-50 shrink-0 space-y-2">
                     <div className="flex gap-2">
-                      <button onClick={() => setSelectedAgreement(null)} className="flex-1 py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{L2("Funga", "Close")}</button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const { data: fullApp } = await supabase
+                              .from("applications")
+                              .select("*, users:user_id(first_name, middle_name, last_name, nida_number, phone, region, district, ward, sex, date_of_birth)")
+                              .eq("id", selectedAgreement.id)
+                              .maybeSingle();
+                            if (!fullApp) return;
+                            const qrUrl = generateQRCodeUrl(fullApp, "DOC");
+                            const isSale = (selectedAgreement.service_name || "").includes("Mauzo");
+                            const Comp = isSale ? MakubalianoMauzianoPDF : MakubalianoPangoPDF;
+                            const blob = await pdf(<Comp application={fullApp} lang={lang} qrDataUrl={qrUrl} />).toBlob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = `Agreement_${selectedAgreement.application_number || "doc"}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          } catch (err) {
+                            console.error("PDF download error:", err);
+                          }
+                        }}
+                        className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                      >
+                        <Download size={16} />
+                        {L2("Pakua Makubaliano", "Download Agreement")}
+                      </button>
+                      <button onClick={() => setSelectedAgreement(null)} className="px-6 py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{L2("Funga", "Close")}</button>
                     </div>
                   </div>
                 </motion.div>

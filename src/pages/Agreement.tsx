@@ -1,6 +1,11 @@
 import { cn } from "@/lib/utils";
 import { SignaturePad } from "@/components/ui/SignaturePad";
+import { pdf } from "@react-pdf/renderer";
+import { CertificatePDFDocument } from "@/components/DocumentRenderer";
+import { generateQRCodeUrl } from "@/components/documents/types";
 import { ApplicationChat } from "@/components/ApplicationChat";
+import { MakubalianoMauzianoPDF } from "@/components/documents/MakubalianoMauzianoPDF";
+import { MakubalianoPangoPDF } from "@/components/documents/MakubalianoPangoPDF";
 /**
  * Agreement / Business Portal
  *
@@ -201,6 +206,46 @@ export function Agreement() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [signingAgr, setSigningAgr] = useState<AgreementApp | null>(null);
   const [viewingAgr, setViewingAgr] = useState<AgreementApp | null>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadAgreement = async (agr: AgreementApp) => {
+    setDownloading(true);
+    try {
+      // Fetch full application data
+      const { data: fullApp } = await supabase
+        .from("applications")
+        .select("*, users:user_id(first_name, middle_name, last_name, nida_number, phone, region, district, ward, sex, date_of_birth)")
+        .eq("id", agr.id)
+        .maybeSingle();
+      if (!fullApp) throw new Error("Application not found");
+
+      // Generate QR
+      const qrUrl = generateQRCodeUrl(fullApp, "DOC");
+
+      // Choose the right PDF component
+      const isSale = (agr.service_name || "").includes("Mauzo") || (agr.service_name || "").includes("Sale");
+      const PdfComponent = isSale ? MakubalianoMauzianoPDF : MakubalianoPangoPDF;
+
+      // Render to blob
+      const blob = await pdf(
+        <PdfComponent application={fullApp} lang={lang} qrDataUrl={qrUrl} />
+      ).toBlob();
+
+      // Trigger download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Agreement_${agr.application_number || "doc"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF download error:", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
   const [buyerSignature, setBuyerSignature] = useState("");
 
   // Application mode
@@ -1697,11 +1742,11 @@ export function Agreement() {
                     <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mb-2">{L2("Hati ya Makubaliano", "Agreement Document")}</p>
                     <p className="text-xs text-stone-500 mb-3">{L2("Soma hati kamili ya makubaliano kabla ya kukubali au kukataa.", "Read the full agreement document before accepting or rejecting.")}</p>
                     <button
-                      onClick={(e) => { e.stopPropagation(); setViewingAgr(null); /* Navigate to applications to download */ }}
+                      onClick={(e) => { e.stopPropagation(); handleDownloadAgreement(viewingAgr); }}
                       className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                     >
-                      <FileText size={16} />
-                      {L2("Fungua kwenye Maombi Yangu kupakua", "Open in My Applications to download")}
+                      <Download size={16} />
+                      {L2("Pakua Hati ya Makubaliano", "Download Agreement Document")}
                     </button>
                   </div>
                 )}
