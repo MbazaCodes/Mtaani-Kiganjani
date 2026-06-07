@@ -27,3 +27,28 @@ CREATE POLICY "applications_update_second_party" ON public.applications
     OR (form_data->>'buyer_id')::uuid = auth.uid()
     OR (form_data->>'tenant_id')::uuid = auth.uid()
   );
+
+-- Allow second party (buyer/tenant) to update agreement-related fields
+-- on applications where they are the second_party_user_id.
+-- This is needed for the buyer to accept/reject agreements.
+
+DROP POLICY IF EXISTS "applications_update_second_party" ON public.applications;
+CREATE POLICY "applications_update_second_party" ON public.applications
+  FOR UPDATE
+  USING (second_party_user_id = auth.uid())
+  WITH CHECK (second_party_user_id = auth.uid());
+
+-- Also allow second party to read the application (for form_data fetch)
+DROP POLICY IF EXISTS "applications_select_second_party" ON public.applications;
+CREATE POLICY "applications_select_second_party" ON public.applications
+  FOR SELECT
+  USING (second_party_user_id = auth.uid());
+
+-- Allow lookup via form_data buyer_id/tenant_id fields too
+DROP POLICY IF EXISTS "applications_select_form_party" ON public.applications;
+CREATE POLICY "applications_select_form_party" ON public.applications
+  FOR SELECT
+  USING (
+    form_data->>'buyer_id' = auth.uid()::text
+    OR form_data->>'tenant_id' = auth.uid()::text
+  );
