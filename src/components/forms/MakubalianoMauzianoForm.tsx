@@ -1143,6 +1143,33 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                   </span>
                 </div>
                 <div className="p-4 space-y-3">
+                  {/* Citizen Lookup */}
+                  <div className="relative">
+                    <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                      <Search size={13} className="text-emerald-600 shrink-0" />
+                      <input
+                        value={witnessSearch[`w${w.num}` as "w1" | "w2"]}
+                        onChange={(e) => searchWitness(e.target.value, `w${w.num}` as "w1" | "w2")}
+                        placeholder={L("Tafuta shahidi kwa jina, NIDA, simu...", "Search witness by name, NIDA, phone...")}
+                        className="flex-1 text-xs bg-transparent outline-none placeholder-emerald-400"
+                      />
+                    </div>
+                    {witnessResults[`w${w.num}` as "w1" | "w2"].length > 0 && (
+                      <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg max-h-32 overflow-y-auto">
+                        {witnessResults[`w${w.num}` as "w1" | "w2"].map((r) => (
+                          <button key={r.id} type="button" onClick={() => selectWitness(w.num as 1 | 2, r)}
+                            className="w-full px-3 py-2 hover:bg-emerald-50 flex items-center gap-2 text-left border-b border-stone-50 last:border-0">
+                            <Users size={12} className="text-emerald-600" />
+                            <div>
+                              <p className="text-xs font-bold">{r.name}</p>
+                              <p className="text-[10px] text-stone-400">{r.phone} · {r.nida}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-[9px] text-stone-400 mt-0.5">{L("Au ingiza kwa mkono hapa chini", "Or enter manually below")}</p>
+                  </div>
                   <Field name={w.nameKey} label={L("Jina Kamili", "Full Name")} required>
                     <TI
                       name={w.nameKey}

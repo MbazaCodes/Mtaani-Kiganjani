@@ -172,7 +172,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
   const [refreshing, setRefreshing] = useState(false);
 
   // Filter state
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending_review");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [serviceFilter, setServiceFilter] = useState<ServiceFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -248,7 +248,11 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
   // ─── Filtered list ──────────────────────────────────────────────────────
   const filteredApps = useMemo(() => {
     return apps.filter((a) => {
-      if (statusFilter !== "all" && a.status !== statusFilter) return false;
+      if (statusFilter !== "all") {
+        if (statusFilter === "pending_review") {
+          if (a.status !== "pending_review" && a.status !== "submitted" && a.status !== "pending" && a.status !== "under_review") return false;
+        } else if (a.status !== statusFilter) return false;
+      }
       if (serviceFilter !== "all" && a.service_name !== serviceFilter) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
