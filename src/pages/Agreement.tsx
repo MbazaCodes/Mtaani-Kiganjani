@@ -1688,9 +1688,17 @@ export function Agreement() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
                     <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">{isSale ? L2("Muuzaji", "Seller") : L2("Mwenye Nyumba", "Landlord")}</p>
-                    <p className="font-black text-stone-900 text-sm">{fd.seller_name || fd.landlord_name || (viewingAgr.initiator ? `${viewingAgr.initiator.first_name} ${viewingAgr.initiator.last_name}` : "—")}</p>
-                    {viewingAgr.initiator?.phone && <p className="text-xs text-stone-500 mt-1">{viewingAgr.initiator.phone}</p>}
-                    {viewingAgr.initiator?.citizen_id && <p className="text-xs text-blue-600 font-mono">{viewingAgr.initiator.citizen_id}</p>}
+                    {(() => {
+                      const init = Array.isArray(viewingAgr.initiator) ? viewingAgr.initiator[0] : viewingAgr.initiator;
+                      const initName = fd.seller_name || fd.landlord_name || (init ? `${init.first_name} ${init.last_name}` : "—");
+                      return (
+                        <>
+                          <p className="font-black text-stone-900 text-sm">{initName}</p>
+                          {init?.phone && <p className="text-xs text-stone-500 mt-1">{init.phone}</p>}
+                          {init?.citizen_id && <p className="text-xs text-blue-600 font-mono">{init.citizen_id}</p>}
+                        </>
+                      );
+                    })()}
                   </div>
                   <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
                     <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">{isSale ? L2("Mnunuzi (Wewe)", "Buyer (You)") : L2("Mpangaji (Wewe)", "Tenant (You)")}</p>
@@ -1798,7 +1806,17 @@ export function Agreement() {
                 </div>
               )}
               {!isPending && (
-                <div className="px-5 py-3 border-t border-stone-100 bg-stone-50 shrink-0">
+                <div className="px-5 py-3 border-t border-stone-100 bg-stone-50 shrink-0 space-y-2">
+                  {viewingAgr.status === "issued" && (
+                    <button
+                      onClick={() => handleDownloadAgreement(viewingAgr)}
+                      disabled={downloading}
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {downloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                      {downloading ? L2("Inaandaa...", "Generating...") : L2("Pakua Hati ya Makubaliano", "Download Agreement")}
+                    </button>
+                  )}
                   <button onClick={() => setViewingAgr(null)} className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{L2("Funga", "Close")}</button>
                 </div>
               )}
