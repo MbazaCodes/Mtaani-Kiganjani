@@ -42,3 +42,9 @@ pnpm-debug.log*
 .nitro
 .wrangler/
 .dev.vars
+
+coverage
+playwright-report
+test-results
+*.bak
+
