@@ -62,6 +62,7 @@ import { logActivity } from "@/lib/activity-log";
 import { createNotification } from "@/lib/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { ApplicationChat } from "@/components/ApplicationChat";
+import { exportToCSV, flattenForExport } from "@/lib/export";
 import { CitizenProfileViewer } from "@/components/CitizenProfileViewer";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
