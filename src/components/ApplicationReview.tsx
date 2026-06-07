@@ -180,6 +180,8 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
   // Detail panel state
   const [selected, setSelected] = useState<AppRecord | null>(null);
   const [viewCitizenId, setViewCitizenId] = useState<string | null>(null);
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [bulkMode, setBulkMode] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
