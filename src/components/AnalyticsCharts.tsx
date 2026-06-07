@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { getApplicationAmount } from "@/lib/serviceFees";
 import {
   BarChart,
   Bar,
@@ -103,10 +104,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
             }
           }
         });
-        const revenue = apps.reduce((sum, a) => {
-          const pd = a.payment_data as { amount?: number } | null;
-          return sum + (pd?.amount || 0);
-        }, 0);
+        const revenue = apps
+          .filter((a) => a.status === "approved" || a.status === "issued" || a.status === "paid")
+          .reduce((sum, a) => sum + getApplicationAmount(a), 0);
 
         setStats({
           total: apps.length,

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FileText,
+  DollarSign,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -18,6 +19,7 @@ import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { StatCard } from "@/components/ui/StatCard";
+import { getApplicationAmount } from "@/lib/serviceFees";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 interface StaffDashboardProps {
@@ -38,6 +40,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
     approved: 0,
     total: 0,
     pendingBusiness: 0, // Pending business registration applications
+    revenue: 0,
   });
 
   // Auto-redirect department officers to their portal.
@@ -123,6 +126,15 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
           ).length,
           total: filteredApps.length,
           pendingBusiness: 0,
+          revenue: filteredApps
+            .filter((a: import("@/lib/supabase").Application) =>
+              ["paid", "approved", "issued"].includes(a.status as string),
+            )
+            .reduce(
+              (s: number, a: import("@/lib/supabase").Application) =>
+                s + getApplicationAmount(a as { service_name?: string; form_data?: Record<string, unknown>; payment_data?: Record<string, unknown> }),
+              0,
+            ),
         });
 
         setApplications(
@@ -135,7 +147,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         setLoading(false);
         return;
       }
-      let statsQuery = supabase.from("applications").select("status", { count: "exact" });
+      let statsQuery = supabase.from("applications").select("status, service_name, form_data, payment_data");
 
       if (["staff", "admin"].includes(user?.role || "")) {
         if (user?.ward) {
@@ -178,6 +190,9 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
           pending: allApps.filter((a) => a.status === "submitted" || a.status === "pending_review")
             .length,
           paid: allApps.filter((a) => a.status === "paid").length,
+          revenue: allApps
+            .filter((a) => ["paid", "approved", "issued"].includes(a.status as string))
+            .reduce((s, a) => s + getApplicationAmount(a as { service_name?: string; form_data?: Record<string, unknown>; payment_data?: Record<string, unknown> }), 0),
           returned: allApps.filter((a) => a.status === "returned").length,
           approved: allApps.filter((a) => a.status === "approved" || a.status === "issued").length,
           total: allApps.length,
@@ -243,7 +258,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard
           icon={<Clock className="text-blue-500" />}
           label={lang === "sw" ? "Maombi Mapya" : "New Applications"}
@@ -268,6 +283,11 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
           icon={<FileText className="text-stone-500" />}
           label={lang === "sw" ? "Jumla ya Maombi" : "Total Handled"}
           value={stats.total}
+        />
+        <StatCard
+          icon={<DollarSign className="text-green-600" />}
+          label={lang === "sw" ? "Mapato" : "Revenue"}
+          value={`TSh ${stats.revenue.toLocaleString()}`}
         />
       </div>
 

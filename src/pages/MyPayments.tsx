@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { getApplicationAmount } from "@/lib/serviceFees";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -101,7 +102,7 @@ export function MyPayments() {
             receipt_number?: string;
           };
           const fd = (app.form_data || {}) as Record<string, unknown> & { service_fee?: number };
-          const amount = pd.amount || fd.service_fee || 0;
+          const amount = getApplicationAmount(app);
           // Skip if already in payments table
           if (finalPayments.find((p) => (p.application as { id?: string })?.id === app.id))
             continue;
@@ -174,8 +175,7 @@ export function MyPayments() {
     const totalMonth = thisMonth.reduce((s, p) => s + Number(p.amount || 0), 0);
     const totalYear = thisYear.reduce((s, p) => s + Number(p.amount || 0), 0);
     const outstandingAmount = outstandingApps.reduce((s, a) => {
-      const fee = a.form_data?.service_fee || a.payment_data?.amount || 0;
-      return s + Number(fee);
+      return s + getApplicationAmount(a);
     }, 0);
 
     // Most used service

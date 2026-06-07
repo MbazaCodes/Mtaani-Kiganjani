@@ -328,3 +328,21 @@
   color: var(--text-primary) !important;
   border-color: var(--border) !important;
 }
+
+/* ═══ Dark Mode — colored boxes (payments, stats, alerts) ═══ */
+.dark .bg-emerald-50 { background: #064e3b !important; }
+.dark .bg-blue-50 { background: #1e3a5f !important; }
+.dark .bg-amber-50 { background: #451a03 !important; }
+.dark .bg-red-50 { background: #450a0a !important; }
+.dark .bg-purple-50 { background: #3b0764 !important; }
+.dark .bg-rose-50 { background: #4c0519 !important; }
+.dark .text-emerald-700 { color: #6ee7b7 !important; }
+.dark .text-blue-700 { color: #93c5fd !important; }
+.dark .text-amber-700 { color: #fcd34d !important; }
+.dark .text-red-700 { color: #fca5a5 !important; }
+.dark .text-emerald-600 { color: #34d399 !important; }
+.dark .text-blue-600 { color: #60a5fa !important; }
+.dark .text-amber-600 { color: #fbbf24 !important; }
+.dark .border-emerald-100, .dark .border-emerald-200 { border-color: #065f46 !important; }
+.dark .border-blue-100, .dark .border-blue-200 { border-color: #1e40af !important; }
+.dark .border-amber-100, .dark .border-amber-200 { border-color: #78350f !important; }
