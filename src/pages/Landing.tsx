@@ -5,6 +5,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Globe2,
+  Moon,
+  Sun,
   Users2,
   FileCheck2,
   Smartphone,
@@ -17,6 +19,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useDarkMode } from "@/hooks/useDarkMode";
 import { useOnlineCount, useSiteVisits } from "@/hooks/useSiteStats";
 import { TANZANIA_LOGO_URL } from "@/constants/services";
 
@@ -27,6 +30,7 @@ interface LandingProps {
 
 export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
   const { lang, setLang, t } = useLanguage();
+  const { isDark, toggle: toggleDark } = useDarkMode();
   const onlineCount = useOnlineCount();
   const siteVisits = useSiteVisits();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -67,6 +71,9 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                 </button>
               ))}
             </div>
+            <button onClick={toggleDark} type="button" className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors" title={isDark ? "Light mode" : "Dark mode"}>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             {onShowVerify && (
               <button
                 onClick={onShowVerify}
@@ -120,6 +127,9 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden bg-white border-t border-stone-100 px-4 py-3 space-y-1">
+            <button onClick={toggleDark} type="button" className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors" title={isDark ? "Light mode" : "Dark mode"}>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             {onShowVerify && (
               <button
                 onClick={() => {
@@ -198,7 +208,10 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                     className="group-hover:translate-x-1 transition-transform"
                   />
                 </button>
-                {onShowVerify && (
+                <button onClick={toggleDark} type="button" className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors" title={isDark ? "Light mode" : "Dark mode"}>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+            {onShowVerify && (
                   <button
                     onClick={onShowVerify}
                     type="button"
@@ -660,14 +673,14 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               </h4>
               <ul className="space-y-2.5 text-sm font-semibold text-stone-500">
                 {[
-                  lang === "sw" ? "Mwanzo" : "Home",
-                  lang === "sw" ? "Huduma" : "Services",
-                  lang === "sw" ? "Msaada" : "Support",
-                  lang === "sw" ? "Faragha" : "Privacy",
+                  { label: lang === "sw" ? "Mwanzo" : "Home", href: "/" },
+                  { label: lang === "sw" ? "Huduma" : "Services", href: "/services" },
+                  { label: lang === "sw" ? "Msaada" : "Help & FAQ", href: "/help" },
+                  { label: lang === "sw" ? "Faragha" : "Privacy", href: "/legal" },
                 ].map((l) => (
-                  <li key={l}>
-                    <a href="#" className="hover:text-emerald-600 transition-colors">
-                      {l}
+                  <li key={l.href}>
+                    <a href={l.href} className="hover:text-emerald-600 transition-colors">
+                      {l.label}
                     </a>
                   </li>
                 ))}
@@ -676,17 +689,26 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
 
             <div className="space-y-4">
               <h4 className="font-bold text-stone-900 uppercase tracking-widest text-xs">
-                {lang === "sw" ? "Mawasiliano" : "Contact"}
+                {lang === "sw" ? "Serikali ya Tanzania" : "Government of Tanzania"}
               </h4>
               <ul className="space-y-2.5 text-sm font-semibold text-stone-500">
-                <li className="flex items-center gap-2">
-                  <MapPin size={14} /> Dodoma, TZ
+                <li>
+                  <a href="https://www.tamisemi.go.tz" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+                    PO-RALG (TAMISEMI)
+                  </a>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Clock size={14} /> 24/7 Portal
+                <li>
+                  <a href="https://www.ega.go.tz" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+                    e-Government Agency
+                  </a>
                 </li>
-                <li className="flex items-center gap-2">
-                  <ShieldCheck size={14} /> Secure
+                <li>
+                  <a href="https://www.nida.go.tz" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+                    NIDA
+                  </a>
+                </li>
+                <li className="flex items-center gap-1.5 text-stone-400">
+                  <MapPin size={12} /> Dodoma, Tanzania
                 </li>
               </ul>
             </div>
