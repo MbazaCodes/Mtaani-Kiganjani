@@ -269,11 +269,11 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         <View style={s.twoCol}>
           <View style={s.colLeft}>
             <Row label={sw ? "Bei / Kodi" : "Price / Rent"} value={formatCurrency(price)} />
-            <Row label={sw ? "Jumla" : "Total Amount"} value={formatCurrency(Number(fd.total_amount || fd.total_rent || price))} />
+            <Row label={sw ? "Jumla" : "Total Amount"} value={formatCurrency(totalAmount)} />
           </View>
           <View style={s.colRight}>
-            <Row label="VAT (18%)" value={formatCurrency(Number(fd.vat_amount || 0))} />
-            <Row label={sw ? "Ada ya Huduma" : "Service Fee"} value={formatCurrency(Number(fd.service_fee || 0))} />
+            <Row label="VAT (18%)" value={formatCurrency(vatAmount)} />
+            <Row label={sw ? "Ada ya Huduma" : "Service Fee"} value={formatCurrency(serviceFee)} />
           </View>
         </View>
         {fd.payment_method && <Row label={sw ? "Njia ya Malipo" : "Payment Method"} value={fd.payment_method} />}
@@ -313,7 +313,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         <View style={s.twoCol}>
           <View style={s.colLeft}>
             <Row label={sw ? "Namba ya Maombi" : "Application No"} value={application.application_number ?? ""} />
-            <Row label={sw ? "Kiasi Kilicholipwa" : "Amount Paid"} value={formatCurrency(Number(application.payment_data?.amount || fd.service_fee || 0))} />
+            <Row label={sw ? "Kiasi Kilicholipwa" : "Amount Paid"} value={formatCurrency(Number(application.payment_data?.amount || serviceFee))} />
           </View>
           <View style={s.colRight}>
             <Row label={sw ? "Tarehe ya Malipo" : "Payment Date"} value={application.approved_at ? new Date(application.approved_at).toLocaleDateString("sw-TZ") : "N/A"} />
