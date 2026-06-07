@@ -145,6 +145,8 @@ interface FormValues {
   witness1_phone: string;
   witness2_name: string;
   witness2_phone: string;
+  witness1_user_id?: string;
+  witness2_user_id?: string;
   // Consent
   terms_accepted: boolean;
   data_confirmed: boolean;
@@ -177,6 +179,22 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
   const [respondentFound, setRespondentFound] = useState<RespondentProfile | null>(null);
   const [respondentSearching, setRSearching] = useState(false);
   const [respondentError, setRespondentError] = useState("");
+  const [witnessSearch, setWitnessSearch] = useState<{ w1: string; w2: string }>({ w1: "", w2: "" });
+  const [witnessResults, setWitnessResults] = useState<{ w1: { id: string; name: string; phone: string }[]; w2: { id: string; name: string; phone: string }[] }>({ w1: [], w2: [] });
+  const searchDisputeWitness = async (q: string, wKey: "w1" | "w2") => {
+    setWitnessSearch((prev) => ({ ...prev, [wKey]: q }));
+    if (q.length < 2) { setWitnessResults((prev) => ({ ...prev, [wKey]: [] })); return; }
+    const term = "%" + q + "%";
+    const { data } = await supabase.from("profiles").select("id, first_name, last_name, phone, nida_number")
+      .or("first_name.ilike." + term + ",last_name.ilike." + term + ",nida_number.ilike." + term + ",phone.ilike." + term)
+      .limit(4);
+    setWitnessResults((prev) => ({ ...prev, [wKey]: (data || []).map((u: { id: string; first_name?: string; last_name?: string; phone?: string }) => ({ id: u.id, name: (u.first_name || "") + " " + (u.last_name || ""), phone: u.phone || "" })) }));
+  };
+  const selectDisputeWitness = (wNum: 1 | 2, w: { id: string; name: string; phone: string }) => {
+    setVals((p) => ({ ...p, ["witness" + wNum + "_name"]: w.name, ["witness" + wNum + "_phone"]: w.phone, ["witness" + wNum + "_user_id"]: w.id }));
+    setWitnessSearch((prev) => ({ ...prev, ["w" + wNum]: "" }));
+    setWitnessResults((prev) => ({ ...prev, ["w" + wNum]: [] }));
+  };
 
   const [vals, setVals] = useState<FormValues>({
     mode: "",
@@ -197,6 +215,8 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
     urgency: "NORMAL",
     resolution_preference: "",
     witness1_name: "",
+    witness1_user_id: "",
+    witness2_user_id: "",
     witness1_phone: "",
     witness2_name: "",
     witness2_phone: "",
@@ -369,6 +389,7 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
         {
           ...vals,
           respondent_id: respondentFound?.id,
+          second_party_user_id: respondentFound?.id,
           respondent_name: respondentFound
             ? `${respondentFound.first_name} ${respondentFound.last_name}`
             : vals.respondent_name_manual,
@@ -388,6 +409,35 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
         },
         files,
       );
+
+      // Notify the respondent (if a registered citizen) that a dispute was filed against them
+      if (respondentFound?.id) {
+        await supabase.from("notifications").insert({
+          user_id: respondentFound.id,
+          title: lang === "sw" ? "Malalamiko Yamewasilishwa Dhidi Yako" : "A Dispute Has Been Filed Against You",
+          message:
+            lang === "sw"
+              ? `Malalamiko (${ref}) yamewasilishwa dhidi yako. Fungua kuona maelezo na kujibu.`
+              : `A dispute (${ref}) has been filed naming you as respondent. Open to view details and respond.`,
+          type: "warning",
+        });
+      }
+
+      // Notify registered witnesses
+      const witnessIds = [vals.witness1_user_id, vals.witness2_user_id].filter(
+        (id): id is string => typeof id === "string" && id.length > 0,
+      );
+      for (const wId of witnessIds) {
+        await supabase.from("notifications").insert({
+          user_id: wId,
+          title: lang === "sw" ? "Umetajwa kama Shahidi" : "You are Named as a Witness",
+          message:
+            lang === "sw"
+              ? `Umetajwa kama shahidi kwenye malalamiko (${ref}).`
+              : `You have been named as a witness in a dispute (${ref}).`,
+          type: "info",
+        });
+      }
       setAppRef(ref);
       setSubmitted(true);
     } catch (e) {
@@ -1220,26 +1270,52 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
                         phoneKey: "witness2_phone" as const,
                       },
                     ].map((w) => (
-                      <div key={w.num} className="grid grid-cols-2 gap-3">
-                        <Field
-                          name={w.nameKey}
-                          label={L(`Jina la Shahidi ${w.num}`, `Witness ${w.num} Name`)}
-                        >
-                          <TI
+                      <div key={w.num} className="space-y-2">
+                        {/* Witness citizen lookup */}
+                        <div className="relative">
+                          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                            <Search size={13} className="text-emerald-600 shrink-0" />
+                            <input
+                              value={witnessSearch[("w" + w.num) as "w1" | "w2"]}
+                              onChange={(e) => searchDisputeWitness(e.target.value, ("w" + w.num) as "w1" | "w2")}
+                              placeholder={L(`Tafuta shahidi ${w.num}...`, `Search witness ${w.num}...`)}
+                              className="flex-1 text-xs bg-transparent outline-none placeholder-emerald-400"
+                            />
+                          </div>
+                          {witnessResults[("w" + w.num) as "w1" | "w2"].length > 0 && (
+                            <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg max-h-32 overflow-y-auto">
+                              {witnessResults[("w" + w.num) as "w1" | "w2"].map((r) => (
+                                <button key={r.id} type="button" onClick={() => selectDisputeWitness(w.num as 1 | 2, r)}
+                                  className="w-full px-3 py-2 hover:bg-emerald-50 flex items-center gap-2 text-left border-b border-stone-50">
+                                  <Users size={12} className="text-emerald-600" />
+                                  <div><p className="text-xs font-bold">{r.name}</p><p className="text-[10px] text-stone-400">{r.phone}</p></div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          <p className="text-[9px] text-stone-400 mt-0.5">{L("Au ingiza kwa mkono", "Or enter manually below")}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Field
                             name={w.nameKey}
-                            value={vals[w.nameKey]}
-                            onChange={(v) => set(w.nameKey, v)}
-                            placeholder={L("Jina kamili", "Full name")}
-                          />
-                        </Field>
-                        <Field name={w.phoneKey} label={L("Simu", "Phone")}>
-                          <TI
-                            name={w.phoneKey}
-                            value={vals[w.phoneKey]}
-                            onChange={(v) => set(w.phoneKey, v)}
-                            placeholder="+255 7XX XXX XXX"
-                          />
-                        </Field>
+                            label={L(`Jina la Shahidi ${w.num}`, `Witness ${w.num} Name`)}
+                          >
+                            <TI
+                              name={w.nameKey}
+                              value={vals[w.nameKey]}
+                              onChange={(v) => set(w.nameKey, v)}
+                              placeholder={L("Jina kamili", "Full name")}
+                            />
+                          </Field>
+                          <Field name={w.phoneKey} label={L("Simu", "Phone")}>
+                            <TI
+                              name={w.phoneKey}
+                              value={vals[w.phoneKey]}
+                              onChange={(v) => set(w.phoneKey, v)}
+                              placeholder="+255 7XX XXX XXX"
+                            />
+                          </Field>
+                        </div>
                       </div>
                     ))}
                   </div>

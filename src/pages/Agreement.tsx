@@ -113,6 +113,7 @@ interface AgreementApp {
   approved_at?: string | null;
   issued_at?: string | null;
   initiator?: { first_name: string; last_name: string; phone?: string; citizen_id?: string } | null;
+  isWitness?: boolean;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -424,6 +425,25 @@ export function Agreement() {
     if (d3) {
       for (const app of d3 as unknown as AgreementApp[]) {
         if (!results.find((r) => r.id === app.id)) results.push(app);
+      }
+    }
+
+    // Query 4 & 5: where user is a witness (witness1_user_id / witness2_user_id in form_data)
+    for (const wField of ["witness1_user_id", "witness2_user_id"]) {
+      const { data: dw } = await supabase
+        .from("applications")
+        .select(
+          "id, application_number, service_name, status, agreement_status, user_id, second_party_user_id, created_at, form_data, payment_data, approved_at, issued_at, initiator:user_id(first_name, last_name, phone, citizen_id)",
+        )
+        .contains("form_data", { [wField]: user.id })
+        .order("created_at", { ascending: false });
+      if (dw) {
+        for (const app of dw as unknown as AgreementApp[]) {
+          if (!results.find((r) => r.id === app.id)) {
+            (app as AgreementApp & { isWitness?: boolean }).isWitness = true;
+            results.push(app);
+          }
+        }
       }
     }
 
@@ -1658,6 +1678,7 @@ export function Agreement() {
         const fd = (viewingAgr.form_data || {}) as Record<string, string>;
         const isPending = !viewingAgr.agreement_status || viewingAgr.agreement_status === "pending";
         const isAccepted = viewingAgr.agreement_status === "buyer_accepted";
+        const isWitness = !!viewingAgr.isWitness;
         const isSale = (viewingAgr.service_name || "").includes("Mauzo") || (viewingAgr.service_name || "").includes("Sale");
         const L2 = (s: string, e: string) => (lang === "sw" ? s : e);
         const fmtCurrency = (v: unknown) => {
@@ -1837,7 +1858,38 @@ export function Agreement() {
               </div>
 
               {/* Action Footer */}
-              {isPending && (
+              {isWitness ? (
+                <div className="px-5 py-4 border-t border-stone-200 bg-blue-50 shrink-0 space-y-2">
+                  <p className="text-xs text-blue-700 font-bold text-center">
+                    {L2("Wewe ni shahidi kwenye makubaliano haya", "You are a witness on this agreement")}
+                  </p>
+                  {viewingAgr.status === "issued" && (
+                    <button
+                      onClick={() => handleDownloadAgreement(viewingAgr)}
+                      disabled={downloading}
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {downloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                      {downloading ? L2("Inaandaa...", "Generating...") : L2("Pakua Nakala ya Shahidi", "Download Witness Copy")}
+                    </button>
+                  )}
+                  <button
+                    onClick={async () => {
+                      const wField = (viewingAgr.form_data as Record<string, unknown>)?.witness1_user_id === user?.id ? "witness1_acknowledged" : "witness2_acknowledged";
+                      await supabase.from("applications").update({
+                        form_data: { ...(viewingAgr.form_data as Record<string, unknown>), [wField]: true, [`${wField}_at`]: new Date().toISOString() },
+                      }).eq("id", viewingAgr.id);
+                      alert(L2("Umethibitisha kuwa shahidi!", "You have acknowledged as witness!"));
+                      setViewingAgr(null);
+                    }}
+                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle size={16} />
+                    {L2("Thibitisha kama Shahidi", "Acknowledge as Witness")}
+                  </button>
+                  <button onClick={() => setViewingAgr(null)} className="w-full py-2 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{L2("Funga", "Close")}</button>
+                </div>
+              ) : isPending ? (
                 <div className="px-5 py-4 border-t border-stone-200 bg-stone-50 shrink-0 space-y-2">
                   <p className="text-[10px] text-stone-500 text-center">{L2("Soma makubaliano kwa makini kabla ya kukubali.", "Read the agreement carefully before accepting.")}</p>
                   <div className="flex gap-3">
@@ -1859,8 +1911,7 @@ export function Agreement() {
                     </button>
                   </div>
                 </div>
-              )}
-              {!isPending && (
+              ) : (
                 <div className="px-5 py-3 border-t border-stone-100 bg-stone-50 shrink-0 space-y-2">
                   {viewingAgr.status === "issued" && (
                     <button

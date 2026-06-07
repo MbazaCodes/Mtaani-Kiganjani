@@ -122,6 +122,8 @@ interface FormValues {
   witness2_name: string;
   witness2_phone: string;
   witness2_nida: string;
+  witness1_user_id?: string;
+  witness2_user_id?: string;
   // Consent
   seller_confirmed: boolean;
   terms_accepted: boolean;
@@ -172,6 +174,8 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
     witness2_name: "",
     witness2_phone: "",
     witness2_nida: "",
+    witness1_user_id: "",
+    witness2_user_id: "",
     seller_confirmed: false,
     terms_accepted: false,
   });
@@ -191,6 +195,50 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
   const progress = ((stepIdx + 1) / STEPS.length) * 100;
 
   const set = (k: keyof FormValues, v: string | boolean) => setVals((p) => ({ ...p, [k]: v }));
+
+  // Witness citizen lookup
+  const [witnessSearch, setWitnessSearch] = useState<{ w1: string; w2: string }>({ w1: "", w2: "" });
+  const [witnessResults, setWitnessResults] = useState<{
+    w1: { id: string; name: string; phone: string; nida: string }[];
+    w2: { id: string; name: string; phone: string; nida: string }[];
+  }>({ w1: [], w2: [] });
+
+  const searchWitness = async (q: string, wKey: "w1" | "w2") => {
+    setWitnessSearch((prev) => ({ ...prev, [wKey]: q }));
+    if (q.length < 2) {
+      setWitnessResults((prev) => ({ ...prev, [wKey]: [] }));
+      return;
+    }
+    const term = "%" + q + "%";
+    const { data } = await supabase
+      .from("users")
+      .select("id, first_name, last_name, phone, nida_number")
+      .or("first_name.ilike." + term + ",last_name.ilike." + term + ",nida_number.ilike." + term + ",phone.ilike." + term)
+      .eq("role", "citizen")
+      .limit(4);
+    setWitnessResults((prev) => ({
+      ...prev,
+      [wKey]: (data || []).map((u) => ({
+        id: u.id,
+        name: ((u.first_name as string) || "") + " " + ((u.last_name as string) || ""),
+        phone: (u.phone as string) || "",
+        nida: (u.nida_number as string) || "",
+      })),
+    }));
+  };
+
+  const selectWitness = (wNum: 1 | 2, w: { id: string; name: string; phone: string; nida: string }) => {
+    setVals((p) => ({
+      ...p,
+      ["witness" + wNum + "_name"]: w.name,
+      ["witness" + wNum + "_phone"]: w.phone,
+      ["witness" + wNum + "_nida"]: w.nida,
+      ["witness" + wNum + "_user_id"]: w.id,
+    }));
+    setWitnessSearch((prev) => ({ ...prev, ["w" + wNum]: "" }));
+    setWitnessResults((prev) => ({ ...prev, ["w" + wNum]: [] }));
+  };
+
   const clrErr = useCallback((k: string) => {
     setErrors((p) => {
       const n = { ...p };

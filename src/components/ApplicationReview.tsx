@@ -250,7 +250,8 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
     return apps.filter((a) => {
       if (statusFilter !== "all") {
         if (statusFilter === "pending_review") {
-          if (a.status !== "pending_review" && a.status !== "submitted" && a.status !== "pending" && a.status !== "under_review") return false;
+          const s = a.status as string;
+          if (s !== "pending_review" && s !== "submitted" && s !== "pending" && s !== "under_review") return false;
         } else if (a.status !== statusFilter) return false;
       }
       if (serviceFilter !== "all" && a.service_name !== serviceFilter) return false;
@@ -561,6 +562,22 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
               ? `Hati rasmi ya ${selected.service_name} iko tayari. Pakua kutoka Maombi Yangu.`
               : `Your official ${selected.service_name} document is ready. Download from My Applications.`,
           type: "success",
+        });
+      }
+      // Notify registered witnesses (those selected from system lookup)
+      const fd = (selected.form_data || {}) as Record<string, unknown>;
+      const witnessIds = [fd.witness1_user_id, fd.witness2_user_id].filter(
+        (id): id is string => typeof id === "string" && id.length > 0,
+      );
+      for (const wId of witnessIds) {
+        await createNotification({
+          user_id: wId,
+          title: lang === "sw" ? "Umetajwa kama Shahidi" : "You are a Witness",
+          message:
+            lang === "sw"
+              ? `Umetajwa kama shahidi kwenye ${selected.service_name} (${selected.application_number}). Fungua kuthibitisha na kupakua nakala.`
+              : `You have been named as a witness on ${selected.service_name} (${selected.application_number}). Open to acknowledge and download a copy.`,
+          type: "info",
         });
       }
     }
