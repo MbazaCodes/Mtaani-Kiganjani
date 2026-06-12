@@ -37,7 +37,7 @@ import { Application } from "@/lib/supabase";
 import { countUnreadNotifications } from "@/lib/notifications";
 import { supabase } from "@/lib/supabase";
 import { VerificationStatusCard } from "@/components/VerificationStatusCard";
-import { getUserTier } from "@/lib/verification";
+import { getUserTier, getProfileCompletion } from "@/lib/verification";
 
 interface DashboardProps {
   applications: Application[];
@@ -153,12 +153,53 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
 
   const hasBizRole = !!(user?.seller_id || user?.landlord_id || user?.broker_id);
 
+  const profileCompletion = getProfileCompletion(user);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-5 sm:space-y-6"
     >
+      {/* Profile completion reminder — shown when profile < 60% */}
+      {user?.role === "citizen" && profileCompletion < 60 && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-2xl p-4 flex items-start gap-4"
+        >
+          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+            <span className="text-xl">📋</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-black text-amber-900 text-sm">
+              {L("Kamilisha Wasifu Wako", "Complete Your Profile")}
+            </p>
+            <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+              {L(
+                `Wasifu wako umekamilika ${profileCompletion}%. Ongeza taarifa zaidi kufungua huduma zote na kupata usindikaji wa haraka.`,
+                `Your profile is ${profileCompletion}% complete. Add more details to unlock all services and get faster processing.`,
+              )}
+            </p>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="flex-1 h-1.5 bg-amber-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-amber-500 rounded-full transition-all"
+                  style={{ width: `${profileCompletion}%` }}
+                />
+              </div>
+              <span className="text-[11px] font-black text-amber-700 shrink-0">{profileCompletion}%</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setView("profile")}
+            className="shrink-0 flex items-center gap-1 px-3 h-8 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-all"
+          >
+            {L("Kamilisha", "Complete")} →
+          </button>
+        </motion.div>
+      )}
+
       {/* Welcome Card */}
       <div className="bg-gradient-to-br from-stone-800 via-stone-700 to-emerald-900 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZyIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCBmaWxsPSJ1cmwoI2cpIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIvPjwvc3ZnPg==')] opacity-50" />
