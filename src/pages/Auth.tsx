@@ -38,6 +38,7 @@ interface AuthProps {
   mode: "login" | "signup";
   onClose: () => void;
   setMode: (mode: "login" | "signup") => void;
+  isDiaspora?: boolean;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -113,7 +114,7 @@ const PwdStrength: React.FC<{ password: string; lang: string }> = ({ password, l
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export function Auth({ mode, onClose, setMode }: AuthProps) {
+export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) {
   const { fetchUserProfile } = useAuth();
   const { lang } = useLanguage();
   const { showToast } = useToast();
