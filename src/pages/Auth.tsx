@@ -37,6 +37,7 @@ interface OtpState {
 interface AuthProps {
   mode: "login" | "signup";
   onClose: () => void;
+  onSuccess?: (role?: string) => void;
   setMode: (mode: "login" | "signup") => void;
   isDiaspora?: boolean;
 }
@@ -114,7 +115,7 @@ const PwdStrength: React.FC<{ password: string; lang: string }> = ({ password, l
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) {
+export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: AuthProps) {
   const { fetchUserProfile } = useAuth();
   const { lang } = useLanguage();
   const { showToast } = useToast();
@@ -271,7 +272,11 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
           throw new Error(L("Barua pepe bado haijathibitishwa", "Email not confirmed. Check inbox."));
         throw error;
       }
-      if (data.user) fetchUserProfile(data.user.id).catch(() => {});
+      if (data.user) {
+        fetchUserProfile(data.user.id).catch(() => {});
+        const role = (data.user.user_metadata?.role as string) || "citizen";
+        onSuccess?.(role);
+      }
       onClose();
     } catch (err) {
       showToast((err as Error).message, "error");
@@ -369,6 +374,7 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       if (!user) throw new Error(L("Usajili umeshindwa.", "Signup failed."));
       fetchUserProfile(user.id).catch(() => {});
       showToast(L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."), "success");
+      onSuccess?.("citizen");
       onClose();
     } catch (err) { showToast(normaliseSignupError(err), "error"); }
     finally { setLoading(false); }
@@ -392,6 +398,7 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       if (!user) throw new Error(L("Usajili umeshindwa.", "Signup failed."));
       fetchUserProfile(user.id).catch(() => {});
       showToast(L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."), "success");
+      onSuccess?.("citizen");
       onClose();
     } catch (err) { showToast(normaliseSignupError(err), "error"); }
     finally { setLoading(false); }

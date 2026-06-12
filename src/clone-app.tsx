@@ -120,6 +120,15 @@ function PublicHome() {
             onClose={() => {
               setShowAuth(false);
               setAuthDiaspora(false);
+              // After signup/login, navigate to dashboard immediately
+              // (useEffect above handles it too, but this fires first)
+            }}
+            onSuccess={(role?: string) => {
+              setShowAuth(false);
+              setAuthDiaspora(false);
+              if (role === "admin") navigate("/admin", { replace: true });
+              else if (role === "staff") navigate("/staff", { replace: true });
+              else navigate("/dashboard", { replace: true });
             }}
             setMode={setAuthMode}
             isDiaspora={authDiaspora}
