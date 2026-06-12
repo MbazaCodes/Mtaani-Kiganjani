@@ -151,33 +151,47 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
     if (!user?.id) return;
     setSaving(true);
     try {
-      const updates: Record<string, unknown> = {
-        first_name: firstName.trim().toUpperCase(),
-        middle_name: middleName.trim().toUpperCase() || null,
-        last_name: lastName.trim().toUpperCase(),
-        phone: phone || null,
-        gender: gender || null,
-        date_of_birth: dob || null,
-        marital_status: marital || null,
-        occupation: occupation.trim() || null,
-        region: region || null,
-        district: district || null,
-        ward: ward || null,
-        street: street.trim() || null,
-        nida_number: nida.trim().replace(/-/g, "") || null,
-        country_of_residence: countryResidence || null,
-        city_of_residence: cityResidence.trim() || null,
-        profile_complete: true,
-      };
+      // Build only columns that exist in the DB schema
+      // marital_status CHECK: 'single','married','divorced','widowed' (lowercase)
+      // account_status CHECK: 'active','suspended','pending' (lowercase)
+      // nida_number is UNIQUE — only include if non-empty
+      const updates: Record<string, unknown> = {};
 
-      // Remove nulls to avoid overwriting with null
-      const cleaned = Object.fromEntries(Object.entries(updates).filter(([, v]) => v !== null && v !== undefined && v !== ""));
+      if (firstName.trim()) updates.first_name = firstName.trim().toUpperCase();
+      if (middleName.trim()) updates.middle_name = middleName.trim().toUpperCase();
+      else updates.middle_name = null;
+      if (lastName.trim()) updates.last_name = lastName.trim().toUpperCase();
+      if (phone) updates.phone = phone;
+      if (gender) updates.gender = gender;
+      if (gender) updates.sex = gender; // keep sex in sync
+      if (dob) updates.date_of_birth = dob;
+      if (marital) updates.marital_status = marital.toLowerCase(); // DB uses lowercase
+      if (occupation.trim()) updates.occupation = occupation.trim();
+      if (region) updates.region = region;
+      if (district) updates.district = district;
+      if (ward) updates.ward = ward;
+      if (street.trim()) updates.street = street.trim();
+      if (countryResidence) updates.country_of_residence = countryResidence;
+      if (cityResidence.trim()) updates.city_of_residence = cityResidence.trim();
+      // NIDA: only include if non-empty (UNIQUE column — can't send "")
+      const cleanNida = nida.trim().replace(/-/g, "");
+      if (cleanNida) updates.nida_number = cleanNida;
 
-      const { error } = await supabase.from("users").update(cleaned).eq("id", user.id);
-      if (error) throw error;
+      if (Object.keys(updates).length === 0) {
+        showToast(L("Hakuna mabadiliko ya kuhifadhi", "No changes to save"), "info");
+        return;
+      }
+
+      const { error } = await supabase.from("users").update(updates).eq("id", user.id);
+
+      if (error) {
+        // Surface the actual Supabase error detail to help diagnose
+        const detail = (error as { details?: string; message?: string }).details || error.message;
+        throw new Error(detail);
+      }
 
       showToast(L("Wasifu umehifadhiwa!", "Profile saved!"), "success");
-      onSaved({ ...user, ...cleaned } as Partial<UserProfile>);
+      onSaved({ ...user, ...updates } as Partial<UserProfile>);
       onClose();
     } catch (err) {
       showToast((err as Error).message || L("Hitilafu imetokea", "An error occurred"), "error");
@@ -271,10 +285,10 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <div>
                       <Label>{L("Hali ya Ndoa", "Marital Status")}</Label>
                       <Select value={marital} onChange={(e) => setMarital(e.target.value)} placeholder={L("Chagua", "Select")}>
-                        <option value="SINGLE">{L("Sijaoana", "Single")}</option>
-                        <option value="MARRIED">{L("Nimeoa/Olewa", "Married")}</option>
-                        <option value="DIVORCED">{L("Talaka", "Divorced")}</option>
-                        <option value="WIDOWED">{L("Mjane", "Widowed")}</option>
+                        <option value="single">{L("Sijaoana", "Single")}</option>
+                        <option value="married">{L("Nimeoa/Olewa", "Married")}</option>
+                        <option value="divorced">{L("Talaka", "Divorced")}</option>
+                        <option value="widowed">{L("Mjane", "Widowed")}</option>
                       </Select>
                     </div>
                     <div>
