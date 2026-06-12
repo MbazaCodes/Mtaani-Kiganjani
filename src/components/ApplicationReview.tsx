@@ -549,6 +549,27 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
 
   const handleIssue = async () => {
     if (!selected || !user) return;
+
+    // ── Payment gate: ensure application is paid before issuing ───────────
+    const hasPaid = !!(
+      selected.paid_at ||
+      (selected.form_data as Record<string, unknown>)?.payment_data ||
+      (selected.payment_data as Record<string, unknown>)?.transaction_id
+    );
+    const fee = (selected.services as { fee?: number })?.fee ?? 0;
+    const formFee = (selected.form_data as Record<string, unknown>)?.service_fee;
+    const effectiveFee = fee > 0 ? fee : typeof formFee === "number" ? formFee : 0;
+
+    if (effectiveFee > 0 && !hasPaid) {
+      showToast(
+        L(
+          "Hakuna malipo yaliyopokelewa. Mwambie mwombaji alipe kwanza kabla ya kutoa hati.",
+          "No payment received. Ask the applicant to pay first before issuing the document.",
+        ),
+        "error",
+      );
+      return;
+    }
     const ok = await updateApp(selected.id, {
       status: "issued",
       issued_at: new Date().toISOString(),
@@ -1381,23 +1402,57 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                 </div>
               )}
 
-              {/* If approved/issued — show issue button */}
-              {selected.status === "approved" && (
-                <div className="border-t border-stone-200 bg-stone-50 px-4 py-3 sm:px-6 sm:py-4 shrink-0">
-                  <button
-                    onClick={handleIssue}
-                    disabled={processing}
-                    className="w-full px-3 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shadow-lg"
-                  >
-                    {processing ? (
-                      <Loader2 size={15} className="animate-spin" />
-                    ) : (
-                      <Award size={15} />
+              {/* If approved — show issue button with payment status */}
+              {selected.status === "approved" && (() => {
+                const hasPaidCheck = !!(
+                  selected.paid_at ||
+                  (selected.form_data as Record<string, unknown>)?.payment_data ||
+                  (selected.payment_data as Record<string, unknown>)?.transaction_id
+                );
+                const svcFee = (selected.services as { fee?: number })?.fee ?? 0;
+                const frmFee = (selected.form_data as Record<string, unknown>)?.service_fee;
+                const eFee = svcFee > 0 ? svcFee : typeof frmFee === "number" ? frmFee : 0;
+                const needsPayment = eFee > 0 && !hasPaidCheck;
+                return (
+                  <div className="border-t border-stone-200 bg-stone-50 px-4 py-3 sm:px-6 sm:py-4 shrink-0 space-y-2">
+                    {needsPayment && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                        <span>🔒</span>
+                        <p className="text-xs font-bold text-amber-700">
+                          {L(
+                            "Malipo bado hayajapokelewa. Hati haitatolewa hadi mwombaji alipe.",
+                            "Payment not received. Document cannot be issued until applicant pays.",
+                          )}
+                        </p>
+                      </div>
                     )}
-                    {L("Toa Hati Rasmi", "Issue Official Document")}
-                  </button>
-                </div>
-              )}
+                    {hasPaidCheck && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
+                        <span>✅</span>
+                        <p className="text-xs font-bold text-emerald-700">
+                          {L("Malipo yamepokelewa — Unaweza kutoa hati.", "Payment confirmed — ready to issue.")}
+                        </p>
+                      </div>
+                    )}
+                    <button
+                      onClick={handleIssue}
+                      disabled={processing}
+                      className="w-full px-3 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shadow-lg"
+                    >
+                      {processing ? (
+                        <Loader2 size={15} className="animate-spin" />
+                      ) : needsPayment ? (
+                        <span>🔒</span>
+                      ) : (
+                        <Award size={15} />
+                      )}
+                      {needsPayment
+                        ? L("Inahitaji Malipo Kwanza", "Payment Required First")
+                        : L("Toa Hati Rasmi", "Issue Official Document")}
+                    </button>
+                  </div>
+                );
+              })()}
             </motion.div>
           </>
         )}

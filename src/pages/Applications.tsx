@@ -618,11 +618,25 @@ export function Applications({
                           ` · ${formatCurrency(getPaymentAmount(app), displayCurrency)}`}
                       </button>
                     ) : app.status === "issued" ? (
-                      <div className="flex items-center justify-end gap-2 flex-wrap">
-                        <CertificateDownloadLink app={app} />
-                        <ReceiptDownloadLink app={app} />
-                        <ShareCertificateButton app={app} lang={lang} />
-                      </div>
+                      (() => {
+                        const isPaid = !!(app.paid_at || (app.form_data as Record<string,unknown>)?.payment_data || getPaymentAmount(app) === 0);
+                        return isPaid ? (
+                          <div className="flex items-center justify-end gap-2 flex-wrap">
+                            <CertificateDownloadLink app={app} />
+                            <ReceiptDownloadLink app={app} />
+                            <ShareCertificateButton app={app} lang={lang} />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onPay(app); }}
+                            className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all"
+                          >
+                            <span>🔒</span>
+                            {lang === "sw" ? "Lipia Kufungua" : "Pay to Unlock"}
+                            {getPaymentAmount(app) > 0 && ` · ${formatCurrency(getPaymentAmount(app), displayCurrency)}`}
+                          </button>
+                        );
+                      })()
                     ) : (
                       <button
                         className="text-stone-400 text-sm font-bold cursor-not-allowed"
@@ -1025,15 +1039,27 @@ export function Applications({
                         : "Pay Now"}
                   </button>
                 )}
-                {selectedApp.status === "issued" && (
-                  <div className="flex flex-col gap-2 flex-1">
-                    <CertificateDownloadLink app={selectedApp} />
-                    <div className="flex gap-2">
-                      <ReceiptDownloadLink app={selectedApp} />
-                      <ShareCertificateButton app={selectedApp} lang={lang} />
+                {selectedApp.status === "issued" && (() => {
+                  const isPaidDetail = !!(selectedApp.paid_at || (selectedApp.form_data as Record<string,unknown>)?.payment_data || getPaymentAmount(selectedApp) === 0);
+                  return isPaidDetail ? (
+                    <div className="flex flex-col gap-2 flex-1">
+                      <CertificateDownloadLink app={selectedApp} />
+                      <div className="flex gap-2">
+                        <ReceiptDownloadLink app={selectedApp} />
+                        <ShareCertificateButton app={selectedApp} lang={lang} />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <button
+                      onClick={() => { onPay(selectedApp); setSelectedApp(null); }}
+                      className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                    >
+                      <span>🔒</span>
+                      {lang === "sw" ? "Lipia ili Kufungua Hati" : "Pay to Unlock Document"}
+                      {getPaymentAmount(selectedApp) > 0 && ` · ${formatCurrency(getPaymentAmount(selectedApp), displayCurrency)}`}
+                    </button>
+                  );
+                })()}
                 <button
                   onClick={() => setSelectedApp(null)}
                   className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-bold text-sm transition-all"
