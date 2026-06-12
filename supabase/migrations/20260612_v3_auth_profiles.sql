@@ -694,3 +694,47 @@ GRANT INSERT, UPDATE, DELETE ON public.services TO authenticated;
 -- ── DONE ──────────────────────────────────────────────────────────────────────
 -- Run this in Supabase SQL Editor (Project: xuhilnejpqvbfukyhefi)
 -- Safe to run multiple times — all DDL uses IF NOT EXISTS / CREATE OR REPLACE
+
+-- ── UPDATE: get_email_by_phone — try all number formats ──────────────────────
+CREATE OR REPLACE FUNCTION public.get_email_by_phone(p_phone text)
+RETURNS TABLE(email text) LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_digits text;
+  v_e164   text;
+  v_local  text;
+  v_short  text;
+BEGIN
+  -- Strip non-digits
+  v_digits := REGEXP_REPLACE(p_phone, '[^0-9]', '', 'g');
+
+  -- Build E.164: +255XXXXXXXXX
+  v_e164 := CASE
+    WHEN LEFT(v_digits, 3) = '255' THEN '+' || v_digits
+    WHEN LEFT(v_digits, 1) = '0'   THEN '+255' || SUBSTRING(v_digits, 2)
+    WHEN LENGTH(v_digits) = 9      THEN '+255' || v_digits
+    ELSE p_phone
+  END;
+
+  -- Local: 0XXXXXXXXX
+  v_local := CASE
+    WHEN LEFT(v_digits, 3) = '255' THEN '0' || SUBSTRING(v_digits, 4)
+    WHEN LEFT(v_digits, 1) = '0'   THEN v_digits
+    ELSE '0' || v_digits
+  END;
+
+  -- Short: 9-digit no prefix
+  v_short := CASE
+    WHEN LEFT(v_digits, 3) = '255' THEN SUBSTRING(v_digits, 4)
+    WHEN LEFT(v_digits, 1) = '0'   THEN SUBSTRING(v_digits, 2)
+    ELSE v_digits
+  END;
+
+  RETURN QUERY
+    SELECT u.email FROM public.users u
+    WHERE u.phone IN (v_e164, v_local, v_digits, '+' || v_digits, v_short)
+       OR u.phone LIKE '%' || v_short
+    LIMIT 1;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_email_by_phone(text) TO anon, authenticated;

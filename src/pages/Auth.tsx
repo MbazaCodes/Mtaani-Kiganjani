@@ -249,27 +249,57 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
     try {
       let email = loginId.trim();
 
-      // If user typed a phone number, we need to look up the email first
       if (loginMethod === "phone") {
-        const phone = toE164(loginId);
-        // Query users table to find the email linked to this phone
-        const { data: userRow, error: lookupErr } = await supabase
-          .from("users")
-          .select("email")
-          .eq("phone", phone)
-          .maybeSingle();
-        if (lookupErr || !userRow?.email) {
-          throw new Error(L("Namba ya simu haipatikani. Jaribu barua pepe.", "Phone number not found. Try your email."));
+        // Normalise the phone into multiple candidate formats
+        const raw = loginId.replace(/\s/g, "").trim();
+        const digits = raw.replace(/\D/g, "");
+
+        // Build all possible stored formats to match against
+        const candidates: string[] = [];
+        if (raw.startsWith("+")) candidates.push(raw);                          // +255685223344
+        if (digits.startsWith("255")) candidates.push(`+${digits}`);            // +255685223344
+        if (digits.startsWith("0")) candidates.push(`+255${digits.slice(1)}`);  // 0685... → +255685...
+        if (digits.length === 9) candidates.push(`+255${digits}`);              // 685223344 → +255685223344
+        // Also try without + prefix
+        candidates.push(digits.startsWith("255") ? digits : `255${digits.startsWith("0") ? digits.slice(1) : digits}`);
+        // Local format
+        if (digits.startsWith("255")) candidates.push(`0${digits.slice(3)}`);   // +255685... → 0685...
+
+        const uniqueCandidates = [...new Set(candidates)].filter(Boolean);
+
+        // Try Supabase RPC first (uses SQL OR across all formats)
+        let found: string | null = null;
+        try {
+          const { data: rpcData } = await supabase
+            .rpc("get_email_by_phone", { p_phone: uniqueCandidates[0] });
+          if (rpcData?.[0]?.email) found = rpcData[0].email;
+        } catch {}
+
+        // Fallback: query with .in() across all candidate formats
+        if (!found) {
+          const { data: rows } = await supabase
+            .from("users")
+            .select("email, phone")
+            .in("phone", uniqueCandidates)
+            .limit(1);
+          if (rows?.[0]?.email) found = rows[0].email;
         }
-        email = userRow.email;
+
+        if (!found) {
+          throw new Error(L(
+            "Namba ya simu haipatikani. Hakikisha umeingiza namba sahihi au jaribu barua pepe.",
+            "Phone number not found. Make sure you entered the correct number or try signing in with email.",
+          ));
+        }
+        email = found;
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({ email, password: loginPwd });
       if (error) {
         if (error.message.includes("Invalid login credentials"))
-          throw new Error(L("Nywila au kitambulisho si sahihi", "Incorrect credentials"));
+          throw new Error(L("Nywila si sahihi.", "Incorrect password."));
         if (error.message.includes("Email not confirmed"))
-          throw new Error(L("Barua pepe bado haijathibitishwa", "Email not confirmed. Check inbox."));
+          throw new Error(L("Barua pepe bado haijathibitishwa. Angalia inbox yako.", "Email not confirmed. Check your inbox."));
         throw error;
       }
       if (data.user) {
