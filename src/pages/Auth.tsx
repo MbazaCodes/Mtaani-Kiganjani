@@ -1,5 +1,5 @@
 /**
- * Auth.tsx — Sign-Up / Login modal  (V3.2)
+ * Auth.tsx — Sign-Up / Login modal  (V3.3 — isDiaspora fix)
  *
  * LOGIN:    email OR mobile number + password  (toggle between the two)
  * CITIZEN:  First/Middle/Last + Phone + Email + Password  (single screen)
