@@ -126,6 +126,14 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
   const [errs, setErrs] = useState<Record<string, string>>({});
   const clearErr = (k: string) => setErrs((p) => { const n = { ...p }; delete n[k]; return n; });
 
+  // 429 rate-limit cooldown (seconds remaining)
+  const [rateCooldown, setRateCooldown] = useState(0);
+  React.useEffect(() => {
+    if (rateCooldown <= 0) return;
+    const t = setTimeout(() => setRateCooldown((v) => v - 1), 1000);
+    return () => clearTimeout(t);
+  }, [rateCooldown]);
+
   // ── Login ─────────────────────────────────────────────────────────────────
   // loginId = email address or mobile number (auto-detected)
   const [loginId, setLoginId] = useState("");
@@ -284,31 +292,69 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
   // ── Shared signup error normaliser ────────────────────────────────────────
   const normaliseSignupError = (err: unknown): string => {
     const msg = (err as { message?: string })?.message ?? "";
-    if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("User already registered"))
+    const status = (err as { status?: number })?.status;
+    if (status === 429 || msg.includes("rate limit") || msg.includes("too many") || msg.includes("429")) {
+      setRateCooldown(60);
+      return L(
+        "Imefikiwa kikomo cha majaribio (429). Subiri sekunde 60 kisha jaribu tena.",
+        "Rate limited (429). Please wait 60 seconds and try again."
+      );
+    }
+    if (msg === "EMAIL_EXISTS" || msg.includes("already registered") || msg.includes("already been registered"))
       return L("Barua pepe hii tayari imesajiliwa. Tafadhali ingia.", "This email is already registered. Please sign in.");
     if (msg.includes("Password should be") || msg.includes("password"))
       return L("Nywila lazima iwe na herufi 6 au zaidi.", "Password must be at least 6 characters.");
     if (msg.includes("invalid") && msg.includes("email"))
       return L("Barua pepe si sahihi.", "Invalid email address.");
-    if (msg.includes("rate limit") || msg.includes("too many") || msg.includes("429") ||
-        (err as { status?: number })?.status === 429)
-      return L(
-        "Imefikiwa kikomo cha majaribio. Subiri dakika 1 kisha jaribu tena.",
-        "Rate limit reached. Please wait 1 minute then try again."
-      );
     if (msg.includes("signup") || msg.includes("disabled"))
       return L("Usajili umezimwa kwa sasa. Wasiliana na msaada.", "Signup is currently disabled. Contact support.");
     return msg || L("Hitilafu imetokea. Jaribu tena.", "An error occurred. Please try again.");
   };
 
-  // Strip undefined/null keys from metadata before sending to Supabase
+  // Strip undefined/null/empty from metadata
   const cleanMeta = (obj: Record<string, unknown>) =>
     Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== ""));
+
+  // ── Sign up via Edge Function (bypasses IP rate limit) ────────────────────
+  const signUpViaEdge = async (email: string, password: string, meta: Record<string, unknown>) => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    try {
+      const res = await fetch(`${supabaseUrl}/functions/v1/register-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "") as string,
+        },
+        body: JSON.stringify({ email, password, meta }),
+      });
+      const json = await res.json();
+      if (res.status === 429) throw Object.assign(new Error("429"), { status: 429 });
+      if (!res.ok) throw new Error(json.error ?? "Signup failed");
+      // Edge fn created user — sign them in immediately for session
+      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInErr) throw signInErr;
+      return signInData.user;
+    } catch (edgeErr: unknown) {
+      const em = (edgeErr as { message?: string })?.message ?? "";
+      // Don't fall back on 429 — just propagate it
+      if (em.includes("429") || (edgeErr as { status?: number })?.status === 429) throw edgeErr;
+      // Edge function not deployed — fall back to direct signup
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: meta, emailRedirectTo: `${window.location.origin}/confirm` },
+      });
+      if (error) throw error;
+      if (data.user?.identities?.length === 0) throw new Error("EMAIL_EXISTS");
+      return data.user;
+    }
+  };
 
   // ── Citizen signup ────────────────────────────────────────────────────────
   const handleCitizenSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateCitizen()) return;
+    if (rateCooldown > 0) { showToast(L(`Subiri sekunde ${rateCooldown}.`, `Wait ${rateCooldown}s.`), "error"); return; }
     setLoading(true);
     try {
       const meta = cleanMeta({
@@ -316,85 +362,39 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
         middle_name: cMiddle.trim().toUpperCase() || undefined,
         last_name: cLast.trim().toUpperCase(),
         phone: toE164(cPhone),
-        is_diaspora: false,
-        role: "citizen",
-        verification_level: "PHONE_VERIFIED",
-        account_status: "ACTIVE",
-        is_verified: true,
-        profile_complete: false,
+        is_diaspora: false, role: "citizen", verification_level: "PHONE_VERIFIED",
+        account_status: "ACTIVE", is_verified: true, profile_complete: false,
       });
-
-      const { data, error } = await supabase.auth.signUp({
-        email: cEmail.trim().toLowerCase(),
-        password: cPwd,
-        options: {
-          data: meta,
-          emailRedirectTo: `${window.location.origin}/confirm`,
-        },
-      });
-
-      if (error) throw new Error(normaliseSignupError(error));
-      // Supabase returns a user even when email confirmation is required —
-      // identities array is empty if the email already exists (no true error thrown)
-      if (data.user && data.user.identities && data.user.identities.length === 0)
-        throw new Error(L("Barua pepe hii tayari imesajiliwa. Tafadhali ingia.", "This email is already registered. Please sign in."));
-      if (!data.user) throw new Error(L("Usajili umeshindwa. Jaribu tena.", "Signup failed. Please try again."));
-
-      // Best-effort profile row — never block success on this
-      supabase.from("users").upsert(
-        { id: data.user.id, email: cEmail.trim().toLowerCase(), ...meta },
-        { onConflict: "id" }
-      ).then(() => fetchUserProfile(data.user!.id).catch(() => {}));
-
+      const user = await signUpViaEdge(cEmail.trim().toLowerCase(), cPwd, meta);
+      if (!user) throw new Error(L("Usajili umeshindwa.", "Signup failed."));
+      fetchUserProfile(user.id).catch(() => {});
       showToast(L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."), "success");
       onClose();
-    } catch (err) {
-      showToast(normaliseSignupError(err), "error");
-    } finally { setLoading(false); }
+    } catch (err) { showToast(normaliseSignupError(err), "error"); }
+    finally { setLoading(false); }
   };
 
   // ── Diaspora signup ───────────────────────────────────────────────────────
   const handleDiasporaSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateDiaspora()) return;
+    if (rateCooldown > 0) { showToast(L(`Subiri sekunde ${rateCooldown}.`, `Wait ${rateCooldown}s.`), "error"); return; }
     setLoading(true);
     try {
       const meta = cleanMeta({
         first_name: dFirst.trim().toUpperCase(),
         middle_name: dMiddle.trim().toUpperCase() || undefined,
         last_name: dLast.trim().toUpperCase(),
-        is_diaspora: true,
-        role: "citizen",
-        verification_level: "EMAIL_VERIFIED",
-        account_status: "ACTIVE",
-        is_verified: true,
-        profile_complete: false,
+        is_diaspora: true, role: "citizen", verification_level: "EMAIL_VERIFIED",
+        account_status: "ACTIVE", is_verified: true, profile_complete: false,
       });
-
-      const { data, error } = await supabase.auth.signUp({
-        email: dEmail.trim().toLowerCase(),
-        password: dPwd,
-        options: {
-          data: meta,
-          emailRedirectTo: `${window.location.origin}/confirm`,
-        },
-      });
-
-      if (error) throw new Error(normaliseSignupError(error));
-      if (data.user && data.user.identities && data.user.identities.length === 0)
-        throw new Error(L("Barua pepe hii tayari imesajiliwa. Tafadhali ingia.", "This email is already registered. Please sign in."));
-      if (!data.user) throw new Error(L("Usajili umeshindwa. Jaribu tena.", "Signup failed. Please try again."));
-
-      supabase.from("users").upsert(
-        { id: data.user.id, email: dEmail.trim().toLowerCase(), ...meta },
-        { onConflict: "id" }
-      ).then(() => fetchUserProfile(data.user!.id).catch(() => {}));
-
+      const user = await signUpViaEdge(dEmail.trim().toLowerCase(), dPwd, meta);
+      if (!user) throw new Error(L("Usajili umeshindwa.", "Signup failed."));
+      fetchUserProfile(user.id).catch(() => {});
       showToast(L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."), "success");
       onClose();
-    } catch (err) {
-      showToast(normaliseSignupError(err), "error");
-    } finally { setLoading(false); }
+    } catch (err) { showToast(normaliseSignupError(err), "error"); }
+    finally { setLoading(false); }
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -703,8 +703,18 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
 
                   <button type="submit" disabled={loading}
                     className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100">
-                    {loading ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={15} />{L("Tengeneza Akaunti", "Create Account")}</>}
+                    {rateCooldown > 0
+                      ? <><span className="animate-pulse">⏳</span> {rateCooldown}s</>
+                      : loading
+                        ? <Loader2 size={16} className="animate-spin" />
+                        : <><CheckCircle2 size={15} />{L("Tengeneza Akaunti", "Create Account")}</>}
                   </button>
+
+                  {rateCooldown > 0 && (
+                    <p className="text-center text-xs text-amber-600 font-medium animate-pulse">
+                      {L(`Subiri sekunde ${rateCooldown} kisha jaribu tena (kikomo cha majaribio)`, `Wait ${rateCooldown}s then retry (rate limited)`)}
+                    </p>
+                  )}
 
                   <p className="text-center text-xs text-stone-500">
                     {L("Una akaunti?", "Have an account?")}{" "}
@@ -831,8 +841,18 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
 
                   <button type="submit" disabled={loading}
                     className="w-full h-12 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
-                    {loading ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={15} />{L("Tengeneza Akaunti", "Create Account")}</>}
+                    {rateCooldown > 0
+                      ? <><span className="animate-pulse">⏳</span> {rateCooldown}s</>
+                      : loading
+                        ? <Loader2 size={16} className="animate-spin" />
+                        : <><CheckCircle2 size={15} />{L("Tengeneza Akaunti", "Create Account")}</>}
                   </button>
+
+                  {rateCooldown > 0 && (
+                    <p className="text-center text-xs text-amber-600 font-medium animate-pulse">
+                      {L(`Subiri sekunde ${rateCooldown} kisha jaribu tena`, `Wait ${rateCooldown}s then retry`)}
+                    </p>
+                  )}
 
                   <p className="text-center text-xs text-stone-500">
                     {L("Una akaunti?", "Have an account?")}{" "}
