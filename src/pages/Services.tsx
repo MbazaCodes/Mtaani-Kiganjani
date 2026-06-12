@@ -167,8 +167,8 @@ export function Services({ onSelectService }: ServicesProps) {
             </p>
             <p className="text-xs mt-0.5 text-blue-700">
               {L(
-                "Maombi yako yatapitiwa na afisa ndani ya siku 2–5. Pakia NIDA au tembelea ofisi kupata usindikaji wa papo hapo.",
-                "Applications go to manual staff review in 2–5 days. Upload NIDA or visit office for instant processing.",
+                "Maombi yako yatapitiwa na afisa ndani ya siku 1–5 za kazi. Pakia NIDA au tembelea ofisi kupata usindikaji wa papo hapo.",
+                "Applications go to manual staff review in 1–5 working days. Upload NIDA or visit office for instant processing.",
               )}
             </p>
           </div>
@@ -220,7 +220,7 @@ export function Services({ onSelectService }: ServicesProps) {
                         </span>
                       ) : (
                         <span className="flex items-center gap-0.5 text-[9px] font-bold text-stone-400">
-                          <Clock size={8} /> {L("Siku 2–5", "2–5 days")}
+                          <Clock size={8} /> {L("Siku 1–5 za kazi", "1–5 working days")}
                         </span>
                       )}
                     </div>

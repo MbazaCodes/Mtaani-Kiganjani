@@ -23,8 +23,8 @@ const FAQS: FaqItem[] = [
   {
     q: { sw: "Muda gani wa kupata jibu?", en: "How long does approval take?" },
     a: {
-      sw: "Muda wa kawaida ni siku 1-3 za kazi. Huduma za dharura zinaweza kushughulikiwa ndani ya saa 24. Unaweza kufuatilia hali ya maombi yako kwenye 'Maombi Yangu'.",
-      en: "Typical processing time is 1-3 business days. Urgent services may be processed within 24 hours. You can track your application status in 'My Applications'.",
+      sw: "Muda wa kawaida ni siku 1-5 za kazi. Huduma za dharura zinaweza kushughulikiwa ndani ya saa 24. Unaweza kufuatilia hali ya maombi yako kwenye 'Maombi Yangu'.",
+      en: "Typical processing time is 1-5 working days. Urgent services may be processed within 24 hours. You can track your application status in 'My Applications'.",
     },
     icon: <Clock size={16} className="text-blue-600" />,
   },

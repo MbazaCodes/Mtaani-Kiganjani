@@ -75,10 +75,10 @@ const BENEFITS: Record<
     { en: "Submit all applications", sw: "Wasilisha maombi yote" },
     { en: "Track application status", sw: "Fuatilia hali ya maombi" },
     { en: "Chat with support", sw: "Zungumza na msaada" },
-    { en: "2–5 day processing time", sw: "Muda wa usindikaji: siku 2–5" },
+    { en: "1–5 working day processing", sw: "Muda wa usindikaji: siku 1–5 za kazi" },
   ],
   standard: [
-    { en: "Faster processing (1–3 days)", sw: "Kasi zaidi (siku 1–3)" },
+    { en: "Faster processing (1–5 working days)", sw: "Kasi zaidi (siku 1–5 za kazi)" },
     { en: "Reduced info requests", sw: "Maombi machache ya nyongeza" },
     { en: "Higher trust score", sw: "Alama ya juu ya uaminifu" },
   ],

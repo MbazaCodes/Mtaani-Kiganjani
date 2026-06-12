@@ -596,8 +596,8 @@ export const KibariShereheForm: React.FC<FormProps> = ({
                 "The Local Government office will review your application",
               ),
               L(
-                "Utapigiwa simu ndani ya siku 2–3 za kazi",
-                "You will be called within 2–3 working days",
+                "Utapigiwa simu ndani ya siku 1–5 za kazi",
+                "You will be called within 1–5 working days",
               ),
               L(
                 `Lipa ada ya TSh ${SERVICE_FEE.toLocaleString()} unapokuja kuchukua kibari`,

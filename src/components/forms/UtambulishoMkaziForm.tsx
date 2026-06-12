@@ -872,8 +872,8 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
                 "The Local Government office will review your application",
               ),
               L(
-                "Utapigiwa simu ndani ya siku 3–5 za kazi",
-                "You will be called within 3–5 working days",
+                "Utapigiwa simu ndani ya siku 1–5 za kazi",
+                "You will be called within 1–5 working days",
               ),
               L(
                 "Hati itatolewa baada ya kulipa ada ya TSh 5,000",

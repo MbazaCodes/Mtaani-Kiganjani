@@ -2098,8 +2098,8 @@ export function Agreement() {
                       {L("Tuliyopokea ombi lako tarehe", "We received your application on")}{" "}
                       {new Date(reg.created_at).toLocaleDateString()}.
                       {L(
-                        " Wafanyakazi watakagua ndani ya siku 1–3 za kazi.",
-                        " Staff will review within 1–3 working days.",
+                        " Wafanyakazi watakagua ndani ya siku 1–5 za kazi.",
+                        " Staff will review within 1–5 working days.",
                       )}
                     </p>
                   </div>

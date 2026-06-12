@@ -604,8 +604,8 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                 "The Local Government office will review your application",
               ),
               L(
-                `Barua ${institutions.length > 1 ? institutions.length + " " : ""}itatolewa ndani ya siku 1–3 za kazi`,
-                `Letter${institutions.length > 1 ? "s" : ""} will be issued within 1–3 working days`,
+                `Barua ${institutions.length > 1 ? institutions.length + " " : ""}itatolewa ndani ya siku 1–5 za kazi`,
+                `Letter${institutions.length > 1 ? "s" : ""} will be issued within 1–5 working days`,
               ),
               L(
                 `Lipa ada ya ${fmtFee(totalFee)} unapokuja kuchukua barua`,
@@ -1141,7 +1141,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
             <Field name="urgency" label={L("Kiwango cha Haraka", "Urgency Level")}>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: "NORMAL", sw: "Kawaida (Siku 1–3)", en: "Normal (1–3 days)" },
+                  { value: "NORMAL", sw: "Kawaida (Siku 1–5 za kazi)", en: "Normal (1–5 working days)" },
                   { value: "URGENT", sw: "Haraka (Siku moja)", en: "Urgent (Same day)" },
                 ].map((opt) => (
                   <button

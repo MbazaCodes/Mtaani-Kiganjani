@@ -1,8 +1,8 @@
 /**
  * verification.ts — E-MTAA V3.0 Verification Tier System
  *
- * Tier 1: PHONE_VERIFIED / EMAIL_VERIFIED  → Basic access, manual review (2-5 days)
- * Tier 2: PROFILE_COMPLETED               → Standard access, faster review (1-3 days)
+ * Tier 1: PHONE_VERIFIED / EMAIL_VERIFIED  → Basic access, manual review (1-5 working days)
+ * Tier 2: PROFILE_COMPLETED               → Standard access, faster review (1-5 working days)
  * Tier 3: NIDA_VERIFIED                   → Full access, instant auto-processing
  */
 
@@ -39,7 +39,7 @@ export const TIER_CONFIG: Record<VerificationTier, TierInfo> = {
     color: "red",
     badgeBg: "bg-red-100", badgeText: "text-red-700", badgeBorder: "border-red-300",
     dotColor: "bg-red-500",
-    processingDays: "5-7", autoApprove: false, staffChecklist: true,
+    processingDays: "1-5 working days", autoApprove: false, staffChecklist: true,
     premiumServices: false, businessServices: false,
   },
   PHONE_VERIFIED: {
@@ -48,7 +48,7 @@ export const TIER_CONFIG: Record<VerificationTier, TierInfo> = {
     color: "yellow",
     badgeBg: "bg-amber-100", badgeText: "text-amber-700", badgeBorder: "border-amber-300",
     dotColor: "bg-amber-400",
-    processingDays: "2-5", autoApprove: false, staffChecklist: true,
+    processingDays: "1-5 working days", autoApprove: false, staffChecklist: true,
     premiumServices: false, businessServices: false,
   },
   EMAIL_VERIFIED: {
@@ -57,7 +57,7 @@ export const TIER_CONFIG: Record<VerificationTier, TierInfo> = {
     color: "yellow",
     badgeBg: "bg-amber-100", badgeText: "text-amber-700", badgeBorder: "border-amber-300",
     dotColor: "bg-amber-400",
-    processingDays: "2-5", autoApprove: false, staffChecklist: true,
+    processingDays: "1-5 working days", autoApprove: false, staffChecklist: true,
     premiumServices: false, businessServices: false,
   },
   PROFILE_COMPLETED: {
@@ -66,7 +66,7 @@ export const TIER_CONFIG: Record<VerificationTier, TierInfo> = {
     color: "orange",
     badgeBg: "bg-orange-100", badgeText: "text-orange-700", badgeBorder: "border-orange-300",
     dotColor: "bg-orange-500",
-    processingDays: "1-3", autoApprove: false, staffChecklist: false,
+    processingDays: "1-5 working days", autoApprove: false, staffChecklist: false,
     premiumServices: false, businessServices: false,
   },
   PENDING_OFFICE_VISIT: {
@@ -75,7 +75,7 @@ export const TIER_CONFIG: Record<VerificationTier, TierInfo> = {
     color: "gray",
     badgeBg: "bg-stone-100", badgeText: "text-stone-600", badgeBorder: "border-stone-300",
     dotColor: "bg-stone-400",
-    processingDays: "1-2", autoApprove: false, staffChecklist: false,
+    processingDays: "1-5 working days", autoApprove: false, staffChecklist: false,
     premiumServices: false, businessServices: false,
   },
   NIDA_VERIFIED: {
@@ -138,7 +138,7 @@ export type ServiceAccessLevel = "full" | "limited";
 // All services are available to all verified users.
 // Tier only determines processing speed:
 //   NIDA_VERIFIED  → instant auto-approval
-//   others         → manual review (2-5 days)
+//   others         → manual review (1-5 working days)
 export function getServiceAccess(
   _serviceName: string,
   tier: VerificationTier,
