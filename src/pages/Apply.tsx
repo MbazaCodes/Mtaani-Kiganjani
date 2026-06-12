@@ -19,7 +19,13 @@ interface ApplyProps {
 }
 
 export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) {
-  const { user } = useAuth();
+  const { user, fetchUserProfile } = useAuth();
+
+  // ── Refresh user profile when Apply page opens to ensure latest data ──────
+  React.useEffect(() => {
+    if (user?.id) fetchUserProfile(user.id).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
   const { lang } = useLanguage();
   const { setView } = useRouterView();
   const displayCurrency = getCurrencyForUser(user?.is_diaspora, user?.country_of_residence);
