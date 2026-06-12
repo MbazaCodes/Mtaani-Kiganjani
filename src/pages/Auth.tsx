@@ -290,8 +290,12 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
       return L("Nywila lazima iwe na herufi 6 au zaidi.", "Password must be at least 6 characters.");
     if (msg.includes("invalid") && msg.includes("email"))
       return L("Barua pepe si sahihi.", "Invalid email address.");
-    if (msg.includes("rate limit") || msg.includes("too many"))
-      return L("Majaribio mengi sana. Subiri dakika moja.", "Too many attempts. Wait a moment.");
+    if (msg.includes("rate limit") || msg.includes("too many") || msg.includes("429") ||
+        (err as { status?: number })?.status === 429)
+      return L(
+        "Imefikiwa kikomo cha majaribio. Subiri dakika 1 kisha jaribu tena.",
+        "Rate limit reached. Please wait 1 minute then try again."
+      );
     if (msg.includes("signup") || msg.includes("disabled"))
       return L("Usajili umezimwa kwa sasa. Wasiliana na msaada.", "Signup is currently disabled. Contact support.");
     return msg || L("Hitilafu imetokea. Jaribu tena.", "An error occurred. Please try again.");
