@@ -133,24 +133,18 @@ export function getProfileCompletion(user: Partial<UserProfile> | null | undefin
 }
 
 // ── Service access gating ────────────────────────────────────────────────────
-export type ServiceAccessLevel = "full" | "limited" | "locked";
+export type ServiceAccessLevel = "full" | "limited";
 
-// Services locked until NIDA_VERIFIED
-const PREMIUM_SERVICE_IDS = [
-  "Makubaliano ya Mauzo",
-  "Makubaliano ya Pango",
-  "Malipo na Michango",
-  "Migogoro na Mashauri",
-];
-
+// All services are available to all verified users.
+// Tier only determines processing speed:
+//   NIDA_VERIFIED  → instant auto-approval
+//   others         → manual review (2-5 days)
 export function getServiceAccess(
-  serviceName: string,
+  _serviceName: string,
   tier: VerificationTier,
 ): ServiceAccessLevel {
   if (tier === "NIDA_VERIFIED") return "full";
-  if (PREMIUM_SERVICE_IDS.includes(serviceName)) return "locked";
-  if (tier === "UNVERIFIED") return "locked";
-  return "limited"; // can submit but goes to manual review
+  return "limited"; // available but goes to manual review queue
 }
 
 export function getTierInfo(tier: VerificationTier): TierInfo {
