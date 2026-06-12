@@ -721,7 +721,7 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
                                 placeholder="Juma" icon={<User size={13} />} hasError={!!fieldErrors.firstName} />
                             </Field>
                             <Field>
-                              <Label optional>{L("Jina la Kati", "Middle")}</Label>
+                              <Label>{L("Jina la Kati", "Middle")}</Label>
                               <TxtInput value={c.middleName} onChange={(e) => updC("middleName", e.target.value)} placeholder="Rashidi" />
                             </Field>
                           </div>
@@ -919,7 +919,7 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
                                 placeholder="Amina" icon={<User size={13} />} hasError={!!fieldErrors.firstName} />
                             </Field>
                             <Field>
-                              <Label optional>{L("Jina la Kati", "Middle")}</Label>
+                              <Label>{L("Jina la Kati", "Middle")}</Label>
                               <TxtInput value={d.middleName} onChange={(e) => updD("middleName", e.target.value)} placeholder="Mwajuma" />
                             </Field>
                           </div>
