@@ -373,7 +373,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-bold">
-                    {lang === "sw" ? "Uhakiki wa Mwongozo" : "Manual Verification"}
+                    {lang === "sw" ? "Uhakiki wa Raia" : "Citizen Verification"}
                   </p>
                   <p className="text-[10px] text-white/60 uppercase tracking-widest font-bold">
                     {lang === "sw" ? "Thibitisha Raia" : "Verify Citizen"}
