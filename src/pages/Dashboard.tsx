@@ -38,6 +38,7 @@ import { countUnreadNotifications } from "@/lib/notifications";
 import { supabase } from "@/lib/supabase";
 import { VerificationStatusCard } from "@/components/VerificationStatusCard";
 import { getUserTier, getProfileCompletion } from "@/lib/verification";
+import { CompleteProfileModal } from "@/components/CompleteProfileModal";
 
 interface DashboardProps {
   applications: Application[];
@@ -51,6 +52,8 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const L = (sw: string, en: string) => (lang === "sw" ? sw : en);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [localUser, setLocalUser] = useState(user);
   const [pendingAgreements, setPendingAgreements] = useState(0);
   const [selectedDashApp, setSelectedDashApp] = useState<Application | null>(null);
 
@@ -153,7 +156,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
 
   const hasBizRole = !!(user?.seller_id || user?.landlord_id || user?.broker_id);
 
-  const profileCompletion = getProfileCompletion(user);
+  const profileCompletion = getProfileCompletion(localUser);
 
   return (
     <motion.div
@@ -192,7 +195,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
             </div>
           </div>
           <button
-            onClick={() => setView("profile")}
+            onClick={() => setShowProfileModal(true)}
             className="shrink-0 flex items-center gap-1 px-3 h-8 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-all"
           >
             {L("Kamilisha", "Complete")} →
@@ -383,11 +386,23 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
 
       {/* Verification Status Widget */}
       <VerificationStatusCard
-        user={user}
+        user={localUser}
         lang={lang}
-        onCompleteProfile={() => setView("profile")}
-        onUploadId={() => setView("profile")}
+        onCompleteProfile={() => setShowProfileModal(true)}
+        onUploadId={() => setShowProfileModal(true)}
         onBookVisit={() => setView("profile")}
+      />
+
+      {/* Complete Profile Popup */}
+      <CompleteProfileModal
+        open={showProfileModal}
+        user={localUser}
+        lang={lang}
+        onClose={() => setShowProfileModal(false)}
+        onSaved={(updated) => {
+          setLocalUser((prev) => ({ ...prev, ...updated }));
+          setShowProfileModal(false);
+        }}
       />
 
       {/* New Module Stats */}

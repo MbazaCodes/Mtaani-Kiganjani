@@ -1,9 +1,9 @@
 /**
  * verification.ts — E-MTAA V3.0 Verification Tier System
  *
- * Tier 1: PHONE_VERIFIED / EMAIL_VERIFIED  → Basic access, manual review (1-5 working days)
- * Tier 2: PROFILE_COMPLETED               → Standard access, faster review (1-5 working days)
- * Tier 3: NIDA_VERIFIED                   → Full access, instant auto-processing
+ * Tier 1: PHONE_VERIFIED / EMAIL_VERIFIED  → All services, 1-5 working days processing
+ * Tier 2: PROFILE_COMPLETED               → All services, NO staff checklist needed
+ * Tier 3: NIDA_VERIFIED                   → All services, instant auto-processing
  */
 
 import type { UserProfile } from "@/lib/supabase";
@@ -48,7 +48,7 @@ export const TIER_CONFIG: Record<VerificationTier, TierInfo> = {
     color: "yellow",
     badgeBg: "bg-amber-100", badgeText: "text-amber-700", badgeBorder: "border-amber-300",
     dotColor: "bg-amber-400",
-    processingDays: "1-5 working days", autoApprove: false, staffChecklist: true,
+    processingDays: "1-5 working days", autoApprove: false, staffChecklist: false,
     premiumServices: false, businessServices: false,
   },
   EMAIL_VERIFIED: {
@@ -57,7 +57,7 @@ export const TIER_CONFIG: Record<VerificationTier, TierInfo> = {
     color: "yellow",
     badgeBg: "bg-amber-100", badgeText: "text-amber-700", badgeBorder: "border-amber-300",
     dotColor: "bg-amber-400",
-    processingDays: "1-5 working days", autoApprove: false, staffChecklist: true,
+    processingDays: "1-5 working days", autoApprove: false, staffChecklist: false,
     premiumServices: false, businessServices: false,
   },
   PROFILE_COMPLETED: {

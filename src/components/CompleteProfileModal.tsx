@@ -1,0 +1,412 @@
+/**
+ * CompleteProfileModal — Quick profile completion popup
+ *
+ * Shown when citizen clicks "Complete Profile" from dashboard banner
+ * or VerificationStatusCard. Collects all key fields in one place,
+ * saves directly to users table on submit.
+ */
+import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X, User, Phone, Mail, MapPin, Calendar, Shield,
+  Loader2, CheckCircle2, AlertCircle, ChevronDown, Globe2,
+} from "lucide-react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/context/ToastContext";
+import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
+import type { UserProfile } from "@/lib/supabase";
+
+interface CompleteProfileModalProps {
+  open: boolean;
+  user: Partial<UserProfile> | null;
+  lang: string;
+  onClose: () => void;
+  onSaved: (updated: Partial<UserProfile>) => void;
+}
+
+// ── Mini primitives ────────────────────────────────────────────────────────────
+const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({ children, required }) => (
+  <label className="block text-[11px] font-black text-stone-500 uppercase tracking-widest mb-1.5">
+    {children}{required && <span className="text-red-400 ml-0.5">*</span>}
+  </label>
+);
+
+const Err: React.FC<{ msg?: string }> = ({ msg }) =>
+  msg ? <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{msg}</p> : null;
+
+const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { icon?: React.ReactNode; hasError?: boolean }> = ({
+  icon, hasError, className, ...props
+}) => (
+  <div className="relative">
+    {icon && <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none">{icon}</span>}
+    <input
+      {...props}
+      className={cn(
+        "w-full h-11 px-3.5 bg-stone-50 border rounded-xl text-sm font-medium text-stone-900 outline-none transition-all",
+        "placeholder:text-stone-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white",
+        icon && "pl-10",
+        hasError ? "border-red-300 bg-red-50" : "border-stone-200",
+        className,
+      )}
+    />
+  </div>
+);
+
+const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement> & { placeholder?: string; hasError?: boolean }> = ({
+  children, placeholder, hasError, ...props
+}) => (
+  <select
+    {...props}
+    className={cn(
+      "w-full h-11 px-3.5 bg-stone-50 border rounded-xl text-sm font-medium text-stone-900 outline-none transition-all",
+      "focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white disabled:opacity-50",
+      hasError ? "border-red-300 bg-red-50" : "border-stone-200",
+    )}
+  >
+    {placeholder && <option value="">{placeholder}</option>}
+    {children}
+  </select>
+);
+
+export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
+  open, user, lang, onClose, onSaved,
+}) => {
+  const { showToast } = useToast();
+  const sw = lang === "sw";
+  const L = (s: string, e: string) => (sw ? s : e);
+
+  const [saving, setSaving] = useState(false);
+  const [errs, setErrs] = useState<Record<string, string>>({});
+
+  // ── Form state pre-filled from user ───────────────────────────────────────
+  const [firstName, setFirstName] = useState(user?.first_name ?? "");
+  const [middleName, setMiddleName] = useState(user?.middle_name ?? "");
+  const [lastName, setLastName] = useState(user?.last_name ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [gender, setGender] = useState(user?.gender ?? "");
+  const [dob, setDob] = useState(user?.date_of_birth ?? user?.birth_date ?? "");
+  const [marital, setMarital] = useState(user?.marital_status ?? "");
+  const [occupation, setOccupation] = useState(user?.occupation ?? "");
+  const [region, setRegion] = useState(user?.region ?? "");
+  const [district, setDistrict] = useState(user?.district ?? "");
+  const [ward, setWard] = useState(user?.ward ?? "");
+  const [street, setStreet] = useState(user?.street ?? "");
+  const [nida, setNida] = useState(user?.nida_number ?? "");
+  // Diaspora extras
+  const [countryResidence, setCountryResidence] = useState(user?.country_of_residence ?? "");
+  const [cityResidence, setCityResidence] = useState((user as Record<string, unknown>)?.city_of_residence as string ?? "");
+
+  const isDiaspora = !!user?.is_diaspora;
+
+  // Cascading address
+  const districts = useMemo(
+    () => TANZANIA_ADDRESS_DATA.find((r) => r.name === region)?.districts || [],
+    [region],
+  );
+  const wards = useMemo(
+    () => districts.find((d) => d.name === district)?.wards || [],
+    [districts, district],
+  );
+
+  // Reset form when user changes
+  React.useEffect(() => {
+    if (open && user) {
+      setFirstName(user.first_name ?? "");
+      setMiddleName(user.middle_name ?? "");
+      setLastName(user.last_name ?? "");
+      setPhone(user.phone ?? "");
+      setGender(user.gender ?? "");
+      setDob(user.date_of_birth ?? user.birth_date ?? "");
+      setMarital(user.marital_status ?? "");
+      setOccupation(user.occupation ?? "");
+      setRegion(user.region ?? "");
+      setDistrict(user.district ?? "");
+      setWard(user.ward ?? "");
+      setStreet(user.street ?? "");
+      setNida(user.nida_number ?? "");
+      setCountryResidence(user.country_of_residence ?? "");
+      setCityResidence((user as Record<string, unknown>)?.city_of_residence as string ?? "");
+    }
+  }, [open, user]);
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!firstName.trim()) e.firstName = L("Jina la kwanza linahitajika", "First name required");
+    if (!lastName.trim()) e.lastName = L("Jina la mwisho linahitajika", "Last name required");
+    if (!isDiaspora && !phone) e.phone = L("Namba ya simu inahitajika", "Phone required");
+    if (!isDiaspora && !region) e.region = L("Chagua mkoa", "Select region");
+    if (!isDiaspora && !district) e.district = L("Chagua wilaya", "Select district");
+    if (!isDiaspora && !ward) e.ward = L("Chagua kata", "Select ward");
+    if (!isDiaspora && !street.trim()) e.street = L("Jina la mtaa linahitajika", "Street required");
+    if (isDiaspora && !countryResidence) e.countryResidence = L("Chagua nchi", "Select country");
+    setErrs(e);
+    return !Object.keys(e).length;
+  };
+
+  const handleSave = async () => {
+    if (!validate()) return;
+    if (!user?.id) return;
+    setSaving(true);
+    try {
+      const updates: Record<string, unknown> = {
+        first_name: firstName.trim().toUpperCase(),
+        middle_name: middleName.trim().toUpperCase() || null,
+        last_name: lastName.trim().toUpperCase(),
+        phone: phone || null,
+        gender: gender || null,
+        date_of_birth: dob || null,
+        marital_status: marital || null,
+        occupation: occupation.trim() || null,
+        region: region || null,
+        district: district || null,
+        ward: ward || null,
+        street: street.trim() || null,
+        nida_number: nida.trim().replace(/-/g, "") || null,
+        country_of_residence: countryResidence || null,
+        city_of_residence: cityResidence.trim() || null,
+        profile_complete: true,
+      };
+
+      // Remove nulls to avoid overwriting with null
+      const cleaned = Object.fromEntries(Object.entries(updates).filter(([, v]) => v !== null && v !== undefined && v !== ""));
+
+      const { error } = await supabase.from("users").update(cleaned).eq("id", user.id);
+      if (error) throw error;
+
+      showToast(L("Wasifu umehifadhiwa!", "Profile saved!"), "success");
+      onSaved({ ...user, ...cleaned } as Partial<UserProfile>);
+      onClose();
+    } catch (err) {
+      showToast((err as Error).message || L("Hitilafu imetokea", "An error occurred"), "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="cp-backdrop"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[150] bg-stone-900/60 backdrop-blur-sm"
+          />
+
+          {/* Modal */}
+          <motion.div
+            key="cp-modal"
+            initial={{ opacity: 0, scale: 0.97, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 12 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="fixed inset-0 z-[151] flex items-center justify-center p-0 sm:p-4 pointer-events-none"
+          >
+            <div
+              className="pointer-events-auto w-full h-full sm:h-auto sm:max-w-2xl bg-white sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-screen sm:max-h-[92vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between bg-white sticky top-0 z-10 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <User size={18} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-black text-stone-900">{L("Kamilisha Wasifu Wako", "Complete Your Profile")}</h2>
+                    <p className="text-[10px] text-stone-400 font-medium">{L("Jaza taarifa zako — utahifadhiwa moja kwa moja", "Fill in your details — saved automatically")}</p>
+                  </div>
+                </div>
+                <button onClick={onClose} className="p-1.5 hover:bg-stone-100 rounded-full text-stone-400" aria-label="Close">
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+
+                {/* Personal info */}
+                <div>
+                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                    <User size={11} /> {L("Taarifa Binafsi", "Personal Information")}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label required>{L("Jina la Kwanza", "First Name")}</Label>
+                      <Input value={firstName} onChange={(e) => { setFirstName(e.target.value); setErrs((p) => { const n={...p}; delete n.firstName; return n; }); }}
+                        placeholder="Juma" icon={<User size={13} />} hasError={!!errs.firstName} />
+                      <Err msg={errs.firstName} />
+                    </div>
+                    <div>
+                      <Label>{L("Jina la Kati", "Middle Name")}</Label>
+                      <Input value={middleName} onChange={(e) => setMiddleName(e.target.value)} placeholder="Rashidi" />
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <Label required>{L("Jina la Mwisho", "Last Name")}</Label>
+                    <Input value={lastName} onChange={(e) => { setLastName(e.target.value); setErrs((p) => { const n={...p}; delete n.lastName; return n; }); }}
+                      placeholder="Mkubwa" hasError={!!errs.lastName} />
+                    <Err msg={errs.lastName} />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <Label>{L("Jinsia", "Gender")}</Label>
+                      <Select value={gender} onChange={(e) => setGender(e.target.value)} placeholder={L("Chagua", "Select")}>
+                        <option value="M">{L("Mwanaume", "Male")}</option>
+                        <option value="F">{L("Mwanamke", "Female")}</option>
+                        <option value="O">{L("Nyingine", "Other")}</option>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>{L("Tarehe ya Kuzaliwa", "Date of Birth")}</Label>
+                      <Input type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                        max={new Date().toISOString().split("T")[0]} icon={<Calendar size={13} />} />
+                    </div>
+                    <div>
+                      <Label>{L("Hali ya Ndoa", "Marital Status")}</Label>
+                      <Select value={marital} onChange={(e) => setMarital(e.target.value)} placeholder={L("Chagua", "Select")}>
+                        <option value="SINGLE">{L("Sijaoana", "Single")}</option>
+                        <option value="MARRIED">{L("Nimeoa/Olewa", "Married")}</option>
+                        <option value="DIVORCED">{L("Talaka", "Divorced")}</option>
+                        <option value="WIDOWED">{L("Mjane", "Widowed")}</option>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>{L("Kazi / Taaluma", "Occupation")}</Label>
+                      <Input value={occupation} onChange={(e) => setOccupation(e.target.value)} placeholder={L("Mfanyabiashara", "Business person")} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                {!isDiaspora && (
+                  <div>
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <Phone size={11} /> {L("Mawasiliano", "Contact")}
+                    </p>
+                    <Label required>{L("Namba ya Simu", "Phone Number")}</Label>
+                    <div className={cn("border rounded-xl overflow-hidden bg-stone-50 focus-within:ring-2 focus-within:ring-emerald-500 transition-all", errs.phone ? "border-red-300" : "border-stone-200")}>
+                      <PhoneInput international defaultCountry="TZ" value={phone}
+                        onChange={(v) => { setPhone(v ?? ""); setErrs((p) => { const n={...p}; delete n.phone; return n; }); }}
+                        className="h-11 px-3.5 text-sm font-medium bg-transparent outline-none w-full" />
+                    </div>
+                    <Err msg={errs.phone} />
+                  </div>
+                )}
+
+                {/* Address — Tanzania residents */}
+                {!isDiaspora && (
+                  <div>
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <MapPin size={11} /> {L("Anwani ya Makazi", "Residential Address")}
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label required>{L("Mkoa", "Region")}</Label>
+                        <Select value={region} onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); }} hasError={!!errs.region} placeholder={L("Chagua Mkoa", "Select Region")}>
+                          {TANZANIA_ADDRESS_DATA.map((r) => <option key={r.name} value={r.name}>{r.name}</option>)}
+                        </Select>
+                        <Err msg={errs.region} />
+                      </div>
+                      <div>
+                        <Label required>{L("Wilaya", "District")}</Label>
+                        <Select value={district} onChange={(e) => { setDistrict(e.target.value); setWard(""); }} disabled={!region} hasError={!!errs.district} placeholder={L("Chagua Wilaya", "Select District")}>
+                          {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
+                        </Select>
+                        <Err msg={errs.district} />
+                      </div>
+                      <div>
+                        <Label required>{L("Kata", "Ward")}</Label>
+                        <Select value={ward} onChange={(e) => setWard(e.target.value)} disabled={!district} hasError={!!errs.ward} placeholder={L("Chagua Kata", "Select Ward")}>
+                          {wards.map((w) => <option key={w} value={w}>{w}</option>)}
+                          <option value="Mengineyo">{L("Mengineyo", "Other")}</option>
+                        </Select>
+                        <Err msg={errs.ward} />
+                      </div>
+                      <div>
+                        <Label required>{L("Mtaa / Kijiji", "Street / Village")}</Label>
+                        <Input value={street} onChange={(e) => { setStreet(e.target.value); setErrs((p) => { const n={...p}; delete n.street; return n; }); }}
+                          placeholder={L("Jina la mtaa", "Street name")} hasError={!!errs.street} />
+                        <Err msg={errs.street} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Diaspora address */}
+                {isDiaspora && (
+                  <div>
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <Globe2 size={11} /> {L("Makazi ya Nje", "Residence Abroad")}
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label required>{L("Nchi ya Makazi", "Country of Residence")}</Label>
+                        <Input value={countryResidence} onChange={(e) => { setCountryResidence(e.target.value); setErrs((p) => { const n={...p}; delete n.countryResidence; return n; }); }}
+                          placeholder="UK, USA, UAE..." hasError={!!errs.countryResidence} />
+                        <Err msg={errs.countryResidence} />
+                      </div>
+                      <div>
+                        <Label>{L("Mji wa Makazi", "City of Residence")}</Label>
+                        <Input value={cityResidence} onChange={(e) => setCityResidence(e.target.value)} placeholder="London, Dubai..." />
+                      </div>
+                      <div>
+                        <Label>{L("Mkoa wa Asili", "Home Region")}</Label>
+                        <Select value={region} onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); }} placeholder={L("Chagua Mkoa", "Select Region")}>
+                          {TANZANIA_ADDRESS_DATA.map((r) => <option key={r.name} value={r.name}>{r.name}</option>)}
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>{L("Wilaya ya Asili", "Home District")}</Label>
+                        <Select value={district} onChange={(e) => { setDistrict(e.target.value); setWard(""); }} disabled={!region} placeholder={L("Chagua", "Select")}>
+                          {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Identity document */}
+                <div>
+                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                    <Shield size={11} /> {L("Kitambulisho", "Identity Document")} <span className="normal-case text-stone-400 font-medium">({L("hiari", "optional")})</span>
+                  </p>
+                  <Label>{isDiaspora ? L("Namba ya Pasipoti", "Passport Number") : "NIDA"}</Label>
+                  <Input value={nida} onChange={(e) => setNida(e.target.value)}
+                    placeholder={isDiaspora ? "TZ1234567" : "XXXX-XXXXX-XXXXX-XX"}
+                    icon={<Shield size={13} />} />
+                  {!isDiaspora && (
+                    <p className="mt-1 text-[11px] text-stone-400">{L("Kuingiza NIDA kutawezesha usindikaji wa papo hapo", "Adding NIDA enables instant processing")}</p>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Footer */}
+              <div className="px-5 pb-5 pt-3 border-t border-stone-100 bg-white sticky bottom-0 shrink-0">
+                <div className="flex gap-3">
+                  <button onClick={onClose}
+                    className="flex-1 h-11 bg-white border border-stone-200 text-stone-600 rounded-2xl font-bold text-sm hover:bg-stone-50 transition-all">
+                    {L("Baadaye", "Later")}
+                  </button>
+                  <button onClick={handleSave} disabled={saving}
+                    className="flex-[2] h-11 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100">
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={15} />{L("Hifadhi Wasifu", "Save Profile")}</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
+export default CompleteProfileModal;
