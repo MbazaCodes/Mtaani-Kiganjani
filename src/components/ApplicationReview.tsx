@@ -69,6 +69,9 @@ import { useToast } from "@/context/ToastContext";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import type { ApplicationStatus } from "@/types";
+import { VerificationBadge } from "@/components/VerificationBadge";
+import { VerificationChecklist } from "@/components/VerificationChecklist";
+import { getUserTier } from "@/lib/verification";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -838,7 +841,14 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                         <h3 className="font-bold text-stone-800 text-sm truncate">{citizen}</h3>
                         <p className="text-xs text-stone-500 truncate">{app.service_name}</p>
                       </div>
-                      <StatusBadge status={app.status} lang={lang} />
+                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                        <VerificationBadge
+                          tier={getUserTier(app.user as Parameters<typeof getUserTier>[0])}
+                          lang={lang}
+                          showDot
+                        />
+                        <StatusBadge status={app.status} lang={lang} />
+                      </div>
                     </div>
                     {/* Agreement buyer status — show for Makubaliano services when issued */}
                     {(app.service_name?.includes("Makubaliano") || app.service_name?.includes("Agreement")) &&
@@ -950,11 +960,18 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                       {L("Mwombaji", "Applicant")}
                     </p>
                   </div>
-                  <p className="font-black text-stone-900 text-base">
-                    {`${selected.user?.first_name || ""} ${selected.user?.middle_name || ""} ${selected.user?.last_name || ""}`
-                      .replace(/\s+/g, " ")
-                      .trim()}
-                  </p>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="font-black text-stone-900 text-base">
+                      {`${selected.user?.first_name || ""} ${selected.user?.middle_name || ""} ${selected.user?.last_name || ""}`
+                        .replace(/\s+/g, " ")
+                        .trim()}
+                    </p>
+                    <VerificationBadge
+                      tier={getUserTier(selected.user as Parameters<typeof getUserTier>[0])}
+                      lang={lang}
+                      showDot
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 text-xs">
                     {selected.user?.nida_number && (
                       <div>
@@ -1044,6 +1061,21 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                         </button>
                       )}
                     </div>
+                  );
+                })()}
+
+                {/* Verification Checklist — for non-NIDA citizens */}
+                {(() => {
+                  const citizenTier = getUserTier(selected.user as Parameters<typeof getUserTier>[0]);
+                  if (citizenTier === "NIDA_VERIFIED") return null;
+                  return (
+                    <VerificationChecklist
+                      applicationId={selected.id}
+                      citizenId={selected.user_id || ""}
+                      citizenName={`${selected.user?.first_name || ""} ${selected.user?.last_name || ""}`.trim()}
+                      citizenPhone={selected.user?.phone}
+                      lang={lang}
+                    />
                   );
                 })()}
 

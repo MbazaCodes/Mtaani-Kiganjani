@@ -36,6 +36,8 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Application } from "@/lib/supabase";
 import { countUnreadNotifications } from "@/lib/notifications";
 import { supabase } from "@/lib/supabase";
+import { VerificationStatusCard } from "@/components/VerificationStatusCard";
+import { getUserTier } from "@/lib/verification";
 
 interface DashboardProps {
   applications: Application[];
@@ -337,6 +339,15 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
           <ArrowRight size={18} className="text-stone-400 group-hover:text-amber-600 shrink-0" />
         </button>
       )}
+
+      {/* Verification Status Widget */}
+      <VerificationStatusCard
+        user={user}
+        lang={lang}
+        onCompleteProfile={() => setView("profile")}
+        onUploadId={() => setView("profile")}
+        onBookVisit={() => setView("profile")}
+      />
 
       {/* New Module Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
