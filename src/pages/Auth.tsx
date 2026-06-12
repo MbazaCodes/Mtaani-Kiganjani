@@ -38,7 +38,6 @@ interface AuthProps {
   mode: "login" | "signup";
   onClose: () => void;
   setMode: (mode: "login" | "signup") => void;
-  isDiaspora?: boolean;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -114,7 +113,7 @@ const PwdStrength: React.FC<{ password: string; lang: string }> = ({ password, l
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) {
+export function Auth({ mode, onClose, setMode }: AuthProps) {
   const { fetchUserProfile } = useAuth();
   const { lang } = useLanguage();
   const { showToast } = useToast();
@@ -159,7 +158,7 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
   const [emailOtp, setEmailOtp] = useState<OtpState>({ open: false, sent: false, verified: false, loading: false, attempts: 0, lockedUntil: null, error: null });
   const updEmailOtp = (p: Partial<OtpState>) => setEmailOtp((v) => ({ ...v, ...p }));
 
-  const regType = isDiaspora ? "diaspora" : "citizen";
+  const [regType, setRegType] = useState<"citizen" | "diaspora">(isDiaspora ? "diaspora" : "citizen");
 
   // ── Validation ────────────────────────────────────────────────────────────
   const validateCitizen = () => {
@@ -509,9 +508,25 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
             ══════════════════════════════════════════ */}
             {mode === "signup" && regType === "citizen" && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                <div className="mb-5 px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <MapPin size={13} className="shrink-0" />
-                  {L("Usajili wa Raia wa Tanzania", "Tanzania Resident Registration")}
+
+                {/* Registration type toggle */}
+                <div className="flex bg-stone-100 rounded-2xl p-1 gap-1 mb-5">
+                  <button
+                    type="button"
+                    onClick={() => setRegType("citizen")}
+                    className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm"
+                  >
+                    <MapPin size={13} />
+                    {L("Raia wa Tanzania", "Tanzania Resident")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRegType("diaspora")}
+                    className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold transition-all text-stone-500 hover:text-stone-700"
+                  >
+                    <Globe2 size={13} />
+                    {L("Watanzania Nje", "Diaspora")}
+                  </button>
                 </div>
 
                 <form onSubmit={handleCitizenSignup} className="space-y-4">
@@ -633,9 +648,25 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
             ══════════════════════════════════════════ */}
             {mode === "signup" && regType === "diaspora" && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                <div className="mb-5 px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                  <Globe2 size={13} className="shrink-0" />
-                  {L("Usajili wa Mtanzania Nje ya Nchi", "Diaspora Citizen Registration")}
+
+                {/* Registration type toggle */}
+                <div className="flex bg-stone-100 rounded-2xl p-1 gap-1 mb-5">
+                  <button
+                    type="button"
+                    onClick={() => setRegType("citizen")}
+                    className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold transition-all text-stone-500 hover:text-stone-700"
+                  >
+                    <MapPin size={13} />
+                    {L("Raia wa Tanzania", "Tanzania Resident")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRegType("diaspora")}
+                    className="flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-sm"
+                  >
+                    <Globe2 size={13} />
+                    {L("Watanzania Nje", "Diaspora")}
+                  </button>
                 </div>
 
                 <form onSubmit={handleDiasporaSignup} className="space-y-4">
