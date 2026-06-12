@@ -74,7 +74,66 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
     };
   }, [user?.id, requiresBusinessReg, requiresSeller]);
 
-  // Ensure user profile has all required fields, provide defaults
+  // ─── Gate: Resident Identity duplicate check ──────────────────────────────
+  const isResidentIdentity =
+    selectedService.name === "Utambulisho wa Mkazi" ||
+    selectedService.name === "Resident Identity";
+
+  const [residentGateLoading, setResidentGateLoading] = useState(isResidentIdentity);
+  const [residentGateState, setResidentGateState] = useState<
+    "checking" | "first_time" | "needs_reason" | "reason_selected"
+  >("checking");
+  const [existingResidentApp, setExistingResidentApp] = useState<{
+    application_number: string;
+    status: string;
+    created_at: string;
+  } | null>(null);
+  const [repeatReason, setRepeatReason] = useState("");
+
+  const REPEAT_REASONS = [
+    { value: "MTOTO_MDOGO", label: { sw: "Mtoto Mdogo (Mwanafamilia Mdogo wa miaka chini ya 18)", en: "Minor Child (Family member under 18 years old)" } },
+    { value: "RAFIKI_NDUGU", label: { sw: "Rafiki au Ndugu (Msaada kwa mtu mwingine)", en: "Friend or Relative (Assisting another person)" } },
+    { value: "MGONJWA_MZEE", label: { sw: "Mtu Mgonjwa / Mzee (Hawezi kuja mwenyewe)", en: "Sick Person / Elderly (Unable to come in person)" } },
+    { value: "KUPOTEZA_NYARAKA", label: { sw: "Kupoteza Nyaraka za Awali (Lost original documents)", en: "Lost Original Documents" } },
+    { value: "KUBADILISHA_TAARIFA", label: { sw: "Kubadilisha Taarifa (Jina, Anwani, n.k.)", en: "Update Information (Name, Address, etc.)" } },
+    { value: "MAHITAJI_YA_KAZI", label: { sw: "Mahitaji ya Kazi / Taasisi Nyingine", en: "Work / Different Institution Requirement" } },
+    { value: "NYINGINEZO", label: { sw: "Sababu Nyingine (Eleza)", en: "Other Reason (Specify)" } },
+  ];
+  const [repeatReasonOther, setRepeatReasonOther] = useState("");
+
+  useEffect(() => {
+    if (!isResidentIdentity || !user?.id) {
+      setResidentGateLoading(false);
+      setResidentGateState("first_time");
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("applications")
+          .select("application_number, status, created_at")
+          .eq("user_id", user.id)
+          .in("service_name", ["Utambulisho wa Mkazi", "Resident Identity"])
+          .not("status", "in", "(rejected,refunded)")
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (cancelled) return;
+        if (data && data.length > 0) {
+          setExistingResidentApp(data[0]);
+          setResidentGateState("needs_reason");
+        } else {
+          setResidentGateState("first_time");
+        }
+      } catch {
+        setResidentGateState("first_time");
+      } finally {
+        if (!cancelled) setResidentGateLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, isResidentIdentity]);
+
   // Pass the FULL user profile to forms so every field (gender, date_of_birth,
   // marital_status, occupation, citizen_id, etc.) is available — not just a
   // hand-picked subset. user is already a UserProfile from AuthContext.
@@ -89,7 +148,7 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
     : null;
 
   // ─── Gate: loading state ────────────────────────────────────────────────
-  if (gateLoading) {
+  if (gateLoading || residentGateLoading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <Loader2 size={32} className="animate-spin text-stone-400" />
@@ -184,6 +243,119 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
     );
   }
 
+  // ─── Gate: Resident Identity — needs reason for repeat application ────────
+  if (isResidentIdentity && residentGateState === "needs_reason") {
+    const L = (sw: string, en: string) => (lang === "sw" ? sw : en);
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-2xl mx-auto px-3 sm:px-6 py-6"
+      >
+        <button
+          onClick={onBack}
+          className="mb-4 flex items-center gap-2 text-stone-500 hover:text-stone-800 text-sm font-bold"
+        >
+          <ArrowLeft size={16} /> {L("Rudi Nyuma", "Go Back")}
+        </button>
+
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-stone-200 space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <div className="w-16 h-16 mx-auto bg-amber-100 rounded-2xl flex items-center justify-center">
+              <span className="text-3xl">🪪</span>
+            </div>
+            <h2 className="text-xl font-black text-stone-900">
+              {L("Maombi ya Ziada — Utambulisho wa Mkazi", "Additional Resident Identity Request")}
+            </h2>
+            <p className="text-sm text-stone-500 max-w-md mx-auto">
+              {L(
+                "Tayari una maombi ya Utambulisho wa Mkazi. Tafadhali chagua sababu ya maombi haya mapya.",
+                "You already have a Resident Identity application. Please select the reason for this additional request.",
+              )}
+            </p>
+          </div>
+
+          {/* Existing app info */}
+          {existingResidentApp && (
+            <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 flex items-start gap-3">
+              <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0 text-sm">📄</div>
+              <div>
+                <p className="text-sm font-bold text-stone-700">
+                  {L("Maombi yaliyopo:", "Existing application:")} {existingResidentApp.application_number}
+                </p>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  {L("Hali:", "Status:")} <span className="font-medium capitalize">{existingResidentApp.status}</span>
+                  {" · "}{new Date(existingResidentApp.created_at).toLocaleDateString(lang === "sw" ? "sw-TZ" : "en-TZ")}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Reason radio list */}
+          <div className="space-y-3">
+            <p className="text-xs font-black text-stone-500 uppercase tracking-widest">
+              {L("Sababu ya Maombi Mapya *", "Reason for Additional Request *")}
+            </p>
+            <div className="space-y-2">
+              {REPEAT_REASONS.map((r) => (
+                <button
+                  key={r.value}
+                  type="button"
+                  onClick={() => { setRepeatReason(r.value); setRepeatReasonOther(""); }}
+                  className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all text-sm font-medium ${
+                    repeatReason === r.value
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                      : "border-stone-200 bg-white text-stone-700 hover:border-stone-300"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
+                      repeatReason === r.value ? "border-emerald-500 bg-emerald-500" : "border-stone-300"
+                    }`}>
+                      {repeatReason === r.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    </div>
+                    {lang === "sw" ? r.label.sw : r.label.en}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {repeatReason === "NYINGINEZO" && (
+              <textarea
+                rows={3}
+                value={repeatReasonOther}
+                onChange={(e) => setRepeatReasonOther(e.target.value)}
+                placeholder={L("Eleza sababu yako kwa undani...", "Describe your reason in detail...")}
+                className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+              />
+            )}
+          </div>
+
+          <button
+            onClick={() => {
+              if (!repeatReason) return;
+              if (repeatReason === "NYINGINEZO" && !repeatReasonOther.trim()) return;
+              setResidentGateState("reason_selected");
+            }}
+            disabled={!repeatReason || (repeatReason === "NYINGINEZO" && !repeatReasonOther.trim())}
+            className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100"
+          >
+            {L("Endelea na Maombi", "Continue with Application")}
+            <ArrowRight size={16} />
+          </button>
+
+          <p className="text-center text-xs text-stone-400">
+            {L(
+              "Sababu yako itaonekana kwa afisa anayekagua maombi haya.",
+              "Your reason will be visible to the reviewing officer.",
+            )}
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -248,9 +420,21 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
         {hasServiceForm(selectedService.name) ? (
           (() => {
             const FormComponent = SERVICE_FORMS[selectedService.name];
+            const submitWithReason = (formData: Record<string, unknown>, files?: File[]) => {
+              // Inject repeat reason metadata for Resident Identity repeat applications
+              const enriched = isResidentIdentity && repeatReason
+                ? {
+                    ...formData,
+                    repeat_reason: repeatReason,
+                    repeat_reason_detail: repeatReason === "NYINGINEZO" ? repeatReasonOther : undefined,
+                    is_repeat_application: true,
+                  }
+                : formData;
+              onSubmit(enriched, files);
+            };
             return (
               <FormComponent
-                onSubmit={onSubmit}
+                onSubmit={submitWithReason}
                 lang={lang}
                 userProfile={userProfileForForm}
                 draftId={draft?.id}
@@ -264,7 +448,12 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
                 ? selectedService.diaspora_form_schema || selectedService.form_schema
                 : selectedService.form_schema
             }
-            onSubmit={onSubmit}
+            onSubmit={(formData, files) => {
+              const enriched = isResidentIdentity && repeatReason
+                ? { ...formData, repeat_reason: repeatReason, repeat_reason_detail: repeatReason === "NYINGINEZO" ? repeatReasonOther : undefined, is_repeat_application: true }
+                : formData;
+              onSubmit(enriched, files);
+            }}
             lang={lang}
             userProfile={userProfileForForm}
             draftId={draft?.id}
