@@ -5,7 +5,7 @@
  * or VerificationStatusCard. Collects all key fields in one place,
  * saves directly to users table on submit.
  */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, User, Phone, Mail, MapPin, Calendar, Shield,
@@ -81,23 +81,48 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [errs, setErrs] = useState<Record<string, string>>({});
 
-  // ── Form state pre-filled from user ───────────────────────────────────────
-  const [firstName, setFirstName] = useState(user?.first_name ?? "");
-  const [middleName, setMiddleName] = useState(user?.middle_name ?? "");
-  const [lastName, setLastName] = useState(user?.last_name ?? "");
-  const [phone, setPhone] = useState(user?.phone ?? "");
-  const [gender, setGender] = useState(user?.gender ?? "");
-  const [dob, setDob] = useState(user?.date_of_birth ?? user?.birth_date ?? "");
-  const [marital, setMarital] = useState(user?.marital_status ?? "");
-  const [occupation, setOccupation] = useState(user?.occupation ?? "");
-  const [region, setRegion] = useState(user?.region ?? "");
-  const [district, setDistrict] = useState(user?.district ?? "");
-  const [ward, setWard] = useState(user?.ward ?? "");
-  const [street, setStreet] = useState(user?.street ?? "");
-  const [nida, setNida] = useState(user?.nida_number ?? "");
-  // Diaspora extras
-  const [countryResidence, setCountryResidence] = useState(user?.country_of_residence ?? "");
-  const [cityResidence, setCityResidence] = useState((user as Record<string, unknown>)?.city_of_residence as string ?? "");
+  // ── sessionStorage key scoped to this user ────────────────────────────────
+  const DRAFT_KEY = `e-mtaa:profile-draft:${user?.id ?? "anon"}`;
+
+  // Load draft from sessionStorage or fall back to user prop
+  const loadDraft = useCallback(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      if (raw) return JSON.parse(raw) as Record<string, string>;
+    } catch {}
+    return null;
+  }, [DRAFT_KEY]);
+
+  const draft = loadDraft();
+
+  const [firstName, setFirstName] = useState(draft?.firstName ?? user?.first_name ?? "");
+  const [middleName, setMiddleName] = useState(draft?.middleName ?? user?.middle_name ?? "");
+  const [lastName, setLastName] = useState(draft?.lastName ?? user?.last_name ?? "");
+  const [phone, setPhone] = useState(draft?.phone ?? user?.phone ?? "");
+  const [gender, setGender] = useState(draft?.gender ?? user?.gender ?? "");
+  const [dob, setDob] = useState(draft?.dob ?? user?.date_of_birth ?? user?.birth_date ?? "");
+  const [marital, setMarital] = useState(draft?.marital ?? user?.marital_status ?? "");
+  const [occupation, setOccupation] = useState(draft?.occupation ?? user?.occupation ?? "");
+  const [region, setRegion] = useState(draft?.region ?? user?.region ?? "");
+  const [district, setDistrict] = useState(draft?.district ?? user?.district ?? "");
+  const [ward, setWard] = useState(draft?.ward ?? user?.ward ?? "");
+  const [street, setStreet] = useState(draft?.street ?? user?.street ?? "");
+  const [nida, setNida] = useState(draft?.nida ?? user?.nida_number ?? "");
+  const [countryResidence, setCountryResidence] = useState(draft?.countryResidence ?? user?.country_of_residence ?? "");
+  const [cityResidence, setCityResidence] = useState(draft?.cityResidence ?? (user as Record<string, unknown>)?.city_of_residence as string ?? "");
+
+  // ── Auto-save draft to sessionStorage on every change ────────────────────
+  const saveDraft = useCallback((patch: Record<string, string>) => {
+    try {
+      const current = loadDraft() ?? {};
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ ...current, ...patch }));
+    } catch {}
+  }, [DRAFT_KEY, loadDraft]);
+
+  // ── Clear draft after successful save ─────────────────────────────────────
+  const clearDraft = useCallback(() => {
+    try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
+  }, [DRAFT_KEY]);
 
   const isDiaspora = !!user?.is_diaspora;
 
@@ -111,26 +136,30 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
     [districts, district],
   );
 
-  // Reset form when user changes
-  React.useEffect(() => {
+  // When modal opens fresh (no draft) reset from user prop
+  useEffect(() => {
     if (open && user) {
-      setFirstName(user.first_name ?? "");
-      setMiddleName(user.middle_name ?? "");
-      setLastName(user.last_name ?? "");
-      setPhone(user.phone ?? "");
-      setGender(user.gender ?? "");
-      setDob(user.date_of_birth ?? user.birth_date ?? "");
-      setMarital(user.marital_status ?? "");
-      setOccupation(user.occupation ?? "");
-      setRegion(user.region ?? "");
-      setDistrict(user.district ?? "");
-      setWard(user.ward ?? "");
-      setStreet(user.street ?? "");
-      setNida(user.nida_number ?? "");
-      setCountryResidence(user.country_of_residence ?? "");
-      setCityResidence((user as Record<string, unknown>)?.city_of_residence as string ?? "");
+      const existing = loadDraft();
+      // Only reset to user values if no draft exists
+      if (!existing) {
+        setFirstName(user.first_name ?? "");
+        setMiddleName(user.middle_name ?? "");
+        setLastName(user.last_name ?? "");
+        setPhone(user.phone ?? "");
+        setGender(user.gender ?? "");
+        setDob(user.date_of_birth ?? user.birth_date ?? "");
+        setMarital(user.marital_status ?? "");
+        setOccupation(user.occupation ?? "");
+        setRegion(user.region ?? "");
+        setDistrict(user.district ?? "");
+        setWard(user.ward ?? "");
+        setStreet(user.street ?? "");
+        setNida(user.nida_number ?? "");
+        setCountryResidence(user.country_of_residence ?? "");
+        setCityResidence((user as Record<string, unknown>)?.city_of_residence as string ?? "");
+      }
     }
-  }, [open, user]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -202,6 +231,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
       }
 
       showToast(L("Wasifu umehifadhiwa! ✓", "Profile saved! ✓"), "success");
+      clearDraft();
       onSaved({ ...user, ...updates } as Partial<UserProfile>);
       onClose();
     } catch (err) {
@@ -245,7 +275,11 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                   </div>
                   <div>
                     <h2 className="text-sm font-black text-stone-900">{L("Kamilisha Wasifu Wako", "Complete Your Profile")}</h2>
-                    <p className="text-[10px] text-stone-400 font-medium">{L("Jaza taarifa zako — utahifadhiwa moja kwa moja", "Fill in your details — saved automatically")}</p>
+                    <p className="text-[10px] text-stone-400 font-medium">
+                      {draft
+                        ? <span className="text-amber-600 font-bold">↩ {L("Unaendelea ulipoacha", "Continuing where you left off")}</span>
+                        : L("Jaza taarifa zako — utahifadhiwa moja kwa moja", "Fill in your details — saved automatically")}
+                    </p>
                   </div>
                 </div>
                 <button onClick={onClose} className="p-1.5 hover:bg-stone-100 rounded-full text-stone-400" aria-label="Close">
@@ -264,18 +298,18 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label required>{L("Jina la Kwanza", "First Name")}</Label>
-                      <Input value={firstName} onChange={(e) => { setFirstName(e.target.value); setErrs((p) => { const n={...p}; delete n.firstName; return n; }); }}
+                      <Input value={firstName} onChange={(e) => { setFirstName(e.target.value); saveDraft({ firstName: e.target.value }); setErrs((p) => { const n={...p}; delete n.firstName; return n; }); }}
                         placeholder="Juma" icon={<User size={13} />} hasError={!!errs.firstName} />
                       <Err msg={errs.firstName} />
                     </div>
                     <div>
                       <Label>{L("Jina la Kati", "Middle Name")}</Label>
-                      <Input value={middleName} onChange={(e) => setMiddleName(e.target.value)} placeholder="Rashidi" />
+                      <Input value={middleName} onChange={(e) => { setMiddleName(e.target.value); saveDraft({ middleName: e.target.value }); }} placeholder="Rashidi" />
                     </div>
                   </div>
                   <div className="mt-3">
                     <Label required>{L("Jina la Mwisho", "Last Name")}</Label>
-                    <Input value={lastName} onChange={(e) => { setLastName(e.target.value); setErrs((p) => { const n={...p}; delete n.lastName; return n; }); }}
+                    <Input value={lastName} onChange={(e) => { setLastName(e.target.value); saveDraft({ lastName: e.target.value }); setErrs((p) => { const n={...p}; delete n.lastName; return n; }); }}
                       placeholder="Mkubwa" hasError={!!errs.lastName} />
                     <Err msg={errs.lastName} />
                   </div>
@@ -283,7 +317,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <Label>{L("Jinsia", "Gender")}</Label>
-                      <Select value={gender} onChange={(e) => setGender(e.target.value)} placeholder={L("Chagua", "Select")}>
+                      <Select value={gender} onChange={(e) => { setGender(e.target.value); saveDraft({ gender: e.target.value }); }} placeholder={L("Chagua", "Select")}>
                         <option value="M">{L("Mwanaume", "Male")}</option>
                         <option value="F">{L("Mwanamke", "Female")}</option>
                         <option value="O">{L("Nyingine", "Other")}</option>
@@ -291,12 +325,12 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     </div>
                     <div>
                       <Label>{L("Tarehe ya Kuzaliwa", "Date of Birth")}</Label>
-                      <Input type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                      <Input type="date" value={dob} onChange={(e) => { setDob(e.target.value); saveDraft({ dob: e.target.value }); }}
                         max={new Date().toISOString().split("T")[0]} icon={<Calendar size={13} />} />
                     </div>
                     <div>
                       <Label>{L("Hali ya Ndoa", "Marital Status")}</Label>
-                      <Select value={marital} onChange={(e) => setMarital(e.target.value)} placeholder={L("Chagua", "Select")}>
+                      <Select value={marital} onChange={(e) => { setMarital(e.target.value); saveDraft({ marital: e.target.value }); }} placeholder={L("Chagua", "Select")}>
                         <option value="single">{L("Sijaoana", "Single")}</option>
                         <option value="married">{L("Nimeoa/Olewa", "Married")}</option>
                         <option value="divorced">{L("Talaka", "Divorced")}</option>
@@ -305,7 +339,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     </div>
                     <div>
                       <Label>{L("Kazi / Taaluma", "Occupation")}</Label>
-                      <Input value={occupation} onChange={(e) => setOccupation(e.target.value)} placeholder={L("Mfanyabiashara", "Business person")} />
+                      <Input value={occupation} onChange={(e) => { setOccupation(e.target.value); saveDraft({ occupation: e.target.value }); }} placeholder={L("Mfanyabiashara", "Business person")} />
                     </div>
                   </div>
                 </div>
@@ -319,7 +353,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <Label required>{L("Namba ya Simu", "Phone Number")}</Label>
                     <div className={cn("border rounded-xl overflow-hidden bg-stone-50 focus-within:ring-2 focus-within:ring-emerald-500 transition-all", errs.phone ? "border-red-300" : "border-stone-200")}>
                       <PhoneInput international defaultCountry="TZ" value={phone}
-                        onChange={(v) => { setPhone(v ?? ""); setErrs((p) => { const n={...p}; delete n.phone; return n; }); }}
+                        onChange={(v) => { setPhone(v ?? ""); saveDraft({ phone: v ?? "" }); setErrs((p) => { const n={...p}; delete n.phone; return n; }); }}
                         className="h-11 px-3.5 text-sm font-medium bg-transparent outline-none w-full" />
                     </div>
                     <Err msg={errs.phone} />
@@ -335,21 +369,21 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label required>{L("Mkoa", "Region")}</Label>
-                        <Select value={region} onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); }} hasError={!!errs.region} placeholder={L("Chagua Mkoa", "Select Region")}>
+                        <Select value={region} onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); saveDraft({ region: e.target.value, district: "", ward: "" }); }} hasError={!!errs.region} placeholder={L("Chagua Mkoa", "Select Region")}>
                           {TANZANIA_ADDRESS_DATA.map((r) => <option key={r.name} value={r.name}>{r.name}</option>)}
                         </Select>
                         <Err msg={errs.region} />
                       </div>
                       <div>
                         <Label required>{L("Wilaya", "District")}</Label>
-                        <Select value={district} onChange={(e) => { setDistrict(e.target.value); setWard(""); }} disabled={!region} hasError={!!errs.district} placeholder={L("Chagua Wilaya", "Select District")}>
+                        <Select value={district} onChange={(e) => { setDistrict(e.target.value); setWard(""); saveDraft({ district: e.target.value, ward: "" }); }} disabled={!region} hasError={!!errs.district} placeholder={L("Chagua Wilaya", "Select District")}>
                           {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
                         </Select>
                         <Err msg={errs.district} />
                       </div>
                       <div>
                         <Label required>{L("Kata", "Ward")}</Label>
-                        <Select value={ward} onChange={(e) => setWard(e.target.value)} disabled={!district} hasError={!!errs.ward} placeholder={L("Chagua Kata", "Select Ward")}>
+                        <Select value={ward} onChange={(e) => { setWard(e.target.value); saveDraft({ ward: e.target.value }); }} disabled={!district} hasError={!!errs.ward} placeholder={L("Chagua Kata", "Select Ward")}>
                           {wards.map((w) => <option key={w} value={w}>{w}</option>)}
                           <option value="Mengineyo">{L("Mengineyo", "Other")}</option>
                         </Select>
@@ -357,7 +391,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                       </div>
                       <div>
                         <Label required>{L("Mtaa / Kijiji", "Street / Village")}</Label>
-                        <Input value={street} onChange={(e) => { setStreet(e.target.value); setErrs((p) => { const n={...p}; delete n.street; return n; }); }}
+                        <Input value={street} onChange={(e) => { setStreet(e.target.value); saveDraft({ street: e.target.value }); setErrs((p) => { const n={...p}; delete n.street; return n; }); }}
                           placeholder={L("Jina la mtaa", "Street name")} hasError={!!errs.street} />
                         <Err msg={errs.street} />
                       </div>
@@ -374,23 +408,23 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label required>{L("Nchi ya Makazi", "Country of Residence")}</Label>
-                        <Input value={countryResidence} onChange={(e) => { setCountryResidence(e.target.value); setErrs((p) => { const n={...p}; delete n.countryResidence; return n; }); }}
+                        <Input value={countryResidence} onChange={(e) => { setCountryResidence(e.target.value); saveDraft({ countryResidence: e.target.value }); setErrs((p) => { const n={...p}; delete n.countryResidence; return n; }); }}
                           placeholder="UK, USA, UAE..." hasError={!!errs.countryResidence} />
                         <Err msg={errs.countryResidence} />
                       </div>
                       <div>
                         <Label>{L("Mji wa Makazi", "City of Residence")}</Label>
-                        <Input value={cityResidence} onChange={(e) => setCityResidence(e.target.value)} placeholder="London, Dubai..." />
+                        <Input value={cityResidence} onChange={(e) => { setCityResidence(e.target.value); saveDraft({ cityResidence: e.target.value }); }} placeholder="London, Dubai..." />
                       </div>
                       <div>
                         <Label>{L("Mkoa wa Asili", "Home Region")}</Label>
-                        <Select value={region} onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); }} placeholder={L("Chagua Mkoa", "Select Region")}>
+                        <Select value={region} onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); saveDraft({ region: e.target.value, district: "", ward: "" }); }} placeholder={L("Chagua Mkoa", "Select Region")}>
                           {TANZANIA_ADDRESS_DATA.map((r) => <option key={r.name} value={r.name}>{r.name}</option>)}
                         </Select>
                       </div>
                       <div>
                         <Label>{L("Wilaya ya Asili", "Home District")}</Label>
-                        <Select value={district} onChange={(e) => { setDistrict(e.target.value); setWard(""); }} disabled={!region} placeholder={L("Chagua", "Select")}>
+                        <Select value={district} onChange={(e) => { setDistrict(e.target.value); setWard(""); saveDraft({ district: e.target.value, ward: "" }); }} disabled={!region} placeholder={L("Chagua", "Select")}>
                           {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
                         </Select>
                       </div>
@@ -404,7 +438,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <Shield size={11} /> {L("Kitambulisho", "Identity Document")} <span className="normal-case text-stone-400 font-medium">({L("hiari", "optional")})</span>
                   </p>
                   <Label>{isDiaspora ? L("Namba ya Pasipoti", "Passport Number") : "NIDA"}</Label>
-                  <Input value={nida} onChange={(e) => setNida(e.target.value)}
+                  <Input value={nida} onChange={(e) => { setNida(e.target.value); saveDraft({ nida: e.target.value }); }}
                     placeholder={isDiaspora ? "TZ1234567" : "XXXX-XXXXX-XXXXX-XX"}
                     icon={<Shield size={13} />} />
                   {!isDiaspora && (
