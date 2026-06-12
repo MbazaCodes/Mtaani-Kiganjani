@@ -150,22 +150,20 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
     if (!validate()) return;
     if (!user?.id) return;
     setSaving(true);
+
+    // Safety: always stop spinning after 10s no matter what
+    const safetyTimer = setTimeout(() => setSaving(false), 10000);
+
     try {
-      // Build only columns that exist in the DB schema
-      // marital_status CHECK: 'single','married','divorced','widowed' (lowercase)
-      // account_status CHECK: 'active','suspended','pending' (lowercase)
-      // nida_number is UNIQUE — only include if non-empty
       const updates: Record<string, unknown> = {};
 
       if (firstName.trim()) updates.first_name = firstName.trim().toUpperCase();
-      if (middleName.trim()) updates.middle_name = middleName.trim().toUpperCase();
-      else updates.middle_name = null;
+      updates.middle_name = middleName.trim() ? middleName.trim().toUpperCase() : null;
       if (lastName.trim()) updates.last_name = lastName.trim().toUpperCase();
       if (phone) updates.phone = phone;
-      if (gender) updates.gender = gender;
-      if (gender) updates.sex = gender; // keep sex in sync
+      if (gender) { updates.gender = gender; updates.sex = gender; }
       if (dob) updates.date_of_birth = dob;
-      if (marital) updates.marital_status = marital.toLowerCase(); // DB uses lowercase
+      if (marital) updates.marital_status = marital.toLowerCase();
       if (occupation.trim()) updates.occupation = occupation.trim();
       if (region) updates.region = region;
       if (district) updates.district = district;
@@ -173,7 +171,6 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
       if (street.trim()) updates.street = street.trim();
       if (countryResidence) updates.country_of_residence = countryResidence;
       if (cityResidence.trim()) updates.city_of_residence = cityResidence.trim();
-      // NIDA: only include if non-empty (UNIQUE column — can't send "")
       const cleanNida = nida.trim().replace(/-/g, "");
       if (cleanNida) updates.nida_number = cleanNida;
 
@@ -182,20 +179,35 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
         return;
       }
 
-      const { error } = await supabase.from("users").update(updates).eq("id", user.id);
+      // Race the DB call against a 8s timeout
+      const dbPromise = supabase.from("users").update(updates).eq("id", user.id);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(L("Muda umeisha. Angalia mtandao wako.", "Request timed out. Check your connection."))), 8000)
+      );
+
+      const { error } = await Promise.race([dbPromise, timeoutPromise]) as Awaited<typeof dbPromise>;
 
       if (error) {
-        // Surface the actual Supabase error detail to help diagnose
-        const detail = (error as { details?: string; message?: string }).details || error.message;
-        throw new Error(detail);
+        // RLS might be blocking — try upsert as fallback
+        if (error.code === "42501" || error.message?.includes("policy")) {
+          const { error: upsertErr } = await supabase
+            .from("users")
+            .upsert({ id: user.id, ...updates }, { onConflict: "id" });
+          if (upsertErr) throw new Error(upsertErr.message);
+        } else {
+          throw new Error(
+            (error as { details?: string }).details || error.message || "Update failed"
+          );
+        }
       }
 
-      showToast(L("Wasifu umehifadhiwa!", "Profile saved!"), "success");
+      showToast(L("Wasifu umehifadhiwa! ✓", "Profile saved! ✓"), "success");
       onSaved({ ...user, ...updates } as Partial<UserProfile>);
       onClose();
     } catch (err) {
       showToast((err as Error).message || L("Hitilafu imetokea", "An error occurred"), "error");
     } finally {
+      clearTimeout(safetyTimer);
       setSaving(false);
     }
   };

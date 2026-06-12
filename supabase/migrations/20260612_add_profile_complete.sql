@@ -47,3 +47,59 @@ DROP TRIGGER IF EXISTS trg_normalise_marital ON public.users;
 CREATE TRIGGER trg_normalise_marital
   BEFORE INSERT OR UPDATE OF marital_status ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.normalise_marital_status();
+
+-- ── Fix RLS: allow citizens to update their own profile ───────────────────────
+-- This is the most likely cause of the infinite spinner —
+-- the UPDATE is being blocked silently by RLS.
+
+-- Drop existing update policy if any
+DROP POLICY IF EXISTS "users_update_own" ON public.users;
+DROP POLICY IF EXISTS "Allow users to update own profile" ON public.users;
+DROP POLICY IF EXISTS "users can update own row" ON public.users;
+
+-- Create correct update policy
+CREATE POLICY "users_update_own"
+  ON public.users
+  FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- Also ensure SELECT works (needed by the update to verify)
+DROP POLICY IF EXISTS "users_select_own" ON public.users;
+CREATE POLICY "users_select_own"
+  ON public.users
+  FOR SELECT
+  USING (auth.uid() = id);
+
+-- Ensure INSERT works for new signups
+DROP POLICY IF EXISTS "users_insert_own" ON public.users;
+CREATE POLICY "users_insert_own"
+  ON public.users
+  FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+-- Staff/admin can read all users
+DROP POLICY IF EXISTS "users_staff_select" ON public.users;
+CREATE POLICY "users_staff_select"
+  ON public.users
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff', 'admin')
+    )
+  );
+
+-- Staff/admin can update citizens (for verification upgrades)
+DROP POLICY IF EXISTS "users_staff_update" ON public.users;
+CREATE POLICY "users_staff_update"
+  ON public.users
+  FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff', 'admin')
+    )
+  );
