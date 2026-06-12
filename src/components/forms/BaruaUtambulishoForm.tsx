@@ -72,6 +72,8 @@ const PURPOSES = [
   { label: "Kupata Umeme / Maji (Utilities — TANESCO/DAWASA)", value: "HUDUMA_UMEME_MAJI" },
   { label: "Uthibitisho kwa Mwajiri (Employer Verification)", value: "WAAJIRI" },
   { label: "Maombi ya Serikali (Government Application)", value: "SERIKALI" },
+  { label: "Dhamana / Udhamini — Kutoka Polisi (Bail Bond / Police Release)", value: "DHAMANA_POLISI" },
+  { label: "Udhamini wa Mtu (Personal Surety / Guarantee)", value: "UDHAMINI" },
   { label: "Nyinginezo (Other — specify below)", value: "NYINGINEZO" },
 ];
 
@@ -188,6 +190,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
     "PASIPOTI",
     "LESENI_UDEREVA",
     "LESENI_BIASHARA",
+    "DHAMANA_POLISI",
   ].includes(vals.purpose);
 
   useEffect(() => {

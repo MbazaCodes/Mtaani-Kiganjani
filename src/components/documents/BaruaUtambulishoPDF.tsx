@@ -41,23 +41,32 @@ const ls = StyleSheet.create({
 const PURPOSE_LABELS: Record<string, { sw: string; en: string }> = {
   BENKI: { sw: "kufungua akaunti ya benki", en: "opening a bank account" },
   KAZI: { sw: "maombi ya kazi", en: "job application" },
+  AJIRA: { sw: "maombi ya kazi", en: "job application" },
   SHULE: { sw: "kuandikisha shuleni", en: "school enrollment" },
+  CHUO: { sw: "maombi ya chuo / shule", en: "school/college application" },
   AFYA: { sw: "huduma za afya", en: "health services" },
   LESENI_BIASHARA: { sw: "leseni ya biashara", en: "business licence" },
+  LESENI_UDEREVA: { sw: "leseni ya udereva", en: "driving licence" },
   LESENI_UENDESHAJI: { sw: "leseni ya uendeshaji", en: "driving licence" },
   SIM: { sw: "usajili wa namba ya simu", en: "SIM card registration" },
-  PASSPORT: { sw: "maombi ya passport", en: "passport application" },
+  PASIPOTI: { sw: "maombi ya pasipoti / visa", en: "passport / visa application" },
+  PASSPORT: { sw: "maombi ya pasipoti", en: "passport application" },
   TRA: { sw: "usajili wa TIN/TRA", en: "TRA/TIN registration" },
-  BIMA: { sw: "bima ya afya/maisha", en: "health/life insurance" },
+  BIMA: { sw: "bima ya afya / maisha", en: "health/life insurance" },
+  KUSAJILI_MTOTO: { sw: "usajili wa mtoto shuleni", en: "child school registration" },
   USAJILI_SHULE: { sw: "usajili wa mtoto shuleni", en: "child school registration" },
   MKOPO: { sw: "maombi ya mkopo", en: "loan application" },
+  ARDHI: { sw: "ununuzi / upangaji wa ardhi au nyumba", en: "property purchase / rental" },
   MALI: { sw: "usajili wa mali isiyohamishika", en: "property registration" },
-  HUDUMA_ZA_KIMSINGI: {
-    sw: "huduma za kimsingi (umeme, maji, n.k.)",
-    en: "utilities (water, electricity)",
-  },
+  HUDUMA_UMEME_MAJI: { sw: "huduma za umeme na maji (TANESCO/DAWASA)", en: "utilities (TANESCO/DAWASA)" },
+  HUDUMA_ZA_KIMSINGI: { sw: "huduma za kimsingi (umeme, maji, n.k.)", en: "utilities (water, electricity)" },
+  WAAJIRI: { sw: "uthibitisho wa kazi kutoka kwa mwajiri", en: "employer verification" },
   UTHIBITISHO_KAZI: { sw: "uthibitisho wa kazi kutoka kwa mwajiri", en: "employer verification" },
   SERIKALI: { sw: "huduma za serikali", en: "government services" },
+  // Bail & Surety
+  DHAMANA_POLISI: { sw: "dhamana ya kutoka polisi (bail bond)", en: "bail bond / release from police custody" },
+  UDHAMINI: { sw: "udhamini wa mtu (personal surety)", en: "personal surety / guarantee" },
+  NYINGINEZO: { sw: "madhumuni mengine", en: "other purposes" },
   NYINGINE: { sw: "madhumuni mengine", en: "other purposes" },
 };
 
@@ -193,6 +202,19 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
             ? "Tafadhali toa msaada wowote wa kisheria na kiutendaji unaohitajika kwa ndugu huyu. Ofisi yetu iko tayari kwa uthibitisho zaidi inapohitajika."
             : "Kindly extend any lawful and procedural assistance required to the bearer. Our office remains available for further verification if needed."}
         </Text>
+
+        {/* Special paragraph for bail / surety purposes */}
+        {(fd.purpose === "DHAMANA_POLISI" || fd.purpose === "UDHAMINI") && (
+          <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5, fontStyle: "italic" }]}>
+            {fd.purpose === "DHAMANA_POLISI"
+              ? sw
+                ? `Ofisi hii inathibitisha kuwa ndugu ${subjectName} anajulikana vizuri katika mtaa huu na ana tabia nzuri ya kuaminika. Ombi la dhamana (bail) linatolewa kwa heshima kwa mamlaka husika, kwa kuzingatia haki za kisheria za mtuhumiwa.`
+                : `This office confirms that ${subjectName} is well known in this community and is of good character. This letter respectfully supports a bail application to the relevant authority, in recognition of the accused's legal rights.`
+              : sw
+                ? `Ofisi hii inathibitisha kuwa ndugu ${subjectName} ni mkazi wa mtaa huu anayeaminika, na anaweza kuhudumia kama mdhamini (surety) kwa mtu mwingine kwa mujibu wa sheria.`
+                : `This office confirms that ${subjectName} is a trusted resident of this locality and is eligible to act as a surety/guarantor for another person in accordance with the law.`}
+          </Text>
+        )}
 
         {/* Applicant details panel */}
         <View style={s.sectionHeader}>
