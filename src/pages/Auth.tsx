@@ -281,27 +281,72 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
     finally { setLoading(false); }
   };
 
+  // ── Shared signup error normaliser ────────────────────────────────────────
+  const normaliseSignupError = (err: unknown): string => {
+    const msg = (err as { message?: string })?.message ?? "";
+    if (msg.includes("already registered") || msg.includes("already been registered") || msg.includes("User already registered"))
+      return L("Barua pepe hii tayari imesajiliwa. Tafadhali ingia.", "This email is already registered. Please sign in.");
+    if (msg.includes("Password should be") || msg.includes("password"))
+      return L("Nywila lazima iwe na herufi 6 au zaidi.", "Password must be at least 6 characters.");
+    if (msg.includes("invalid") && msg.includes("email"))
+      return L("Barua pepe si sahihi.", "Invalid email address.");
+    if (msg.includes("rate limit") || msg.includes("too many"))
+      return L("Majaribio mengi sana. Subiri dakika moja.", "Too many attempts. Wait a moment.");
+    if (msg.includes("signup") || msg.includes("disabled"))
+      return L("Usajili umezimwa kwa sasa. Wasiliana na msaada.", "Signup is currently disabled. Contact support.");
+    return msg || L("Hitilafu imetokea. Jaribu tena.", "An error occurred. Please try again.");
+  };
+
+  // Strip undefined/null keys from metadata before sending to Supabase
+  const cleanMeta = (obj: Record<string, unknown>) =>
+    Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== ""));
+
   // ── Citizen signup ────────────────────────────────────────────────────────
   const handleCitizenSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateCitizen()) return;
     setLoading(true);
     try {
-      const meta = {
-        first_name: cFirst.trim().toUpperCase(), middle_name: cMiddle.trim().toUpperCase() || null,
-        last_name: cLast.trim().toUpperCase(), phone: toE164(cPhone),
-        is_diaspora: false, role: "citizen", verification_level: "PHONE_VERIFIED",
-        account_status: "ACTIVE", is_verified: true, profile_complete: false,
-      };
-      const { data, error } = await supabase.auth.signUp({ email: cEmail.trim(), password: cPwd, options: { data: meta } });
-      if (error) { if (error.message.includes("already registered")) throw new Error(L("Barua pepe hii tayari imesajiliwa", "Email already registered")); throw error; }
-      if (!data.user) throw new Error(L("Usajili umeshindwa", "Signup failed"));
-      await supabase.from("users").upsert({ id: data.user.id, email: cEmail.trim(), ...meta }, { onConflict: "id" });
-      await fetchUserProfile(data.user.id).catch(() => {});
+      const meta = cleanMeta({
+        first_name: cFirst.trim().toUpperCase(),
+        middle_name: cMiddle.trim().toUpperCase() || undefined,
+        last_name: cLast.trim().toUpperCase(),
+        phone: toE164(cPhone),
+        is_diaspora: false,
+        role: "citizen",
+        verification_level: "PHONE_VERIFIED",
+        account_status: "ACTIVE",
+        is_verified: true,
+        profile_complete: false,
+      });
+
+      const { data, error } = await supabase.auth.signUp({
+        email: cEmail.trim().toLowerCase(),
+        password: cPwd,
+        options: {
+          data: meta,
+          emailRedirectTo: `${window.location.origin}/confirm`,
+        },
+      });
+
+      if (error) throw new Error(normaliseSignupError(error));
+      // Supabase returns a user even when email confirmation is required —
+      // identities array is empty if the email already exists (no true error thrown)
+      if (data.user && data.user.identities && data.user.identities.length === 0)
+        throw new Error(L("Barua pepe hii tayari imesajiliwa. Tafadhali ingia.", "This email is already registered. Please sign in."));
+      if (!data.user) throw new Error(L("Usajili umeshindwa. Jaribu tena.", "Signup failed. Please try again."));
+
+      // Best-effort profile row — never block success on this
+      supabase.from("users").upsert(
+        { id: data.user.id, email: cEmail.trim().toLowerCase(), ...meta },
+        { onConflict: "id" }
+      ).then(() => fetchUserProfile(data.user!.id).catch(() => {}));
+
       showToast(L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."), "success");
       onClose();
-    } catch (err) { showToast((err as Error).message, "error"); }
-    finally { setLoading(false); }
+    } catch (err) {
+      showToast(normaliseSignupError(err), "error");
+    } finally { setLoading(false); }
   };
 
   // ── Diaspora signup ───────────────────────────────────────────────────────
@@ -310,21 +355,42 @@ export function Auth({ mode, onClose, setMode, isDiaspora = false }: AuthProps) 
     if (!validateDiaspora()) return;
     setLoading(true);
     try {
-      const meta = {
-        first_name: dFirst.trim().toUpperCase(), middle_name: dMiddle.trim().toUpperCase() || null,
+      const meta = cleanMeta({
+        first_name: dFirst.trim().toUpperCase(),
+        middle_name: dMiddle.trim().toUpperCase() || undefined,
         last_name: dLast.trim().toUpperCase(),
-        is_diaspora: true, role: "citizen", verification_level: "EMAIL_VERIFIED",
-        account_status: "ACTIVE", is_verified: true, profile_complete: false,
-      };
-      const { data, error } = await supabase.auth.signUp({ email: dEmail.trim(), password: dPwd, options: { data: meta } });
-      if (error) { if (error.message.includes("already registered")) throw new Error(L("Barua pepe hii tayari imesajiliwa", "Email already registered")); throw error; }
-      if (!data.user) throw new Error(L("Usajili umeshindwa", "Signup failed"));
-      await supabase.from("users").upsert({ id: data.user.id, email: dEmail.trim(), ...meta }, { onConflict: "id" });
-      await fetchUserProfile(data.user.id).catch(() => {});
+        is_diaspora: true,
+        role: "citizen",
+        verification_level: "EMAIL_VERIFIED",
+        account_status: "ACTIVE",
+        is_verified: true,
+        profile_complete: false,
+      });
+
+      const { data, error } = await supabase.auth.signUp({
+        email: dEmail.trim().toLowerCase(),
+        password: dPwd,
+        options: {
+          data: meta,
+          emailRedirectTo: `${window.location.origin}/confirm`,
+        },
+      });
+
+      if (error) throw new Error(normaliseSignupError(error));
+      if (data.user && data.user.identities && data.user.identities.length === 0)
+        throw new Error(L("Barua pepe hii tayari imesajiliwa. Tafadhali ingia.", "This email is already registered. Please sign in."));
+      if (!data.user) throw new Error(L("Usajili umeshindwa. Jaribu tena.", "Signup failed. Please try again."));
+
+      supabase.from("users").upsert(
+        { id: data.user.id, email: dEmail.trim().toLowerCase(), ...meta },
+        { onConflict: "id" }
+      ).then(() => fetchUserProfile(data.user!.id).catch(() => {}));
+
       showToast(L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."), "success");
       onClose();
-    } catch (err) { showToast((err as Error).message, "error"); }
-    finally { setLoading(false); }
+    } catch (err) {
+      showToast(normaliseSignupError(err), "error");
+    } finally { setLoading(false); }
   };
 
   // ─────────────────────────────────────────────────────────────────────────
