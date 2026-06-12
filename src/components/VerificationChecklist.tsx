@@ -105,10 +105,12 @@ export const VerificationChecklist: React.FC<VerificationChecklistProps> = ({
     try {
       const updated = { ...checklist, [key]: true };
       setChecklist(updated);
-      // Persist to DB
-      await supabase.from("applications").update({
+      // Persist to DB — silently ignore if checklist columns not yet migrated
+      supabase.from("applications").update({
         [`checklist_${key}`]: true,
-      }).eq("id", applicationId);
+      }).eq("id", applicationId).then(({ error }) => {
+        if (error) console.warn("[Checklist] Column may be missing — run migration:", error.message);
+      });
 
       if (Object.values(updated).every(Boolean)) {
         onAllComplete?.(updated);
