@@ -25,6 +25,13 @@ function createSupabaseClient() {
       persistSession: true,
       autoRefreshToken: true,
     },
+    realtime: {
+      // Realtime is not used — disable to suppress WebSocket connection warnings
+      params: { eventsPerSecond: 0 },
+    },
+    global: {
+      headers: { "x-client-info": "e-mtaa-tz" },
+    },
   });
 }
 
