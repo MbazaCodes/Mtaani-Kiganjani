@@ -157,6 +157,8 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const hasBizRole = !!(user?.seller_id || user?.landlord_id || user?.broker_id);
 
   const profileCompletion = getProfileCompletion(localUser);
+  const currentTier = getUserTier(localUser);
+  const profileDone = currentTier === "PROFILE_COMPLETED" || currentTier === "NIDA_VERIFIED";
 
   return (
     <motion.div
@@ -165,7 +167,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
       className="space-y-5 sm:space-y-6"
     >
       {/* Profile completion reminder — shown when profile < 60% */}
-      {user?.role === "citizen" && profileCompletion < 60 && (
+      {user?.role === "citizen" && !profileDone && profileCompletion < 100 && (
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}

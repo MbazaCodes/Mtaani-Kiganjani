@@ -230,6 +230,24 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
         }
       }
 
+      // Auto-upgrade verification_level to PROFILE_COMPLETED when key fields are filled
+      const isComplete = !!(
+        (firstName.trim() || user?.first_name) &&
+        (lastName.trim() || user?.last_name) &&
+        (region || user?.region) &&
+        (district || user?.district) &&
+        (ward || user?.ward) &&
+        (phone || user?.phone || user?.is_diaspora)
+      );
+      if (isComplete) {
+        const currentLevel = (user as Record<string, unknown>)?.verification_level as string;
+        if (!currentLevel || currentLevel === "PHONE_VERIFIED" || currentLevel === "EMAIL_VERIFIED") {
+          supabase.from("users").update({ verification_level: "PROFILE_COMPLETED" })
+            .eq("id", user!.id).then(() => {});
+          updates.verification_level = "PROFILE_COMPLETED";
+        }
+      }
+
       showToast(L("Wasifu umehifadhiwa! ✓", "Profile saved! ✓"), "success");
       clearDraft();
       onSaved({ ...user, ...updates } as Partial<UserProfile>);
