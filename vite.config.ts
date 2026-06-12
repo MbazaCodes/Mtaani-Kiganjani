@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       "@": "/src",
     },
-    dedupe: ["react", "react-dom"],
+    dedupe: ["react", "react-dom", "react-router-dom"],
   },
   build: {
     outDir: "dist",
