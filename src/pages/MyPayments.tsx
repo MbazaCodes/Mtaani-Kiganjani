@@ -23,7 +23,8 @@ import { cn } from "@/lib/utils";
 import type { Application } from "@/lib/supabase";
 import { RefreshButton } from "@/components/ui/RefreshButton";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { ReceiptPDF } from "@/components/ReceiptPDF";
+import { RisitiMalipoPDF } from "@/components/documents/RisitiMalipoPDF";
+import { generateQRDataUrl } from "@/lib/qr";
 
 interface PaymentRecord {
   id: string;
@@ -56,11 +57,91 @@ interface MyPaymentsProps {
   onPay?: (app: Application) => void;
 }
 
-export function MyPayments({ onPay }: MyPaymentsProps = {}) {
+// ── Receipt download button — generates QR then official RisitiMalipoPDF ──────
+const ReceiptDownloadButton: React.FC<{
+  app: IssuedDoc;
+  lang: string;
+  amount: number;
+  L: (sw: string, en: string) => string;
+}> = ({ app, lang, amount, L }) => {
   const PDFLink = PDFDownloadLink as unknown as React.ComponentType<{
     document: React.ReactElement; fileName: string;
     children: (p: { loading: boolean; error: Error | null }) => React.ReactNode;
   }>;
+  const [qr, setQr] = useState<string | null>(null);
+  const [loadingQr, setLoadingQr] = useState(false);
+
+  // Build an application object with guaranteed amount for the receipt
+  const appForReceipt = useMemo(() => ({
+    ...app,
+    form_data: {
+      ...(app.form_data as Record<string, unknown>),
+      service_fee: amount,
+      payment_data: {
+        ...((app.form_data as Record<string, unknown>)?.payment_data as Record<string, unknown> ?? {}),
+        amount,
+        payment_method: ((app.payment_data as Record<string, unknown>)?.payment_method as string) ?? "E-Mtaa Portal",
+        transaction_id: ((app.payment_data as Record<string, unknown>)?.transaction_id as string) ?? `RCP-${app.application_number}`,
+        paid_at: app.created_at,
+      },
+    },
+    payment_data: {
+      ...(app.payment_data as Record<string, unknown>),
+      amount,
+    },
+  }), [app, amount]);
+
+  const startQr = async () => {
+    if (qr || loadingQr) return;
+    setLoadingQr(true);
+    try {
+      setQr(await generateQRDataUrl(app as unknown as Parameters<typeof generateQRDataUrl>[0], "RCP"));
+    } catch {
+      setQr(""); // proceed without QR rather than fail
+    } finally {
+      setLoadingQr(false);
+    }
+  };
+
+  if (qr === null) {
+    return (
+      <button onClick={startQr} disabled={loadingQr}
+        className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold bg-stone-100 hover:bg-emerald-50 text-stone-600 hover:text-emerald-600 transition-colors disabled:opacity-50"
+        title={L("Pakua Risiti", "Download Receipt")}>
+        {loadingQr ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+        {L("Risiti", "Receipt")}
+      </button>
+    );
+  }
+
+  return (
+    <PDFLink
+      document={
+        <RisitiMalipoPDF
+          application={appForReceipt as unknown as Parameters<typeof RisitiMalipoPDF>[0]["application"]}
+          lang={lang as "sw" | "en"}
+          qrDataUrl={qr || undefined}
+        />
+      }
+      fileName={`Risiti_${app.application_number}.pdf`}
+    >
+      {({ loading, error }) => (
+        <button
+          className={cn(
+            "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors",
+            error ? "bg-red-50 text-red-500" : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700",
+          )}
+          title={L("Pakua Risiti", "Download Receipt")}
+        >
+          {loading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+          {error ? L("Hitilafu", "Error") : L("Risiti", "Receipt")}
+        </button>
+      )}
+    </PDFLink>
+  );
+};
+
+export function MyPayments({ onPay }: MyPaymentsProps = {}) {
   const { user } = useAuth();
   const { lang } = useLanguage();
   const L = useCallback((sw: string, en: string) => (lang === "sw" ? sw : en), [lang]);
@@ -507,37 +588,7 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
                       <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg uppercase">
                         {L("Imetolewa", "Issued")}
                       </span>
-                      <PDFLink
-                        document={
-                          <ReceiptPDF
-                            application={app as unknown as Application}
-                            paymentData={{
-                              amount: getApplicationAmount(app),
-                              currency: "TZS",
-                              payment_method: app.payment_data?.receipt_number ? "E-Mtaa" : "E-Mtaa",
-                              transaction_id: (app.payment_data as Record<string, unknown>)?.transaction_id as string ?? app.application_number,
-                              receipt_number: app.payment_data?.receipt_number ?? `RCP-${app.application_number}`,
-                              status: "completed",
-                              paid_at: app.created_at,
-                            } as unknown as Parameters<typeof ReceiptPDF>[0]["paymentData"]}
-                            lang={lang}
-                          />
-                        }
-                        fileName={`Risiti_${app.application_number}.pdf`}
-                      >
-                        {({ loading, error }) => (
-                          <button
-                            className={cn(
-                              "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors",
-                              error ? "bg-red-50 text-red-500" : "bg-stone-100 hover:bg-emerald-50 text-stone-600 hover:text-emerald-600",
-                            )}
-                            title={L("Pakua Risiti", "Download Receipt")}
-                          >
-                            {loading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-                            {error ? L("Hitilafu", "Error") : L("Risiti", "Receipt")}
-                          </button>
-                        )}
-                      </PDFLink>
+                      <ReceiptDownloadButton app={app} lang={lang} amount={getApplicationAmount(app)} L={L} />
                     </div>
                   </div>
                 ))
