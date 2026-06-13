@@ -102,6 +102,7 @@ export interface UserProfile {
   assigned_region?: string;
   assigned_district?: string;
   office_id?: string;
+  assigned_office_id?: string;
   employee_id?: string;
   department?: string;
   position?: string;

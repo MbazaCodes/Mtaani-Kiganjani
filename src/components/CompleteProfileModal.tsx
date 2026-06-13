@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/context/ToastContext";
 import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
+import { assignOfficeForAddress } from "@/lib/officeRegistry";
 import type { UserProfile } from "@/lib/supabase";
 
 interface CompleteProfileModalProps {
@@ -246,6 +247,19 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
             .eq("id", user!.id).then(() => {});
           updates.verification_level = "PROFILE_COMPLETED";
         }
+      }
+
+      // P2-T9 / T11: Assign citizen to correct office based on address
+      const finalRegion = region || user?.region || "";
+      const finalDistrict = district || user?.district || "";
+      const finalWard = ward || user?.ward || "";
+      const finalStreet = street || user?.street || "";
+      if (finalRegion && finalDistrict && finalWard && !isDiaspora) {
+        assignOfficeForAddress(user!.id, finalRegion, finalDistrict, finalWard, finalStreet)
+          .then(({ officeId }) => {
+            if (officeId) (updates as Record<string, unknown>).assigned_office_id = officeId;
+          })
+          .catch(() => {});
       }
 
       showToast(L("Wasifu umehifadhiwa! ✓", "Profile saved! ✓"), "success");

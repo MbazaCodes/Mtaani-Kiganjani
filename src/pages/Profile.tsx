@@ -57,6 +57,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { InfoItem } from "../components/ui/InfoItem";
 import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
+import { assignOfficeForAddress } from "@/lib/officeRegistry";
 
 // Types based on signup form
 interface UserProfile {
@@ -1198,6 +1199,22 @@ export function Profile() {
         const { error } = await supabase.from("users").update(directUpdates).eq("id", user?.id);
 
         if (error) throw error;
+
+        // P2-T11: Recalculate assigned office if address fields changed.
+        // Applications already in progress stay with their old office
+        // (they store office_registry_id at submission time).
+        const addressChanged = ["region", "district", "ward", "street"].some(
+          (k) => k in directUpdates,
+        );
+        if (addressChanged && user?.id && !user?.is_diaspora) {
+          const region = (directUpdates as Record<string, string>).region ?? user.region ?? "";
+          const district = (directUpdates as Record<string, string>).district ?? user.district ?? "";
+          const ward = (directUpdates as Record<string, string>).ward ?? user.ward ?? "";
+          const street = (directUpdates as Record<string, string>).street ?? user.street ?? "";
+          if (region && district && ward) {
+            assignOfficeForAddress(user.id, region, district, ward, street).catch(() => {});
+          }
+        }
       }
 
       // Create change requests for sensitive fields

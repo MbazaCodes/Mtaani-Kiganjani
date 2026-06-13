@@ -129,6 +129,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const randomNum = Math.floor(1000 + Math.random() * 9000);
       const applicationNumber = `TZ-${getServiceCode(selectedService.name)}-${dateStr}-${randomNum}`;
 
+      // P2-T11: snapshot the citizen's assigned office at submission time
+      // so applications in progress stay with this office even if the
+      // citizen later changes address.
+      let officeRegistryId: string | null = (user as Record<string, unknown>).assigned_office_id as string ?? null;
+      if (!officeRegistryId && user.region && user.district && user.ward && !user.is_diaspora) {
+        try {
+          const { data: oid } = await supabase.rpc("find_office_for_address", {
+            p_region: user.region, p_district: user.district, p_ward: user.ward, p_street: user.street || "",
+          });
+          officeRegistryId = (oid as string) || null;
+        } catch { /* optional */ }
+      }
+
       const newApp = {
         id: "app-" + Math.random().toString(36).substring(7),
         user_id: user.id,
@@ -141,6 +154,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         district: user.district,
         ward: user.ward,
         street: user.street,
+        office_registry_id: officeRegistryId,
         created_at: new Date().toISOString(),
       };
 
@@ -204,6 +218,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             district: user.district ?? null,
             ward: user.ward ?? null,
             street: user.street ?? null,
+            office_registry_id: officeRegistryId,
             target_user_id: sendForApproval ? targetUserId : null,
             second_party_user_id: sendForApproval ? targetUserId : null,
             target_user_nida: sendForApproval ? (formData.target_user_nida ?? null) : null,

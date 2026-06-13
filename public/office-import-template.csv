@@ -1,0 +1,6 @@
+office_type,name,name_sw,region,district,ward,mtaa,department_type,phone,email,address
+regional,Dar es Salaam Regional Office,Ofisi ya Mkoa wa Dar es Salaam,Dar es Salaam,,,,,+255222123456,regional.dar@emtaa.go.tz,Samora Avenue
+district,Ilala District Office,Ofisi ya Wilaya ya Ilala,Dar es Salaam,Ilala,,,,+255222111222,ilala@emtaa.go.tz,Ilala
+ward,Kariakoo Ward Office,Ofisi ya Kata ya Kariakoo,Dar es Salaam,Ilala,Kariakoo,,,+255222333444,kariakoo@emtaa.go.tz,Kariakoo
+mtaa,Mchikichini Mtaa Office,Ofisi ya Mtaa wa Mchikichini,Dar es Salaam,Ilala,Kariakoo,Mchikichini,,+255222555666,mchikichini@emtaa.go.tz,Mchikichini
+department,Kariakoo Police Post,Kituo cha Polisi Kariakoo,Dar es Salaam,Ilala,Kariakoo,,Police,+255222777888,police.kariakoo@emtaa.go.tz,Kariakoo
