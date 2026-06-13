@@ -13,6 +13,7 @@ import {
 } from "./types";
 import { GovernmentStamp } from "./GovernmentStamp";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
+import { distributeFee } from "@/lib/feeDistribution";
 
 const ls = StyleSheet.create({
   paidBanner: {
@@ -48,6 +49,29 @@ const ls = StyleSheet.create({
   tableAlt: { backgroundColor: "#f9fafb" },
   tableLabel: { width: "40%", fontSize: 9, color: "#6b7280", fontWeight: "bold" },
   tableValue: { width: "60%", fontSize: 9, color: "#1c1917" },
+  // Fee distribution
+  distRow: {
+    flexDirection: "row",
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#e5e7eb",
+    alignItems: "center",
+  },
+  distAlt: { backgroundColor: "#f9fafb" },
+  distLabel: { width: "55%", fontSize: 8.5, color: "#374151" },
+  distPct: { width: "20%", fontSize: 8.5, color: "#6b7280", textAlign: "right" },
+  distAmt: { width: "25%", fontSize: 8.5, color: "#1c1917", fontWeight: "bold", textAlign: "right" },
+  distTotalRow: {
+    flexDirection: "row",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    backgroundColor: "#1a5632",
+    alignItems: "center",
+  },
+  distTotalLabel: { width: "55%", fontSize: 9, color: "#ffffff", fontWeight: "bold" },
+  distTotalPct: { width: "20%", fontSize: 9, color: "#d1fae5", textAlign: "right" },
+  distTotalAmt: { width: "25%", fontSize: 9, color: "#ffffff", fontWeight: "bold", textAlign: "right" },
 });
 
 const PAYMENT_METHODS: Record<string, { sw: string; en: string }> = {
@@ -146,6 +170,23 @@ export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang,
           label={sw ? "Namba ya Maombi" : "Application No."}
           value={application.application_number || "—"}
         />
+
+        {/* Fee distribution breakdown */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>{sw ? "MGAWANYO WA ADA" : "FEE DISTRIBUTION"}</Text>
+        </View>
+        {distributeFee(amount).map((share, i) => (
+          <View key={share.key} style={[ls.distRow, i % 2 === 1 ? ls.distAlt : {}]}>
+            <Text style={ls.distLabel}>{sw ? share.label.sw : share.label.en}</Text>
+            <Text style={ls.distPct}>{share.percent}%</Text>
+            <Text style={ls.distAmt}>{formatCurrency(share.amount)}</Text>
+          </View>
+        ))}
+        <View style={ls.distTotalRow}>
+          <Text style={ls.distTotalLabel}>{sw ? "JUMLA" : "TOTAL"}</Text>
+          <Text style={ls.distTotalPct}>100%</Text>
+          <Text style={ls.distTotalAmt}>{formatCurrency(amount)}</Text>
+        </View>
 
         {/* Payer details */}
         <View style={s.sectionHeader}>
