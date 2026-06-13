@@ -22,6 +22,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Application } from "@/lib/supabase";
 import { RefreshButton } from "@/components/ui/RefreshButton";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { ReceiptPDF } from "@/components/ReceiptPDF";
 
 interface PaymentRecord {
   id: string;
@@ -55,6 +57,10 @@ interface MyPaymentsProps {
 }
 
 export function MyPayments({ onPay }: MyPaymentsProps = {}) {
+  const PDFLink = PDFDownloadLink as unknown as React.ComponentType<{
+    document: React.ReactElement; fileName: string;
+    children: (p: { loading: boolean; error: Error | null }) => React.ReactNode;
+  }>;
   const { user } = useAuth();
   const { lang } = useLanguage();
   const L = useCallback((sw: string, en: string) => (lang === "sw" ? sw : en), [lang]);
@@ -501,13 +507,37 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
                       <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg uppercase">
                         {L("Imetolewa", "Issued")}
                       </span>
-                      <button
-                        className="p-2 text-stone-400 hover:text-emerald-600 transition-colors"
-                        title={L("Pakua", "Download")}
-                        aria-label="Download receipt"
+                      <PDFLink
+                        document={
+                          <ReceiptPDF
+                            application={app as unknown as Application}
+                            paymentData={{
+                              amount: getApplicationAmount(app),
+                              currency: "TZS",
+                              payment_method: app.payment_data?.receipt_number ? "E-Mtaa" : "E-Mtaa",
+                              transaction_id: (app.payment_data as Record<string, unknown>)?.transaction_id as string ?? app.application_number,
+                              receipt_number: app.payment_data?.receipt_number ?? `RCP-${app.application_number}`,
+                              status: "completed",
+                              paid_at: app.created_at,
+                            } as unknown as Parameters<typeof ReceiptPDF>[0]["paymentData"]}
+                            lang={lang}
+                          />
+                        }
+                        fileName={`Risiti_${app.application_number}.pdf`}
                       >
-                        <Download size={16} />
-                      </button>
+                        {({ loading, error }) => (
+                          <button
+                            className={cn(
+                              "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors",
+                              error ? "bg-red-50 text-red-500" : "bg-stone-100 hover:bg-emerald-50 text-stone-600 hover:text-emerald-600",
+                            )}
+                            title={L("Pakua Risiti", "Download Receipt")}
+                          >
+                            {loading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                            {error ? L("Hitilafu", "Error") : L("Risiti", "Receipt")}
+                          </button>
+                        )}
+                      </PDFLink>
                     </div>
                   </div>
                 ))
