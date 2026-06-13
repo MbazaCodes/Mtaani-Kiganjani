@@ -44,6 +44,7 @@ import {
   ShieldAlert,
   Banknote,
   Award,
+  ShieldCheck,
   Inbox,
   ListFilter,
   ChevronDown,
@@ -1085,10 +1086,38 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                   );
                 })()}
 
-                {/* Verification Checklist — for non-NIDA citizens */}
+                {/* Verification Checklist — ONLY for citizens not yet verified.
+                    Once a citizen is verified (via a prior application's checklist
+                    or physical verification), their future applications skip this. */}
                 {(() => {
-                  const citizenTier = getUserTier(selected.user as Parameters<typeof getUserTier>[0]);
-                  if (citizenTier === "NIDA_VERIFIED") return null;
+                  const citizen = selected.user as Parameters<typeof getUserTier>[0];
+                  const citizenTier = getUserTier(citizen);
+                  // Skip checklist if citizen is already verified at any level above basic
+                  const alreadyVerified =
+                    citizen?.is_verified === true ||
+                    citizenTier === "NIDA_VERIFIED" ||
+                    citizenTier === "PROFILE_COMPLETED" ||
+                    citizenTier === "PENDING_OFFICE_VISIT";
+                  if (alreadyVerified) {
+                    return (
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+                          <ShieldCheck size={18} className="text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="font-black text-emerald-800 text-sm">
+                            {L("Raia Amethibitishwa", "Citizen Already Verified")}
+                          </p>
+                          <p className="text-xs text-emerald-700 mt-0.5">
+                            {L(
+                              "Hakuna haja ya orodha ya ukaguzi tena. Unaweza kuidhinisha moja kwa moja.",
+                              "No checklist needed. You can approve directly.",
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
                   return (
                     <VerificationChecklist
                       applicationId={selected.id}

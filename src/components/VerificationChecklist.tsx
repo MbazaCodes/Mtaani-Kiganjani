@@ -113,8 +113,18 @@ export const VerificationChecklist: React.FC<VerificationChecklistProps> = ({
       });
 
       if (Object.values(updated).every(Boolean)) {
+        // All 5 steps done — mark the CITIZEN as verified so future
+        // applications from them skip the checklist entirely
+        if (citizenId) {
+          supabase.from("users").update({
+            is_verified: true,
+            verification_level: "PROFILE_COMPLETED",
+          }).eq("id", citizenId).then(({ error }) => {
+            if (error) console.warn("[Checklist] Could not mark citizen verified:", error.message);
+          });
+        }
         onAllComplete?.(updated);
-        showToast(L("Orodha yote imekamilika!", "All checklist items complete!"), "success");
+        showToast(L("Raia amethibitishwa! Maombi yajayo hayatahitaji ukaguzi.", "Citizen verified! Future applications won't need this checklist."), "success");
       } else {
         showToast(L("Hatua imewekwa alama ✓", "Step marked complete ✓"), "success");
       }

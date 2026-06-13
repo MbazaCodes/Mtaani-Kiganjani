@@ -75,10 +75,16 @@ export function ManualVerification() {
 
       if (error) throw error;
 
-      // Only apps from non-NIDA citizens
+      // Only apps from citizens who are NOT yet verified
       const filtered = (data || []).filter((a) => {
-        const tier = getUserTier(a.user as Partial<UserProfile>);
-        return tier !== "NIDA_VERIFIED";
+        const citizen = a.user as Partial<UserProfile>;
+        const tier = getUserTier(citizen);
+        const alreadyVerified =
+          citizen?.is_verified === true ||
+          tier === "NIDA_VERIFIED" ||
+          tier === "PROFILE_COMPLETED" ||
+          tier === "PENDING_OFFICE_VISIT";
+        return !alreadyVerified;
       });
       setApps(filtered);
     } catch (e) {
