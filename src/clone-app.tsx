@@ -163,6 +163,12 @@ function ApplyRoute() {
 }
 
 // Applications page wrapper
+// Payments page wrapper with payment gateway wired
+function MyPaymentsRoute() {
+  const { handleInitiatePayment } = useAppContext();
+  return <MyPayments onPay={handleInitiatePayment} />;
+}
+
 function ApplicationsRoute() {
   const {
     applications,
@@ -695,7 +701,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
                 <AppShell>
-                  <MyPayments />
+                  <MyPaymentsRoute />
                 </AppShell>
               </ProtectedRoute>
             }

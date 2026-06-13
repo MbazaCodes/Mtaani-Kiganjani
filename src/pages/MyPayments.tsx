@@ -13,12 +13,14 @@ import {
   Calendar,
   FileText,
   ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getApplicationAmount } from "@/lib/serviceFees";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
+import type { Application } from "@/lib/supabase";
 
 interface PaymentRecord {
   id: string;
@@ -47,7 +49,11 @@ interface IssuedDoc {
   payment_data?: { amount?: number; receipt_number?: string };
 }
 
-export function MyPayments() {
+interface MyPaymentsProps {
+  onPay?: (app: Application) => void;
+}
+
+export function MyPayments({ onPay }: MyPaymentsProps = {}) {
   const { user } = useAuth();
   const { lang } = useLanguage();
   const L = useCallback((sw: string, en: string) => (lang === "sw" ? sw : en), [lang]);
@@ -142,12 +148,12 @@ export function MyPayments() {
         .order("created_at", { ascending: false });
       setIssuedApps((issued as IssuedDoc[]) || []);
 
-      // 3. Outstanding (pending_payment)
+      // 3. Outstanding (pending_payment OR approved — both need payment)
       const { data: outstanding } = await supabase
         .from("applications")
-        .select("id, application_number, service_name, status, created_at, form_data, payment_data")
+        .select("id, application_number, service_name, status, created_at, form_data, payment_data, services:service_id(fee, extra_address_fee)")
         .eq("user_id", user.id)
-        .eq("status", "pending_payment")
+        .in("status", ["pending_payment", "approved"])
         .order("created_at", { ascending: false });
       setOutstandingApps((outstanding as IssuedDoc[]) || []);
 
@@ -504,7 +510,7 @@ export function MyPayments() {
                 </div>
               ) : (
                 outstandingApps.map((app) => {
-                  const fee = app.form_data?.service_fee || app.payment_data?.amount || 0;
+                  const fee = getApplicationAmount(app);
                   return (
                     <div
                       key={app.id}
@@ -521,11 +527,22 @@ export function MyPayments() {
                           {app.application_number} · {L("Inasubiri malipo", "Pending payment")}
                         </p>
                       </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-black text-amber-800">{fmt(Number(fee))}</p>
-                        <p className="text-[10px] font-bold text-amber-600 uppercase">
-                          {L("Madeni", "Due")}
-                        </p>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="text-right">
+                          <p className="text-sm font-black text-amber-800">{fmt(Number(fee))}</p>
+                          <p className="text-[10px] font-bold text-amber-600 uppercase">
+                            {L("Madeni", "Due")}
+                          </p>
+                        </div>
+                        {onPay && (
+                          <button
+                            onClick={() => onPay(app as unknown as Application)}
+                            className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-all shadow-md whitespace-nowrap"
+                          >
+                            <CreditCard size={14} />
+                            {L("Lipia Sasa", "Pay Now")}
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
