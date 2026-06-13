@@ -24,6 +24,7 @@ import { createNotification } from "@/lib/notifications";
 import { getUserTier, getTierInfo } from "@/lib/verification";
 import { VerificationBadge } from "@/components/VerificationBadge";
 import { VerificationChecklist } from "@/components/VerificationChecklist";
+import { RefreshButton } from "@/components/ui/RefreshButton";
 import { cn } from "@/lib/utils";
 
 type Tab = "manual" | "physical";
@@ -180,13 +181,16 @@ export function ManualVerification() {
     <div className="space-y-5">
 
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-black text-stone-900">
-          {L("Uthibitisho wa Raia", "Citizen Verification")}
-        </h1>
-        <p className="text-xs text-stone-400 mt-0.5">
-          {L("Kagua maombi yanayohitaji muda wa afisa na thibitisha raia kwa mwili", "Review applications needing officer time and verify citizens in person")}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-black text-stone-900">
+            {L("Uthibitisho wa Raia", "Citizen Verification")}
+          </h1>
+          <p className="text-xs text-stone-400 mt-0.5">
+            {L("Kagua maombi yanayohitaji muda wa afisa na thibitisha raia kwa mwili", "Review applications needing officer time and verify citizens in person")}
+          </p>
+        </div>
+        <RefreshButton onRefresh={loadApps} lang={lang} />
       </div>
 
       {/* Tab switcher */}

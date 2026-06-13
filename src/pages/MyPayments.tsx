@@ -21,6 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Application } from "@/lib/supabase";
+import { RefreshButton } from "@/components/ui/RefreshButton";
 
 interface PaymentRecord {
   id: string;
@@ -66,11 +67,10 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
   const [activeTab, setActiveTab] = useState<"history" | "receipts" | "outstanding">("history");
 
   // ── Fetch data ─────────────────────────────────────────────────────────
-  useEffect(() => {
+  const fetchAll = useCallback(async () => {
     if (!user?.id) return;
     setLoading(true);
-
-    const fetchAll = async () => {
+    {
       // 1. Get user's application IDs first
       const { data: apps } = await supabase
         .from("applications")
@@ -173,10 +173,12 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
       if (unpaidOutstanding.length > 0) setActiveTab("outstanding");
 
       setLoading(false);
-    };
-
-    fetchAll();
+    }
   }, [user?.id]);
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   // ── Analytics ──────────────────────────────────────────────────────────
   const analytics = useMemo(() => {
@@ -249,17 +251,20 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
       className="space-y-6"
     >
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-stone-900 tracking-tight flex items-center gap-2">
-          <Wallet size={24} className="text-emerald-600" />
-          {L("Malipo Yangu", "My Payments")}
-        </h1>
-        <p className="text-sm text-stone-500 mt-0.5">
-          {L(
-            "Historia ya malipo, stakabadhi, na madeni",
-            "Payment history, receipts, and obligations",
-          )}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-black text-stone-900 tracking-tight flex items-center gap-2">
+            <Wallet size={24} className="text-emerald-600" />
+            {L("Malipo Yangu", "My Payments")}
+          </h1>
+          <p className="text-sm text-stone-500 mt-0.5">
+            {L(
+              "Historia ya malipo, stakabadhi, na madeni",
+              "Payment history, receipts, and obligations",
+            )}
+          </p>
+        </div>
+        <RefreshButton onRefresh={fetchAll} lang={lang} />
       </div>
 
       {/* Analytics cards */}

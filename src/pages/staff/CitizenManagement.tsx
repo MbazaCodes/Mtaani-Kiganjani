@@ -27,6 +27,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
 import { cn } from "@/lib/utils";
+import { RefreshButton } from "@/components/ui/RefreshButton";
 
 interface PendingProfileChange {
   id: string;
@@ -423,6 +424,7 @@ export function StaffCitizenManagement() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <RefreshButton onRefresh={fetchCitizens} lang={lang} variant="labeled" />
           <button
             onClick={() => setShowAddModal(true)}
             className="h-12 px-6 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-100"
