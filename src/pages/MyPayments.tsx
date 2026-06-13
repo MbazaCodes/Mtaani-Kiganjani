@@ -148,14 +148,29 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
         .order("created_at", { ascending: false });
       setIssuedApps((issued as IssuedDoc[]) || []);
 
-      // 3. Outstanding (pending_payment OR approved — both need payment)
-      const { data: outstanding } = await supabase
+      // 3. Outstanding — any application that needs payment and isn't paid/issued/rejected
+      const { data: outstanding, error: outErr } = await supabase
         .from("applications")
-        .select("id, application_number, service_name, status, created_at, form_data, payment_data, services:service_id(fee, extra_address_fee)")
+        .select("id, application_number, service_name, status, created_at, form_data, payment_data, paid_at")
         .eq("user_id", user.id)
-        .in("status", ["pending_payment", "approved"])
+        .in("status", ["pending_payment", "approved", "verified"])
         .order("created_at", { ascending: false });
-      setOutstandingApps((outstanding as IssuedDoc[]) || []);
+      if (outErr) console.warn("[MyPayments] outstanding query error:", outErr.message);
+
+      // Only keep ones with a fee that haven't been paid
+      const unpaidOutstanding = (outstanding || []).filter((app) => {
+        const isPaid = !!(
+          app.paid_at ||
+          (app.payment_data as Record<string, unknown>)?.transaction_id ||
+          (app.form_data as Record<string, unknown>)?.payment_data
+        );
+        const fee = getApplicationAmount(app);
+        return !isPaid && fee > 0;
+      });
+      setOutstandingApps(unpaidOutstanding as IssuedDoc[]);
+
+      // Auto-show outstanding tab if there are unpaid items
+      if (unpaidOutstanding.length > 0) setActiveTab("outstanding");
 
       setLoading(false);
     };
