@@ -215,7 +215,10 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
           user:users!applications_user_id_fkey (
             id, first_name, middle_name, last_name,
             nida_number, citizen_id, phone, email,
-            ward, district, region
+            ward, district, region,
+            is_verified, verification_level,
+            profile_completion_pct, is_diaspora,
+            date_of_birth, birth_date, street
           )
         `,
         )
