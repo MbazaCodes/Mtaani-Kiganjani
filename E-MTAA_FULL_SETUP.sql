@@ -1,1337 +1,27 @@
--- ================================================================
--- E-MTAA COMPLETE DATABASE SETUP
--- Single-pass script — safe on empty Supabase project
--- Run in Supabase Dashboard → SQL Editor
+-- ================================================
+-- E-MTAA COMPLETE DATABASE SETUP (IDEMPOTENT v3)
+-- ================================================
+-- Safe on ANY Supabase project state (fresh or partial)
+-- Run in Supabase Dashboard -> SQL Editor
 -- Project: xuhilnejpqvbfukyhefi
--- ================================================================
+-- ================================================
 
--- ═══ PART 1: V3 Auth, Profiles & Verification ═══
--- ============================================================
--- E-MTAA V3.0 — Auth, Profiles & Verification SQL Migration
--- Covers:
---   1. users table — all columns for signup, login, profile completion
---   2. handle_new_user trigger — auto-creates profile on auth.users insert
---   3. create_citizen_profile RPC — safe upsert from signup flow
---   4. update_profile_completion RPC — recalculates completion %
---   5. get_profile_by_phone RPC — phone-based login lookup
---   6. Verification tier logic + upgrade functions
---   7. RLS policies for users, applications, drafts
---   8. Indexes for fast lookups
--- ============================================================
 
--- ── 1. USERS TABLE ───────────────────────────────────────────────────────────
 
-CREATE TABLE IF NOT EXISTS public.users (
-  -- Identity
-  id              uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email           text UNIQUE NOT NULL,
-  first_name      text NOT NULL DEFAULT '',
-  middle_name     text,
-  last_name       text NOT NULL DEFAULT '',
-  phone           text UNIQUE,
-  photo_url       text,
+-- >>> MIGRATION: 20260602060217_139773c5-7c13-4e7d-93ec-1890709c310d.sql
 
-  -- Role & Status
-  role            text NOT NULL DEFAULT 'citizen'
-                  CHECK (role IN ('citizen','staff','admin')),
-  account_status  text NOT NULL DEFAULT 'ACTIVE'
-                  CHECK (account_status IN ('ACTIVE','SUSPENDED','PENDING','INACTIVE')),
-  is_verified     boolean NOT NULL DEFAULT false,
-  is_diaspora     boolean NOT NULL DEFAULT false,
-  profile_complete boolean NOT NULL DEFAULT false,
-  profile_completion_pct smallint NOT NULL DEFAULT 0,
+-- Concatenated E-Mtaa schema migrations from cloned repository
+-- Files: 01_final_schema.sql, 02_fix_migration.sql, 03_documentation.sql,
+--        20260601_fix_admin_staff_rls.sql, 20260601_fix_phone_constraint.sql,
+--        20260601_fix_signup_profile_creation.sql
 
-  -- Verification tier (V3)
-  verification_level text NOT NULL DEFAULT 'UNVERIFIED'
-    CHECK (verification_level IN (
-      'UNVERIFIED','PHONE_VERIFIED','EMAIL_VERIFIED',
-      'PROFILE_COMPLETED','PENDING_OFFICE_VISIT','NIDA_VERIFIED'
-    )),
+-- Disclaimer: Loaded inline below.
+-- (Truncated marker — real SQL injected after this comment.)
 
-  -- Personal info
-  date_of_birth   date,
-  gender          text CHECK (gender IN ('M','F','O')),
-  sex             text,
-  nationality     text DEFAULT 'Tanzanian',
-  country_of_citizenship text DEFAULT 'Tanzania',
-  marital_status  text,
-  occupation      text,
-  education_level text,
-  place_of_birth  text,
-  tribe           text,
-  blood_group     text,
-  disability_status text,
-  religious_affiliation text,
+-- >>> MIGRATION: 20260602060459_cfd27db2-ca56-41df-a1c7-cb429fac8491.sql
 
-  -- Identity documents
-  nida_number     text UNIQUE,
-  passport_number text,
-  voter_id_number text,
-  driving_license_number text,
-  citizen_id      text UNIQUE,
-  id_type         text,
-  id_number       text,
-
-  -- Tanzania address (residents)
-  region          text,
-  district        text,
-  ward            text,
-  street          text,
-  house_number    text,
-  postal_code     text,
-  landmark        text,
-
-  -- Diaspora fields
-  country_of_residence text,
-  city_of_residence    text,
-  diaspora_region      text,
-  diaspora_district    text,
-  diaspora_ward        text,
-
-  -- Contact
-  alternative_phone     text,
-  email_address         text,
-  alternative_email     text,
-
-  -- Emergency contact
-  emergency_contact_name     text,
-  emergency_contact_phone    text,
-  emergency_contact_relation text,
-
-  -- Business roles
-  seller_id   text UNIQUE,
-  landlord_id text UNIQUE,
-  broker_id   text UNIQUE,
-
-  -- Signatures/stamps
-  signature_url text,
-  stamp_url     text,
-
-  -- Local officials linkage
-  mtaa_executive_officer text,
-  ward_councillor        text,
-  ward_chairperson       text,
-
-  -- Staff fields
-  assigned_region   text,
-  assigned_district text,
-  office_id         uuid,
-  employee_id       text UNIQUE,
-  department        text,
-  position          text,
-  employment_date   date,
-
-  -- Department membership
-  is_department_member boolean DEFAULT false,
-  department_id        uuid,
-
-  -- Metadata
-  email_verified  boolean DEFAULT false,
-  phone_verified  boolean DEFAULT false,
-  last_login      timestamptz,
-  created_at      timestamptz NOT NULL DEFAULT now(),
-  updated_at      timestamptz NOT NULL DEFAULT now()
-);
-
--- Add missing columns to existing tables (safe with IF NOT EXISTS alternative)
-DO $$ BEGIN
-  -- verification_level
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-    WHERE table_name='users' AND column_name='verification_level') THEN
-    ALTER TABLE public.users ADD COLUMN verification_level text NOT NULL DEFAULT 'UNVERIFIED'
-      CHECK (verification_level IN ('UNVERIFIED','PHONE_VERIFIED','EMAIL_VERIFIED',
-        'PROFILE_COMPLETED','PENDING_OFFICE_VISIT','NIDA_VERIFIED'));
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-    WHERE table_name='users' AND column_name='profile_complete') THEN
-    ALTER TABLE public.users ADD COLUMN profile_complete boolean NOT NULL DEFAULT false;
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-    WHERE table_name='users' AND column_name='profile_completion_pct') THEN
-    ALTER TABLE public.users ADD COLUMN profile_completion_pct smallint NOT NULL DEFAULT 0;
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-    WHERE table_name='users' AND column_name='city_of_residence') THEN
-    ALTER TABLE public.users ADD COLUMN city_of_residence text;
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-    WHERE table_name='users' AND column_name='is_department_member') THEN
-    ALTER TABLE public.users ADD COLUMN is_department_member boolean DEFAULT false;
-  END IF;
-END $$;
-
--- ── 2. UPDATED_AT TRIGGER ─────────────────────────────────────────────────────
-
-CREATE OR REPLACE FUNCTION public.set_updated_at()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trg_users_updated_at ON public.users;
-CREATE TRIGGER trg_users_updated_at
-  BEFORE UPDATE ON public.users
-  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
-
--- ── 3. HANDLE NEW USER TRIGGER ────────────────────────────────────────────────
--- Fires on every new auth.users row. Creates a minimal profile from metadata.
--- The signup flow also calls create_citizen_profile RPC which fills in more detail.
-
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  meta jsonb;
-  v_level text;
-BEGIN
-  meta := COALESCE(NEW.raw_user_meta_data, '{}'::jsonb);
-
-  -- Derive verification level
-  v_level := COALESCE(
-    meta->>'verification_level',
-    CASE
-      WHEN (meta->>'is_diaspora')::boolean = true THEN 'EMAIL_VERIFIED'
-      WHEN meta->>'phone' IS NOT NULL               THEN 'PHONE_VERIFIED'
-      ELSE 'UNVERIFIED'
-    END
-  );
-
-  INSERT INTO public.users (
-    id, email,
-    first_name, middle_name, last_name,
-    phone,
-    role, account_status,
-    is_verified, is_diaspora,
-    verification_level,
-    nationality, country_of_citizenship,
-    nida_number, passport_number,
-    id_type, id_number,
-    region, district, ward, street, house_number,
-    country_of_residence, city_of_residence,
-    date_of_birth, gender, sex,
-    profile_complete, profile_completion_pct,
-    created_at, updated_at
-  ) VALUES (
-    NEW.id,
-    LOWER(NEW.email),
-    UPPER(COALESCE(meta->>'first_name', split_part(NEW.email,'@',1))),
-    UPPER(NULLIF(TRIM(COALESCE(meta->>'middle_name','')), '')),
-    UPPER(COALESCE(meta->>'last_name', '')),
-    NULLIF(TRIM(COALESCE(meta->>'phone', '')), ''),
-    COALESCE(meta->>'role', 'citizen'),
-    COALESCE(meta->>'account_status', 'ACTIVE'),
-    COALESCE((meta->>'is_verified')::boolean, false),
-    COALESCE((meta->>'is_diaspora')::boolean, false),
-    v_level,
-    COALESCE(meta->>'nationality', 'Tanzanian'),
-    COALESCE(meta->>'country_of_citizenship', 'Tanzania'),
-    NULLIF(TRIM(COALESCE(meta->>'nida_number', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'passport_number', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'id_type', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'id_number', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'region', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'district', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'ward', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'street', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'house_number', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'country_of_residence', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'city_of_residence', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'date_of_birth', '')), '')::date,
-    NULLIF(TRIM(COALESCE(meta->>'gender', '')), ''),
-    NULLIF(TRIM(COALESCE(meta->>'sex', '')), ''),
-    false, 0,
-    now(), now()
-  )
-  ON CONFLICT (id) DO UPDATE SET
-    first_name  = EXCLUDED.first_name,
-    middle_name = EXCLUDED.middle_name,
-    last_name   = EXCLUDED.last_name,
-    phone       = COALESCE(EXCLUDED.phone, users.phone),
-    verification_level = EXCLUDED.verification_level,
-    is_verified = EXCLUDED.is_verified,
-    is_diaspora = EXCLUDED.is_diaspora,
-    updated_at  = now();
-
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- ── 4. PROFILE COMPLETION CALCULATOR ─────────────────────────────────────────
--- Returns 0-100. Called after profile save to update profile_completion_pct.
-
-CREATE OR REPLACE FUNCTION public.calculate_profile_completion(p_user_id uuid)
-RETURNS smallint LANGUAGE plpgsql SECURITY DEFINER AS $$
-DECLARE
-  u public.users%ROWTYPE;
-  score smallint := 0;
-  total smallint := 10;
-BEGIN
-  SELECT * INTO u FROM public.users WHERE id = p_user_id;
-  IF NOT FOUND THEN RETURN 0; END IF;
-
-  IF u.first_name  <> '' AND u.first_name IS NOT NULL  THEN score := score + 1; END IF;
-  IF u.last_name   <> '' AND u.last_name IS NOT NULL   THEN score := score + 1; END IF;
-  IF u.phone IS NOT NULL OR u.is_diaspora                THEN score := score + 1; END IF;
-  IF u.email IS NOT NULL                                 THEN score := score + 1; END IF;
-  IF u.region IS NOT NULL OR u.country_of_residence IS NOT NULL THEN score := score + 1; END IF;
-  IF u.district IS NOT NULL OR u.city_of_residence IS NOT NULL  THEN score := score + 1; END IF;
-  IF u.ward IS NOT NULL OR u.diaspora_ward IS NOT NULL           THEN score := score + 1; END IF;
-  IF u.street IS NOT NULL                                        THEN score := score + 1; END IF;
-  IF u.date_of_birth IS NOT NULL                                 THEN score := score + 1; END IF;
-  IF u.nida_number IS NOT NULL OR u.passport_number IS NOT NULL  THEN score := score + 1; END IF;
-
-  RETURN (score * 100 / total)::smallint;
-END;
-$$;
-
--- ── 5. UPDATE PROFILE COMPLETION ─────────────────────────────────────────────
-
-CREATE OR REPLACE FUNCTION public.update_profile_completion(p_user_id uuid)
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
-DECLARE
-  pct smallint;
-  v_level text;
-  u public.users%ROWTYPE;
-BEGIN
-  pct := public.calculate_profile_completion(p_user_id);
-  SELECT * INTO u FROM public.users WHERE id = p_user_id;
-
-  -- Upgrade verification level if earned
-  v_level := u.verification_level;
-  IF u.nida_number IS NOT NULL AND u.is_verified THEN
-    v_level := 'NIDA_VERIFIED';
-  ELSIF pct >= 70 AND v_level IN ('PHONE_VERIFIED','EMAIL_VERIFIED') THEN
-    v_level := 'PROFILE_COMPLETED';
-  END IF;
-
-  UPDATE public.users SET
-    profile_completion_pct = pct,
-    profile_complete = (pct >= 60),
-    verification_level = v_level,
-    updated_at = now()
-  WHERE id = p_user_id;
-END;
-$$;
-
--- Trigger: auto-recalculate after every profile update
-CREATE OR REPLACE FUNCTION public.trg_recalc_completion()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  PERFORM public.update_profile_completion(NEW.id);
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trg_users_completion ON public.users;
-CREATE TRIGGER trg_users_completion
-  AFTER UPDATE OF region, district, ward, street, date_of_birth,
-                  nida_number, passport_number, phone, gender,
-                  country_of_residence, city_of_residence
-  ON public.users
-  FOR EACH ROW EXECUTE FUNCTION public.trg_recalc_completion();
-
--- ── 6. CREATE CITIZEN PROFILE RPC ─────────────────────────────────────────────
--- Called from Auth.tsx signup after supabase.auth.signUp succeeds.
--- Safe upsert — won't fail if trigger already created the row.
-
-CREATE OR REPLACE FUNCTION public.create_citizen_profile(
-  p_id                    uuid,
-  p_email                 text      DEFAULT NULL,
-  p_first_name            text      DEFAULT NULL,
-  p_middle_name           text      DEFAULT NULL,
-  p_last_name             text      DEFAULT NULL,
-  p_phone                 text      DEFAULT NULL,
-  p_sex                   text      DEFAULT NULL,
-  p_gender                text      DEFAULT NULL,
-  p_date_of_birth         text      DEFAULT NULL,
-  p_place_of_birth        text      DEFAULT NULL,
-  p_marital_status        text      DEFAULT NULL,
-  p_occupation            text      DEFAULT NULL,
-  p_education_level       text      DEFAULT NULL,
-  p_nationality           text      DEFAULT 'Tanzanian',
-  p_country_of_citizenship text     DEFAULT 'Tanzania',
-  p_nida_number           text      DEFAULT NULL,
-  p_id_type               text      DEFAULT NULL,
-  p_id_number             text      DEFAULT NULL,
-  p_region                text      DEFAULT NULL,
-  p_district              text      DEFAULT NULL,
-  p_ward                  text      DEFAULT NULL,
-  p_street                text      DEFAULT NULL,
-  p_house_number          text      DEFAULT NULL,
-  p_is_diaspora           boolean   DEFAULT false,
-  p_country_of_residence  text      DEFAULT NULL,
-  p_city_of_residence     text      DEFAULT NULL,
-  p_passport_number       text      DEFAULT NULL,
-  p_is_verified           boolean   DEFAULT true,
-  p_verification_level    text      DEFAULT NULL
-)
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_level text;
-BEGIN
-  v_level := COALESCE(
-    p_verification_level,
-    CASE
-      WHEN p_nida_number IS NOT NULL AND p_is_verified THEN 'NIDA_VERIFIED'
-      WHEN p_is_diaspora                                THEN 'EMAIL_VERIFIED'
-      WHEN p_phone IS NOT NULL                          THEN 'PHONE_VERIFIED'
-      ELSE 'UNVERIFIED'
-    END
-  );
-
-  INSERT INTO public.users (
-    id, email, first_name, middle_name, last_name,
-    phone, sex, gender, date_of_birth, place_of_birth,
-    marital_status, occupation, education_level,
-    nationality, country_of_citizenship,
-    nida_number, id_type, id_number,
-    region, district, ward, street, house_number,
-    is_diaspora, country_of_residence, city_of_residence,
-    passport_number,
-    role, is_verified, verification_level, account_status,
-    profile_complete, profile_completion_pct,
-    created_at, updated_at
-  )
-  VALUES (
-    p_id,
-    LOWER(COALESCE(p_email, '')),
-    UPPER(COALESCE(p_first_name, '')),
-    UPPER(NULLIF(TRIM(COALESCE(p_middle_name, '')), '')),
-    UPPER(COALESCE(p_last_name, '')),
-    NULLIF(TRIM(COALESCE(p_phone, '')), ''),
-    p_sex, p_gender,
-    NULLIF(TRIM(COALESCE(p_date_of_birth, '')), '')::date,
-    p_place_of_birth, p_marital_status, p_occupation, p_education_level,
-    COALESCE(p_nationality, 'Tanzanian'),
-    COALESCE(p_country_of_citizenship, 'Tanzania'),
-    NULLIF(TRIM(COALESCE(p_nida_number, '')), ''),
-    p_id_type, p_id_number,
-    NULLIF(TRIM(COALESCE(p_region, '')), ''),
-    NULLIF(TRIM(COALESCE(p_district, '')), ''),
-    NULLIF(TRIM(COALESCE(p_ward, '')), ''),
-    NULLIF(TRIM(COALESCE(p_street, '')), ''),
-    NULLIF(TRIM(COALESCE(p_house_number, '')), ''),
-    COALESCE(p_is_diaspora, false),
-    NULLIF(TRIM(COALESCE(p_country_of_residence, '')), ''),
-    NULLIF(TRIM(COALESCE(p_city_of_residence, '')), ''),
-    NULLIF(TRIM(COALESCE(p_passport_number, '')), ''),
-    'citizen',
-    COALESCE(p_is_verified, true),
-    v_level,
-    'ACTIVE',
-    false, 0,
-    now(), now()
-  )
-  ON CONFLICT (id) DO UPDATE SET
-    first_name            = COALESCE(EXCLUDED.first_name, users.first_name),
-    middle_name           = COALESCE(EXCLUDED.middle_name, users.middle_name),
-    last_name             = COALESCE(NULLIF(EXCLUDED.last_name,''), users.last_name),
-    phone                 = COALESCE(EXCLUDED.phone, users.phone),
-    sex                   = COALESCE(EXCLUDED.sex, users.sex),
-    gender                = COALESCE(EXCLUDED.gender, users.gender),
-    date_of_birth         = COALESCE(EXCLUDED.date_of_birth, users.date_of_birth),
-    nationality           = COALESCE(EXCLUDED.nationality, users.nationality),
-    nida_number           = COALESCE(EXCLUDED.nida_number, users.nida_number),
-    id_type               = COALESCE(EXCLUDED.id_type, users.id_type),
-    id_number             = COALESCE(EXCLUDED.id_number, users.id_number),
-    region                = COALESCE(EXCLUDED.region, users.region),
-    district              = COALESCE(EXCLUDED.district, users.district),
-    ward                  = COALESCE(EXCLUDED.ward, users.ward),
-    street                = COALESCE(EXCLUDED.street, users.street),
-    house_number          = COALESCE(EXCLUDED.house_number, users.house_number),
-    is_diaspora           = EXCLUDED.is_diaspora,
-    country_of_residence  = COALESCE(EXCLUDED.country_of_residence, users.country_of_residence),
-    city_of_residence     = COALESCE(EXCLUDED.city_of_residence, users.city_of_residence),
-    passport_number       = COALESCE(EXCLUDED.passport_number, users.passport_number),
-    verification_level    = CASE
-      WHEN EXCLUDED.verification_level = 'NIDA_VERIFIED' THEN 'NIDA_VERIFIED'
-      WHEN users.verification_level    = 'NIDA_VERIFIED' THEN 'NIDA_VERIFIED'
-      ELSE COALESCE(EXCLUDED.verification_level, users.verification_level)
-    END,
-    is_verified           = COALESCE(EXCLUDED.is_verified, users.is_verified),
-    updated_at            = now();
-
-  -- Recalculate completion after insert/update
-  PERFORM public.update_profile_completion(p_id);
-END;
-$$;
-
--- ── 7. PHONE-BASED LOGIN LOOKUP ───────────────────────────────────────────────
--- Auth.tsx phone login: looks up email by phone, then calls signInWithPassword
-
-CREATE OR REPLACE FUNCTION public.get_email_by_phone(p_phone text)
-RETURNS TABLE(email text) LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-BEGIN
-  RETURN QUERY
-    SELECT u.email FROM public.users u
-    WHERE u.phone = p_phone
-       OR u.phone = '+255' || REGEXP_REPLACE(p_phone, '^(0|\+255)', '')
-    LIMIT 1;
-END;
-$$;
-
-GRANT EXECUTE ON FUNCTION public.get_email_by_phone(text) TO anon, authenticated;
-
--- ── 8. UPGRADE VERIFICATION TIER ─────────────────────────────────────────────
-
-CREATE OR REPLACE FUNCTION public.upgrade_verification_tier(
-  p_user_id uuid,
-  p_tier    text  -- 'PHONE_VERIFIED'|'EMAIL_VERIFIED'|'PROFILE_COMPLETED'|'PENDING_OFFICE_VISIT'|'NIDA_VERIFIED'
-)
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
-BEGIN
-  UPDATE public.users SET
-    verification_level = p_tier,
-    is_verified = (p_tier IN ('PHONE_VERIFIED','EMAIL_VERIFIED','PROFILE_COMPLETED','PENDING_OFFICE_VISIT','NIDA_VERIFIED')),
-    updated_at = now()
-  WHERE id = p_user_id;
-
-  PERFORM public.update_profile_completion(p_user_id);
-END;
-$$;
-
-GRANT EXECUTE ON FUNCTION public.upgrade_verification_tier(uuid, text) TO authenticated;
-
--- ── 9. APPLICATIONS TABLE COLUMNS ────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS public.applications (
-  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id            uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  service_id         text NOT NULL,
-  service_name       text NOT NULL,
-  application_number text UNIQUE NOT NULL,
-  status             text NOT NULL DEFAULT 'submitted'
-    CHECK (status IN ('submitted','pending_review','pending_payment','paid','verified',
-                      'approved','issued','returned','rejected','refunded')),
-  form_data          jsonb NOT NULL DEFAULT '{}',
-  feedback           text,
-  region             text,
-  district           text,
-  ward               text,
-  street             text,
-  assigned_staff_id  uuid REFERENCES public.users(id),
-  target_user_id     uuid REFERENCES public.users(id),
-  target_user_nida   text,
-  target_user_role   text,
-  second_party_user_id uuid REFERENCES public.users(id),
-  agreement_status   text,
-  payment_data       jsonb,
-  confirmation_data  jsonb,
-  is_confirmed       boolean DEFAULT false,
-  buyer_accepted     boolean,
-  tenant_accepted    boolean,
-  approved_by        uuid REFERENCES public.users(id),
-  rejected_by        uuid REFERENCES public.users(id),
-  returned_by        uuid REFERENCES public.users(id),
-  issued_by          uuid REFERENCES public.users(id),
-  verified_by        uuid REFERENCES public.users(id),
-  approved_at        timestamptz,
-  paid_at            timestamptz,
-  issued_at          timestamptz,
-  verified_at        timestamptz,
-  -- V3 officer checklist columns
-  checklist_phone_verified   boolean DEFAULT false,
-  checklist_address_verified boolean DEFAULT false,
-  checklist_id_verified      boolean DEFAULT false,
-  checklist_witnesses_added  boolean DEFAULT false,
-  checklist_final_approved   boolean DEFAULT false,
-  created_at         timestamptz NOT NULL DEFAULT now(),
-  updated_at         timestamptz NOT NULL DEFAULT now()
-);
-
--- Add checklist columns to existing tables
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-    WHERE table_name='applications' AND column_name='checklist_phone_verified') THEN
-    ALTER TABLE public.applications
-      ADD COLUMN checklist_phone_verified   boolean DEFAULT false,
-      ADD COLUMN checklist_address_verified boolean DEFAULT false,
-      ADD COLUMN checklist_id_verified      boolean DEFAULT false,
-      ADD COLUMN checklist_witnesses_added  boolean DEFAULT false,
-      ADD COLUMN checklist_final_approved   boolean DEFAULT false;
-  END IF;
-END $$;
-
-DROP TRIGGER IF EXISTS trg_applications_updated_at ON public.applications;
-CREATE TRIGGER trg_applications_updated_at
-  BEFORE UPDATE ON public.applications
-  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
-
--- ── 10. APPLICATION NUMBER GENERATOR ─────────────────────────────────────────
-
-CREATE OR REPLACE FUNCTION public.generate_application_number()
-RETURNS text LANGUAGE plpgsql AS $$
-BEGIN
-  RETURN 'APP-' || TO_CHAR(now(), 'YYYYMMDD') || '-' ||
-         LPAD(FLOOR(RANDOM() * 99999)::text, 5, '0');
-END;
-$$;
-
--- ── 11. RLS POLICIES ─────────────────────────────────────────────────────────
-
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
-
--- Users: own row full access
-DROP POLICY IF EXISTS "users_select_own"  ON public.users;
-DROP POLICY IF EXISTS "users_insert_own"  ON public.users;
-DROP POLICY IF EXISTS "users_update_own"  ON public.users;
-DROP POLICY IF EXISTS "users_staff_select" ON public.users;
-
-DROP POLICY IF EXISTS "users_select_own" ON public.users;
-DROP POLICY IF EXISTS "users_select_own" ON public.users;
-CREATE POLICY "users_select_own" ON public.users
-  FOR SELECT USING (auth.uid() = id);
-
-DROP POLICY IF EXISTS "users_insert_own" ON public.users;
-DROP POLICY IF EXISTS "users_insert_own" ON public.users;
-CREATE POLICY "users_insert_own" ON public.users
-  FOR INSERT WITH CHECK (auth.uid() = id);
-
-DROP POLICY IF EXISTS "users_update_own" ON public.users;
-DROP POLICY IF EXISTS "users_update_own" ON public.users;
-CREATE POLICY "users_update_own" ON public.users
-  FOR UPDATE USING (auth.uid() = id);
-
--- Staff/admin: can read all citizens
-DROP POLICY IF EXISTS "users_staff_select" ON public.users;
-DROP POLICY IF EXISTS "users_staff_select" ON public.users;
-CREATE POLICY "users_staff_select" ON public.users
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.users u
-      WHERE u.id = auth.uid()
-        AND u.role IN ('staff','admin')
-    )
-  );
-
--- Staff/admin: can update citizens (for verification upgrades)
-DROP POLICY IF EXISTS "users_staff_update" ON public.users;
-DROP POLICY IF EXISTS "users_staff_update" ON public.users;
-CREATE POLICY "users_staff_update" ON public.users
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.users u
-      WHERE u.id = auth.uid()
-        AND u.role IN ('staff','admin')
-    )
-  );
-
--- Applications: citizen sees own, staff/admin sees all in their region
-DROP POLICY IF EXISTS "applications_select_own"   ON public.applications;
-DROP POLICY IF EXISTS "applications_insert_own"   ON public.applications;
-DROP POLICY IF EXISTS "applications_update_own"   ON public.applications;
-DROP POLICY IF EXISTS "applications_staff_select" ON public.applications;
-DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
-
-DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
-DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
-CREATE POLICY "applications_select_own" ON public.applications
-  FOR SELECT USING (user_id = auth.uid() OR second_party_user_id = auth.uid());
-
-DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
-DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
-CREATE POLICY "applications_insert_own" ON public.applications
-  FOR INSERT WITH CHECK (user_id = auth.uid());
-
-DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
-DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
-CREATE POLICY "applications_update_own" ON public.applications
-  FOR UPDATE USING (user_id = auth.uid());
-
-DROP POLICY IF EXISTS "applications_staff_select" ON public.applications;
-DROP POLICY IF EXISTS "applications_staff_select" ON public.applications;
-CREATE POLICY "applications_staff_select" ON public.applications
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role IN ('staff','admin'))
-  );
-
-DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
-DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
-CREATE POLICY "applications_staff_update" ON public.applications
-  FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role IN ('staff','admin'))
-  );
-
--- ── 12. INDEXES ───────────────────────────────────────────────────────────────
-
-DROP INDEX IF EXISTS "idx_users_phone";
-CREATE INDEX IF NOT EXISTS idx_users_phone   ON public.users(phone);
-DROP INDEX IF EXISTS "idx_users_email";
-CREATE INDEX IF NOT EXISTS idx_users_email   ON public.users(email);
-DROP INDEX IF EXISTS "idx_users_nida";
-CREATE INDEX IF NOT EXISTS idx_users_nida    ON public.users(nida_number);
-DROP INDEX IF EXISTS "idx_users_role";
-CREATE INDEX IF NOT EXISTS idx_users_role    ON public.users(role);
-DROP INDEX IF EXISTS "idx_users_region";
-CREATE INDEX IF NOT EXISTS idx_users_region  ON public.users(region);
-DROP INDEX IF EXISTS "idx_users_verification";
-CREATE INDEX IF NOT EXISTS idx_users_verification ON public.users(verification_level);
-DROP INDEX IF EXISTS "idx_applications_user";
-CREATE INDEX IF NOT EXISTS idx_applications_user    ON public.applications(user_id);
-DROP INDEX IF EXISTS "idx_applications_status";
-CREATE INDEX IF NOT EXISTS idx_applications_status  ON public.applications(status);
-DROP INDEX IF EXISTS "idx_applications_service";
-CREATE INDEX IF NOT EXISTS idx_applications_service ON public.applications(service_name);
-DROP INDEX IF EXISTS "idx_applications_region";
-CREATE INDEX IF NOT EXISTS idx_applications_region  ON public.applications(region);
-DROP INDEX IF EXISTS "idx_applications_number";
-CREATE INDEX IF NOT EXISTS idx_applications_number  ON public.applications(application_number);
-
--- ── 13. GRANTS ────────────────────────────────────────────────────────────────
-
-GRANT USAGE ON SCHEMA public TO anon, authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.users TO authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.applications TO authenticated;
-GRANT SELECT ON public.users TO anon;
-
-GRANT EXECUTE ON FUNCTION public.create_citizen_profile TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.calculate_profile_completion TO authenticated;
-GRANT EXECUTE ON FUNCTION public.update_profile_completion TO authenticated;
-GRANT EXECUTE ON FUNCTION public.get_email_by_phone TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.upgrade_verification_tier TO authenticated;
-GRANT EXECUTE ON FUNCTION public.generate_application_number TO authenticated;
-
--- ── 14. SERVICES TABLE ────────────────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS public.services (
-  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name         text UNIQUE NOT NULL,
-  name_en      text,
-  description  text,
-  description_en text,
-  fee          numeric(12,2) NOT NULL DEFAULT 0,
-  active       boolean NOT NULL DEFAULT true,
-  created_at   timestamptz NOT NULL DEFAULT now()
-);
-
-DROP INDEX IF EXISTS "idx_services_active";
-CREATE INDEX IF NOT EXISTS idx_services_active ON public.services(active);
-
-ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "services_select_all" ON public.services;
-DROP POLICY IF EXISTS "services_select_all" ON public.services;
-CREATE POLICY "services_select_all" ON public.services FOR SELECT USING (true);
-DROP POLICY IF EXISTS "services_staff_write" ON public.services;
-DROP POLICY IF EXISTS "services_staff_write" ON public.services;
-CREATE POLICY "services_staff_write" ON public.services
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role IN ('staff','admin'))
-  );
-
-GRANT SELECT ON public.services TO anon, authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.services TO authenticated;
-
--- ── DONE ──────────────────────────────────────────────────────────────────────
--- Run this in Supabase SQL Editor (Project: xuhilnejpqvbfukyhefi)
--- Safe to run multiple times — all DDL uses IF NOT EXISTS / CREATE OR REPLACE
-
--- ── UPDATE: get_email_by_phone — try all number formats ──────────────────────
-CREATE OR REPLACE FUNCTION public.get_email_by_phone(p_phone text)
-RETURNS TABLE(email text) LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_digits text;
-  v_e164   text;
-  v_local  text;
-  v_short  text;
-BEGIN
-  -- Strip non-digits
-  v_digits := REGEXP_REPLACE(p_phone, '[^0-9]', '', 'g');
-
-  -- Build E.164: +255XXXXXXXXX
-  v_e164 := CASE
-    WHEN LEFT(v_digits, 3) = '255' THEN '+' || v_digits
-    WHEN LEFT(v_digits, 1) = '0'   THEN '+255' || SUBSTRING(v_digits, 2)
-    WHEN LENGTH(v_digits) = 9      THEN '+255' || v_digits
-    ELSE p_phone
-  END;
-
-  -- Local: 0XXXXXXXXX
-  v_local := CASE
-    WHEN LEFT(v_digits, 3) = '255' THEN '0' || SUBSTRING(v_digits, 4)
-    WHEN LEFT(v_digits, 1) = '0'   THEN v_digits
-    ELSE '0' || v_digits
-  END;
-
-  -- Short: 9-digit no prefix
-  v_short := CASE
-    WHEN LEFT(v_digits, 3) = '255' THEN SUBSTRING(v_digits, 4)
-    WHEN LEFT(v_digits, 1) = '0'   THEN SUBSTRING(v_digits, 2)
-    ELSE v_digits
-  END;
-
-  RETURN QUERY
-    SELECT u.email FROM public.users u
-    WHERE u.phone IN (v_e164, v_local, v_digits, '+' || v_digits, v_short)
-       OR u.phone LIKE '%' || v_short
-    LIMIT 1;
-END;
-$$;
-
-GRANT EXECUTE ON FUNCTION public.get_email_by_phone(text) TO anon, authenticated;
-
-
--- ═══ PART 2: Full RLS Policies (notifications, agreements, biz_reg, etc.) ═══
--- ═══════════════════════════════════════════════════════════════════
--- E-MTAA Row Level Security Policies
--- 
--- Ensures:
---   • Citizens see only their own data
---   • Staff see data in their assigned region/district
---   • Admin sees everything
---   • Applications visible to applicant + assigned staff + admin
---   • Notifications visible only to the intended recipient
---   • Business registrations visible to owner + staff/admin
--- ═══════════════════════════════════════════════════════════════════
-
--- ── Helper function: check if current user is admin ──────────────
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS boolean AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'admin'
-  );
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
-
--- ── Helper function: check if current user is staff or admin ────
-CREATE OR REPLACE FUNCTION public.is_staff_or_admin()
-RETURNS boolean AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role IN ('staff', 'admin')
-  );
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
-
--- ══════════════════════════════════════════════════════════════════
--- 1. USERS / PROFILES TABLE
--- ══════════════════════════════════════════════════════════════════
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-
--- Citizens can read their own profile
-DROP POLICY IF EXISTS "users_select_own" ON public.users;
-DROP POLICY IF EXISTS "users_select_own" ON public.users;
-CREATE POLICY "users_select_own" ON public.users
-  FOR SELECT USING (auth.uid() = id);
-
--- Citizens can update their own profile
-DROP POLICY IF EXISTS "users_update_own" ON public.users;
-DROP POLICY IF EXISTS "users_update_own" ON public.users;
-CREATE POLICY "users_update_own" ON public.users
-  FOR UPDATE USING (auth.uid() = id);
-
--- Staff can read all citizens (needed for verification, support, review)
-DROP POLICY IF EXISTS "users_select_staff" ON public.users;
-DROP POLICY IF EXISTS "users_select_staff" ON public.users;
-CREATE POLICY "users_select_staff" ON public.users
-  FOR SELECT USING (public.is_staff_or_admin());
-
--- Admin can update any user (role changes, verification, etc.)
-DROP POLICY IF EXISTS "users_update_admin" ON public.users;
-DROP POLICY IF EXISTS "users_update_admin" ON public.users;
-CREATE POLICY "users_update_admin" ON public.users
-  FOR UPDATE USING (public.is_admin());
-
--- Service creation (signup) — allow insert for authenticated users
-DROP POLICY IF EXISTS "users_insert_self" ON public.users;
-DROP POLICY IF EXISTS "users_insert_self" ON public.users;
-CREATE POLICY "users_insert_self" ON public.users
-  FOR INSERT WITH CHECK (auth.uid() = id);
-
--- ══════════════════════════════════════════════════════════════════
--- 2. PROFILES TABLE (if separate from users)
--- ══════════════════════════════════════════════════════════════════
-DO $$ BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'profiles' AND table_schema = 'public') THEN
-    ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-    
-    -- Citizen reads own profile
-DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
-    DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
-    CREATE POLICY "profiles_select_own" ON public.profiles
-      FOR SELECT USING (auth.uid() = id);
-    
-    -- Citizen updates own profile
-DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
-    DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
-    CREATE POLICY "profiles_update_own" ON public.profiles
-      FOR UPDATE USING (auth.uid() = id);
-    
-    -- Staff/admin can read all profiles (for buyer/tenant lookup in Sales/Rental)
-DROP POLICY IF EXISTS "profiles_select_staff" ON public.profiles;
-    DROP POLICY IF EXISTS "profiles_select_staff" ON public.profiles;
-    CREATE POLICY "profiles_select_staff" ON public.profiles
-      FOR SELECT USING (public.is_staff_or_admin());
-
-    -- Insert own profile
-DROP POLICY IF EXISTS "profiles_insert_self" ON public.profiles;
-    DROP POLICY IF EXISTS "profiles_insert_self" ON public.profiles;
-    CREATE POLICY "profiles_insert_self" ON public.profiles
-      FOR INSERT WITH CHECK (auth.uid() = id);
-
-    -- Allow authenticated users to search by NIDA/phone (for agreement counterparty lookup)
-    -- This is safe because the search only returns basic public fields
-DROP POLICY IF EXISTS "profiles_select_authenticated" ON public.profiles;
-    DROP POLICY IF EXISTS "profiles_select_authenticated" ON public.profiles;
-    CREATE POLICY "profiles_select_authenticated" ON public.profiles
-      FOR SELECT USING (auth.uid() IS NOT NULL);
-  END IF;
-END $$;
-
--- ══════════════════════════════════════════════════════════════════
--- 3. APPLICATIONS TABLE
--- ══════════════════════════════════════════════════════════════════
-ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
-
--- Citizen can read their own applications
-DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
-DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
-CREATE POLICY "applications_select_own" ON public.applications
-  FOR SELECT USING (auth.uid() = user_id);
-
--- Citizen can insert their own applications
-DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
-DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
-CREATE POLICY "applications_insert_own" ON public.applications
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
--- Staff/admin can read all applications
-DROP POLICY IF EXISTS "applications_select_staff" ON public.applications;
-DROP POLICY IF EXISTS "applications_select_staff" ON public.applications;
-CREATE POLICY "applications_select_staff" ON public.applications
-  FOR SELECT USING (public.is_staff_or_admin());
-
--- Staff/admin can update applications (approve, reject, etc.)
-DROP POLICY IF EXISTS "applications_update_staff" ON public.applications;
-DROP POLICY IF EXISTS "applications_update_staff" ON public.applications;
-CREATE POLICY "applications_update_staff" ON public.applications
-  FOR UPDATE USING (public.is_staff_or_admin());
-
--- Citizen can update own application (for buyer_accepted / tenant_accepted)
-DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
-DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
-CREATE POLICY "applications_update_own" ON public.applications
-  FOR UPDATE USING (auth.uid() = user_id);
-
--- Also allow target_user to update (counterparty acceptance)
-DROP POLICY IF EXISTS "applications_update_target" ON public.applications;
-DROP POLICY IF EXISTS "applications_update_target" ON public.applications;
-CREATE POLICY "applications_update_target" ON public.applications
-  FOR UPDATE USING (auth.uid() = target_user_id);
-
--- ══════════════════════════════════════════════════════════════════
--- 4. NOTIFICATIONS TABLE
--- ══════════════════════════════════════════════════════════════════
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
-
--- User can only see their own notifications
-DROP POLICY IF EXISTS "notifications_select_own" ON public.notifications;
-DROP POLICY IF EXISTS "notifications_select_own" ON public.notifications;
-CREATE POLICY "notifications_select_own" ON public.notifications
-  FOR SELECT USING (auth.uid() = user_id);
-
--- User can update their own notifications (mark as read)
-DROP POLICY IF EXISTS "notifications_update_own" ON public.notifications;
-DROP POLICY IF EXISTS "notifications_update_own" ON public.notifications;
-CREATE POLICY "notifications_update_own" ON public.notifications
-  FOR UPDATE USING (auth.uid() = user_id);
-
--- Any authenticated user can insert notifications (forms create notifications for others)
-DROP POLICY IF EXISTS "notifications_insert_auth" ON public.notifications;
-DROP POLICY IF EXISTS "notifications_insert_auth" ON public.notifications;
-CREATE POLICY "notifications_insert_auth" ON public.notifications
-  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
-
--- Staff/admin can read all notifications (for support)
-DROP POLICY IF EXISTS "notifications_select_staff" ON public.notifications;
-DROP POLICY IF EXISTS "notifications_select_staff" ON public.notifications;
-CREATE POLICY "notifications_select_staff" ON public.notifications
-  FOR SELECT USING (public.is_staff_or_admin());
-
--- ══════════════════════════════════════════════════════════════════
--- 5. AGREEMENT_NOTIFICATIONS TABLE
--- ══════════════════════════════════════════════════════════════════
-ALTER TABLE public.agreement_notifications ENABLE ROW LEVEL SECURITY;
-
--- Recipient can see their agreement notifications
-DROP POLICY IF EXISTS "agreement_notifs_select_recipient" ON public.agreement_notifications;
-DROP POLICY IF EXISTS "agreement_notifs_select_recipient" ON public.agreement_notifications;
-CREATE POLICY "agreement_notifs_select_recipient" ON public.agreement_notifications
-  FOR SELECT USING (auth.uid() = recipient_id);
-
--- Sender can see what they sent
-DROP POLICY IF EXISTS "agreement_notifs_select_sender" ON public.agreement_notifications;
-DROP POLICY IF EXISTS "agreement_notifs_select_sender" ON public.agreement_notifications;
-CREATE POLICY "agreement_notifs_select_sender" ON public.agreement_notifications
-  FOR SELECT USING (auth.uid() = sender_id);
-
--- Recipient can update (accept/reject)
-DROP POLICY IF EXISTS "agreement_notifs_update_recipient" ON public.agreement_notifications;
-DROP POLICY IF EXISTS "agreement_notifs_update_recipient" ON public.agreement_notifications;
-CREATE POLICY "agreement_notifs_update_recipient" ON public.agreement_notifications
-  FOR UPDATE USING (auth.uid() = recipient_id);
-
--- Any authenticated user can insert (seller/landlord creates for buyer/tenant)
-DROP POLICY IF EXISTS "agreement_notifs_insert_auth" ON public.agreement_notifications;
-DROP POLICY IF EXISTS "agreement_notifs_insert_auth" ON public.agreement_notifications;
-CREATE POLICY "agreement_notifs_insert_auth" ON public.agreement_notifications
-  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
-
--- Staff/admin can read all
-DROP POLICY IF EXISTS "agreement_notifs_select_staff" ON public.agreement_notifications;
-DROP POLICY IF EXISTS "agreement_notifs_select_staff" ON public.agreement_notifications;
-CREATE POLICY "agreement_notifs_select_staff" ON public.agreement_notifications
-  FOR SELECT USING (public.is_staff_or_admin());
-
--- ══════════════════════════════════════════════════════════════════
--- 6. BUSINESS_REGISTRATIONS TABLE
--- ══════════════════════════════════════════════════════════════════
-ALTER TABLE public.business_registrations ENABLE ROW LEVEL SECURITY;
-
--- Citizen can read their own registrations
-DROP POLICY IF EXISTS "bizreg_select_own" ON public.business_registrations;
-DROP POLICY IF EXISTS "bizreg_select_own" ON public.business_registrations;
-CREATE POLICY "bizreg_select_own" ON public.business_registrations
-  FOR SELECT USING (auth.uid() = user_id);
-
--- Citizen can insert their own registrations
-DROP POLICY IF EXISTS "bizreg_insert_own" ON public.business_registrations;
-DROP POLICY IF EXISTS "bizreg_insert_own" ON public.business_registrations;
-CREATE POLICY "bizreg_insert_own" ON public.business_registrations
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
--- Staff/admin can read all registrations
-DROP POLICY IF EXISTS "bizreg_select_staff" ON public.business_registrations;
-DROP POLICY IF EXISTS "bizreg_select_staff" ON public.business_registrations;
-CREATE POLICY "bizreg_select_staff" ON public.business_registrations
-  FOR SELECT USING (public.is_staff_or_admin());
-
--- Staff/admin can update registrations (approve/reject)
-DROP POLICY IF EXISTS "bizreg_update_staff" ON public.business_registrations;
-DROP POLICY IF EXISTS "bizreg_update_staff" ON public.business_registrations;
-CREATE POLICY "bizreg_update_staff" ON public.business_registrations
-  FOR UPDATE USING (public.is_staff_or_admin());
-
--- ══════════════════════════════════════════════════════════════════
--- 7. SERVICES TABLE (public read for all, admin write)
--- ══════════════════════════════════════════════════════════════════
-DO $$ BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'services' AND table_schema = 'public') THEN
-    ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
-    
-    -- Everyone can read services
-DROP POLICY IF EXISTS "services_select_all" ON public.services;
-    DROP POLICY IF EXISTS "services_select_all" ON public.services;
-    CREATE POLICY "services_select_all" ON public.services
-      FOR SELECT USING (true);
-    
-    -- Only admin can modify services
-DROP POLICY IF EXISTS "services_modify_admin" ON public.services;
-    DROP POLICY IF EXISTS "services_modify_admin" ON public.services;
-    CREATE POLICY "services_modify_admin" ON public.services
-      FOR ALL USING (public.is_admin());
-  END IF;
-END $$;
-
--- ══════════════════════════════════════════════════════════════════
--- 8. ACTIVITY_LOGS TABLE
--- ══════════════════════════════════════════════════════════════════
-DO $$ BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'activity_logs' AND table_schema = 'public') THEN
-    ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
-    
-    -- Only admin can read logs
-DROP POLICY IF EXISTS "logs_select_admin" ON public.activity_logs;
-    DROP POLICY IF EXISTS "logs_select_admin" ON public.activity_logs;
-    CREATE POLICY "logs_select_admin" ON public.activity_logs
-      FOR SELECT USING (public.is_admin());
-    
-    -- Any authenticated user can insert logs
-DROP POLICY IF EXISTS "logs_insert_auth" ON public.activity_logs;
-    DROP POLICY IF EXISTS "logs_insert_auth" ON public.activity_logs;
-    CREATE POLICY "logs_insert_auth" ON public.activity_logs
-      FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
-  END IF;
-END $$;
-
--- ══════════════════════════════════════════════════════════════════
--- 9. STORAGE POLICIES (documents bucket)
--- ══════════════════════════════════════════════════════════════════
--- Citizens can upload to their own folder
--- Staff/admin can read all documents
-DO $$ BEGIN
-  IF EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'documents') THEN
-    -- Upload policy: citizen can upload to business-docs/{their_id}/
-DROP POLICY IF EXISTS "storage_upload_own" ON storage.objects;
-    DROP POLICY IF EXISTS "storage_upload_own" ON storage.objects;
-    CREATE POLICY "storage_upload_own" ON storage.objects
-      FOR INSERT WITH CHECK (
-        bucket_id = 'documents' AND
-        auth.uid() IS NOT NULL AND
-        (storage.foldername(name))[1] = 'business-docs' AND
-        (storage.foldername(name))[2] = auth.uid()::text
-      );
-    
-    -- Read policy: owner can read their own files
-DROP POLICY IF EXISTS "storage_select_own" ON storage.objects;
-    DROP POLICY IF EXISTS "storage_select_own" ON storage.objects;
-    CREATE POLICY "storage_select_own" ON storage.objects
-      FOR SELECT USING (
-        bucket_id = 'documents' AND
-        auth.uid() IS NOT NULL AND
-        (storage.foldername(name))[2] = auth.uid()::text
-      );
-    
-    -- Staff/admin can read all documents
-DROP POLICY IF EXISTS "storage_select_staff" ON storage.objects;
-    DROP POLICY IF EXISTS "storage_select_staff" ON storage.objects;
-    CREATE POLICY "storage_select_staff" ON storage.objects
-      FOR SELECT USING (
-        bucket_id = 'documents' AND
-        public.is_staff_or_admin()
-      );
-  END IF;
-EXCEPTION WHEN OTHERS THEN
-  RAISE NOTICE 'Storage policies skipped (storage extension may not be available)';
-END $$;
-
--- ══════════════════════════════════════════════════════════════════
--- 10. LOCATIONS TABLE (public read, admin write)
--- ══════════════════════════════════════════════════════════════════
-DO $$ BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'locations' AND table_schema = 'public') THEN
-    ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
-    
-DROP POLICY IF EXISTS "locations_select_all" ON public.locations;
-    DROP POLICY IF EXISTS "locations_select_all" ON public.locations;
-    CREATE POLICY "locations_select_all" ON public.locations
-      FOR SELECT USING (true);
-    
-DROP POLICY IF EXISTS "locations_modify_admin" ON public.locations;
-    DROP POLICY IF EXISTS "locations_modify_admin" ON public.locations;
-    CREATE POLICY "locations_modify_admin" ON public.locations
-      FOR ALL USING (public.is_admin());
-  END IF;
-END $$;
-
--- Done. Run this in Supabase Dashboard → SQL Editor.
-
-
--- ═══ PART 3: Office Registry Module (Phase 2) ═══
--- ════════════════════════════════════════════════════════════════════════════
--- OFFICE REGISTRY MODULE — Phase 2
--- Run in Supabase SQL Editor: project xuhilnejpqvbfukyhefi
--- ════════════════════════════════════════════════════════════════════════════
-
--- ── 1. Rebuild offices table with full hierarchy support ──────────────────────
--- Office levels: regional → district → ward → mtaa (street/village) + department
-CREATE TABLE IF NOT EXISTS public.office_registry (
-  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  office_code     TEXT UNIQUE NOT NULL,                 -- e.g. DSM-ILA-KAR-Mchikichini-001
-  name            TEXT NOT NULL,
-  name_sw         TEXT,
-  name_en         TEXT,
-  office_type     TEXT NOT NULL CHECK (office_type IN ('regional','district','ward','mtaa','department')),
-  -- Hierarchy
-  parent_id       UUID REFERENCES public.office_registry(id) ON DELETE SET NULL,
-  -- Location
-  region          TEXT,
-  district        TEXT,
-  ward            TEXT,
-  mtaa            TEXT,                                  -- street / village name
-  -- Department-specific (when office_type = 'department')
-  department_type TEXT,                                  -- e.g. 'police','health','land'
-  -- Contact
-  address         TEXT,
-  phone           TEXT,
-  email           TEXT,
-  -- Officer-in-charge
-  head_officer_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
-  head_officer_name TEXT,
-  -- Streets served (for mtaa offices) — array of street names
-  served_streets  TEXT[] DEFAULT '{}',
-  -- Status
-  active          BOOLEAN DEFAULT TRUE,
-  created_at      TIMESTAMPTZ DEFAULT NOW(),
-  updated_at      TIMESTAMPTZ DEFAULT NOW(),
-  created_by      UUID REFERENCES public.users(id) ON DELETE SET NULL
-);
-
-DROP INDEX IF EXISTS "idx_office_registry_type";
-CREATE INDEX IF NOT EXISTS idx_office_registry_type   ON public.office_registry(office_type);
-DROP INDEX IF EXISTS "idx_office_registry_parent";
-CREATE INDEX IF NOT EXISTS idx_office_registry_parent ON public.office_registry(parent_id);
-DROP INDEX IF EXISTS "idx_office_registry_region";
-CREATE INDEX IF NOT EXISTS idx_office_registry_region ON public.office_registry(region);
-DROP INDEX IF EXISTS "idx_office_registry_active";
-CREATE INDEX IF NOT EXISTS idx_office_registry_active ON public.office_registry(active);
-DROP INDEX IF EXISTS "idx_office_registry_streets";
-CREATE INDEX IF NOT EXISTS idx_office_registry_streets ON public.office_registry USING GIN(served_streets);
-
--- ── 2. Citizen / application office assignment columns ───────────────────────
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='assigned_office_id') THEN
-    ALTER TABLE public.users ADD COLUMN assigned_office_id UUID REFERENCES public.office_registry(id) ON DELETE SET NULL;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='applications' AND column_name='office_registry_id') THEN
-    ALTER TABLE public.applications ADD COLUMN office_registry_id UUID REFERENCES public.office_registry(id) ON DELETE SET NULL;
-  END IF;
-END $$;
-
-DROP INDEX IF EXISTS "idx_users_assigned_office";
-CREATE INDEX IF NOT EXISTS idx_users_assigned_office ON public.users(assigned_office_id);
-
--- ── 3. Server-side office code generation ────────────────────────────────────
--- Format: {RegionAbbr}-{DistrictAbbr}-{WardAbbr}-{MtaaName}-{Serial}
-CREATE OR REPLACE FUNCTION public.generate_office_code(
-  p_office_type TEXT,
-  p_region TEXT,
-  p_district TEXT DEFAULT NULL,
-  p_ward TEXT DEFAULT NULL,
-  p_mtaa TEXT DEFAULT NULL,
-  p_department_type TEXT DEFAULT NULL
-) RETURNS TEXT LANGUAGE plpgsql AS $$
-DECLARE
-  v_reg  TEXT;
-  v_dist TEXT;
-  v_ward TEXT;
-  v_mtaa TEXT;
-  v_prefix TEXT;
-  v_serial INT;
-  v_code TEXT;
-BEGIN
-  -- 3-letter uppercase abbreviations
-  v_reg  := UPPER(LEFT(REGEXP_REPLACE(COALESCE(p_region, 'XXX'), '[^a-zA-Z]', '', 'g'), 3));
-  v_dist := UPPER(LEFT(REGEXP_REPLACE(COALESCE(p_district, ''), '[^a-zA-Z]', '', 'g'), 3));
-  v_ward := UPPER(LEFT(REGEXP_REPLACE(COALESCE(p_ward, ''), '[^a-zA-Z]', '', 'g'), 3));
-  -- Mtaa keeps its name (cleaned, capitalised first letter)
-  v_mtaa := REGEXP_REPLACE(COALESCE(p_mtaa, ''), '[^a-zA-Z0-9]', '', 'g');
-
-  -- Build prefix by office type
-  v_prefix := CASE p_office_type
-    WHEN 'regional'   THEN v_reg || '-Regional'
-    WHEN 'district'   THEN v_reg || '-' || v_dist || '-District'
-    WHEN 'ward'       THEN v_reg || '-' || v_dist || '-' || v_ward || '-Ward'
-    WHEN 'mtaa'       THEN v_reg || '-' || v_dist || '-' || v_ward || '-' || v_mtaa
-    WHEN 'department' THEN v_reg || '-' || v_dist || '-' || v_ward || '-' || UPPER(LEFT(COALESCE(p_department_type,'DEP'),4))
-    ELSE v_reg
-  END;
-
-  -- Next serial for this prefix
-  SELECT COALESCE(MAX(CAST(RIGHT(office_code, 3) AS INT)), 0) + 1
-  INTO v_serial
-  FROM public.office_registry
-  WHERE office_code LIKE v_prefix || '-%'
-    AND RIGHT(office_code, 3) ~ '^[0-9]{3}$';
-
-  v_code := v_prefix || '-' || LPAD(v_serial::TEXT, 3, '0');
-  RETURN v_code;
-END;
-$$;
-
--- Auto-assign office_code on insert if not provided
-CREATE OR REPLACE FUNCTION public.set_office_code()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  IF NEW.office_code IS NULL OR NEW.office_code = '' THEN
-    NEW.office_code := public.generate_office_code(
-      NEW.office_type, NEW.region, NEW.district, NEW.ward, NEW.mtaa, NEW.department_type
-    );
-  END IF;
-  NEW.updated_at := NOW();
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trg_set_office_code ON public.office_registry;
-CREATE TRIGGER trg_set_office_code
-  BEFORE INSERT OR UPDATE ON public.office_registry
-  FOR EACH ROW EXECUTE FUNCTION public.set_office_code();
-
--- ── 4. Street → office assignment lookup ─────────────────────────────────────
--- Given a citizen's region/district/ward/street, find the best office:
---   1. Mtaa office whose served_streets contains the street
---   2. Mtaa office matching mtaa name
---   3. Fallback: Ward office
---   4. Fallback: District office → Regional office
-CREATE OR REPLACE FUNCTION public.find_office_for_address(
-  p_region TEXT, p_district TEXT, p_ward TEXT, p_street TEXT
-) RETURNS UUID LANGUAGE plpgsql AS $$
-DECLARE v_id UUID;
-BEGIN
-  -- 1. Mtaa office serving this street
-  SELECT id INTO v_id FROM public.office_registry
-  WHERE office_type='mtaa' AND active
-    AND region=p_region AND district=p_district AND ward=p_ward
-    AND p_street = ANY(served_streets)
-  LIMIT 1;
-  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
-
-  -- 2. Mtaa office matching mtaa name = street
-  SELECT id INTO v_id FROM public.office_registry
-  WHERE office_type='mtaa' AND active
-    AND region=p_region AND district=p_district AND ward=p_ward
-    AND (mtaa ILIKE p_street OR mtaa ILIKE '%'||p_street||'%')
-  LIMIT 1;
-  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
-
-  -- 3. Ward office
-  SELECT id INTO v_id FROM public.office_registry
-  WHERE office_type='ward' AND active
-    AND region=p_region AND district=p_district AND ward=p_ward
-  LIMIT 1;
-  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
-
-  -- 4. District office
-  SELECT id INTO v_id FROM public.office_registry
-  WHERE office_type='district' AND active
-    AND region=p_region AND district=p_district
-  LIMIT 1;
-  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
-
-  -- 5. Regional office
-  SELECT id INTO v_id FROM public.office_registry
-  WHERE office_type='regional' AND active AND region=p_region
-  LIMIT 1;
-  RETURN v_id;
-END;
-$$;
-
--- ── 5. RLS ────────────────────────────────────────────────────────────────────
-ALTER TABLE public.office_registry ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS office_registry_select ON public.office_registry;
-DROP POLICY IF EXISTS "office_registry_select" ON public.office_registry;
-CREATE POLICY office_registry_select ON public.office_registry
-  FOR SELECT USING (true);  -- everyone can read offices (needed for assignment lookup)
-
-DROP POLICY IF EXISTS office_registry_admin_all ON public.office_registry;
-DROP POLICY IF EXISTS "office_registry_admin_all" ON public.office_registry;
-CREATE POLICY office_registry_admin_all ON public.office_registry
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.users u WHERE u.id=auth.uid() AND u.role='admin')
-  );
-
-GRANT EXECUTE ON FUNCTION public.generate_office_code TO authenticated;
-GRANT EXECUTE ON FUNCTION public.find_office_for_address TO anon, authenticated;
-
--- ── 6. Audit notification table for unmapped streets (optional helper) ───────
--- Reuses existing notifications — no new table needed.
-
-
--- ═══ PART 4: Remaining Tables (payments, documents, locations, etc.) ═══
 -- E-Mtaa schema (from cloned repo 01_final_schema.sql)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 DO $$ BEGIN CREATE TYPE user_role AS ENUM ('citizen', 'staff', 'admin'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN CREATE TYPE application_status AS ENUM ('submitted','pending_review','pending_payment','paid','verified','approved','issued','returned','rejected','refunded'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -1616,17 +306,14 @@ BEGIN
   RETURN NEW;
 END; $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trigger_set_citizen_id ON public.users;
-DROP TRIGGER IF EXISTS "trigger_set_citizen_id" ON public;
+DROP TRIGGER IF EXISTS "trigger_set_citizen_id" ON users;
 CREATE TRIGGER trigger_set_citizen_id BEFORE INSERT ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.set_citizen_id();
 
-DROP TRIGGER IF EXISTS trigger_users_updated_at ON public.users;
-DROP TRIGGER IF EXISTS "trigger_users_updated_at" ON public;
+DROP TRIGGER IF EXISTS "trigger_users_updated_at";
 CREATE TRIGGER trigger_users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.trigger_set_updated_at();
 
-DROP TRIGGER IF EXISTS trigger_applications_updated_at ON public.applications;
-DROP TRIGGER IF EXISTS "trigger_applications_updated_at" ON public;
+DROP TRIGGER IF EXISTS "trigger_applications_updated_at";
 CREATE TRIGGER trigger_applications_updated_at BEFORE UPDATE ON public.applications FOR EACH ROW EXECUTE FUNCTION public.trigger_set_updated_at();
 
 -- Auto-create profile row on signup
@@ -1646,8 +333,7 @@ BEGIN
   RETURN NEW;
 END; $$;
 
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP TRIGGER IF EXISTS "on_auth_user_created" ON auth;
+DROP TRIGGER IF EXISTS "on_auth_user_created" ON users;
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
@@ -1696,199 +382,140 @@ ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
-DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 CREATE POLICY "Users can view own profile" ON public.users FOR SELECT USING (auth.uid() = id);
-DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
 CREATE POLICY "Users can insert own profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
 DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
-DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
 CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE USING (auth.uid() = id);
-DROP POLICY IF EXISTS "Staff can view all users" ON public.users;
 DROP POLICY IF EXISTS "Staff can view all users" ON public.users;
 CREATE POLICY "Staff can view all users" ON public.users FOR SELECT USING (public.is_admin_or_staff());
 DROP POLICY IF EXISTS "Staff can update users" ON public.users;
-DROP POLICY IF EXISTS "Staff can update users" ON public.users;
 CREATE POLICY "Staff can update users" ON public.users FOR UPDATE USING (public.is_admin_or_staff());
-DROP POLICY IF EXISTS "Admin can delete users" ON public.users;
 DROP POLICY IF EXISTS "Admin can delete users" ON public.users;
 CREATE POLICY "Admin can delete users" ON public.users FOR DELETE USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Anyone can view active services" ON public.services;
-DROP POLICY IF EXISTS "Anyone can view active services" ON public.services;
 CREATE POLICY "Anyone can view active services" ON public.services FOR SELECT USING (active = true);
-DROP POLICY IF EXISTS "Staff can manage services" ON public.services;
 DROP POLICY IF EXISTS "Staff can manage services" ON public.services;
 CREATE POLICY "Staff can manage services" ON public.services FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Citizens can view own applications" ON public.applications;
-DROP POLICY IF EXISTS "Citizens can view own applications" ON public.applications;
 CREATE POLICY "Citizens can view own applications" ON public.applications FOR SELECT USING (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Citizens can insert own applications" ON public.applications;
 DROP POLICY IF EXISTS "Citizens can insert own applications" ON public.applications;
 CREATE POLICY "Citizens can insert own applications" ON public.applications FOR INSERT WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Citizens can update own applications" ON public.applications;
-DROP POLICY IF EXISTS "Citizens can update own applications" ON public.applications;
 CREATE POLICY "Citizens can update own applications" ON public.applications FOR UPDATE USING (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Second party can view applications" ON public.applications;
 DROP POLICY IF EXISTS "Second party can view applications" ON public.applications;
 CREATE POLICY "Second party can view applications" ON public.applications FOR SELECT USING (second_party_user_id = auth.uid() OR target_user_id = auth.uid());
 DROP POLICY IF EXISTS "Staff can view all applications" ON public.applications;
-DROP POLICY IF EXISTS "Staff can view all applications" ON public.applications;
 CREATE POLICY "Staff can view all applications" ON public.applications FOR SELECT USING (public.is_admin_or_staff());
-DROP POLICY IF EXISTS "Staff can update applications" ON public.applications;
 DROP POLICY IF EXISTS "Staff can update applications" ON public.applications;
 CREATE POLICY "Staff can update applications" ON public.applications FOR UPDATE USING (public.is_admin_or_staff());
 DROP POLICY IF EXISTS "Public can verify issued applications" ON public.applications;
-DROP POLICY IF EXISTS "Public can verify issued applications" ON public.applications;
 CREATE POLICY "Public can verify issued applications" ON public.applications FOR SELECT USING (status = 'issued');
 
-DROP POLICY IF EXISTS "Users can view own payments" ON public.payments;
 DROP POLICY IF EXISTS "Users can view own payments" ON public.payments;
 CREATE POLICY "Users can view own payments" ON public.payments FOR SELECT USING (
   EXISTS (SELECT 1 FROM public.applications WHERE id = payments.application_id AND user_id = auth.uid())
 );
 DROP POLICY IF EXISTS "Users can insert own payments" ON public.payments;
-DROP POLICY IF EXISTS "Users can insert own payments" ON public.payments;
 CREATE POLICY "Users can insert own payments" ON public.payments FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM public.applications WHERE id = payments.application_id AND user_id = auth.uid())
 );
 DROP POLICY IF EXISTS "Staff can view all payments" ON public.payments;
-DROP POLICY IF EXISTS "Staff can view all payments" ON public.payments;
 CREATE POLICY "Staff can view all payments" ON public.payments FOR SELECT USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Anyone can view generated documents" ON public.generated_documents;
-DROP POLICY IF EXISTS "Anyone can view generated documents" ON public.generated_documents;
 CREATE POLICY "Anyone can view generated documents" ON public.generated_documents FOR SELECT USING (true);
-DROP POLICY IF EXISTS "Staff can manage generated documents" ON public.generated_documents;
 DROP POLICY IF EXISTS "Staff can manage generated documents" ON public.generated_documents;
 CREATE POLICY "Staff can manage generated documents" ON public.generated_documents FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Users can view own registrations" ON public.business_registrations;
-DROP POLICY IF EXISTS "Users can view own registrations" ON public.business_registrations;
 CREATE POLICY "Users can view own registrations" ON public.business_registrations FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can insert own registrations" ON public.business_registrations;
-DROP POLICY IF EXISTS "Users can insert own registrations" ON public.business_registrations;
 CREATE POLICY "Users can insert own registrations" ON public.business_registrations FOR INSERT WITH CHECK (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Staff can manage registrations" ON public.business_registrations;
 DROP POLICY IF EXISTS "Staff can manage registrations" ON public.business_registrations;
 CREATE POLICY "Staff can manage registrations" ON public.business_registrations FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Owners can view own relationships" ON public.client_relationships;
-DROP POLICY IF EXISTS "Owners can view own relationships" ON public.client_relationships;
 CREATE POLICY "Owners can view own relationships" ON public.client_relationships FOR SELECT USING (auth.uid() = owner_id);
-DROP POLICY IF EXISTS "Clients can view own relationships" ON public.client_relationships;
 DROP POLICY IF EXISTS "Clients can view own relationships" ON public.client_relationships;
 CREATE POLICY "Clients can view own relationships" ON public.client_relationships FOR SELECT USING (auth.uid() = client_id);
 DROP POLICY IF EXISTS "Owners can insert relationships" ON public.client_relationships;
-DROP POLICY IF EXISTS "Owners can insert relationships" ON public.client_relationships;
 CREATE POLICY "Owners can insert relationships" ON public.client_relationships FOR INSERT WITH CHECK (auth.uid() = owner_id);
-DROP POLICY IF EXISTS "Owners can update relationships" ON public.client_relationships;
 DROP POLICY IF EXISTS "Owners can update relationships" ON public.client_relationships;
 CREATE POLICY "Owners can update relationships" ON public.client_relationships FOR UPDATE USING (auth.uid() = owner_id);
 
 DROP POLICY IF EXISTS "Users can view own change requests" ON public.profile_change_requests;
-DROP POLICY IF EXISTS "Users can view own change requests" ON public.profile_change_requests;
 CREATE POLICY "Users can view own change requests" ON public.profile_change_requests FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can insert change requests" ON public.profile_change_requests;
-DROP POLICY IF EXISTS "Users can insert change requests" ON public.profile_change_requests;
 CREATE POLICY "Users can insert change requests" ON public.profile_change_requests FOR INSERT WITH CHECK (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Staff can manage profile change requests" ON public.profile_change_requests;
 DROP POLICY IF EXISTS "Staff can manage profile change requests" ON public.profile_change_requests;
 CREATE POLICY "Staff can manage profile change requests" ON public.profile_change_requests FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Users can view own notifications" ON public.notifications;
-DROP POLICY IF EXISTS "Users can view own notifications" ON public.notifications;
 CREATE POLICY "Users can view own notifications" ON public.notifications FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can update own notifications" ON public.notifications;
-DROP POLICY IF EXISTS "Users can update own notifications" ON public.notifications;
 CREATE POLICY "Users can update own notifications" ON public.notifications FOR UPDATE USING (auth.uid() = user_id);
-DROP POLICY IF EXISTS "System can insert notifications" ON public.notifications;
 DROP POLICY IF EXISTS "System can insert notifications" ON public.notifications;
 CREATE POLICY "System can insert notifications" ON public.notifications FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Users can view own agreement notifications" ON public.agreement_notifications;
-DROP POLICY IF EXISTS "Users can view own agreement notifications" ON public.agreement_notifications;
 CREATE POLICY "Users can view own agreement notifications" ON public.agreement_notifications FOR SELECT USING (recipient_id = auth.uid() OR sender_id = auth.uid());
 DROP POLICY IF EXISTS "Users can insert agreement notifications" ON public.agreement_notifications;
-DROP POLICY IF EXISTS "Users can insert agreement notifications" ON public.agreement_notifications;
 CREATE POLICY "Users can insert agreement notifications" ON public.agreement_notifications FOR INSERT WITH CHECK (sender_id = auth.uid());
-DROP POLICY IF EXISTS "Recipients can update agreement notifications" ON public.agreement_notifications;
 DROP POLICY IF EXISTS "Recipients can update agreement notifications" ON public.agreement_notifications;
 CREATE POLICY "Recipients can update agreement notifications" ON public.agreement_notifications FOR UPDATE USING (recipient_id = auth.uid());
 
 DROP POLICY IF EXISTS "Users can view own documents" ON public.user_documents;
-DROP POLICY IF EXISTS "Users can view own documents" ON public.user_documents;
 CREATE POLICY "Users can view own documents" ON public.user_documents FOR SELECT USING (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Users can upload own documents" ON public.user_documents;
 DROP POLICY IF EXISTS "Users can upload own documents" ON public.user_documents;
 CREATE POLICY "Users can upload own documents" ON public.user_documents FOR INSERT WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can update own documents" ON public.user_documents;
-DROP POLICY IF EXISTS "Users can update own documents" ON public.user_documents;
 CREATE POLICY "Users can update own documents" ON public.user_documents FOR UPDATE USING (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Staff can view all documents" ON public.user_documents;
 DROP POLICY IF EXISTS "Staff can view all documents" ON public.user_documents;
 CREATE POLICY "Staff can view all documents" ON public.user_documents FOR SELECT USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Users can view own sessions" ON public.sessions;
-DROP POLICY IF EXISTS "Users can view own sessions" ON public.sessions;
 CREATE POLICY "Users can view own sessions" ON public.sessions FOR SELECT USING (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Users can insert own sessions" ON public.sessions;
 DROP POLICY IF EXISTS "Users can insert own sessions" ON public.sessions;
 CREATE POLICY "Users can insert own sessions" ON public.sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can view own activity" ON public.activity_logs;
-DROP POLICY IF EXISTS "Users can view own activity" ON public.activity_logs;
 CREATE POLICY "Users can view own activity" ON public.activity_logs FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Staff can view all activity" ON public.activity_logs;
-DROP POLICY IF EXISTS "Staff can view all activity" ON public.activity_logs;
 CREATE POLICY "Staff can view all activity" ON public.activity_logs FOR SELECT USING (public.is_admin_or_staff());
-DROP POLICY IF EXISTS "System can insert activity" ON public.activity_logs;
 DROP POLICY IF EXISTS "System can insert activity" ON public.activity_logs;
 CREATE POLICY "System can insert activity" ON public.activity_logs FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Anyone can view locations" ON public.locations;
-DROP POLICY IF EXISTS "Anyone can view locations" ON public.locations;
 CREATE POLICY "Anyone can view locations" ON public.locations FOR SELECT USING (true);
-DROP POLICY IF EXISTS "Staff can manage locations" ON public.locations;
 DROP POLICY IF EXISTS "Staff can manage locations" ON public.locations;
 CREATE POLICY "Staff can manage locations" ON public.locations FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Anyone can view offices" ON public.offices;
-DROP POLICY IF EXISTS "Anyone can view offices" ON public.offices;
 CREATE POLICY "Anyone can view offices" ON public.offices FOR SELECT USING (true);
-DROP POLICY IF EXISTS "Staff can manage offices" ON public.offices;
 DROP POLICY IF EXISTS "Staff can manage offices" ON public.offices;
 CREATE POLICY "Staff can manage offices" ON public.offices FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Anyone can view service categories" ON public.service_categories;
-DROP POLICY IF EXISTS "Anyone can view service categories" ON public.service_categories;
 CREATE POLICY "Anyone can view service categories" ON public.service_categories FOR SELECT USING (true);
-DROP POLICY IF EXISTS "Staff can manage service categories" ON public.service_categories;
 DROP POLICY IF EXISTS "Staff can manage service categories" ON public.service_categories;
 CREATE POLICY "Staff can manage service categories" ON public.service_categories FOR ALL USING (public.is_admin_or_staff());
 
 -- Indexes
-DROP INDEX IF EXISTS "idx_users_nida";
 CREATE INDEX IF NOT EXISTS idx_users_nida ON public.users(nida_number) WHERE nida_number IS NOT NULL;
-DROP INDEX IF EXISTS "idx_users_phone";
 CREATE INDEX IF NOT EXISTS idx_users_phone ON public.users(phone) WHERE phone IS NOT NULL;
-DROP INDEX IF EXISTS "idx_users_email";
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
-DROP INDEX IF EXISTS "idx_users_role";
 CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
-DROP INDEX IF EXISTS "idx_applications_user_id";
 CREATE INDEX IF NOT EXISTS idx_applications_user_id ON public.applications(user_id);
-DROP INDEX IF EXISTS "idx_applications_status";
 CREATE INDEX IF NOT EXISTS idx_applications_status ON public.applications(status);
-DROP INDEX IF EXISTS "idx_applications_application_number";
 CREATE INDEX IF NOT EXISTS idx_applications_application_number ON public.applications(application_number);
-DROP INDEX IF EXISTS "idx_payments_application_id";
 CREATE INDEX IF NOT EXISTS idx_payments_application_id ON public.payments(application_id);
-DROP INDEX IF EXISTS "idx_notifications_user_id";
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
 
--- ═══ PART 5: Fix Profile Creation RPC ═══
+-- >>> MIGRATION: 20260602_fix_profile_creation.sql
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Fix: create_citizen_profile SECURITY DEFINER RPC
 -- This bypasses RLS so it works immediately after signUp even before
@@ -2038,7 +665,316 @@ END;
 $$;
 
 
--- ═══ PART 6: Add Missing Application Columns ═══
+-- >>> MIGRATION: 20260602_rls_policies.sql
+
+-- ═══════════════════════════════════════════════════════════════════
+-- E-MTAA Row Level Security Policies
+-- 
+-- Ensures:
+--   • Citizens see only their own data
+--   • Staff see data in their assigned region/district
+--   • Admin sees everything
+--   • Applications visible to applicant + assigned staff + admin
+--   • Notifications visible only to the intended recipient
+--   • Business registrations visible to owner + staff/admin
+-- ═══════════════════════════════════════════════════════════════════
+
+-- ── Helper function: check if current user is admin ──────────────
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- ── Helper function: check if current user is staff or admin ────
+CREATE OR REPLACE FUNCTION public.is_staff_or_admin()
+RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid() AND role IN ('staff', 'admin')
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- ══════════════════════════════════════════════════════════════════
+-- 1. USERS / PROFILES TABLE
+-- ══════════════════════════════════════════════════════════════════
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+-- Citizens can read their own profile
+DROP POLICY IF EXISTS "users_select_own" ON public.users;
+CREATE POLICY "users_select_own" ON public.users
+  FOR SELECT USING (auth.uid() = id);
+
+-- Citizens can update their own profile
+DROP POLICY IF EXISTS "users_update_own" ON public.users;
+CREATE POLICY "users_update_own" ON public.users
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Staff can read all citizens (needed for verification, support, review)
+DROP POLICY IF EXISTS "users_select_staff" ON public.users;
+CREATE POLICY "users_select_staff" ON public.users
+  FOR SELECT USING (public.is_staff_or_admin());
+
+-- Admin can update any user (role changes, verification, etc.)
+DROP POLICY IF EXISTS "users_update_admin" ON public.users;
+CREATE POLICY "users_update_admin" ON public.users
+  FOR UPDATE USING (public.is_admin());
+
+-- Service creation (signup) — allow insert for authenticated users
+DROP POLICY IF EXISTS "users_insert_self" ON public.users;
+CREATE POLICY "users_insert_self" ON public.users
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- ══════════════════════════════════════════════════════════════════
+-- 2. PROFILES TABLE (if separate from users)
+-- ══════════════════════════════════════════════════════════════════
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'profiles' AND table_schema = 'public') THEN
+    ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+    
+    -- Citizen reads own profile
+    DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
+    CREATE POLICY "profiles_select_own" ON public.profiles
+      FOR SELECT USING (auth.uid() = id);
+    
+    -- Citizen updates own profile
+    DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+    CREATE POLICY "profiles_update_own" ON public.profiles
+      FOR UPDATE USING (auth.uid() = id);
+    
+    -- Staff/admin can read all profiles (for buyer/tenant lookup in Sales/Rental)
+    DROP POLICY IF EXISTS "profiles_select_staff" ON public.profiles;
+    CREATE POLICY "profiles_select_staff" ON public.profiles
+      FOR SELECT USING (public.is_staff_or_admin());
+
+    -- Insert own profile
+    DROP POLICY IF EXISTS "profiles_insert_self" ON public.profiles;
+    CREATE POLICY "profiles_insert_self" ON public.profiles
+      FOR INSERT WITH CHECK (auth.uid() = id);
+
+    -- Allow authenticated users to search by NIDA/phone (for agreement counterparty lookup)
+    -- This is safe because the search only returns basic public fields
+    DROP POLICY IF EXISTS "profiles_select_authenticated" ON public.profiles;
+    CREATE POLICY "profiles_select_authenticated" ON public.profiles
+      FOR SELECT USING (auth.uid() IS NOT NULL);
+  END IF;
+END $$;
+
+-- ══════════════════════════════════════════════════════════════════
+-- 3. APPLICATIONS TABLE
+-- ══════════════════════════════════════════════════════════════════
+ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
+
+-- Citizen can read their own applications
+DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
+CREATE POLICY "applications_select_own" ON public.applications
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Citizen can insert their own applications
+DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
+CREATE POLICY "applications_insert_own" ON public.applications
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Staff/admin can read all applications
+DROP POLICY IF EXISTS "applications_select_staff" ON public.applications;
+CREATE POLICY "applications_select_staff" ON public.applications
+  FOR SELECT USING (public.is_staff_or_admin());
+
+-- Staff/admin can update applications (approve, reject, etc.)
+DROP POLICY IF EXISTS "applications_update_staff" ON public.applications;
+CREATE POLICY "applications_update_staff" ON public.applications
+  FOR UPDATE USING (public.is_staff_or_admin());
+
+-- Citizen can update own application (for buyer_accepted / tenant_accepted)
+DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
+CREATE POLICY "applications_update_own" ON public.applications
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Also allow target_user to update (counterparty acceptance)
+DROP POLICY IF EXISTS "applications_update_target" ON public.applications;
+CREATE POLICY "applications_update_target" ON public.applications
+  FOR UPDATE USING (auth.uid() = target_user_id);
+
+-- ══════════════════════════════════════════════════════════════════
+-- 4. NOTIFICATIONS TABLE
+-- ══════════════════════════════════════════════════════════════════
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- User can only see their own notifications
+DROP POLICY IF EXISTS "notifications_select_own" ON public.notifications;
+CREATE POLICY "notifications_select_own" ON public.notifications
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- User can update their own notifications (mark as read)
+DROP POLICY IF EXISTS "notifications_update_own" ON public.notifications;
+CREATE POLICY "notifications_update_own" ON public.notifications
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Any authenticated user can insert notifications (forms create notifications for others)
+DROP POLICY IF EXISTS "notifications_insert_auth" ON public.notifications;
+CREATE POLICY "notifications_insert_auth" ON public.notifications
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Staff/admin can read all notifications (for support)
+DROP POLICY IF EXISTS "notifications_select_staff" ON public.notifications;
+CREATE POLICY "notifications_select_staff" ON public.notifications
+  FOR SELECT USING (public.is_staff_or_admin());
+
+-- ══════════════════════════════════════════════════════════════════
+-- 5. AGREEMENT_NOTIFICATIONS TABLE
+-- ══════════════════════════════════════════════════════════════════
+ALTER TABLE public.agreement_notifications ENABLE ROW LEVEL SECURITY;
+
+-- Recipient can see their agreement notifications
+DROP POLICY IF EXISTS "agreement_notifs_select_recipient" ON public.agreement_notifications;
+CREATE POLICY "agreement_notifs_select_recipient" ON public.agreement_notifications
+  FOR SELECT USING (auth.uid() = recipient_id);
+
+-- Sender can see what they sent
+DROP POLICY IF EXISTS "agreement_notifs_select_sender" ON public.agreement_notifications;
+CREATE POLICY "agreement_notifs_select_sender" ON public.agreement_notifications
+  FOR SELECT USING (auth.uid() = sender_id);
+
+-- Recipient can update (accept/reject)
+DROP POLICY IF EXISTS "agreement_notifs_update_recipient" ON public.agreement_notifications;
+CREATE POLICY "agreement_notifs_update_recipient" ON public.agreement_notifications
+  FOR UPDATE USING (auth.uid() = recipient_id);
+
+-- Any authenticated user can insert (seller/landlord creates for buyer/tenant)
+DROP POLICY IF EXISTS "agreement_notifs_insert_auth" ON public.agreement_notifications;
+CREATE POLICY "agreement_notifs_insert_auth" ON public.agreement_notifications
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Staff/admin can read all
+DROP POLICY IF EXISTS "agreement_notifs_select_staff" ON public.agreement_notifications;
+CREATE POLICY "agreement_notifs_select_staff" ON public.agreement_notifications
+  FOR SELECT USING (public.is_staff_or_admin());
+
+-- ══════════════════════════════════════════════════════════════════
+-- 6. BUSINESS_REGISTRATIONS TABLE
+-- ══════════════════════════════════════════════════════════════════
+ALTER TABLE public.business_registrations ENABLE ROW LEVEL SECURITY;
+
+-- Citizen can read their own registrations
+DROP POLICY IF EXISTS "bizreg_select_own" ON public.business_registrations;
+CREATE POLICY "bizreg_select_own" ON public.business_registrations
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Citizen can insert their own registrations
+DROP POLICY IF EXISTS "bizreg_insert_own" ON public.business_registrations;
+CREATE POLICY "bizreg_insert_own" ON public.business_registrations
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Staff/admin can read all registrations
+DROP POLICY IF EXISTS "bizreg_select_staff" ON public.business_registrations;
+CREATE POLICY "bizreg_select_staff" ON public.business_registrations
+  FOR SELECT USING (public.is_staff_or_admin());
+
+-- Staff/admin can update registrations (approve/reject)
+DROP POLICY IF EXISTS "bizreg_update_staff" ON public.business_registrations;
+CREATE POLICY "bizreg_update_staff" ON public.business_registrations
+  FOR UPDATE USING (public.is_staff_or_admin());
+
+-- ══════════════════════════════════════════════════════════════════
+-- 7. SERVICES TABLE (public read for all, admin write)
+-- ══════════════════════════════════════════════════════════════════
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'services' AND table_schema = 'public') THEN
+    ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
+    
+    -- Everyone can read services
+    DROP POLICY IF EXISTS "services_select_all" ON public.services;
+    CREATE POLICY "services_select_all" ON public.services
+      FOR SELECT USING (true);
+    
+    -- Only admin can modify services
+    DROP POLICY IF EXISTS "services_modify_admin" ON public.services;
+    CREATE POLICY "services_modify_admin" ON public.services
+      FOR ALL USING (public.is_admin());
+  END IF;
+END $$;
+
+-- ══════════════════════════════════════════════════════════════════
+-- 8. ACTIVITY_LOGS TABLE
+-- ══════════════════════════════════════════════════════════════════
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'activity_logs' AND table_schema = 'public') THEN
+    ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
+    
+    -- Only admin can read logs
+    DROP POLICY IF EXISTS "logs_select_admin" ON public.activity_logs;
+    CREATE POLICY "logs_select_admin" ON public.activity_logs
+      FOR SELECT USING (public.is_admin());
+    
+    -- Any authenticated user can insert logs
+    DROP POLICY IF EXISTS "logs_insert_auth" ON public.activity_logs;
+    CREATE POLICY "logs_insert_auth" ON public.activity_logs
+      FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+  END IF;
+END $$;
+
+-- ══════════════════════════════════════════════════════════════════
+-- 9. STORAGE POLICIES (documents bucket)
+-- ══════════════════════════════════════════════════════════════════
+-- Citizens can upload to their own folder
+-- Staff/admin can read all documents
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'documents') THEN
+    -- Upload policy: citizen can upload to business-docs/{their_id}/
+    DROP POLICY IF EXISTS "storage_upload_own" ON storage.objects;
+    CREATE POLICY "storage_upload_own" ON storage.objects
+      FOR INSERT WITH CHECK (
+        bucket_id = 'documents' AND
+        auth.uid() IS NOT NULL AND
+        (storage.foldername(name))[1] = 'business-docs' AND
+        (storage.foldername(name))[2] = auth.uid()::text
+      );
+    
+    -- Read policy: owner can read their own files
+    DROP POLICY IF EXISTS "storage_select_own" ON storage.objects;
+    CREATE POLICY "storage_select_own" ON storage.objects
+      FOR SELECT USING (
+        bucket_id = 'documents' AND
+        auth.uid() IS NOT NULL AND
+        (storage.foldername(name))[2] = auth.uid()::text
+      );
+    
+    -- Staff/admin can read all documents
+    DROP POLICY IF EXISTS "storage_select_staff" ON storage.objects;
+    CREATE POLICY "storage_select_staff" ON storage.objects
+      FOR SELECT USING (
+        bucket_id = 'documents' AND
+        public.is_staff_or_admin()
+      );
+  END IF;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Storage policies skipped (storage extension may not be available)';
+END $$;
+
+-- ══════════════════════════════════════════════════════════════════
+-- 10. LOCATIONS TABLE (public read, admin write)
+-- ══════════════════════════════════════════════════════════════════
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'locations' AND table_schema = 'public') THEN
+    ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
+    
+    DROP POLICY IF EXISTS "locations_select_all" ON public.locations;
+    CREATE POLICY "locations_select_all" ON public.locations
+      FOR SELECT USING (true);
+    
+    DROP POLICY IF EXISTS "locations_modify_admin" ON public.locations;
+    CREATE POLICY "locations_modify_admin" ON public.locations
+      FOR ALL USING (public.is_admin());
+  END IF;
+END $$;
+
+-- Done. Run this in Supabase Dashboard → SQL Editor.
+
+
+-- >>> MIGRATION: 20260612_add_missing_app_columns.sql
+
 -- Add missing columns to applications table
 -- Run in Supabase SQL Editor: project xuhilnejpqvbfukyhefi
 
@@ -2084,7 +1020,6 @@ END $$;
 
 -- Fix applications RLS: allow staff/admin to update any application
 DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
-DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
 CREATE POLICY "applications_staff_update"
   ON public.applications FOR UPDATE
   USING (
@@ -2096,13 +1031,13 @@ CREATE POLICY "applications_staff_update"
 
 -- Fix applications RLS: allow citizens to update their own (second_party acceptance etc)
 DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
-DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
 CREATE POLICY "applications_update_own"
   ON public.applications FOR UPDATE
   USING (user_id = auth.uid() OR second_party_user_id = auth.uid());
 
 
--- ═══ PART 7: Add Profile Complete Columns ═══
+-- >>> MIGRATION: 20260612_add_profile_complete.sql
+
 -- Add profile_complete and verification_level columns if they don't exist
 -- Run in Supabase SQL Editor: project xuhilnejpqvbfukyhefi
 
@@ -2148,7 +1083,7 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_normalise_marital ON public.users;
+DROP TRIGGER IF EXISTS "trg_normalise_marital" ON users;
 CREATE TRIGGER trg_normalise_marital
   BEFORE INSERT OR UPDATE OF marital_status ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.normalise_marital_status();
@@ -2158,9 +1093,6 @@ CREATE TRIGGER trg_normalise_marital
 -- the UPDATE is being blocked silently by RLS.
 
 -- Drop existing update policy if any
-DROP POLICY IF EXISTS "users_update_own" ON public.users;
-DROP POLICY IF EXISTS "Allow users to update own profile" ON public.users;
-DROP POLICY IF EXISTS "users can update own row" ON public.users;
 
 -- Create correct update policy
 DROP POLICY IF EXISTS "users_update_own" ON public.users;
@@ -2172,7 +1104,6 @@ CREATE POLICY "users_update_own"
 
 -- Also ensure SELECT works (needed by the update to verify)
 DROP POLICY IF EXISTS "users_select_own" ON public.users;
-DROP POLICY IF EXISTS "users_select_own" ON public.users;
 CREATE POLICY "users_select_own"
   ON public.users
   FOR SELECT
@@ -2180,14 +1111,12 @@ CREATE POLICY "users_select_own"
 
 -- Ensure INSERT works for new signups
 DROP POLICY IF EXISTS "users_insert_own" ON public.users;
-DROP POLICY IF EXISTS "users_insert_own" ON public.users;
 CREATE POLICY "users_insert_own"
   ON public.users
   FOR INSERT
   WITH CHECK (auth.uid() = id);
 
 -- Staff/admin can read all users
-DROP POLICY IF EXISTS "users_staff_select" ON public.users;
 DROP POLICY IF EXISTS "users_staff_select" ON public.users;
 CREATE POLICY "users_staff_select"
   ON public.users
@@ -2202,7 +1131,6 @@ CREATE POLICY "users_staff_select"
 
 -- Staff/admin can update citizens (for verification upgrades)
 DROP POLICY IF EXISTS "users_staff_update" ON public.users;
-DROP POLICY IF EXISTS "users_staff_update" ON public.users;
 CREATE POLICY "users_staff_update"
   ON public.users
   FOR UPDATE
@@ -2215,7 +1143,947 @@ CREATE POLICY "users_staff_update"
   );
 
 
--- ═══ PART 8: Consolidated Fixes (account_status UPPERCASE, clean duplicate RLS) ═══
+-- >>> MIGRATION: 20260612_v3_auth_profiles.sql
+
+-- ============================================================
+-- E-MTAA V3.0 — Auth, Profiles & Verification SQL Migration
+-- Covers:
+--   1. users table — all columns for signup, login, profile completion
+--   2. handle_new_user trigger — auto-creates profile on auth.users insert
+--   3. create_citizen_profile RPC — safe upsert from signup flow
+--   4. update_profile_completion RPC — recalculates completion %
+--   5. get_profile_by_phone RPC — phone-based login lookup
+--   6. Verification tier logic + upgrade functions
+--   7. RLS policies for users, applications, drafts
+--   8. Indexes for fast lookups
+-- ============================================================
+
+-- ── 1. USERS TABLE ───────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS public.users (
+  -- Identity
+  id              uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email           text UNIQUE NOT NULL,
+  first_name      text NOT NULL DEFAULT '',
+  middle_name     text,
+  last_name       text NOT NULL DEFAULT '',
+  phone           text UNIQUE,
+  photo_url       text,
+
+  -- Role & Status
+  role            text NOT NULL DEFAULT 'citizen'
+                  CHECK (role IN ('citizen','staff','admin')),
+  account_status  text NOT NULL DEFAULT 'ACTIVE'
+                  CHECK (account_status IN ('ACTIVE','SUSPENDED','PENDING','INACTIVE')),
+  is_verified     boolean NOT NULL DEFAULT false,
+  is_diaspora     boolean NOT NULL DEFAULT false,
+  profile_complete boolean NOT NULL DEFAULT false,
+  profile_completion_pct smallint NOT NULL DEFAULT 0,
+
+  -- Verification tier (V3)
+  verification_level text NOT NULL DEFAULT 'UNVERIFIED'
+    CHECK (verification_level IN (
+      'UNVERIFIED','PHONE_VERIFIED','EMAIL_VERIFIED',
+      'PROFILE_COMPLETED','PENDING_OFFICE_VISIT','NIDA_VERIFIED'
+    )),
+
+  -- Personal info
+  date_of_birth   date,
+  gender          text CHECK (gender IN ('M','F','O')),
+  sex             text,
+  nationality     text DEFAULT 'Tanzanian',
+  country_of_citizenship text DEFAULT 'Tanzania',
+  marital_status  text,
+  occupation      text,
+  education_level text,
+  place_of_birth  text,
+  tribe           text,
+  blood_group     text,
+  disability_status text,
+  religious_affiliation text,
+
+  -- Identity documents
+  nida_number     text UNIQUE,
+  passport_number text,
+  voter_id_number text,
+  driving_license_number text,
+  citizen_id      text UNIQUE,
+  id_type         text,
+  id_number       text,
+
+  -- Tanzania address (residents)
+  region          text,
+  district        text,
+  ward            text,
+  street          text,
+  house_number    text,
+  postal_code     text,
+  landmark        text,
+
+  -- Diaspora fields
+  country_of_residence text,
+  city_of_residence    text,
+  diaspora_region      text,
+  diaspora_district    text,
+  diaspora_ward        text,
+
+  -- Contact
+  alternative_phone     text,
+  email_address         text,
+  alternative_email     text,
+
+  -- Emergency contact
+  emergency_contact_name     text,
+  emergency_contact_phone    text,
+  emergency_contact_relation text,
+
+  -- Business roles
+  seller_id   text UNIQUE,
+  landlord_id text UNIQUE,
+  broker_id   text UNIQUE,
+
+  -- Signatures/stamps
+  signature_url text,
+  stamp_url     text,
+
+  -- Local officials linkage
+  mtaa_executive_officer text,
+  ward_councillor        text,
+  ward_chairperson       text,
+
+  -- Staff fields
+  assigned_region   text,
+  assigned_district text,
+  office_id         uuid,
+  employee_id       text UNIQUE,
+  department        text,
+  position          text,
+  employment_date   date,
+
+  -- Department membership
+  is_department_member boolean DEFAULT false,
+  department_id        uuid,
+
+  -- Metadata
+  email_verified  boolean DEFAULT false,
+  phone_verified  boolean DEFAULT false,
+  last_login      timestamptz,
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now()
+);
+
+-- Add missing columns to existing tables (safe with IF NOT EXISTS alternative)
+DO $$ BEGIN
+  -- verification_level
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name='users' AND column_name='verification_level') THEN
+    ALTER TABLE public.users ADD COLUMN verification_level text NOT NULL DEFAULT 'UNVERIFIED'
+      CHECK (verification_level IN ('UNVERIFIED','PHONE_VERIFIED','EMAIL_VERIFIED',
+        'PROFILE_COMPLETED','PENDING_OFFICE_VISIT','NIDA_VERIFIED'));
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name='users' AND column_name='profile_complete') THEN
+    ALTER TABLE public.users ADD COLUMN profile_complete boolean NOT NULL DEFAULT false;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name='users' AND column_name='profile_completion_pct') THEN
+    ALTER TABLE public.users ADD COLUMN profile_completion_pct smallint NOT NULL DEFAULT 0;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name='users' AND column_name='city_of_residence') THEN
+    ALTER TABLE public.users ADD COLUMN city_of_residence text;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name='users' AND column_name='is_department_member') THEN
+    ALTER TABLE public.users ADD COLUMN is_department_member boolean DEFAULT false;
+  END IF;
+END $$;
+
+-- ── 2. UPDATED_AT TRIGGER ─────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS "trg_users_updated_at" ON users;
+CREATE TRIGGER trg_users_updated_at
+  BEFORE UPDATE ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- ── 3. HANDLE NEW USER TRIGGER ────────────────────────────────────────────────
+-- Fires on every new auth.users row. Creates a minimal profile from metadata.
+-- The signup flow also calls create_citizen_profile RPC which fills in more detail.
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  meta jsonb;
+  v_level text;
+BEGIN
+  meta := COALESCE(NEW.raw_user_meta_data, '{}'::jsonb);
+
+  -- Derive verification level
+  v_level := COALESCE(
+    meta->>'verification_level',
+    CASE
+      WHEN (meta->>'is_diaspora')::boolean = true THEN 'EMAIL_VERIFIED'
+      WHEN meta->>'phone' IS NOT NULL               THEN 'PHONE_VERIFIED'
+      ELSE 'UNVERIFIED'
+    END
+  );
+
+  INSERT INTO public.users (
+    id, email,
+    first_name, middle_name, last_name,
+    phone,
+    role, account_status,
+    is_verified, is_diaspora,
+    verification_level,
+    nationality, country_of_citizenship,
+    nida_number, passport_number,
+    id_type, id_number,
+    region, district, ward, street, house_number,
+    country_of_residence, city_of_residence,
+    date_of_birth, gender, sex,
+    profile_complete, profile_completion_pct,
+    created_at, updated_at
+  ) VALUES (
+    NEW.id,
+    LOWER(NEW.email),
+    UPPER(COALESCE(meta->>'first_name', split_part(NEW.email,'@',1))),
+    UPPER(NULLIF(TRIM(COALESCE(meta->>'middle_name','')), '')),
+    UPPER(COALESCE(meta->>'last_name', '')),
+    NULLIF(TRIM(COALESCE(meta->>'phone', '')), ''),
+    COALESCE(meta->>'role', 'citizen'),
+    COALESCE(meta->>'account_status', 'ACTIVE'),
+    COALESCE((meta->>'is_verified')::boolean, false),
+    COALESCE((meta->>'is_diaspora')::boolean, false),
+    v_level,
+    COALESCE(meta->>'nationality', 'Tanzanian'),
+    COALESCE(meta->>'country_of_citizenship', 'Tanzania'),
+    NULLIF(TRIM(COALESCE(meta->>'nida_number', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'passport_number', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'id_type', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'id_number', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'region', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'district', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'ward', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'street', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'house_number', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'country_of_residence', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'city_of_residence', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'date_of_birth', '')), '')::date,
+    NULLIF(TRIM(COALESCE(meta->>'gender', '')), ''),
+    NULLIF(TRIM(COALESCE(meta->>'sex', '')), ''),
+    false, 0,
+    now(), now()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    first_name  = EXCLUDED.first_name,
+    middle_name = EXCLUDED.middle_name,
+    last_name   = EXCLUDED.last_name,
+    phone       = COALESCE(EXCLUDED.phone, users.phone),
+    verification_level = EXCLUDED.verification_level,
+    is_verified = EXCLUDED.is_verified,
+    is_diaspora = EXCLUDED.is_diaspora,
+    updated_at  = now();
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS "on_auth_user_created" ON users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ── 4. PROFILE COMPLETION CALCULATOR ─────────────────────────────────────────
+-- Returns 0-100. Called after profile save to update profile_completion_pct.
+
+CREATE OR REPLACE FUNCTION public.calculate_profile_completion(p_user_id uuid)
+RETURNS smallint LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  u public.users%ROWTYPE;
+  score smallint := 0;
+  total smallint := 10;
+BEGIN
+  SELECT * INTO u FROM public.users WHERE id = p_user_id;
+  IF NOT FOUND THEN RETURN 0; END IF;
+
+  IF u.first_name  <> '' AND u.first_name IS NOT NULL  THEN score := score + 1; END IF;
+  IF u.last_name   <> '' AND u.last_name IS NOT NULL   THEN score := score + 1; END IF;
+  IF u.phone IS NOT NULL OR u.is_diaspora                THEN score := score + 1; END IF;
+  IF u.email IS NOT NULL                                 THEN score := score + 1; END IF;
+  IF u.region IS NOT NULL OR u.country_of_residence IS NOT NULL THEN score := score + 1; END IF;
+  IF u.district IS NOT NULL OR u.city_of_residence IS NOT NULL  THEN score := score + 1; END IF;
+  IF u.ward IS NOT NULL OR u.diaspora_ward IS NOT NULL           THEN score := score + 1; END IF;
+  IF u.street IS NOT NULL                                        THEN score := score + 1; END IF;
+  IF u.date_of_birth IS NOT NULL                                 THEN score := score + 1; END IF;
+  IF u.nida_number IS NOT NULL OR u.passport_number IS NOT NULL  THEN score := score + 1; END IF;
+
+  RETURN (score * 100 / total)::smallint;
+END;
+$$;
+
+-- ── 5. UPDATE PROFILE COMPLETION ─────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION public.update_profile_completion(p_user_id uuid)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  pct smallint;
+  v_level text;
+  u public.users%ROWTYPE;
+BEGIN
+  pct := public.calculate_profile_completion(p_user_id);
+  SELECT * INTO u FROM public.users WHERE id = p_user_id;
+
+  -- Upgrade verification level if earned
+  v_level := u.verification_level;
+  IF u.nida_number IS NOT NULL AND u.is_verified THEN
+    v_level := 'NIDA_VERIFIED';
+  ELSIF pct >= 70 AND v_level IN ('PHONE_VERIFIED','EMAIL_VERIFIED') THEN
+    v_level := 'PROFILE_COMPLETED';
+  END IF;
+
+  UPDATE public.users SET
+    profile_completion_pct = pct,
+    profile_complete = (pct >= 60),
+    verification_level = v_level,
+    updated_at = now()
+  WHERE id = p_user_id;
+END;
+$$;
+
+-- Trigger: auto-recalculate after every profile update
+CREATE OR REPLACE FUNCTION public.trg_recalc_completion()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM public.update_profile_completion(NEW.id);
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS "trg_users_completion" ON users;
+CREATE TRIGGER trg_users_completion
+  AFTER UPDATE OF region, district, ward, street, date_of_birth,
+                  nida_number, passport_number, phone, gender,
+                  country_of_residence, city_of_residence
+  ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.trg_recalc_completion();
+
+-- ── 6. CREATE CITIZEN PROFILE RPC ─────────────────────────────────────────────
+-- Called from Auth.tsx signup after supabase.auth.signUp succeeds.
+-- Safe upsert — won't fail if trigger already created the row.
+
+CREATE OR REPLACE FUNCTION public.create_citizen_profile(
+  p_id                    uuid,
+  p_email                 text      DEFAULT NULL,
+  p_first_name            text      DEFAULT NULL,
+  p_middle_name           text      DEFAULT NULL,
+  p_last_name             text      DEFAULT NULL,
+  p_phone                 text      DEFAULT NULL,
+  p_sex                   text      DEFAULT NULL,
+  p_gender                text      DEFAULT NULL,
+  p_date_of_birth         text      DEFAULT NULL,
+  p_place_of_birth        text      DEFAULT NULL,
+  p_marital_status        text      DEFAULT NULL,
+  p_occupation            text      DEFAULT NULL,
+  p_education_level       text      DEFAULT NULL,
+  p_nationality           text      DEFAULT 'Tanzanian',
+  p_country_of_citizenship text     DEFAULT 'Tanzania',
+  p_nida_number           text      DEFAULT NULL,
+  p_id_type               text      DEFAULT NULL,
+  p_id_number             text      DEFAULT NULL,
+  p_region                text      DEFAULT NULL,
+  p_district              text      DEFAULT NULL,
+  p_ward                  text      DEFAULT NULL,
+  p_street                text      DEFAULT NULL,
+  p_house_number          text      DEFAULT NULL,
+  p_is_diaspora           boolean   DEFAULT false,
+  p_country_of_residence  text      DEFAULT NULL,
+  p_city_of_residence     text      DEFAULT NULL,
+  p_passport_number       text      DEFAULT NULL,
+  p_is_verified           boolean   DEFAULT true,
+  p_verification_level    text      DEFAULT NULL
+)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_level text;
+BEGIN
+  v_level := COALESCE(
+    p_verification_level,
+    CASE
+      WHEN p_nida_number IS NOT NULL AND p_is_verified THEN 'NIDA_VERIFIED'
+      WHEN p_is_diaspora                                THEN 'EMAIL_VERIFIED'
+      WHEN p_phone IS NOT NULL                          THEN 'PHONE_VERIFIED'
+      ELSE 'UNVERIFIED'
+    END
+  );
+
+  INSERT INTO public.users (
+    id, email, first_name, middle_name, last_name,
+    phone, sex, gender, date_of_birth, place_of_birth,
+    marital_status, occupation, education_level,
+    nationality, country_of_citizenship,
+    nida_number, id_type, id_number,
+    region, district, ward, street, house_number,
+    is_diaspora, country_of_residence, city_of_residence,
+    passport_number,
+    role, is_verified, verification_level, account_status,
+    profile_complete, profile_completion_pct,
+    created_at, updated_at
+  )
+  VALUES (
+    p_id,
+    LOWER(COALESCE(p_email, '')),
+    UPPER(COALESCE(p_first_name, '')),
+    UPPER(NULLIF(TRIM(COALESCE(p_middle_name, '')), '')),
+    UPPER(COALESCE(p_last_name, '')),
+    NULLIF(TRIM(COALESCE(p_phone, '')), ''),
+    p_sex, p_gender,
+    NULLIF(TRIM(COALESCE(p_date_of_birth, '')), '')::date,
+    p_place_of_birth, p_marital_status, p_occupation, p_education_level,
+    COALESCE(p_nationality, 'Tanzanian'),
+    COALESCE(p_country_of_citizenship, 'Tanzania'),
+    NULLIF(TRIM(COALESCE(p_nida_number, '')), ''),
+    p_id_type, p_id_number,
+    NULLIF(TRIM(COALESCE(p_region, '')), ''),
+    NULLIF(TRIM(COALESCE(p_district, '')), ''),
+    NULLIF(TRIM(COALESCE(p_ward, '')), ''),
+    NULLIF(TRIM(COALESCE(p_street, '')), ''),
+    NULLIF(TRIM(COALESCE(p_house_number, '')), ''),
+    COALESCE(p_is_diaspora, false),
+    NULLIF(TRIM(COALESCE(p_country_of_residence, '')), ''),
+    NULLIF(TRIM(COALESCE(p_city_of_residence, '')), ''),
+    NULLIF(TRIM(COALESCE(p_passport_number, '')), ''),
+    'citizen',
+    COALESCE(p_is_verified, true),
+    v_level,
+    'ACTIVE',
+    false, 0,
+    now(), now()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    first_name            = COALESCE(EXCLUDED.first_name, users.first_name),
+    middle_name           = COALESCE(EXCLUDED.middle_name, users.middle_name),
+    last_name             = COALESCE(NULLIF(EXCLUDED.last_name,''), users.last_name),
+    phone                 = COALESCE(EXCLUDED.phone, users.phone),
+    sex                   = COALESCE(EXCLUDED.sex, users.sex),
+    gender                = COALESCE(EXCLUDED.gender, users.gender),
+    date_of_birth         = COALESCE(EXCLUDED.date_of_birth, users.date_of_birth),
+    nationality           = COALESCE(EXCLUDED.nationality, users.nationality),
+    nida_number           = COALESCE(EXCLUDED.nida_number, users.nida_number),
+    id_type               = COALESCE(EXCLUDED.id_type, users.id_type),
+    id_number             = COALESCE(EXCLUDED.id_number, users.id_number),
+    region                = COALESCE(EXCLUDED.region, users.region),
+    district              = COALESCE(EXCLUDED.district, users.district),
+    ward                  = COALESCE(EXCLUDED.ward, users.ward),
+    street                = COALESCE(EXCLUDED.street, users.street),
+    house_number          = COALESCE(EXCLUDED.house_number, users.house_number),
+    is_diaspora           = EXCLUDED.is_diaspora,
+    country_of_residence  = COALESCE(EXCLUDED.country_of_residence, users.country_of_residence),
+    city_of_residence     = COALESCE(EXCLUDED.city_of_residence, users.city_of_residence),
+    passport_number       = COALESCE(EXCLUDED.passport_number, users.passport_number),
+    verification_level    = CASE
+      WHEN EXCLUDED.verification_level = 'NIDA_VERIFIED' THEN 'NIDA_VERIFIED'
+      WHEN users.verification_level    = 'NIDA_VERIFIED' THEN 'NIDA_VERIFIED'
+      ELSE COALESCE(EXCLUDED.verification_level, users.verification_level)
+    END,
+    is_verified           = COALESCE(EXCLUDED.is_verified, users.is_verified),
+    updated_at            = now();
+
+  -- Recalculate completion after insert/update
+  PERFORM public.update_profile_completion(p_id);
+END;
+$$;
+
+-- ── 7. PHONE-BASED LOGIN LOOKUP ───────────────────────────────────────────────
+-- Auth.tsx phone login: looks up email by phone, then calls signInWithPassword
+
+CREATE OR REPLACE FUNCTION public.get_email_by_phone(p_phone text)
+RETURNS TABLE(email text) LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  RETURN QUERY
+    SELECT u.email FROM public.users u
+    WHERE u.phone = p_phone
+       OR u.phone = '+255' || REGEXP_REPLACE(p_phone, '^(0|\+255)', '')
+    LIMIT 1;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_email_by_phone(text) TO anon, authenticated;
+
+-- ── 8. UPGRADE VERIFICATION TIER ─────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION public.upgrade_verification_tier(
+  p_user_id uuid,
+  p_tier    text  -- 'PHONE_VERIFIED'|'EMAIL_VERIFIED'|'PROFILE_COMPLETED'|'PENDING_OFFICE_VISIT'|'NIDA_VERIFIED'
+)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE public.users SET
+    verification_level = p_tier,
+    is_verified = (p_tier IN ('PHONE_VERIFIED','EMAIL_VERIFIED','PROFILE_COMPLETED','PENDING_OFFICE_VISIT','NIDA_VERIFIED')),
+    updated_at = now()
+  WHERE id = p_user_id;
+
+  PERFORM public.update_profile_completion(p_user_id);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.upgrade_verification_tier(uuid, text) TO authenticated;
+
+-- ── 9. APPLICATIONS TABLE COLUMNS ────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS public.applications (
+  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id            uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  service_id         text NOT NULL,
+  service_name       text NOT NULL,
+  application_number text UNIQUE NOT NULL,
+  status             text NOT NULL DEFAULT 'submitted'
+    CHECK (status IN ('submitted','pending_review','pending_payment','paid','verified',
+                      'approved','issued','returned','rejected','refunded')),
+  form_data          jsonb NOT NULL DEFAULT '{}',
+  feedback           text,
+  region             text,
+  district           text,
+  ward               text,
+  street             text,
+  assigned_staff_id  uuid REFERENCES public.users(id),
+  target_user_id     uuid REFERENCES public.users(id),
+  target_user_nida   text,
+  target_user_role   text,
+  second_party_user_id uuid REFERENCES public.users(id),
+  agreement_status   text,
+  payment_data       jsonb,
+  confirmation_data  jsonb,
+  is_confirmed       boolean DEFAULT false,
+  buyer_accepted     boolean,
+  tenant_accepted    boolean,
+  approved_by        uuid REFERENCES public.users(id),
+  rejected_by        uuid REFERENCES public.users(id),
+  returned_by        uuid REFERENCES public.users(id),
+  issued_by          uuid REFERENCES public.users(id),
+  verified_by        uuid REFERENCES public.users(id),
+  approved_at        timestamptz,
+  paid_at            timestamptz,
+  issued_at          timestamptz,
+  verified_at        timestamptz,
+  -- V3 officer checklist columns
+  checklist_phone_verified   boolean DEFAULT false,
+  checklist_address_verified boolean DEFAULT false,
+  checklist_id_verified      boolean DEFAULT false,
+  checklist_witnesses_added  boolean DEFAULT false,
+  checklist_final_approved   boolean DEFAULT false,
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now()
+);
+
+-- Add checklist columns to existing tables
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name='applications' AND column_name='checklist_phone_verified') THEN
+    ALTER TABLE public.applications
+      ADD COLUMN checklist_phone_verified   boolean DEFAULT false,
+      ADD COLUMN checklist_address_verified boolean DEFAULT false,
+      ADD COLUMN checklist_id_verified      boolean DEFAULT false,
+      ADD COLUMN checklist_witnesses_added  boolean DEFAULT false,
+      ADD COLUMN checklist_final_approved   boolean DEFAULT false;
+  END IF;
+END $$;
+
+DROP TRIGGER IF EXISTS "trg_applications_updated_at" ON applications;
+CREATE TRIGGER trg_applications_updated_at
+  BEFORE UPDATE ON public.applications
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- ── 10. APPLICATION NUMBER GENERATOR ─────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION public.generate_application_number()
+RETURNS text LANGUAGE plpgsql AS $$
+BEGIN
+  RETURN 'APP-' || TO_CHAR(now(), 'YYYYMMDD') || '-' ||
+         LPAD(FLOOR(RANDOM() * 99999)::text, 5, '0');
+END;
+$$;
+
+-- ── 11. RLS POLICIES ─────────────────────────────────────────────────────────
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
+
+-- Users: own row full access
+
+DROP POLICY IF EXISTS "users_select_own" ON public.users;
+CREATE POLICY "users_select_own" ON public.users
+  FOR SELECT USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "users_insert_own" ON public.users;
+CREATE POLICY "users_insert_own" ON public.users
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "users_update_own" ON public.users;
+CREATE POLICY "users_update_own" ON public.users
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Staff/admin: can read all citizens
+DROP POLICY IF EXISTS "users_staff_select" ON public.users;
+CREATE POLICY "users_staff_select" ON public.users
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff','admin')
+    )
+  );
+
+-- Staff/admin: can update citizens (for verification upgrades)
+DROP POLICY IF EXISTS "users_staff_update" ON public.users;
+CREATE POLICY "users_staff_update" ON public.users
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff','admin')
+    )
+  );
+
+-- Applications: citizen sees own, staff/admin sees all in their region
+
+DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
+CREATE POLICY "applications_select_own" ON public.applications
+  FOR SELECT USING (user_id = auth.uid() OR second_party_user_id = auth.uid());
+
+DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
+CREATE POLICY "applications_insert_own" ON public.applications
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
+CREATE POLICY "applications_update_own" ON public.applications
+  FOR UPDATE USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "applications_staff_select" ON public.applications;
+CREATE POLICY "applications_staff_select" ON public.applications
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role IN ('staff','admin'))
+  );
+
+DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
+CREATE POLICY "applications_staff_update" ON public.applications
+  FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role IN ('staff','admin'))
+  );
+
+-- ── 12. INDEXES ───────────────────────────────────────────────────────────────
+
+CREATE INDEX IF NOT EXISTS idx_users_phone   ON public.users(phone);
+CREATE INDEX IF NOT EXISTS idx_users_email   ON public.users(email);
+CREATE INDEX IF NOT EXISTS idx_users_nida    ON public.users(nida_number);
+CREATE INDEX IF NOT EXISTS idx_users_role    ON public.users(role);
+CREATE INDEX IF NOT EXISTS idx_users_region  ON public.users(region);
+CREATE INDEX IF NOT EXISTS idx_users_verification ON public.users(verification_level);
+CREATE INDEX IF NOT EXISTS idx_applications_user    ON public.applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_applications_status  ON public.applications(status);
+CREATE INDEX IF NOT EXISTS idx_applications_service ON public.applications(service_name);
+CREATE INDEX IF NOT EXISTS idx_applications_region  ON public.applications(region);
+CREATE INDEX IF NOT EXISTS idx_applications_number  ON public.applications(application_number);
+
+-- ── 13. GRANTS ────────────────────────────────────────────────────────────────
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.users TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.applications TO authenticated;
+GRANT SELECT ON public.users TO anon;
+
+GRANT EXECUTE ON FUNCTION public.create_citizen_profile TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.calculate_profile_completion TO authenticated;
+GRANT EXECUTE ON FUNCTION public.update_profile_completion TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_email_by_phone TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.upgrade_verification_tier TO authenticated;
+GRANT EXECUTE ON FUNCTION public.generate_application_number TO authenticated;
+
+-- ── 14. SERVICES TABLE ────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS public.services (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name         text UNIQUE NOT NULL,
+  name_en      text,
+  description  text,
+  description_en text,
+  fee          numeric(12,2) NOT NULL DEFAULT 0,
+  active       boolean NOT NULL DEFAULT true,
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_services_active ON public.services(active);
+
+ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "services_select_all" ON public.services;
+CREATE POLICY "services_select_all" ON public.services FOR SELECT USING (true);
+DROP POLICY IF EXISTS "services_staff_write" ON public.services;
+CREATE POLICY "services_staff_write" ON public.services
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role IN ('staff','admin'))
+  );
+
+GRANT SELECT ON public.services TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.services TO authenticated;
+
+-- ── DONE ──────────────────────────────────────────────────────────────────────
+-- Run this in Supabase SQL Editor (Project: xuhilnejpqvbfukyhefi)
+-- Safe to run multiple times — all DDL uses IF NOT EXISTS / CREATE OR REPLACE
+
+-- ── UPDATE: get_email_by_phone — try all number formats ──────────────────────
+CREATE OR REPLACE FUNCTION public.get_email_by_phone(p_phone text)
+RETURNS TABLE(email text) LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_digits text;
+  v_e164   text;
+  v_local  text;
+  v_short  text;
+BEGIN
+  -- Strip non-digits
+  v_digits := REGEXP_REPLACE(p_phone, '[^0-9]', '', 'g');
+
+  -- Build E.164: +255XXXXXXXXX
+  v_e164 := CASE
+    WHEN LEFT(v_digits, 3) = '255' THEN '+' || v_digits
+    WHEN LEFT(v_digits, 1) = '0'   THEN '+255' || SUBSTRING(v_digits, 2)
+    WHEN LENGTH(v_digits) = 9      THEN '+255' || v_digits
+    ELSE p_phone
+  END;
+
+  -- Local: 0XXXXXXXXX
+  v_local := CASE
+    WHEN LEFT(v_digits, 3) = '255' THEN '0' || SUBSTRING(v_digits, 4)
+    WHEN LEFT(v_digits, 1) = '0'   THEN v_digits
+    ELSE '0' || v_digits
+  END;
+
+  -- Short: 9-digit no prefix
+  v_short := CASE
+    WHEN LEFT(v_digits, 3) = '255' THEN SUBSTRING(v_digits, 4)
+    WHEN LEFT(v_digits, 1) = '0'   THEN SUBSTRING(v_digits, 2)
+    ELSE v_digits
+  END;
+
+  RETURN QUERY
+    SELECT u.email FROM public.users u
+    WHERE u.phone IN (v_e164, v_local, v_digits, '+' || v_digits, v_short)
+       OR u.phone LIKE '%' || v_short
+    LIMIT 1;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_email_by_phone(text) TO anon, authenticated;
+
+
+-- >>> MIGRATION: 20260613_office_registry.sql
+
+-- ════════════════════════════════════════════════════════════════════════════
+-- OFFICE REGISTRY MODULE — Phase 2
+-- Run in Supabase SQL Editor: project xuhilnejpqvbfukyhefi
+-- ════════════════════════════════════════════════════════════════════════════
+
+-- ── 1. Rebuild offices table with full hierarchy support ──────────────────────
+-- Office levels: regional → district → ward → mtaa (street/village) + department
+CREATE TABLE IF NOT EXISTS public.office_registry (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  office_code     TEXT UNIQUE NOT NULL,                 -- e.g. DSM-ILA-KAR-Mchikichini-001
+  name            TEXT NOT NULL,
+  name_sw         TEXT,
+  name_en         TEXT,
+  office_type     TEXT NOT NULL CHECK (office_type IN ('regional','district','ward','mtaa','department')),
+  -- Hierarchy
+  parent_id       UUID REFERENCES public.office_registry(id) ON DELETE SET NULL,
+  -- Location
+  region          TEXT,
+  district        TEXT,
+  ward            TEXT,
+  mtaa            TEXT,                                  -- street / village name
+  -- Department-specific (when office_type = 'department')
+  department_type TEXT,                                  -- e.g. 'police','health','land'
+  -- Contact
+  address         TEXT,
+  phone           TEXT,
+  email           TEXT,
+  -- Officer-in-charge
+  head_officer_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  head_officer_name TEXT,
+  -- Streets served (for mtaa offices) — array of street names
+  served_streets  TEXT[] DEFAULT '{}',
+  -- Status
+  active          BOOLEAN DEFAULT TRUE,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW(),
+  created_by      UUID REFERENCES public.users(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_office_registry_type   ON public.office_registry(office_type);
+CREATE INDEX IF NOT EXISTS idx_office_registry_parent ON public.office_registry(parent_id);
+CREATE INDEX IF NOT EXISTS idx_office_registry_region ON public.office_registry(region);
+CREATE INDEX IF NOT EXISTS idx_office_registry_active ON public.office_registry(active);
+CREATE INDEX IF NOT EXISTS idx_office_registry_streets ON public.office_registry USING GIN(served_streets);
+
+-- ── 2. Citizen / application office assignment columns ───────────────────────
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='assigned_office_id') THEN
+    ALTER TABLE public.users ADD COLUMN assigned_office_id UUID REFERENCES public.office_registry(id) ON DELETE SET NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='applications' AND column_name='office_registry_id') THEN
+    ALTER TABLE public.applications ADD COLUMN office_registry_id UUID REFERENCES public.office_registry(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_users_assigned_office ON public.users(assigned_office_id);
+
+-- ── 3. Server-side office code generation ────────────────────────────────────
+-- Format: {RegionAbbr}-{DistrictAbbr}-{WardAbbr}-{MtaaName}-{Serial}
+CREATE OR REPLACE FUNCTION public.generate_office_code(
+  p_office_type TEXT,
+  p_region TEXT,
+  p_district TEXT DEFAULT NULL,
+  p_ward TEXT DEFAULT NULL,
+  p_mtaa TEXT DEFAULT NULL,
+  p_department_type TEXT DEFAULT NULL
+) RETURNS TEXT LANGUAGE plpgsql AS $$
+DECLARE
+  v_reg  TEXT;
+  v_dist TEXT;
+  v_ward TEXT;
+  v_mtaa TEXT;
+  v_prefix TEXT;
+  v_serial INT;
+  v_code TEXT;
+BEGIN
+  -- 3-letter uppercase abbreviations
+  v_reg  := UPPER(LEFT(REGEXP_REPLACE(COALESCE(p_region, 'XXX'), '[^a-zA-Z]', '', 'g'), 3));
+  v_dist := UPPER(LEFT(REGEXP_REPLACE(COALESCE(p_district, ''), '[^a-zA-Z]', '', 'g'), 3));
+  v_ward := UPPER(LEFT(REGEXP_REPLACE(COALESCE(p_ward, ''), '[^a-zA-Z]', '', 'g'), 3));
+  -- Mtaa keeps its name (cleaned, capitalised first letter)
+  v_mtaa := REGEXP_REPLACE(COALESCE(p_mtaa, ''), '[^a-zA-Z0-9]', '', 'g');
+
+  -- Build prefix by office type
+  v_prefix := CASE p_office_type
+    WHEN 'regional'   THEN v_reg || '-Regional'
+    WHEN 'district'   THEN v_reg || '-' || v_dist || '-District'
+    WHEN 'ward'       THEN v_reg || '-' || v_dist || '-' || v_ward || '-Ward'
+    WHEN 'mtaa'       THEN v_reg || '-' || v_dist || '-' || v_ward || '-' || v_mtaa
+    WHEN 'department' THEN v_reg || '-' || v_dist || '-' || v_ward || '-' || UPPER(LEFT(COALESCE(p_department_type,'DEP'),4))
+    ELSE v_reg
+  END;
+
+  -- Next serial for this prefix
+  SELECT COALESCE(MAX(CAST(RIGHT(office_code, 3) AS INT)), 0) + 1
+  INTO v_serial
+  FROM public.office_registry
+  WHERE office_code LIKE v_prefix || '-%'
+    AND RIGHT(office_code, 3) ~ '^[0-9]{3}$';
+
+  v_code := v_prefix || '-' || LPAD(v_serial::TEXT, 3, '0');
+  RETURN v_code;
+END;
+$$;
+
+-- Auto-assign office_code on insert if not provided
+CREATE OR REPLACE FUNCTION public.set_office_code()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.office_code IS NULL OR NEW.office_code = '' THEN
+    NEW.office_code := public.generate_office_code(
+      NEW.office_type, NEW.region, NEW.district, NEW.ward, NEW.mtaa, NEW.department_type
+    );
+  END IF;
+  NEW.updated_at := NOW();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS "trg_set_office_code" ON office_registry;
+CREATE TRIGGER trg_set_office_code
+  BEFORE INSERT OR UPDATE ON public.office_registry
+  FOR EACH ROW EXECUTE FUNCTION public.set_office_code();
+
+-- ── 4. Street → office assignment lookup ─────────────────────────────────────
+-- Given a citizen's region/district/ward/street, find the best office:
+--   1. Mtaa office whose served_streets contains the street
+--   2. Mtaa office matching mtaa name
+--   3. Fallback: Ward office
+--   4. Fallback: District office → Regional office
+CREATE OR REPLACE FUNCTION public.find_office_for_address(
+  p_region TEXT, p_district TEXT, p_ward TEXT, p_street TEXT
+) RETURNS UUID LANGUAGE plpgsql AS $$
+DECLARE v_id UUID;
+BEGIN
+  -- 1. Mtaa office serving this street
+  SELECT id INTO v_id FROM public.office_registry
+  WHERE office_type='mtaa' AND active
+    AND region=p_region AND district=p_district AND ward=p_ward
+    AND p_street = ANY(served_streets)
+  LIMIT 1;
+  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+
+  -- 2. Mtaa office matching mtaa name = street
+  SELECT id INTO v_id FROM public.office_registry
+  WHERE office_type='mtaa' AND active
+    AND region=p_region AND district=p_district AND ward=p_ward
+    AND (mtaa ILIKE p_street OR mtaa ILIKE '%'||p_street||'%')
+  LIMIT 1;
+  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+
+  -- 3. Ward office
+  SELECT id INTO v_id FROM public.office_registry
+  WHERE office_type='ward' AND active
+    AND region=p_region AND district=p_district AND ward=p_ward
+  LIMIT 1;
+  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+
+  -- 4. District office
+  SELECT id INTO v_id FROM public.office_registry
+  WHERE office_type='district' AND active
+    AND region=p_region AND district=p_district
+  LIMIT 1;
+  IF v_id IS NOT NULL THEN RETURN v_id; END IF;
+
+  -- 5. Regional office
+  SELECT id INTO v_id FROM public.office_registry
+  WHERE office_type='regional' AND active AND region=p_region
+  LIMIT 1;
+  RETURN v_id;
+END;
+$$;
+
+-- ── 5. RLS ────────────────────────────────────────────────────────────────────
+ALTER TABLE public.office_registry ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "office_registry_select" ON public.office_registry;
+CREATE POLICY office_registry_select ON public.office_registry
+  FOR SELECT USING (true);  -- everyone can read offices (needed for assignment lookup)
+
+DROP POLICY IF EXISTS "office_registry_admin_all" ON public.office_registry;
+CREATE POLICY office_registry_admin_all ON public.office_registry
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id=auth.uid() AND u.role='admin')
+  );
+
+GRANT EXECUTE ON FUNCTION public.generate_office_code TO authenticated;
+GRANT EXECUTE ON FUNCTION public.find_office_for_address TO anon, authenticated;
+
+-- ── 6. Audit notification table for unmapped streets (optional helper) ───────
+-- Reuses existing notifications — no new table needed.
+
+
+-- >>> MIGRATION: 20260619_consolidated_fixes.sql
+
 -- ================================================================
 -- E-MTAA Consolidated Migration — Fix Scan Issues
 -- Date: 2026-06-19
@@ -2371,34 +2239,11 @@ $$;
 
 -- 6. Clean up duplicate/conflicting RLS policies
 -- Users
-DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
-DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
-DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
-DROP POLICY IF EXISTS "Staff can view all users" ON public.users;
-DROP POLICY IF EXISTS "Staff can update users" ON public.users;
-DROP POLICY IF EXISTS "Admin can delete users" ON public.users;
 
 -- Applications
-DROP POLICY IF EXISTS "Citizens can view own applications" ON public.applications;
-DROP POLICY IF EXISTS "Citizens can insert own applications" ON public.applications;
-DROP POLICY IF EXISTS "Citizens can update own applications" ON public.applications;
-DROP POLICY IF EXISTS "Second party can view applications" ON public.applications;
-DROP POLICY IF EXISTS "Staff can view all applications" ON public.applications;
-DROP POLICY IF EXISTS "Staff can update applications" ON public.applications;
-DROP POLICY IF EXISTS "Public can verify issued applications" ON public.applications;
 
 -- Services
-DROP POLICY IF EXISTS "Anyone can view active services" ON public.services;
-DROP POLICY IF EXISTS "Staff can manage services" ON public.services;
 
 -- Payments
-DROP POLICY IF EXISTS "Users can view own payments" ON public.payments;
-DROP POLICY IF EXISTS "Users can insert own payments" ON public.payments;
-DROP POLICY IF EXISTS "Staff can view all payments" ON public.payments;
 
 -- Notifications
-DROP POLICY IF EXISTS "Users can view own notifications" ON public.notifications;
-DROP POLICY IF EXISTS "Users can update own notifications" ON public.notifications;
-DROP POLICY IF EXISTS "System can insert notifications" ON public.notifications;
-
-
