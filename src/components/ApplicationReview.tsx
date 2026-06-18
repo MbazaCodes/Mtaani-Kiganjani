@@ -1130,28 +1130,43 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                 {(() => {
                   const citizen = selected.user as Parameters<typeof getUserTier>[0];
                   const citizenTier = getUserTier(citizen);
-                  // Skip checklist if citizen is already verified at any level above basic
+                  // Skip checklist if citizen is verified at ANY level above UNVERIFIED —
+                  // is_verified=true means staff already ran this checklist on a prior
+                  // application, so there's no need to repeat it.
                   const alreadyVerified =
                     citizen?.is_verified === true ||
                     citizenTier === "NIDA_VERIFIED" ||
                     citizenTier === "PROFILE_COMPLETED" ||
-                    citizenTier === "PENDING_OFFICE_VISIT";
+                    citizenTier === "PENDING_OFFICE_VISIT" ||
+                    citizenTier === "PHONE_VERIFIED" ||
+                    citizenTier === "EMAIL_VERIFIED";
                   if (alreadyVerified) {
+                    const tierLabel: Record<string, [string, string]> = {
+                      NIDA_VERIFIED: [L("NIDA Imethibitishwa", "NIDA Verified"), "text-emerald-700"],
+                      PROFILE_COMPLETED: [L("Wasifu Umekamilika", "Profile Completed"), "text-emerald-700"],
+                      PHONE_VERIFIED: [L("Simu Imethibitishwa", "Phone Verified"), "text-blue-700"],
+                      EMAIL_VERIFIED: [L("Barua Pepe Imethibitishwa", "Email Verified"), "text-blue-700"],
+                      PENDING_OFFICE_VISIT: [L("Inasubiri Ziara ya Ofisi", "Pending Office Visit"), "text-amber-700"],
+                    };
+                    const [tierText, tierColor] = tierLabel[citizenTier] ?? [citizenTier, "text-stone-600"];
                     return (
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
-                        <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
-                          <ShieldCheck size={18} className="text-emerald-600" />
+                      <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-2xl p-4 flex items-center gap-3">
+                        <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center shrink-0">
+                          <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
-                          <p className="font-black text-emerald-800 text-sm">
+                          <p className="font-black text-emerald-800 dark:text-emerald-300 text-sm">
                             {L("Raia Amethibitishwa", "Citizen Already Verified")}
                           </p>
-                          <p className="text-xs text-emerald-700 mt-0.5">
+                          <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">
                             {L(
-                              "Hakuna haja ya orodha ya ukaguzi tena. Unaweza kuidhinisha moja kwa moja.",
+                              "Hakuna haja ya orodha ya ukaguzi. Unaweza kuidhinisha moja kwa moja.",
                               "No checklist needed. You can approve directly.",
                             )}
                           </p>
+                          <span className={`inline-block mt-1 text-[10px] font-black uppercase tracking-wider ${tierColor}`}>
+                            ✓ {tierText}
+                          </span>
                         </div>
                       </div>
                     );
