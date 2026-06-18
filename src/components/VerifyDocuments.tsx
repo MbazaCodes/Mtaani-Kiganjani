@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   ArrowLeft,
@@ -31,7 +31,12 @@ import {
   Lock,
   ShieldCheck,
   AlertCircle,
+  ScanLine,
+  ImageIcon,
+  X,
+  Loader2,
 } from "lucide-react";
+import jsQR from "jsqr";
 import { Language } from "@/lib/i18n";
 import { useTranslation } from "@/lib/i18n";
 import { supabase, UserRole } from "@/lib/supabase";
@@ -270,6 +275,14 @@ export function VerifyDocuments({
   const [showDocTypeDropdown, setShowDocTypeDropdown] = useState(false);
   const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
+  // ── Upload state ──────────────────────────────────────────────────────────
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "scanning" | "found" | "notfound">("idle");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const hasFullAccess = userRole === "admin" || userRole === "staff";
   const availableDocTypes = hasFullAccess ? DOCUMENT_TYPES : PUBLIC_DOCUMENT_TYPES;
   const selectedDocument =
@@ -285,6 +298,200 @@ export function VerifyDocuments({
     setVerifiedDocument(null);
     setErrorDetail(null);
     setQrInput("");
+  };
+
+  // ── Upload & QR scan logic ────────────────────────────────────────────────
+
+  /** Draw an image/canvas onto a hidden canvas and run jsQR over the pixels */
+  const scanImageForQR = useCallback(
+    async (dataUrl: string): Promise<string | null> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(null);
+          ctx.drawImage(img, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+          resolve(code ? code.data : null);
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      });
+    },
+    [],
+  );
+
+  /** Extract the application/reference number from a decoded QR payload string */
+  const extractRefFromQR = (raw: string): string | null => {
+    // Try JSON payload first (E-Mtaa format: { ref, id, svc, dt })
+    try {
+      const parsed = JSON.parse(raw) as Record<string, string>;
+      if (parsed.ref) return parsed.ref;
+      if (parsed.id) return parsed.id;
+    } catch {
+      // not JSON — treat as raw string
+    }
+    // Might be a plain app number or URL containing one
+    const urlMatch = raw.match(/[?&]ref=([^&]+)/);
+    if (urlMatch) return decodeURIComponent(urlMatch[1]);
+    const appMatch = raw.match(/TZ-[A-Z0-9-]+/i);
+    if (appMatch) return appMatch[0].toUpperCase();
+    const ctMatch = raw.match(/CT\d{2}[A-Z]\d+/i);
+    if (ctMatch) return ctMatch[0].toUpperCase();
+    // Return the raw value if it looks like a code (not a long URL)
+    if (raw.length < 60 && !/https?:\/\//.test(raw)) return raw.trim();
+    return null;
+  };
+
+  const processFile = useCallback(
+    async (file: File) => {
+      setUploadedFile(file);
+      setUploadStatus("scanning");
+      setUploadError(null);
+
+      const isPDF = file.type === "application/pdf";
+      const isImage = file.type.startsWith("image/");
+
+      if (!isPDF && !isImage) {
+        setUploadStatus("notfound");
+        setUploadError(L("Aina ya faili haikusuluhuliwa. Tumia PNG, JPG, au PDF.", "Unsupported file type. Use PNG, JPG, or PDF."));
+        return;
+      }
+
+      if (file.size > 15 * 1024 * 1024) {
+        setUploadStatus("notfound");
+        setUploadError(L("Faili ni kubwa sana (max 15MB).", "File too large (max 15MB)."));
+        return;
+      }
+
+      try {
+        let dataUrl: string | null = null;
+
+        if (isImage) {
+          // Read image directly
+          dataUrl = await new Promise<string>((res, rej) => {
+            const reader = new FileReader();
+            reader.onload = () => res(reader.result as string);
+            reader.onerror = rej;
+            reader.readAsDataURL(file);
+          });
+          setUploadPreview(dataUrl);
+        } else {
+          // PDF — render first page via pdf.js from CDN (loaded via script tag)
+          setUploadPreview(null);
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            // Load pdf.js via script tag to avoid Vite/TS issues with CDN imports
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const pdfjsLib: any = await new Promise((res, rej) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const win = window as any;
+              if (win.pdfjsLib) return res(win.pdfjsLib);
+              const script = document.createElement("script");
+              script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+              script.onload = () => res(win.pdfjsLib);
+              script.onerror = () => rej(new Error("pdf.js failed to load"));
+              document.head.appendChild(script);
+            }).catch(() => null);
+
+            if (pdfjsLib) {
+              pdfjsLib.GlobalWorkerOptions.workerSrc =
+                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+              const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+              const page = await pdf.getPage(1);
+              const viewport = page.getViewport({ scale: 2 });
+              const canvas = document.createElement("canvas");
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+              const ctx = canvas.getContext("2d")!;
+              await page.render({ canvasContext: ctx, viewport }).promise;
+              dataUrl = canvas.toDataURL("image/png");
+              setUploadPreview(dataUrl);
+            }
+          } catch {
+            // pdf.js failed — proceed with null dataUrl (QR scan will be skipped)
+          }
+        }
+
+        // Scan for QR code in the image
+        let qrValue: string | null = null;
+        if (dataUrl) {
+          qrValue = await scanImageForQR(dataUrl);
+        }
+
+        if (qrValue) {
+          const ref = extractRefFromQR(qrValue);
+          if (ref) {
+            setUploadStatus("found");
+            // Auto-fill the number field and trigger verification
+            setQrInput(ref);
+            setSelectedDocType(ref.startsWith("CT") ? "ct_id" : "application");
+            // Short delay so user sees the "found" state before results load
+            setTimeout(() => {
+              setVerificationStatus("pending");
+              setVerifiedDocument(null);
+              setErrorDetail(null);
+              setLoading(true);
+              const fn = ref.toUpperCase().startsWith("CT")
+                ? verifyCTID(ref)
+                : verifyEMtaaApplication(ref);
+              fn.finally(() => setLoading(false));
+            }, 600);
+            return;
+          }
+        }
+
+        // No QR found
+        setUploadStatus("notfound");
+        setUploadError(
+          L(
+            "Hakuna QR Code iliyopatikana kwenye faili hili. Jaribu kutumia namba ya maombi moja kwa moja.",
+            "No QR code found in this file. Try entering the application number directly.",
+          ),
+        );
+      } catch (err) {
+        console.error("File scan error:", err);
+        setUploadStatus("notfound");
+        setUploadError(L("Hitilafu wakati wa kusoma faili. Jaribu tena.", "Error reading file. Please try again."));
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lang, scanImageForQR],
+  );
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) processFile(file);
+      e.target.value = ""; // allow re-selecting same file
+    },
+    [processFile],
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      const file = e.dataTransfer.files[0];
+      if (file) processFile(file);
+    },
+    [processFile],
+  );
+
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragOver(true); };
+  const handleDragLeave = () => setIsDragOver(false);
+
+  const clearUpload = () => {
+    setUploadedFile(null);
+    setUploadPreview(null);
+    setUploadStatus("idle");
+    setUploadError(null);
   };
 
   const handleVerify = async () => {
@@ -761,28 +968,147 @@ export function VerifyDocuments({
           <div className="bg-white dark:bg-stone-900 rounded-3xl p-8 border border-stone-200 dark:border-stone-700 shadow-sm space-y-6">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                <Upload className="h-6 w-6" />
+                <ScanLine className="h-6 w-6" />
               </div>
               <div>
                 <h3 className="font-heading font-bold text-stone-900 dark:text-stone-100">
-                  {L("Pakia Nyaraka", "Upload Document")}
+                  {L("Pakia Nyaraka / Skena QR", "Upload & Scan QR")}
                 </h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400">
-                  {L("Skena hati yako ya PDF au picha", "Scan your PDF or image document")}
+                  {L("Pakia PDF au picha — QR Code itapatikana na kuthibitishwa moja kwa moja", "Upload PDF or image — QR Code will be detected and verified automatically")}
                 </p>
               </div>
             </div>
-            <div className="border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-2xl p-10 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-all group">
-              <div className="h-16 w-16 bg-stone-50 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <Upload className="h-8 w-8 text-stone-400 group-hover:text-emerald-600" />
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+
+            {/* Drop zone — show when no file selected yet */}
+            {!uploadedFile && (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                className={cn(
+                  "border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all",
+                  isDragOver
+                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 scale-[1.01]"
+                    : "border-stone-200 dark:border-stone-700 hover:border-emerald-400 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10",
+                )}
+              >
+                <div className={cn(
+                  "h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-all",
+                  isDragOver ? "bg-emerald-100 dark:bg-emerald-900/40 scale-110" : "bg-stone-50 dark:bg-stone-800",
+                )}>
+                  <Upload className={cn("h-8 w-8 transition-colors", isDragOver ? "text-emerald-600" : "text-stone-400 group-hover:text-emerald-600")} />
+                </div>
+                <p className="text-stone-900 dark:text-stone-100 font-bold mb-1">
+                  {L("Buruta na uachie hapa", "Drag and drop here")}
+                </p>
+                <p className="text-sm text-stone-500 dark:text-stone-400 mb-3">
+                  {L("au bonyeza kuchagua faili", "or click to browse files")}
+                </p>
+                <p className="text-xs text-stone-400 dark:text-stone-500">
+                  PDF, PNG, JPG, WEBP · {L("Max", "Max")} 15MB
+                </p>
               </div>
-              <p className="text-stone-900 dark:text-stone-100 font-bold mb-1">
-                {L("Buruta na uachie nyaraka hapa", "Drag and drop your document")}
-              </p>
-              <p className="text-sm text-stone-500 dark:text-stone-400">
-                {L("au bonyeza kutafuta kwenye kompyuta", "or click to browse files")}
-              </p>
-            </div>
+            )}
+
+            {/* File selected — show preview & status */}
+            {uploadedFile && (
+              <div className="space-y-4">
+                {/* File info bar */}
+                <div className="flex items-center gap-3 p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700">
+                  <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                    <ImageIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-stone-900 dark:text-stone-100 text-sm truncate">
+                      {uploadedFile.name}
+                    </p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
+                      {(uploadedFile.size / 1024).toFixed(1)} KB · {uploadedFile.type.split("/")[1]?.toUpperCase()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={clearUpload}
+                    className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    title={L("Futa faili", "Remove file")}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Preview (images and rendered PDFs) */}
+                {uploadPreview && (
+                  <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 max-h-48 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                    <img
+                      src={uploadPreview}
+                      alt="Document preview"
+                      className="max-h-48 w-auto object-contain"
+                    />
+                  </div>
+                )}
+
+                {/* Scanning status */}
+                {uploadStatus === "scanning" && (
+                  <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <Loader2 className="h-5 w-5 text-blue-500 animate-spin shrink-0" />
+                    <div>
+                      <p className="font-bold text-blue-800 dark:text-blue-300 text-sm">
+                        {L("Inatafuta QR Code...", "Scanning for QR Code...")}
+                      </p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400">
+                        {L("Tafadhali subiri", "Please wait")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {uploadStatus === "found" && (
+                  <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-700">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                    <div>
+                      <p className="font-bold text-emerald-800 dark:text-emerald-300 text-sm">
+                        {L("QR Code imepatikana!", "QR Code detected!")}
+                      </p>
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                        {L("Inahakiki moja kwa moja...", "Verifying automatically...")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {uploadStatus === "notfound" && (
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700">
+                      <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold text-amber-800 dark:text-amber-300 text-sm">
+                          {L("QR Code haikupatikana", "QR Code not found")}
+                        </p>
+                        <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                          {uploadError}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full py-2.5 border border-stone-200 dark:border-stone-700 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                    >
+                      {L("Jaribu faili lingine", "Try another file")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
