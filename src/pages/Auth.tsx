@@ -24,6 +24,8 @@ import {
   MapPin,
   User,
   Shield,
+  RefreshCw,
+  UserPlus,
 } from "lucide-react";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -186,6 +188,7 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const [loginId, setLoginId] = useState("");
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
   const [loginPwd, setLoginPwd] = useState("");
+  const [loginError, setLoginError] = useState<{ type: "credentials" | "notfound" | "other"; message: string } | null>(null);
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
@@ -361,6 +364,7 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   // ── Login handler — email OR phone ────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
     setLoading(true);
     try {
       let email = loginId.trim();
@@ -409,28 +413,49 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
         }
 
         if (!found) {
-          throw new Error(
-            L(
-              "Namba ya simu haipatikani. Hakikisha umeingiza namba sahihi au jaribu barua pepe.",
-              "Phone number not found. Make sure you entered the correct number or try signing in with email.",
+          setLoginError({
+            type: "notfound",
+            message: L(
+              "Namba ya simu haipatikani kwenye mfumo wetu.",
+              "Mobile number not found in our system.",
             ),
-          );
+          });
+          return;
         }
         email = found;
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({ email, password: loginPwd });
       if (error) {
-        if (error.message.includes("Invalid login credentials"))
-          throw new Error(L("Nywila si sahihi.", "Incorrect password."));
-        if (error.message.includes("Email not confirmed"))
-          throw new Error(
-            L(
+        if (
+          error.message.includes("Invalid login credentials") ||
+          error.message.includes("invalid_credentials")
+        ) {
+          setLoginError({
+            type: "credentials",
+            message: L(
+              loginMethod === "phone"
+                ? "Namba ya simu au nywila si sahihi."
+                : "Barua pepe au nywila si sahihi.",
+              loginMethod === "phone"
+                ? "Wrong mobile number or password."
+                : "Wrong email or password.",
+            ),
+          });
+          return;
+        }
+        if (error.message.includes("Email not confirmed")) {
+          setLoginError({
+            type: "other",
+            message: L(
               "Barua pepe bado haijathibitishwa. Angalia inbox yako.",
               "Email not confirmed. Check your inbox.",
             ),
-          );
-        throw error;
+          });
+          return;
+        }
+        setLoginError({ type: "other", message: error.message });
+        return;
       }
       if (data.user) {
         fetchUserProfile(data.user.id).catch(() => {});
@@ -439,7 +464,7 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       }
       onClose();
     } catch (_err) {
-      showToast((err as Error).message, "error");
+      setLoginError({ type: "other", message: (_err as Error).message });
     } finally {
       setLoading(false);
     }
@@ -454,7 +479,7 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       });
       if (error) throw error;
       setForgotSent(true);
-    } catch (_err) {
+    } catch (err) {
       showToast((err as Error).message, "error");
     } finally {
       setLoading(false);
@@ -578,7 +603,7 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       );
       onSuccess?.("citizen");
       onClose();
-    } catch (_err) {
+    } catch (err) {
       showToast(normaliseSignupError(err), "error");
     } finally {
       setLoading(false);
@@ -615,7 +640,7 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       );
       onSuccess?.("citizen");
       onClose();
-    } catch (_err) {
+    } catch (err) {
       showToast(normaliseSignupError(err), "error");
     } finally {
       setLoading(false);
@@ -767,7 +792,7 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                           <TxtInput
                             type="email"
                             value={loginId}
-                            onChange={(e) => setLoginId(e.target.value)}
+                            onChange={(e) => { setLoginId(e.target.value); setLoginError(null); }}
                             placeholder="juma@mfano.co.tz"
                             icon={<Mail size={15} />}
                             required
@@ -802,7 +827,7 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                           <TxtInput
                             type={showPwd ? "text" : "password"}
                             value={loginPwd}
-                            onChange={(e) => setLoginPwd(e.target.value)}
+                            onChange={(e) => { setLoginPwd(e.target.value); setLoginError(null); }}
                             placeholder="••••••••"
                             icon={<Lock size={15} />}
                             required
@@ -826,6 +851,85 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                           </p>
                         )}
                       </div>
+
+                      {/* ── Login error popup ── */}
+                      {loginError && (
+                        <div className="rounded-2xl border-2 border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-800 overflow-hidden">
+                          {/* Red header bar */}
+                          <div className="bg-red-500 dark:bg-red-700 px-4 py-2.5 flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                              <AlertCircle size={15} className="text-white" />
+                            </div>
+                            <p className="text-white font-bold text-sm">
+                              {loginError.type === "credentials"
+                                ? L("Imeshindwa Kuingia", "Login Failed")
+                                : loginError.type === "notfound"
+                                  ? L("Akaunti Haijapatikana", "Account Not Found")
+                                  : L("Hitilafu", "Error")}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setLoginError(null)}
+                              className="ml-auto text-white/70 hover:text-white transition-colors"
+                              aria-label="Dismiss"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+
+                          {/* Body */}
+                          <div className="px-4 py-3 space-y-3">
+                            <p className="text-sm text-red-800 dark:text-red-300 font-semibold">
+                              {loginError.message}
+                            </p>
+
+                            <p className="text-xs text-red-600 dark:text-red-400">
+                              {loginError.type === "credentials"
+                                ? L(
+                                    "Angalia tena barua pepe/simu na nywila yako, kisha jaribu tena. Ikiwa huna akaunti, jisajili bure.",
+                                    "Double-check your email/phone and password, then try again. If you don't have an account, sign up for free.",
+                                  )
+                                : loginError.type === "notfound"
+                                  ? L(
+                                      "Jaribu kutumia barua pepe badala ya simu, au jisajili kuunda akaunti mpya.",
+                                      "Try signing in with email instead of phone, or sign up to create a new account.",
+                                    )
+                                  : L(
+                                      "Tafadhali jaribu tena baadaye au wasiliana na msaada.",
+                                      "Please try again later or contact support.",
+                                    )}
+                            </p>
+
+                            {/* Actions */}
+                            <div className="flex gap-2 pt-0.5">
+                              <button
+                                type="submit"
+                                className="flex-1 h-9 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                              >
+                                <RefreshCw size={12} />
+                                {L("Jaribu Tena", "Try Again")}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setLoginError(null); setMode("signup"); }}
+                                className="flex-1 h-9 bg-white dark:bg-stone-800 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                              >
+                                <UserPlus size={12} />
+                                {L("Jisajili", "Sign Up")}
+                              </button>
+                              {loginError.type === "credentials" && (
+                                <button
+                                  type="button"
+                                  onClick={() => { setLoginError(null); setShowForgot(true); }}
+                                  className="flex-1 h-9 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 rounded-xl text-xs font-bold transition-all"
+                                >
+                                  {L("Nywila?", "Forgot?")}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       <button
                         type="submit"
