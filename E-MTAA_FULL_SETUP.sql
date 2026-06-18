@@ -310,10 +310,10 @@ DROP TRIGGER IF EXISTS "trigger_set_citizen_id" ON users;
 CREATE TRIGGER trigger_set_citizen_id BEFORE INSERT ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.set_citizen_id();
 
-DROP TRIGGER IF EXISTS "trigger_users_updated_at";
+DROP TRIGGER IF EXISTS "trigger_users_updated_at" ON public.users;
 CREATE TRIGGER trigger_users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.trigger_set_updated_at();
 
-DROP TRIGGER IF EXISTS "trigger_applications_updated_at";
+DROP TRIGGER IF EXISTS "trigger_applications_updated_at" ON public.applications;
 CREATE TRIGGER trigger_applications_updated_at BEFORE UPDATE ON public.applications FOR EACH ROW EXECUTE FUNCTION public.trigger_set_updated_at();
 
 -- Auto-create profile row on signup
