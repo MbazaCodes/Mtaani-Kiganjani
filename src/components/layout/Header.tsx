@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { LogOut, Menu, Loader2, Bell, Users } from "lucide-react";
+import { LogOut, Menu, Loader2, Bell, Users, Sun, Moon } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { useDarkMode } from "../../hooks/useDarkMode";
 import { cn, TanzanianBranding } from "../../lib/utils";
 import { TANZANIA_LOGO_URL } from "@/constants/services";
 import { countUnreadNotifications } from "@/lib/notifications";
@@ -15,6 +16,7 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { user, signOut } = useAuth();
   const { lang, setLang } = useLanguage();
+  const { isDark, toggle: toggleDark } = useDarkMode();
   const { setView } = useRouterView();
   const [signingOut, setSigningOut] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -45,7 +47,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white border-b border-stone-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+    <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm transition-colors">
       <div className="flex items-center gap-2 sm:gap-4">
         <button
           onClick={onMenuClick}
@@ -64,9 +66,9 @@ export function Header({ onMenuClick }: HeaderProps) {
             className="w-8 h-8 sm:w-12 sm:h-12 object-contain"
             referrerPolicy="no-referrer"
           />
-          <div className="h-8 sm:h-10 w-px bg-stone-200 hidden xs:block" aria-hidden="true"></div>
+          <div className="h-8 sm:h-10 w-px bg-stone-200 dark:bg-stone-700 hidden xs:block" aria-hidden="true"></div>
           <div className="flex flex-col leading-none">
-            <span className="text-base sm:text-lg font-black tracking-tighter text-stone-900 flex items-center gap-1">
+            <span className="text-base sm:text-lg font-black tracking-tighter text-stone-900 dark:text-stone-100 flex items-center gap-1">
               E-MTAA
               <span className="text-[7px] sm:text-[9px] text-white px-1 py-0.5 rounded font-bold tracking-normal align-middle bg-primary ml-1">
                 PORTAL
@@ -99,7 +101,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           </div>
         )}
         <div
-          className="flex items-center gap-1 sm:gap-2 bg-stone-100 rounded-full p-1 mr-1 sm:mr-2"
+          className="flex items-center gap-1 sm:gap-2 bg-stone-100 dark:bg-stone-800 rounded-full p-1 mr-1 sm:mr-2"
           role="group"
           aria-label="Language selector"
         >
@@ -108,8 +110,8 @@ export function Header({ onMenuClick }: HeaderProps) {
             className={cn(
               "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
               lang === "sw"
-                ? "bg-white shadow-sm text-primary"
-                : "text-stone-500 hover:bg-stone-200",
+                ? "bg-white dark:bg-stone-700 shadow-sm text-primary"
+                : "text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700",
             )}
             aria-label="Switch to Swahili"
             title="Kiswahili"
@@ -122,8 +124,8 @@ export function Header({ onMenuClick }: HeaderProps) {
             className={cn(
               "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
               lang === "en"
-                ? "bg-white shadow-sm text-primary"
-                : "text-stone-500 hover:bg-stone-200",
+                ? "bg-white dark:bg-stone-700 shadow-sm text-primary"
+                : "text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700",
             )}
             aria-label="Switch to English"
             title="English"
@@ -132,6 +134,17 @@ export function Header({ onMenuClick }: HeaderProps) {
             EN
           </button>
         </div>
+
+        {/* Dark / Light toggle */}
+        <button
+          onClick={toggleDark}
+          className="p-2 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 hover:text-stone-700 dark:hover:text-stone-200 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 mr-1 sm:mr-2"
+          aria-label={isDark ? (lang === "sw" ? "Washa mwanga" : "Switch to light mode") : (lang === "sw" ? "Washa giza" : "Switch to dark mode")}
+          title={isDark ? (lang === "sw" ? "Mwanga" : "Light mode") : (lang === "sw" ? "Giza" : "Dark mode")}
+          type="button"
+        >
+          {isDark ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
+        </button>
 
         {/* Notification Bell */}
         {user && (
@@ -153,10 +166,10 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         {user && (
           <div className="text-right hidden md:block">
-            <p className="text-sm font-bold text-stone-800">
+            <p className="text-sm font-bold text-stone-800 dark:text-stone-100">
               {user.first_name} {user.last_name}
             </p>
-            <p className="text-xs text-stone-500 capitalize flex items-center gap-1.5 justify-end flex-wrap">
+            <p className="text-xs text-stone-500 dark:text-stone-400 capitalize flex items-center gap-1.5 justify-end flex-wrap">
               <span>
                 {user.role} {user.is_diaspora && "(Diaspora)"}
               </span>
