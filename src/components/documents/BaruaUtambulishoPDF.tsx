@@ -100,12 +100,14 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
 
   const institutions = Array.isArray(fd.institutions) ? (fd.institutions as any[]) : [];
   const firstInst = institutions[0] || {};
-  const purpose = String(fd.purpose || "");
-  const purposeLabel = PURPOSE_LABELS[purpose]
-    ? PURPOSE_LABELS[purpose][sw ? "sw" : "en"]
-    : sw
-      ? "madhumuni rasmi"
-      : "official purposes";
+  const globalPurpose = String(fd.purpose || "");
+
+  // Resolve purpose for first institution: own purpose → global purpose → fallback
+  const instPurpose = String(firstInst.purpose || globalPurpose || "");
+  const instPurposeDetails = String(firstInst.purpose_details || fd.purpose_details || "");
+  const purposeLabel = PURPOSE_LABELS[instPurpose]
+    ? PURPOSE_LABELS[instPurpose][sw ? "sw" : "en"]
+    : instPurposeDetails || (sw ? "madhumuni rasmi" : "official purposes");
 
   // Resolve beneficiary name (Self/Minor/Behalf)
   const appType = String(fd.application_type || "SELF");
@@ -232,9 +234,9 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
         </Text>
 
         {/* Special paragraph for bail / surety purposes */}
-        {(fd.purpose === "DHAMANA_POLISI" || fd.purpose === "UDHAMINI") && (
+        {(instPurpose === "DHAMANA_POLISI" || instPurpose === "UDHAMINI") && (
           <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5, fontStyle: "italic" }]}>
-            {fd.purpose === "DHAMANA_POLISI"
+            {instPurpose === "DHAMANA_POLISI"
               ? sw
                 ? `Ofisi hii inathibitisha kuwa ndugu ${subjectName} anajulikana vizuri katika mtaa huu na ana tabia nzuri ya kuaminika. Ombi la dhamana (bail) linatolewa kwa heshima kwa mamlaka husika, kwa kuzingatia haki za kisheria za mtuhumiwa.`
                 : `This office confirms that ${subjectName} is well known in this community and is of good character. This letter respectfully supports a bail application to the relevant authority, in recognition of the accused's legal rights.`

@@ -92,6 +92,8 @@ interface Institution {
   address: string;
   contact_person: string;
   department: string;
+  purpose: string;        // own purpose, or "" = inherit global
+  purpose_details: string; // only if purpose === "NYINGINEZO"
 }
 
 interface UploadedDoc {
@@ -146,7 +148,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
 
   // Institutions — always start with 1 empty slot
   const [institutions, setInstitutions] = useState<Institution[]>([
-    { name: "", address: "", contact_person: "", department: "" },
+    { name: "", address: "", contact_person: "", department: "", purpose: "", purpose_details: "" },
   ]);
 
   // Uploaded support docs
@@ -239,7 +241,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
 
   const addInst = () => {
     if (institutions.length < MAX_INSTITUTIONS)
-      setInstitutions((p) => [...p, { name: "", address: "", contact_person: "", department: "" }]);
+      setInstitutions((p) => [...p, { name: "", address: "", contact_person: "", department: "", purpose: "", purpose_details: "" }]);
   };
 
   const removeInst = (i: number) => {
@@ -1392,6 +1394,82 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                       className={inputCls(`inst_addr_${i}`)}
                     />
                   </Field>
+
+                  {/* ── Per-institution purpose ── */}
+                  <div className="border-t border-stone-100 pt-3 mt-1">
+                    <p className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Activity size={12} />
+                      {L("Sababu ya Barua kwa Taasisi Hii", "Purpose for This Institution")}
+                    </p>
+
+                    {/* Same-purpose shortcut (only shown when a global purpose is selected) */}
+                    {vals.purpose && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInst(i, "purpose", inst.purpose === "" ? vals.purpose : "");
+                          setInst(i, "purpose_details", "");
+                        }}
+                        className={`w-full mb-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-between ${
+                          inst.purpose === "" || inst.purpose === vals.purpose
+                            ? "bg-emerald-50 border-emerald-300 text-emerald-700"
+                            : "bg-stone-50 border-stone-200 text-stone-500 hover:border-emerald-200"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Check size={12} className={inst.purpose === "" || inst.purpose === vals.purpose ? "text-emerald-600" : "text-stone-300"} />
+                          {L("Sababu ile ile:", "Same reason:")} {PURPOSES.find(p => p.value === vals.purpose)?.label || vals.purpose}
+                        </span>
+                        {(inst.purpose === "" || inst.purpose === vals.purpose) && (
+                          <span className="text-emerald-600 text-[10px]">✓ {L("Imechaguliwa", "Selected")}</span>
+                        )}
+                      </button>
+                    )}
+
+                    {/* Different purpose selector */}
+                    <select
+                      value={inst.purpose === "" || inst.purpose === vals.purpose ? "" : inst.purpose}
+                      onChange={(e) => {
+                        setInst(i, "purpose", e.target.value || "");
+                        setInst(i, "purpose_details", "");
+                      }}
+                      className={`${inputCls(`inst_purpose_${i}`)} text-sm`}
+                    >
+                      <option value="">
+                        {vals.purpose
+                          ? L("── Sababu tofauti (hiari) ──", "── Different reason (optional) ──")
+                          : L("── Chagua sababu ──", "── Select reason ──")}
+                      </option>
+                      {PURPOSES.map((p) => (
+                        <option key={p.value} value={p.value}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Custom description when NYINGINEZO is picked for this institution */}
+                    {inst.purpose === "NYINGINEZO" && (
+                      <textarea
+                        value={inst.purpose_details}
+                        onChange={(e) => setInst(i, "purpose_details", e.target.value)}
+                        placeholder={L("Eleza sababu ya barua kwa taasisi hii...", "Describe the reason for this institution...")}
+                        rows={2}
+                        className={`${inputCls(`inst_purpose_details_${i}`)} resize-none mt-2 text-sm`}
+                      />
+                    )}
+
+                    {/* Resolved purpose chip */}
+                    {(inst.purpose || vals.purpose) && (
+                      <p className="text-[10px] text-stone-400 mt-1.5 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                        {L("Sababu itakayotumika:", "Reason that will be used:")}
+                        {" "}
+                        <span className="font-bold text-stone-600">
+                          {PURPOSES.find(p => p.value === (inst.purpose || vals.purpose))?.label || (inst.purpose || vals.purpose)}
+                        </span>
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
