@@ -300,21 +300,24 @@ export const UtambulishoMkaziForm: React.FC<FormProps> = ({
     if (!userProfile) return;
     setVals((prev) => ({
       ...prev,
-      region:            prev.region            || userProfile.region                    || "",
-      district:          prev.district          || userProfile.district                  || "",
-      ward:              prev.ward              || userProfile.ward                      || "",
-      village_street:    prev.village_street    || userProfile.street                    || "",
-      mtaa_officer:      prev.mtaa_officer      || userProfile.mtaa_executive_officer    || "",
-      marital_status:    prev.marital_status    || userProfile.marital_status            || "",
-      occupation:        prev.occupation        || userProfile.occupation                || "",
-      house_number:      prev.house_number      || userProfile.house_number              || "",
-      passport_number:   prev.passport_number   || userProfile.passport_number          || "",
-      country_of_origin: prev.country_of_origin || userProfile.country_of_citizenship   || "",
-      residency_status:  prev.residency_status  !== "REGULAR"
-                           ? prev.residency_status
-                           : userProfile.is_diaspora ? "DIASPORA" : "REGULAR",
+      region: prev.region || userProfile.region || "",
+      district: prev.district || userProfile.district || "",
+      ward: prev.ward || userProfile.ward || "",
+      village_street: prev.village_street || userProfile.street || "",
+      mtaa_officer: prev.mtaa_officer || userProfile.mtaa_executive_officer || "",
+      marital_status: prev.marital_status || userProfile.marital_status || "",
+      occupation: prev.occupation || userProfile.occupation || "",
+      house_number: prev.house_number || userProfile.house_number || "",
+      passport_number: prev.passport_number || userProfile.passport_number || "",
+      country_of_origin: prev.country_of_origin || userProfile.country_of_citizenship || "",
+      residency_status:
+        prev.residency_status !== "REGULAR"
+          ? prev.residency_status
+          : userProfile.is_diaspora
+            ? "DIASPORA"
+            : "REGULAR",
     }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfile?.id, userProfile?.region, userProfile?.district, userProfile?.ward]);
 
   // ─── Address cascades (memoised — TANZANIA_ADDRESS_DATA is 4000+ lines) ──

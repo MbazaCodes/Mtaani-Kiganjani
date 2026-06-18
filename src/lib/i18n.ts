@@ -1,4 +1,10 @@
-export type Language = "sw" | "en";
+/**
+ * @deprecated Import { Language } from "@/context/LanguageContext" instead.
+ * This module is kept for backward compatibility — prefer useLanguage() context hook.
+ */
+import type { Language } from "@/context/LanguageContext";
+
+export type { Language } from "@/context/LanguageContext";
 
 export const translations = {
   sw: {
@@ -22,7 +28,7 @@ export const translations = {
     myApplications: "Maombi Yangu",
     dashboard: "Dashibodi",
     apply: "Omba Huduma",
-    logout: "Ondoka",
+    logout: "Tondoka",
     nidaNumber: "Namba ya NIDA",
     firstName: "Jina la Kwanza",
     middleName: "Jina la Kati",

@@ -255,7 +255,13 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
       if (statusFilter !== "all") {
         if (statusFilter === "pending_review") {
           const s = a.status as string;
-          if (s !== "pending_review" && s !== "submitted" && s !== "pending" && s !== "under_review") return false;
+          if (
+            s !== "pending_review" &&
+            s !== "submitted" &&
+            s !== "pending" &&
+            s !== "under_review"
+          )
+            return false;
         } else if (a.status !== statusFilter) return false;
       }
       if (serviceFilter !== "all" && a.service_name !== serviceFilter) return false;
@@ -873,15 +879,17 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                       </div>
                     </div>
                     {/* Agreement buyer status — show for Makubaliano services when issued */}
-                    {(app.service_name?.includes("Makubaliano") || app.service_name?.includes("Agreement")) &&
+                    {(app.service_name?.includes("Makubaliano") ||
+                      app.service_name?.includes("Agreement")) &&
                       app.status === "issued" && (
                         <div className="mt-1.5">
-                          {(!app.agreement_status || app.agreement_status === "pending") ? (
+                          {!app.agreement_status || app.agreement_status === "pending" ? (
                             <div className="flex items-center gap-1.5">
                               <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                                 {L("⏳ Inasubiri Mnunuzi", "⏳ Awaiting Buyer")}
                               </span>
-                              {(app.form_data as Record<string, string> | undefined)?.buyer_name && (
+                              {(app.form_data as Record<string, string> | undefined)
+                                ?.buyer_name && (
                                 <span className="text-[10px] text-stone-400 truncate">
                                   → {(app.form_data as Record<string, string>).buyer_name}
                                 </span>
@@ -1037,54 +1045,81 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                 </div>
 
                 {/* Buyer / Second Party — for agreements only */}
-                {(selected.service_name?.includes("Makubaliano") || selected.service_name?.includes("Agreement")) && (() => {
-                  const fd = (selected.form_data || {}) as Record<string, string>;
-                  const buyerName = fd.buyer_name || fd.tenant_name || fd.second_party_name || "";
-                  const buyerPhone = fd.buyer_phone || fd.tenant_phone || "";
-                  const buyerNida = fd.buyer_nida || fd.tenant_nida || "";
-                  const agrStatus = selected.agreement_status || "pending";
-                  const isPending = !selected.agreement_status || selected.agreement_status === "pending";
-                  return (
-                    <div className={`border rounded-2xl p-4 ${isPending ? "bg-amber-50 border-amber-200" : agrStatus === "buyer_accepted" ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <User size={14} className="text-stone-600" />
-                          <p className="text-[10px] font-black text-stone-600 uppercase tracking-wider">
-                            {L("Mnunuzi / Upande wa Pili", "Buyer / Second Party")}
-                          </p>
+                {(selected.service_name?.includes("Makubaliano") ||
+                  selected.service_name?.includes("Agreement")) &&
+                  (() => {
+                    const fd = (selected.form_data || {}) as Record<string, string>;
+                    const buyerName = fd.buyer_name || fd.tenant_name || fd.second_party_name || "";
+                    const buyerPhone = fd.buyer_phone || fd.tenant_phone || "";
+                    const buyerNida = fd.buyer_nida || fd.tenant_nida || "";
+                    const agrStatus = selected.agreement_status || "pending";
+                    const isPending =
+                      !selected.agreement_status || selected.agreement_status === "pending";
+                    return (
+                      <div
+                        className={`border rounded-2xl p-4 ${isPending ? "bg-amber-50 border-amber-200" : agrStatus === "buyer_accepted" ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <User size={14} className="text-stone-600" />
+                            <p className="text-[10px] font-black text-stone-600 uppercase tracking-wider">
+                              {L("Mnunuzi / Upande wa Pili", "Buyer / Second Party")}
+                            </p>
+                          </div>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isPending ? "bg-amber-100 text-amber-700" : agrStatus === "buyer_accepted" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}
+                          >
+                            {isPending
+                              ? L("⏳ Inasubiri", "⏳ Pending")
+                              : agrStatus === "buyer_accepted"
+                                ? L("✅ Amekubali", "✅ Accepted")
+                                : L("❌ Amekataa", "❌ Rejected")}
+                          </span>
                         </div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isPending ? "bg-amber-100 text-amber-700" : agrStatus === "buyer_accepted" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
-                          {isPending ? L("⏳ Inasubiri", "⏳ Pending") : agrStatus === "buyer_accepted" ? L("✅ Amekubali", "✅ Accepted") : L("❌ Amekataa", "❌ Rejected")}
-                        </span>
+                        {buyerName && <p className="font-black text-stone-900">{buyerName}</p>}
+                        <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                          {buyerPhone && (
+                            <div>
+                              <span className="text-stone-400">{L("Simu:", "Phone:")}</span>{" "}
+                              <span className="font-bold text-stone-700">{buyerPhone}</span>
+                            </div>
+                          )}
+                          {buyerNida && (
+                            <div>
+                              <span className="text-stone-400">NIDA:</span>{" "}
+                              <span className="font-bold text-stone-700">{buyerNida}</span>
+                            </div>
+                          )}
+                        </div>
+                        {isPending && selected.second_party_user_id && (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              await supabase.from("notifications").insert({
+                                user_id: selected.second_party_user_id,
+                                title: L(
+                                  "Kumbusho: Makubaliano Yanasubiri",
+                                  "Reminder: Agreement Awaiting Your Acceptance",
+                                ),
+                                message: L(
+                                  `Makubaliano ${selected.application_number} yanasubiri uikubali. Fungua ukurasa wa Makubaliano kukubali au kukataa.`,
+                                  `Agreement ${selected.application_number} is awaiting your acceptance. Open the Agreements page to accept or reject.`,
+                                ),
+                                type: "agreement",
+                              });
+                              showToast(
+                                L("Kumbusho limetumwa kwa mnunuzi", "Reminder sent to buyer"),
+                                "success",
+                              );
+                            }}
+                            className="mt-3 w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
+                          >
+                            {L("📩 Tuma Kumbusho kwa Mnunuzi", "📩 Send Reminder to Buyer")}
+                          </button>
+                        )}
                       </div>
-                      {buyerName && <p className="font-black text-stone-900">{buyerName}</p>}
-                      <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                        {buyerPhone && <div><span className="text-stone-400">{L("Simu:", "Phone:")}</span> <span className="font-bold text-stone-700">{buyerPhone}</span></div>}
-                        {buyerNida && <div><span className="text-stone-400">NIDA:</span> <span className="font-bold text-stone-700">{buyerNida}</span></div>}
-                      </div>
-                      {isPending && selected.second_party_user_id && (
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            await supabase.from("notifications").insert({
-                              user_id: selected.second_party_user_id,
-                              title: L("Kumbusho: Makubaliano Yanasubiri", "Reminder: Agreement Awaiting Your Acceptance"),
-                              message: L(
-                                `Makubaliano ${selected.application_number} yanasubiri uikubali. Fungua ukurasa wa Makubaliano kukubali au kukataa.`,
-                                `Agreement ${selected.application_number} is awaiting your acceptance. Open the Agreements page to accept or reject.`
-                              ),
-                              type: "agreement",
-                            });
-                            showToast(L("Kumbusho limetumwa kwa mnunuzi", "Reminder sent to buyer"), "success");
-                          }}
-                          className="mt-3 w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
-                        >
-                          {L("📩 Tuma Kumbusho kwa Mnunuzi", "📩 Send Reminder to Buyer")}
-                        </button>
-                      )}
-                    </div>
-                  );
-                })()}
+                    );
+                  })()}
 
                 {/* Verification Checklist — ONLY for citizens not yet verified.
                     Once a citizen is verified (via a prior application's checklist
@@ -1153,7 +1188,11 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                             {fmtKey(k)}
                           </p>
                           {typeof v === "string" && v.startsWith("data:image") ? (
-                            <img src={v} alt={k} className="h-10 w-auto rounded border border-stone-200" />
+                            <img
+                              src={v}
+                              alt={k}
+                              className="h-10 w-auto rounded border border-stone-200"
+                            />
                           ) : (
                             <p className="text-xs text-stone-800 font-semibold break-words">
                               {fmtVal(v)}
@@ -1432,56 +1471,60 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
               )}
 
               {/* If approved — show issue button with payment status */}
-              {selected.status === "approved" && (() => {
-                const hasPaidCheck = !!(
-                  selected.paid_at ||
-                  (selected.form_data as Record<string, unknown>)?.payment_data ||
-                  (selected.payment_data as Record<string, unknown>)?.transaction_id
-                );
-                const svcFee = (selected.services as { fee?: number })?.fee ?? 0;
-                const frmFee = (selected.form_data as Record<string, unknown>)?.service_fee;
-                const eFee = svcFee > 0 ? svcFee : typeof frmFee === "number" ? frmFee : 0;
-                const needsPayment = eFee > 0 && !hasPaidCheck;
-                return (
-                  <div className="border-t border-stone-200 bg-stone-50 px-4 py-3 sm:px-6 sm:py-4 shrink-0 space-y-2">
-                    {needsPayment && (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-                        <span>🔒</span>
-                        <p className="text-xs font-bold text-amber-700">
-                          {L(
-                            "Malipo bado hayajapokelewa. Hati haitatolewa hadi mwombaji alipe.",
-                            "Payment not received. Document cannot be issued until applicant pays.",
-                          )}
-                        </p>
-                      </div>
-                    )}
-                    {hasPaidCheck && (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
-                        <span>✅</span>
-                        <p className="text-xs font-bold text-emerald-700">
-                          {L("Malipo yamepokelewa — Unaweza kutoa hati.", "Payment confirmed — ready to issue.")}
-                        </p>
-                      </div>
-                    )}
-                    <button
-                      onClick={handleIssue}
-                      disabled={processing}
-                      className="w-full px-3 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shadow-lg"
-                    >
-                      {processing ? (
-                        <Loader2 size={15} className="animate-spin" />
-                      ) : needsPayment ? (
-                        <span>🔒</span>
-                      ) : (
-                        <Award size={15} />
+              {selected.status === "approved" &&
+                (() => {
+                  const hasPaidCheck = !!(
+                    selected.paid_at ||
+                    (selected.form_data as Record<string, unknown>)?.payment_data ||
+                    (selected.payment_data as Record<string, unknown>)?.transaction_id
+                  );
+                  const svcFee = (selected.services as { fee?: number })?.fee ?? 0;
+                  const frmFee = (selected.form_data as Record<string, unknown>)?.service_fee;
+                  const eFee = svcFee > 0 ? svcFee : typeof frmFee === "number" ? frmFee : 0;
+                  const needsPayment = eFee > 0 && !hasPaidCheck;
+                  return (
+                    <div className="border-t border-stone-200 bg-stone-50 px-4 py-3 sm:px-6 sm:py-4 shrink-0 space-y-2">
+                      {needsPayment && (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                          <span>🔒</span>
+                          <p className="text-xs font-bold text-amber-700">
+                            {L(
+                              "Malipo bado hayajapokelewa. Hati haitatolewa hadi mwombaji alipe.",
+                              "Payment not received. Document cannot be issued until applicant pays.",
+                            )}
+                          </p>
+                        </div>
                       )}
-                      {needsPayment
-                        ? L("Inahitaji Malipo Kwanza", "Payment Required First")
-                        : L("Toa Hati Rasmi", "Issue Official Document")}
-                    </button>
-                  </div>
-                );
-              })()}
+                      {hasPaidCheck && (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
+                          <span>✅</span>
+                          <p className="text-xs font-bold text-emerald-700">
+                            {L(
+                              "Malipo yamepokelewa — Unaweza kutoa hati.",
+                              "Payment confirmed — ready to issue.",
+                            )}
+                          </p>
+                        </div>
+                      )}
+                      <button
+                        onClick={handleIssue}
+                        disabled={processing}
+                        className="w-full px-3 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shadow-lg"
+                      >
+                        {processing ? (
+                          <Loader2 size={15} className="animate-spin" />
+                        ) : needsPayment ? (
+                          <span>🔒</span>
+                        ) : (
+                          <Award size={15} />
+                        )}
+                        {needsPayment
+                          ? L("Inahitaji Malipo Kwanza", "Payment Required First")
+                          : L("Toa Hati Rasmi", "Issue Official Document")}
+                      </button>
+                    </div>
+                  );
+                })()}
             </motion.div>
           </>
         )}
@@ -1831,7 +1874,6 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
           onClose={() => setViewCitizenId(null)}
         />
       )}
-
     </div>
   );
 }

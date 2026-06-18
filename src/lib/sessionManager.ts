@@ -39,7 +39,9 @@ export function getBrowserName(): string {
 /** Record the current session */
 export async function recordSession(): Promise<void> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) return;
 
     const sessionId = session.access_token.slice(-8);

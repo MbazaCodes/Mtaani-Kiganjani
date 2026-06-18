@@ -155,7 +155,7 @@ export function LocationManagement() {
       }
 
       setLocations(data && data.length > 0 ? data : DEMO_LOCATIONS);
-    } catch (error) {
+    } catch (_error) {
       console.error("Exception in fetchLocations:", error);
       showToast(lang === "sw" ? "Hitilafu ya mfumo" : "System error", "error");
       setLocations(DEMO_LOCATIONS);

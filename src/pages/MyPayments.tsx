@@ -65,37 +65,50 @@ const ReceiptDownloadButton: React.FC<{
   L: (sw: string, en: string) => string;
 }> = ({ app, lang, amount, L }) => {
   const PDFLink = PDFDownloadLink as unknown as React.ComponentType<{
-    document: React.ReactElement; fileName: string;
+    document: React.ReactElement;
+    fileName: string;
     children: (p: { loading: boolean; error: Error | null }) => React.ReactNode;
   }>;
   const [qr, setQr] = useState<string | null>(null);
   const [loadingQr, setLoadingQr] = useState(false);
 
   // Build an application object with guaranteed amount for the receipt
-  const appForReceipt = useMemo(() => ({
-    ...app,
-    form_data: {
-      ...(app.form_data as Record<string, unknown>),
-      service_fee: amount,
-      payment_data: {
-        ...((app.form_data as Record<string, unknown>)?.payment_data as Record<string, unknown> ?? {}),
-        amount,
-        payment_method: ((app.payment_data as Record<string, unknown>)?.payment_method as string) ?? "E-Mtaa Portal",
-        transaction_id: ((app.payment_data as Record<string, unknown>)?.transaction_id as string) ?? `RCP-${app.application_number}`,
-        paid_at: app.created_at,
+  const appForReceipt = useMemo(
+    () => ({
+      ...app,
+      form_data: {
+        ...(app.form_data as Record<string, unknown>),
+        service_fee: amount,
+        payment_data: {
+          ...(((app.form_data as Record<string, unknown>)?.payment_data as Record<
+            string,
+            unknown
+          >) ?? {}),
+          amount,
+          payment_method:
+            ((app.payment_data as Record<string, unknown>)?.payment_method as string) ??
+            "E-Mtaa Portal",
+          transaction_id:
+            ((app.payment_data as Record<string, unknown>)?.transaction_id as string) ??
+            `RCP-${app.application_number}`,
+          paid_at: app.created_at,
+        },
       },
-    },
-    payment_data: {
-      ...(app.payment_data as Record<string, unknown>),
-      amount,
-    },
-  }), [app, amount]);
+      payment_data: {
+        ...(app.payment_data as Record<string, unknown>),
+        amount,
+      },
+    }),
+    [app, amount],
+  );
 
   const startQr = async () => {
     if (qr || loadingQr) return;
     setLoadingQr(true);
     try {
-      setQr(await generateQRDataUrl(app as unknown as Parameters<typeof generateQRDataUrl>[0], "RCP"));
+      setQr(
+        await generateQRDataUrl(app as unknown as Parameters<typeof generateQRDataUrl>[0], "RCP"),
+      );
     } catch {
       setQr(""); // proceed without QR rather than fail
     } finally {
@@ -105,9 +118,12 @@ const ReceiptDownloadButton: React.FC<{
 
   if (qr === null) {
     return (
-      <button onClick={startQr} disabled={loadingQr}
+      <button
+        onClick={startQr}
+        disabled={loadingQr}
         className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold bg-stone-100 hover:bg-emerald-50 text-stone-600 hover:text-emerald-600 transition-colors disabled:opacity-50"
-        title={L("Pakua Risiti", "Download Receipt")}>
+        title={L("Pakua Risiti", "Download Receipt")}
+      >
         {loadingQr ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
         {L("Risiti", "Receipt")}
       </button>
@@ -118,7 +134,9 @@ const ReceiptDownloadButton: React.FC<{
     <PDFLink
       document={
         <RisitiMalipoPDF
-          application={appForReceipt as unknown as Parameters<typeof RisitiMalipoPDF>[0]["application"]}
+          application={
+            appForReceipt as unknown as Parameters<typeof RisitiMalipoPDF>[0]["application"]
+          }
           lang={lang as "sw" | "en"}
           qrDataUrl={qr || undefined}
         />
@@ -129,7 +147,9 @@ const ReceiptDownloadButton: React.FC<{
         <button
           className={cn(
             "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors",
-            error ? "bg-red-50 text-red-500" : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700",
+            error
+              ? "bg-red-50 text-red-500"
+              : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700",
           )}
           title={L("Pakua Risiti", "Download Receipt")}
         >
@@ -238,7 +258,9 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
       // 3. Outstanding — any application that needs payment and isn't paid/issued/rejected
       const { data: outstanding, error: outErr } = await supabase
         .from("applications")
-        .select("id, application_number, service_name, status, created_at, form_data, payment_data, paid_at")
+        .select(
+          "id, application_number, service_name, status, created_at, form_data, payment_data, paid_at",
+        )
         .eq("user_id", user.id)
         .in("status", ["pending_payment", "approved", "verified"])
         .order("created_at", { ascending: false });
@@ -588,7 +610,12 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
                       <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg uppercase">
                         {L("Imetolewa", "Issued")}
                       </span>
-                      <ReceiptDownloadButton app={app} lang={lang} amount={getApplicationAmount(app)} L={L} />
+                      <ReceiptDownloadButton
+                        app={app}
+                        lang={lang}
+                        amount={getApplicationAmount(app)}
+                        L={L}
+                      />
                     </div>
                   </div>
                 ))

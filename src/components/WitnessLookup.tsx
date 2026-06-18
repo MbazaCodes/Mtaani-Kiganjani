@@ -25,12 +25,7 @@ interface CitizenResult {
   citizen_id: string;
 }
 
-export const WitnessLookup: React.FC<WitnessLookupProps> = ({
-  label,
-  value,
-  onChange,
-  lang,
-}) => {
+export const WitnessLookup: React.FC<WitnessLookupProps> = ({ label, value, onChange, lang }) => {
   const sw = lang === "sw";
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CitizenResult[]>([]);
@@ -169,7 +164,9 @@ export const WitnessLookup: React.FC<WitnessLookupProps> = ({
             search(e.target.value);
           }}
           onFocus={() => query.length >= 2 && setShowResults(true)}
-          placeholder={sw ? "Tafuta kwa jina, NIDA, au simu..." : "Search by name, NIDA, or phone..."}
+          placeholder={
+            sw ? "Tafuta kwa jina, NIDA, au simu..." : "Search by name, NIDA, or phone..."
+          }
           className="flex-1 text-sm outline-none placeholder-stone-400"
         />
         {searching && <Loader2 size={14} className="animate-spin text-stone-400" />}
@@ -205,7 +202,9 @@ export const WitnessLookup: React.FC<WitnessLookupProps> = ({
         onClick={() => setManualMode(true)}
         className="mt-1.5 text-xs text-stone-500 hover:text-emerald-600"
       >
-        {sw ? "↳ Ingiza kwa mkono (hapatikani kwenye mfumo)" : "↳ Enter manually (not found in system)"}
+        {sw
+          ? "↳ Ingiza kwa mkono (hapatikani kwenye mfumo)"
+          : "↳ Enter manually (not found in system)"}
       </button>
     </div>
   );

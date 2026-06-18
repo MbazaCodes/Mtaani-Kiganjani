@@ -66,17 +66,13 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
     try {
       const { data } = await supabase
         .from("application_messages")
-        .select(
-          "*, sender:sender_id(first_name, last_name, role)",
-        )
+        .select("*, sender:sender_id(first_name, last_name, role)")
         .eq("application_id", applicationId)
         .order("created_at", { ascending: true });
       const msgs = (data || []) as ChatMessage[];
       setMessages(msgs);
       // Count unread for this user
-      const unread = msgs.filter(
-        (m) => !m.read && m.sender_id !== user?.id,
-      ).length;
+      const unread = msgs.filter((m) => !m.read && m.sender_id !== user?.id).length;
       setUnreadCount(unread);
     } catch {
       /* ignore */
@@ -99,9 +95,7 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
   // Mark messages as read when expanded
   useEffect(() => {
     if (!expanded || !user?.id || messages.length === 0) return;
-    const unreadIds = messages
-      .filter((m) => !m.read && m.sender_id !== user.id)
-      .map((m) => m.id);
+    const unreadIds = messages.filter((m) => !m.read && m.sender_id !== user.id).map((m) => m.id);
     if (unreadIds.length === 0) return;
     void supabase
       .from("application_messages")
@@ -109,9 +103,7 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
       .in("id", unreadIds)
       .then(() => {
         setMessages((prev) =>
-          prev.map((m) =>
-            unreadIds.includes(m.id) ? { ...m, read: true } : m,
-          ),
+          prev.map((m) => (unreadIds.includes(m.id) ? { ...m, read: true } : m)),
         );
         setUnreadCount(0);
       });
@@ -156,9 +148,9 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
       }
       // If citizen replying, notify the staff who last messaged (or area staff)
       if (!isStaff) {
-        const lastStaffMsg = [...messages].reverse().find(
-          (m) => m.sender?.role === "staff" || m.sender?.role === "admin",
-        );
+        const lastStaffMsg = [...messages]
+          .reverse()
+          .find((m) => m.sender?.role === "staff" || m.sender?.role === "admin");
         if (lastStaffMsg) {
           await supabase.from("notifications").insert({
             user_id: lastStaffMsg.sender_id,
@@ -184,9 +176,12 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
     if (!s) return m.sender_id === user?.id ? L("Wewe", "You") : "?";
     const name = `${s.first_name || ""} ${s.last_name || ""}`.trim();
     if (m.sender_id === user?.id) return L("Wewe", "You");
-    const roleLabel = s.role === "admin" ? L("Msimamizi", "Admin")
-      : s.role === "staff" ? L("Afisa", "Officer")
-      : L("Raia", "Citizen");
+    const roleLabel =
+      s.role === "admin"
+        ? L("Msimamizi", "Admin")
+        : s.role === "staff"
+          ? L("Afisa", "Officer")
+          : L("Raia", "Citizen");
     return name ? `${name} (${roleLabel})` : roleLabel;
   };
 
@@ -238,10 +233,7 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
               </p>
             ) : (
               messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex ${isMe(m) ? "justify-end" : "justify-start"}`}
-                >
+                <div key={m.id} className={`flex ${isMe(m) ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`max-w-[80%] rounded-2xl px-3 py-2 ${
                       isMe(m)
@@ -258,9 +250,7 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
                         minute: "2-digit",
                       })}
                     </p>
-                    {m.message && (
-                      <p className="text-sm whitespace-pre-wrap">{m.message}</p>
-                    )}
+                    {m.message && <p className="text-sm whitespace-pre-wrap">{m.message}</p>}
                     {m.attachments && m.attachments.length > 0 && (
                       <div className="mt-1.5 space-y-1">
                         {m.attachments.map((att, i) => (
@@ -307,9 +297,7 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
                 >
                   <span className="truncate max-w-[80px]">{att.name}</span>
                   <button
-                    onClick={() =>
-                      setAttachments((prev) => prev.filter((_, j) => j !== i))
-                    }
+                    onClick={() => setAttachments((prev) => prev.filter((_, j) => j !== i))}
                     className="text-stone-400 hover:text-red-500"
                   >
                     <X size={10} />
@@ -358,11 +346,7 @@ export const ApplicationChat: React.FC<ApplicationChatProps> = ({
               disabled={sending || (!text.trim() && attachments.length === 0)}
               className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl disabled:opacity-40"
             >
-              {sending ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Send size={16} />
-              )}
+              {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
             </button>
           </div>
         </div>

@@ -62,8 +62,7 @@ export async function downloadAgreementPDF(
 
     const qrUrl = await generateQRDataUrl(fullApp as Application, "DOC");
 
-    const isSale =
-      serviceName.includes("Mauzo") || serviceName.includes("Sale");
+    const isSale = serviceName.includes("Mauzo") || serviceName.includes("Sale");
     const Comp = isSale ? MakubalianoMauzianoPDF : MakubalianoPangoPDF;
 
     await downloadPDF(
@@ -76,7 +75,7 @@ export async function downloadAgreementPDF(
     );
 
     return true;
-  } catch (err) {
+  } catch (_err) {
     console.error("PDF download error:", err);
     return false;
   }

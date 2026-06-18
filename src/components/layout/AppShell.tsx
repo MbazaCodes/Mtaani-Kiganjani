@@ -106,9 +106,13 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar currentView={currentView} setView={setView} />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
-          {currentView === "help_faq" ? <HelpPage lang={lang} />
-              : currentView === "legal" ? <LegalPage lang={lang} />
-              : children}
+          {currentView === "help_faq" ? (
+            <HelpPage lang={lang} />
+          ) : currentView === "legal" ? (
+            <LegalPage lang={lang} />
+          ) : (
+            children
+          )}
           {/* Demonstration disclaimer footer */}
           <footer className="mt-8 pt-4 border-t border-stone-200">
             <p className="text-center text-[11px] leading-relaxed text-stone-400 max-w-3xl mx-auto px-4">

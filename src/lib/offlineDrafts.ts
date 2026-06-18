@@ -16,16 +16,10 @@
 
 const DRAFT_PREFIX = "emtaa_draft_";
 
-export function saveDraft(
-  serviceKey: string,
-  data: Record<string, unknown>,
-): void {
+export function saveDraft(serviceKey: string, data: Record<string, unknown>): void {
   try {
     const key = DRAFT_PREFIX + serviceKey;
-    localStorage.setItem(
-      key,
-      JSON.stringify({ data, savedAt: Date.now() }),
-    );
+    localStorage.setItem(key, JSON.stringify({ data, savedAt: Date.now() }));
   } catch {
     // localStorage might be full or unavailable
   }

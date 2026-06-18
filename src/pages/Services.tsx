@@ -180,7 +180,10 @@ export function Services({ onSelectService }: ServicesProps) {
         <div className="rounded-xl p-3 bg-emerald-50 border border-emerald-200 flex items-center gap-2.5">
           <Zap size={14} className="text-emerald-600 shrink-0" />
           <p className="text-xs font-bold text-emerald-700">
-            {L("NIDA Imethibitishwa — Usindikaji wa Papo Hapo kwa Huduma Zote", "NIDA Verified — Instant processing on all services")}
+            {L(
+              "NIDA Imethibitishwa — Usindikaji wa Papo Hapo kwa Huduma Zote",
+              "NIDA Verified — Instant processing on all services",
+            )}
           </p>
           <VerificationBadge tier={tier} lang={lang} />
         </div>
@@ -247,9 +250,21 @@ export function Services({ onSelectService }: ServicesProps) {
                     )}
                   >
                     {isInstant ? (
-                      <><Zap size={13} /> {L("Omba — Papo Hapo", "Apply — Instant")}<ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" /></>
+                      <>
+                        <Zap size={13} /> {L("Omba — Papo Hapo", "Apply — Instant")}
+                        <ArrowRight
+                          size={13}
+                          className="group-hover:translate-x-0.5 transition-transform"
+                        />
+                      </>
                     ) : (
-                      <>{L("Omba Sasa", "Apply Now")} <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" /></>
+                      <>
+                        {L("Omba Sasa", "Apply Now")}{" "}
+                        <ArrowRight
+                          size={14}
+                          className="group-hover:translate-x-0.5 transition-transform"
+                        />
+                      </>
                     )}
                   </button>
                 </div>

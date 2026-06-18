@@ -94,7 +94,7 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
   const vatRate = 0.18;
   const vatAmount = Number(fd.vat_amount) || Math.round(price * vatRate);
   const serviceFee = Number(fd.service_fee) || 5000;
-  const totalAmount = Number(fd.total_amount || fd.total_rent) || (price + vatAmount + serviceFee);
+  const totalAmount = Number(fd.total_amount || fd.total_rent) || price + vatAmount + serviceFee;
 
   const L = {
     title: isRental
@@ -124,21 +124,45 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
     preamble: sw
       ? "Makubaliano haya yanafanywa kati ya wahusika walioainishwa hapa chini, kwa ridhaa yao wenyewe na kwa masharti yaliyoelezwa katika hati hii. Pande zote mbili zinakubaliana kutekeleza wajibu wao kama ilivyoainishwa."
       : "This agreement is entered into by and between the parties identified below, of their own free will and subject to the terms and conditions set forth herein. Both parties agree to fulfil their respective obligations as outlined.",
-    termsIntro: sw ? "Pande zote zinakubaliana na masharti yafuatayo:" : "Both parties agree to the following terms and conditions:",
-    clause1: sw ? "Mali/kitu kilichoainishwa hapo juu kitahamishwa kutoka kwa muuzaji kwenda kwa mnunuzi baada ya malipo yote kukamilika." : "The asset/item described above shall be transferred from the seller to the buyer upon completion of all payments.",
-    clause2: sw ? "Muuzaji anadhibitisha kuwa mali/kitu hiki ni chake halali na hana deni lolote juu yake." : "The seller confirms that the asset/item is their lawful property and is free from any encumbrances, liens, or debts.",
-    clause3: sw ? "Mnunuzi amekagua mali/kitu na anakubali hali yake ya sasa." : "The buyer has inspected the asset/item and accepts it in its current condition.",
-    clause4: sw ? "Mgogoro wowote utatatuliwa kwanza kwa mazungumzo, kisha kwa usuluhishi kupitia ofisi ya serikali ya mtaa husika." : "Any disputes shall be resolved first through negotiation, then by mediation through the relevant local government office.",
-    clause5: sw ? "Makubaliano haya yanaongozwa na sheria za Jamhuri ya Muungano wa Tanzania." : "This agreement is governed by the laws of the United Republic of Tanzania.",
-    clause6: sw ? "Makubaliano haya yanafanya kazi tangu tarehe ya kusainiwa na pande zote mbili." : "This agreement becomes effective from the date of signing by both parties.",
+    termsIntro: sw
+      ? "Pande zote zinakubaliana na masharti yafuatayo:"
+      : "Both parties agree to the following terms and conditions:",
+    clause1: sw
+      ? "Mali/kitu kilichoainishwa hapo juu kitahamishwa kutoka kwa muuzaji kwenda kwa mnunuzi baada ya malipo yote kukamilika."
+      : "The asset/item described above shall be transferred from the seller to the buyer upon completion of all payments.",
+    clause2: sw
+      ? "Muuzaji anadhibitisha kuwa mali/kitu hiki ni chake halali na hana deni lolote juu yake."
+      : "The seller confirms that the asset/item is their lawful property and is free from any encumbrances, liens, or debts.",
+    clause3: sw
+      ? "Mnunuzi amekagua mali/kitu na anakubali hali yake ya sasa."
+      : "The buyer has inspected the asset/item and accepts it in its current condition.",
+    clause4: sw
+      ? "Mgogoro wowote utatatuliwa kwanza kwa mazungumzo, kisha kwa usuluhishi kupitia ofisi ya serikali ya mtaa husika."
+      : "Any disputes shall be resolved first through negotiation, then by mediation through the relevant local government office.",
+    clause5: sw
+      ? "Makubaliano haya yanaongozwa na sheria za Jamhuri ya Muungano wa Tanzania."
+      : "This agreement is governed by the laws of the United Republic of Tanzania.",
+    clause6: sw
+      ? "Makubaliano haya yanafanya kazi tangu tarehe ya kusainiwa na pande zote mbili."
+      : "This agreement becomes effective from the date of signing by both parties.",
     sellerObligations: sw ? "WAJIBU WA MUUZAJI" : "SELLER OBLIGATIONS",
     buyerObligations: sw ? "WAJIBU WA MNUNUZI" : "BUYER OBLIGATIONS",
-    sellerOb1: sw ? "Kuhamisha umiliki wa mali/kitu kwa mnunuzi baada ya malipo kukamilika." : "Transfer ownership of the asset/item to the buyer upon completion of payment.",
-    sellerOb2: sw ? "Kutoa nyaraka zote zinazohusiana na mali/kitu." : "Provide all documents related to the asset/item.",
-    sellerOb3: sw ? "Kuhakikisha mali/kitu hakina madeni au matatizo ya kisheria." : "Ensure the asset/item is free from debts or legal issues.",
+    sellerOb1: sw
+      ? "Kuhamisha umiliki wa mali/kitu kwa mnunuzi baada ya malipo kukamilika."
+      : "Transfer ownership of the asset/item to the buyer upon completion of payment.",
+    sellerOb2: sw
+      ? "Kutoa nyaraka zote zinazohusiana na mali/kitu."
+      : "Provide all documents related to the asset/item.",
+    sellerOb3: sw
+      ? "Kuhakikisha mali/kitu hakina madeni au matatizo ya kisheria."
+      : "Ensure the asset/item is free from debts or legal issues.",
     buyerOb1: sw ? "Kulipa bei iliyokubaliwa kwa wakati." : "Pay the agreed price on time.",
-    buyerOb2: sw ? "Kupokea mali/kitu kwa hali iliyokubaliwa." : "Accept the asset/item in the agreed condition.",
-    buyerOb3: sw ? "Kuheshimu masharti yote ya makubaliano haya." : "Respect all terms of this agreement.",
+    buyerOb2: sw
+      ? "Kupokea mali/kitu kwa hali iliyokubaliwa."
+      : "Accept the asset/item in the agreed condition.",
+    buyerOb3: sw
+      ? "Kuheshimu masharti yote ya makubaliano haya."
+      : "Respect all terms of this agreement.",
     declaration: sw
       ? "Sisi wahusika tuliotajwa hapo juu tunashuhudia kwamba tumesoma, tumeelewa na tunakubaliana na masharti yote ya makubaliano haya. Tunasaini kwa hiari yetu wenyewe bila kulazimishwa."
       : "We, the undersigned parties, hereby declare that we have read, understood, and agree to all terms and conditions of this agreement. We sign of our own free will without coercion.",
@@ -248,7 +272,12 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
               <Row label={sw ? "Raia ID" : "Cit. ID"} value={sellerCitizenId} />
               {fd.seller_tin ? <Row label="TIN" value={fd.seller_tin ?? ""} /> : <View />}
               {fd.seller_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.seller_phone} />}
-              {application.users?.ward && <Row label={sw ? "Kata" : "Ward"} value={`${application.users.ward}, ${application.users?.district || ""}`} />}
+              {application.users?.ward && (
+                <Row
+                  label={sw ? "Kata" : "Ward"}
+                  value={`${application.users.ward}, ${application.users?.district || ""}`}
+                />
+              )}
             </View>
           </View>
           <View style={s.colRight}>
@@ -261,7 +290,12 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
               <Row label="NIDA" value={fd.buyer_nida || fd.tenant_nida || fd.target_user_nida} />
               <Row label={sw ? "Raia ID" : "Cit. ID"} value={fd.second_party_citizen_id ?? ""} />
               {fd.buyer_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.buyer_phone} />}
-              {fd.buyer_ward && <Row label={sw ? "Kata" : "Ward"} value={`${fd.buyer_ward}, ${fd.buyer_district || ""}`} />}
+              {fd.buyer_ward && (
+                <Row
+                  label={sw ? "Kata" : "Ward"}
+                  value={`${fd.buyer_ward}, ${fd.buyer_district || ""}`}
+                />
+              )}
             </View>
           </View>
         </View>
@@ -280,8 +314,12 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
             <Row label={sw ? "Ada ya Huduma" : "Service Fee"} value={formatCurrency(serviceFee)} />
           </View>
         </View>
-        {fd.payment_method && <Row label={sw ? "Njia ya Malipo" : "Payment Method"} value={fd.payment_method} />}
-        {fd.payment_schedule && <Row label={sw ? "Ratiba ya Malipo" : "Payment Schedule"} value={fd.payment_schedule} />}
+        {fd.payment_method && (
+          <Row label={sw ? "Njia ya Malipo" : "Payment Method"} value={fd.payment_method} />
+        )}
+        {fd.payment_schedule && (
+          <Row label={sw ? "Ratiba ya Malipo" : "Payment Schedule"} value={fd.payment_schedule} />
+        )}
 
         {/* Terms & Conditions */}
         <View style={s.sectionHeader}>
@@ -316,24 +354,46 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
         </View>
         {(() => {
           const pd = (application.payment_data || {}) as Record<string, unknown>;
-          const receiptNo = String(pd.receipt_number || `RCP-${application.application_number || ""}`);
-          const txnId = String(pd.transaction_id || `TXN-${(application.id || "").slice(0, 8).toUpperCase()}`);
-          const paidAt = pd.paid_at || application.approved_at || application.issued_at || application.created_at;
+          const receiptNo = String(
+            pd.receipt_number || `RCP-${application.application_number || ""}`,
+          );
+          const txnId = String(
+            pd.transaction_id || `TXN-${(application.id || "").slice(0, 8).toUpperCase()}`,
+          );
+          const paidAt =
+            pd.paid_at ||
+            application.approved_at ||
+            application.issued_at ||
+            application.created_at;
           const payAmount = Number(pd.amount || serviceFee);
           const payMethod = String(pd.payment_method || "E-Mtaa Portal");
           return (
-            <View style={{ borderWidth: 0.5, borderColor: "#c0c0c0", borderRadius: 4, padding: 8, marginBottom: 6 }}>
+            <View
+              style={{
+                borderWidth: 0.5,
+                borderColor: "#c0c0c0",
+                borderRadius: 4,
+                padding: 8,
+                marginBottom: 6,
+              }}
+            >
               <View style={s.twoCol}>
                 <View style={s.colLeft}>
                   <Row label={sw ? "Namba ya Risiti" : "Receipt Number"} value={receiptNo} />
                   <Row label={sw ? "Namba ya Muamala" : "Transaction ID"} value={txnId} />
-                  <Row label={sw ? "Namba ya Maombi" : "Application Ref"} value={application.application_number ?? ""} />
+                  <Row
+                    label={sw ? "Namba ya Maombi" : "Application Ref"}
+                    value={application.application_number ?? ""}
+                  />
                   <Row label={sw ? "Huduma" : "Service"} value={application.service_name ?? ""} />
                 </View>
                 <View style={s.colRight}>
                   <Row label={sw ? "Kiasi" : "Amount"} value={formatCurrency(payAmount)} />
                   <Row label={sw ? "Njia ya Malipo" : "Payment Method"} value={payMethod} />
-                  <Row label={sw ? "Tarehe ya Malipo" : "Payment Date"} value={paidAt ? new Date(String(paidAt)).toLocaleDateString("sw-TZ") : "N/A"} />
+                  <Row
+                    label={sw ? "Tarehe ya Malipo" : "Payment Date"}
+                    value={paidAt ? new Date(String(paidAt)).toLocaleDateString("sw-TZ") : "N/A"}
+                  />
                   <Row label={sw ? "Sarafu" : "Currency"} value="TZS (Shilingi ya Tanzania)" />
                 </View>
               </View>
@@ -343,14 +403,25 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
               </View>
               <View style={s.infoRow}>
                 <Text style={s.infoLabel}>{sw ? "Hali:" : "Status:"}</Text>
-                <Text style={[s.infoValue, { color: "#059669", fontWeight: "bold" }]}>{sw ? "IMELIPWA" : "PAID"}</Text>
+                <Text style={[s.infoValue, { color: "#059669", fontWeight: "bold" }]}>
+                  {sw ? "IMELIPWA" : "PAID"}
+                </Text>
               </View>
             </View>
           );
         })()}
 
         {/* Declaration */}
-        <View style={{ backgroundColor: "#f7f7f7", borderWidth: 0.5, borderColor: "#c0c0c0", padding: 8, marginVertical: 6, borderRadius: 4 }}>
+        <View
+          style={{
+            backgroundColor: "#f7f7f7",
+            borderWidth: 0.5,
+            borderColor: "#c0c0c0",
+            padding: 8,
+            marginVertical: 6,
+            borderRadius: 4,
+          }}
+        >
           <Text style={[s.body, { fontStyle: "italic", lineHeight: 1.5 }]}>{L.declaration}</Text>
         </View>
 
@@ -374,7 +445,9 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
             )}
             <View style={s.signatureLine} />
             <Text style={s.signatureName}>
-              {String(fd.second_party_name || fd.buyer_name || fd.tenant_name || "______________________")}
+              {String(
+                fd.second_party_name || fd.buyer_name || fd.tenant_name || "______________________",
+              )}
             </Text>
             <Text style={s.signatureTitle}>{L.buyerParty}</Text>
           </View>

@@ -11,8 +11,19 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Mail, Lock, Eye, EyeOff, Loader2,
-  CheckCircle2, AlertCircle, Phone, Globe2, MapPin, User, Shield,
+  X,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Phone,
+  Globe2,
+  MapPin,
+  User,
+  Shield,
 } from "lucide-react";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -31,8 +42,13 @@ const OTP_LOCKOUT_MS = 15 * 60 * 1000;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface OtpState {
-  open: boolean; sent: boolean; verified: boolean; loading: boolean;
-  attempts: number; lockedUntil: number | null; error: string | null;
+  open: boolean;
+  sent: boolean;
+  verified: boolean;
+  loading: boolean;
+  attempts: number;
+  lockedUntil: number | null;
+  error: string | null;
 }
 interface AuthProps {
   mode: "login" | "signup";
@@ -56,20 +72,30 @@ const toE164 = (phone: string) => {
 const isPhoneInput = (val: string) => /^[0-9+\s\-()]+$/.test(val.trim()) && val.trim().length > 5;
 
 const pwdStrength = (p: string) =>
-  p.length >= 10 && /[A-Z]/.test(p) && /[0-9]/.test(p) ? 3
-  : p.length >= 8 ? 2 : p.length >= 6 ? 1 : 0;
+  p.length >= 10 && /[A-Z]/.test(p) && /[0-9]/.test(p)
+    ? 3
+    : p.length >= 8
+      ? 2
+      : p.length >= 6
+        ? 1
+        : 0;
 
 // ── Mini UI helpers ───────────────────────────────────────────────────────────
-const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({ children, required }) => (
+const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({
+  children,
+  required,
+}) => (
   <label className="block text-[11px] font-black text-stone-500 uppercase tracking-widest mb-1.5">
-    {children}{required && <span className="text-red-400 ml-0.5">*</span>}
+    {children}
+    {required && <span className="text-red-400 ml-0.5">*</span>}
   </label>
 );
 
 const Err: React.FC<{ msg?: string }> = ({ msg }) =>
   msg ? (
     <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
-      <AlertCircle size={11} className="shrink-0" />{msg}
+      <AlertCircle size={11} className="shrink-0" />
+      {msg}
     </p>
   ) : null;
 
@@ -104,10 +130,25 @@ const PwdStrength: React.FC<{ password: string; lang: string }> = ({ password, l
     <div className="flex items-center gap-2 mt-1.5">
       <div className="flex gap-1 flex-1">
         {[1, 2, 3].map((i) => (
-          <div key={i} className={cn("h-1 flex-1 rounded-full transition-all", s >= i ? colors[s - 1] : "bg-stone-200")} />
+          <div
+            key={i}
+            className={cn(
+              "h-1 flex-1 rounded-full transition-all",
+              s >= i ? colors[s - 1] : "bg-stone-200",
+            )}
+          />
         ))}
       </div>
-      {s > 0 && <span className={cn("text-[11px] font-bold", ["text-red-500","text-amber-500","text-emerald-600"][s-1])}>{labels[s-1]}</span>}
+      {s > 0 && (
+        <span
+          className={cn(
+            "text-[11px] font-bold",
+            ["text-red-500", "text-amber-500", "text-emerald-600"][s - 1],
+          )}
+        >
+          {labels[s - 1]}
+        </span>
+      )}
     </div>
   );
 };
@@ -125,7 +166,12 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [errs, setErrs] = useState<Record<string, string>>({});
-  const clearErr = (k: string) => setErrs((p) => { const n = { ...p }; delete n[k]; return n; });
+  const clearErr = (k: string) =>
+    setErrs((p) => {
+      const n = { ...p };
+      delete n[k];
+      return n;
+    });
 
   // 429 rate-limit cooldown (seconds remaining)
   const [rateCooldown, setRateCooldown] = useState(0);
@@ -162,13 +208,31 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const [dPwd2, setDPwd2] = useState("");
 
   // ── OTP states ────────────────────────────────────────────────────────────
-  const [otp, setOtp] = useState<OtpState>({ open: false, sent: false, verified: false, loading: false, attempts: 0, lockedUntil: null, error: null });
+  const [otp, setOtp] = useState<OtpState>({
+    open: false,
+    sent: false,
+    verified: false,
+    loading: false,
+    attempts: 0,
+    lockedUntil: null,
+    error: null,
+  });
   const updOtp = (p: Partial<OtpState>) => setOtp((v) => ({ ...v, ...p }));
 
-  const [emailOtp, setEmailOtp] = useState<OtpState>({ open: false, sent: false, verified: false, loading: false, attempts: 0, lockedUntil: null, error: null });
+  const [emailOtp, setEmailOtp] = useState<OtpState>({
+    open: false,
+    sent: false,
+    verified: false,
+    loading: false,
+    attempts: 0,
+    lockedUntil: null,
+    error: null,
+  });
   const updEmailOtp = (p: Partial<OtpState>) => setEmailOtp((v) => ({ ...v, ...p }));
 
-  const [regType, setRegType] = useState<"citizen" | "diaspora">(isDiaspora ? "diaspora" : "citizen");
+  const [regType, setRegType] = useState<"citizen" | "diaspora">(
+    isDiaspora ? "diaspora" : "citizen",
+  );
 
   // ── Validation ────────────────────────────────────────────────────────────
   const validateCitizen = () => {
@@ -176,69 +240,121 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
     if (!cFirst.trim()) e.cFirst = L("Jina la kwanza linahitajika", "First name required");
     if (!cLast.trim()) e.cLast = L("Jina la mwisho linahitajika", "Last name required");
     if (!cPhone) e.cPhone = L("Namba ya simu inahitajika", "Phone number required");
-    else if (!isTanzanianNumber(cPhone)) e.cPhone = L("Namba za Tanzania tu (06x / 07x)", "Tanzanian numbers only (06x / 07x)");
-    if (!cEmail.trim() || !/\S+@\S+\.\S+/.test(cEmail)) e.cEmail = L("Barua pepe sahihi inahitajika", "Valid email required");
+    else if (!isTanzanianNumber(cPhone))
+      e.cPhone = L("Namba za Tanzania tu (06x / 07x)", "Tanzanian numbers only (06x / 07x)");
+    if (!cEmail.trim() || !/\S+@\S+\.\S+/.test(cEmail))
+      e.cEmail = L("Barua pepe sahihi inahitajika", "Valid email required");
     if (cPwd.length < 6) e.cPwd = L("Angalau herufi 6", "At least 6 characters");
     if (cPwd !== cPwd2) e.cPwd2 = L("Nywila hazifanani", "Passwords don't match");
-    setErrs(e); return !Object.keys(e).length;
+    setErrs(e);
+    return !Object.keys(e).length;
   };
 
   const validateDiaspora = () => {
     const e: Record<string, string> = {};
     if (!dFirst.trim()) e.dFirst = L("Jina la kwanza linahitajika", "First name required");
     if (!dLast.trim()) e.dLast = L("Jina la mwisho linahitajika", "Last name required");
-    if (!dEmail.trim() || !/\S+@\S+\.\S+/.test(dEmail)) e.dEmail = L("Barua pepe sahihi inahitajika", "Valid email required");
+    if (!dEmail.trim() || !/\S+@\S+\.\S+/.test(dEmail))
+      e.dEmail = L("Barua pepe sahihi inahitajika", "Valid email required");
     if (dPwd.length < 6) e.dPwd = L("Angalau herufi 6", "At least 6 characters");
     if (dPwd !== dPwd2) e.dPwd2 = L("Nywila hazifanani", "Passwords don't match");
-    setErrs(e); return !Object.keys(e).length;
+    setErrs(e);
+    return !Object.keys(e).length;
   };
 
   // ── OTP send/verify ───────────────────────────────────────────────────────
   const sendSmsOtp = async () => {
     updOtp({ loading: true, error: null });
     try {
-      if (IS_SUPABASE_CONFIGURED) { const { error } = await supabase.auth.signInWithOtp({ phone: toE164(cPhone) }); if (error) throw error; }
+      if (IS_SUPABASE_CONFIGURED) {
+        const { error } = await supabase.auth.signInWithOtp({ phone: toE164(cPhone) });
+        if (error) throw error;
+      }
       updOtp({ sent: true, loading: false, open: true });
-    } catch { updOtp({ sent: true, loading: false, open: true }); }
+    } catch {
+      updOtp({ sent: true, loading: false, open: true });
+    }
   };
 
   const verifySmsOtp = async (code: string) => {
     updOtp({ loading: true, error: null });
-    if (code === "123456" || !IS_SUPABASE_CONFIGURED) { updOtp({ verified: true, open: false, loading: false }); showToast(L("Simu imethibitishwa!", "Phone verified!"), "success"); return; }
+    if (code === "123456" || !IS_SUPABASE_CONFIGURED) {
+      updOtp({ verified: true, open: false, loading: false });
+      showToast(L("Simu imethibitishwa!", "Phone verified!"), "success");
+      return;
+    }
     try {
-      const { error } = await supabase.auth.verifyOtp({ phone: toE164(cPhone), token: code, type: "sms" });
+      const { error } = await supabase.auth.verifyOtp({
+        phone: toE164(cPhone),
+        token: code,
+        type: "sms",
+      });
       if (error) throw error;
       updOtp({ verified: true, open: false, loading: false });
       showToast(L("Simu imethibitishwa!", "Phone verified!"), "success");
     } catch {
       const a = otp.attempts + 1;
-      a >= OTP_MAX_ATTEMPTS
-        ? updOtp({ attempts: a, lockedUntil: Date.now() + OTP_LOCKOUT_MS, loading: false, error: L("Umezuiwa dakika 15", "Locked 15 min") })
-        : updOtp({ attempts: a, loading: false, error: L(`Namba si sahihi. ${OTP_MAX_ATTEMPTS - a} yamebaki`, `Wrong code. ${OTP_MAX_ATTEMPTS - a} left`) });
+      if (a >= OTP_MAX_ATTEMPTS) {
+        updOtp({
+          attempts: a,
+          lockedUntil: Date.now() + OTP_LOCKOUT_MS,
+          loading: false,
+          error: L("Umezuiwa dakika 15", "Locked 15 min"),
+        });
+      } else {
+        updOtp({
+          attempts: a,
+          loading: false,
+          error: L(
+            `Namba si sahihi. ${OTP_MAX_ATTEMPTS - a} yamebaki`,
+            `Wrong code. ${OTP_MAX_ATTEMPTS - a} left`,
+          ),
+        });
+      }
     }
   };
 
   const sendEmailOtp = async () => {
     updEmailOtp({ loading: true, error: null });
     try {
-      if (IS_SUPABASE_CONFIGURED) { const { error } = await supabase.auth.signInWithOtp({ email: dEmail }); if (error) throw error; }
+      if (IS_SUPABASE_CONFIGURED) {
+        const { error } = await supabase.auth.signInWithOtp({ email: dEmail });
+        if (error) throw error;
+      }
       updEmailOtp({ sent: true, loading: false, open: true });
-    } catch { updEmailOtp({ sent: true, loading: false, open: true }); }
+    } catch {
+      updEmailOtp({ sent: true, loading: false, open: true });
+    }
   };
 
   const verifyEmailOtp = async (code: string) => {
     updEmailOtp({ loading: true, error: null });
-    if (code === "123456" || !IS_SUPABASE_CONFIGURED) { updEmailOtp({ verified: true, open: false, loading: false }); showToast(L("Barua pepe imethibitishwa!", "Email verified!"), "success"); return; }
+    if (code === "123456" || !IS_SUPABASE_CONFIGURED) {
+      updEmailOtp({ verified: true, open: false, loading: false });
+      showToast(L("Barua pepe imethibitishwa!", "Email verified!"), "success");
+      return;
+    }
     try {
-      const { error } = await supabase.auth.verifyOtp({ email: dEmail, token: code, type: "email" });
+      const { error } = await supabase.auth.verifyOtp({
+        email: dEmail,
+        token: code,
+        type: "email",
+      });
       if (error) throw error;
       updEmailOtp({ verified: true, open: false, loading: false });
       showToast(L("Barua pepe imethibitishwa!", "Email verified!"), "success");
     } catch {
       const a = emailOtp.attempts + 1;
-      a >= OTP_MAX_ATTEMPTS
-        ? updEmailOtp({ attempts: a, lockedUntil: Date.now() + OTP_LOCKOUT_MS, loading: false, error: L("Umezuiwa", "Locked") })
-        : updEmailOtp({ attempts: a, loading: false, error: L("Namba si sahihi", "Wrong code") });
+      if (a >= OTP_MAX_ATTEMPTS) {
+        updEmailOtp({
+          attempts: a,
+          lockedUntil: Date.now() + OTP_LOCKOUT_MS,
+          loading: false,
+          error: L("Umezuiwa", "Locked"),
+        });
+      } else {
+        updEmailOtp({ attempts: a, loading: false, error: L("Namba si sahihi", "Wrong code") });
+      }
     }
   };
 
@@ -256,24 +372,31 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
 
         // Build all possible stored formats to match against
         const candidates: string[] = [];
-        if (raw.startsWith("+")) candidates.push(raw);                          // +255685223344
-        if (digits.startsWith("255")) candidates.push(`+${digits}`);            // +255685223344
-        if (digits.startsWith("0")) candidates.push(`+255${digits.slice(1)}`);  // 0685... → +255685...
-        if (digits.length === 9) candidates.push(`+255${digits}`);              // 685223344 → +255685223344
+        if (raw.startsWith("+")) candidates.push(raw); // +255685223344
+        if (digits.startsWith("255")) candidates.push(`+${digits}`); // +255685223344
+        if (digits.startsWith("0")) candidates.push(`+255${digits.slice(1)}`); // 0685... → +255685...
+        if (digits.length === 9) candidates.push(`+255${digits}`); // 685223344 → +255685223344
         // Also try without + prefix
-        candidates.push(digits.startsWith("255") ? digits : `255${digits.startsWith("0") ? digits.slice(1) : digits}`);
+        candidates.push(
+          digits.startsWith("255")
+            ? digits
+            : `255${digits.startsWith("0") ? digits.slice(1) : digits}`,
+        );
         // Local format
-        if (digits.startsWith("255")) candidates.push(`0${digits.slice(3)}`);   // +255685... → 0685...
+        if (digits.startsWith("255")) candidates.push(`0${digits.slice(3)}`); // +255685... → 0685...
 
         const uniqueCandidates = [...new Set(candidates)].filter(Boolean);
 
         // Try Supabase RPC first (uses SQL OR across all formats)
         let found: string | null = null;
         try {
-          const { data: rpcData } = await supabase
-            .rpc("get_email_by_phone", { p_phone: uniqueCandidates[0] });
+          const { data: rpcData } = await supabase.rpc("get_email_by_phone", {
+            p_phone: uniqueCandidates[0],
+          });
           if (rpcData?.[0]?.email) found = rpcData[0].email;
-        } catch {}
+        } catch {
+          // caught and ignored — non-critical email lookup
+        }
 
         // Fallback: query with .in() across all candidate formats
         if (!found) {
@@ -286,10 +409,12 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
         }
 
         if (!found) {
-          throw new Error(L(
-            "Namba ya simu haipatikani. Hakikisha umeingiza namba sahihi au jaribu barua pepe.",
-            "Phone number not found. Make sure you entered the correct number or try signing in with email.",
-          ));
+          throw new Error(
+            L(
+              "Namba ya simu haipatikani. Hakikisha umeingiza namba sahihi au jaribu barua pepe.",
+              "Phone number not found. Make sure you entered the correct number or try signing in with email.",
+            ),
+          );
         }
         email = found;
       }
@@ -299,7 +424,12 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
         if (error.message.includes("Invalid login credentials"))
           throw new Error(L("Nywila si sahihi.", "Incorrect password."));
         if (error.message.includes("Email not confirmed"))
-          throw new Error(L("Barua pepe bado haijathibitishwa. Angalia inbox yako.", "Email not confirmed. Check your inbox."));
+          throw new Error(
+            L(
+              "Barua pepe bado haijathibitishwa. Angalia inbox yako.",
+              "Email not confirmed. Check your inbox.",
+            ),
+          );
         throw error;
       }
       if (data.user) {
@@ -308,47 +438,74 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
         onSuccess?.(role);
       }
       onClose();
-    } catch (err) {
+    } catch (_err) {
       showToast((err as Error).message, "error");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPwd = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, { redirectTo: `${window.location.origin}/confirm` });
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/confirm`,
+      });
       if (error) throw error;
       setForgotSent(true);
-    } catch (err) { showToast((err as Error).message, "error"); }
-    finally { setLoading(false); }
+    } catch (_err) {
+      showToast((err as Error).message, "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Shared signup error normaliser ────────────────────────────────────────
   const normaliseSignupError = (err: unknown): string => {
     const msg = (err as { message?: string })?.message ?? "";
     const status = (err as { status?: number })?.status;
-    if (status === 429 || msg.includes("rate limit") || msg.includes("too many") || msg.includes("429")) {
+    if (
+      status === 429 ||
+      msg.includes("rate limit") ||
+      msg.includes("too many") ||
+      msg.includes("429")
+    ) {
       setRateCooldown(60);
       return L(
         "Imefikiwa kikomo cha majaribio (429). Subiri sekunde 60 kisha jaribu tena.",
-        "Rate limited (429). Please wait 60 seconds and try again."
+        "Rate limited (429). Please wait 60 seconds and try again.",
       );
     }
-    if (msg === "EMAIL_EXISTS" || msg.includes("already registered") || msg.includes("already been registered"))
-      return L("Barua pepe hii tayari imesajiliwa. Tafadhali ingia.", "This email is already registered. Please sign in.");
+    if (
+      msg === "EMAIL_EXISTS" ||
+      msg.includes("already registered") ||
+      msg.includes("already been registered")
+    )
+      return L(
+        "Barua pepe hii tayari imesajiliwa. Tafadhali ingia.",
+        "This email is already registered. Please sign in.",
+      );
     if (msg.includes("Password should be") || msg.includes("password"))
-      return L("Nywila lazima iwe na herufi 6 au zaidi.", "Password must be at least 6 characters.");
+      return L(
+        "Nywila lazima iwe na herufi 6 au zaidi.",
+        "Password must be at least 6 characters.",
+      );
     if (msg.includes("invalid") && msg.includes("email"))
       return L("Barua pepe si sahihi.", "Invalid email address.");
     if (msg.includes("signup") || msg.includes("disabled"))
-      return L("Usajili umezimwa kwa sasa. Wasiliana na msaada.", "Signup is currently disabled. Contact support.");
+      return L(
+        "Usajili umezimwa kwa sasa. Wasiliana na msaada.",
+        "Signup is currently disabled. Contact support.",
+      );
     return msg || L("Hitilafu imetokea. Jaribu tena.", "An error occurred. Please try again.");
   };
 
   // Strip undefined/null/empty from metadata
   const cleanMeta = (obj: Record<string, unknown>) =>
-    Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== ""));
+    Object.fromEntries(
+      Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== ""),
+    );
 
   // ── Sign up via Edge Function (bypasses IP rate limit) ────────────────────
   const signUpViaEdge = async (email: string, password: string, meta: Record<string, unknown>) => {
@@ -358,7 +515,9 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "") as string,
+          apikey: (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+            import.meta.env.VITE_SUPABASE_ANON_KEY ||
+            "") as string,
         },
         body: JSON.stringify({ email, password, meta }),
       });
@@ -366,7 +525,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       if (res.status === 429) throw Object.assign(new Error("429"), { status: 429 });
       if (!res.ok) throw new Error(json.error ?? "Signup failed");
       // Edge fn created user — sign them in immediately for session
-      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (signInErr) throw signInErr;
       return signInData.user;
     } catch (edgeErr: unknown) {
@@ -389,7 +551,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const handleCitizenSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateCitizen()) return;
-    if (rateCooldown > 0) { showToast(L(`Subiri sekunde ${rateCooldown}.`, `Wait ${rateCooldown}s.`), "error"); return; }
+    if (rateCooldown > 0) {
+      showToast(L(`Subiri sekunde ${rateCooldown}.`, `Wait ${rateCooldown}s.`), "error");
+      return;
+    }
     setLoading(true);
     try {
       const meta = cleanMeta({
@@ -397,41 +562,64 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
         middle_name: cMiddle.trim().toUpperCase() || undefined,
         last_name: cLast.trim().toUpperCase(),
         phone: toE164(cPhone),
-        is_diaspora: false, role: "citizen", verification_level: "PHONE_VERIFIED",
-        account_status: "ACTIVE", is_verified: true, profile_complete: false,
+        is_diaspora: false,
+        role: "citizen",
+        verification_level: "PHONE_VERIFIED",
+        account_status: "ACTIVE",
+        is_verified: true,
+        profile_complete: false,
       });
       const user = await signUpViaEdge(cEmail.trim().toLowerCase(), cPwd, meta);
       if (!user) throw new Error(L("Usajili umeshindwa.", "Signup failed."));
       fetchUserProfile(user.id).catch(() => {});
-      showToast(L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."), "success");
+      showToast(
+        L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."),
+        "success",
+      );
       onSuccess?.("citizen");
       onClose();
-    } catch (err) { showToast(normaliseSignupError(err), "error"); }
-    finally { setLoading(false); }
+    } catch (_err) {
+      showToast(normaliseSignupError(err), "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Diaspora signup ───────────────────────────────────────────────────────
   const handleDiasporaSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateDiaspora()) return;
-    if (rateCooldown > 0) { showToast(L(`Subiri sekunde ${rateCooldown}.`, `Wait ${rateCooldown}s.`), "error"); return; }
+    if (rateCooldown > 0) {
+      showToast(L(`Subiri sekunde ${rateCooldown}.`, `Wait ${rateCooldown}s.`), "error");
+      return;
+    }
     setLoading(true);
     try {
       const meta = cleanMeta({
         first_name: dFirst.trim().toUpperCase(),
         middle_name: dMiddle.trim().toUpperCase() || undefined,
         last_name: dLast.trim().toUpperCase(),
-        is_diaspora: true, role: "citizen", verification_level: "EMAIL_VERIFIED",
-        account_status: "ACTIVE", is_verified: true, profile_complete: false,
+        is_diaspora: true,
+        role: "citizen",
+        verification_level: "EMAIL_VERIFIED",
+        account_status: "ACTIVE",
+        is_verified: true,
+        profile_complete: false,
       });
       const user = await signUpViaEdge(dEmail.trim().toLowerCase(), dPwd, meta);
       if (!user) throw new Error(L("Usajili umeshindwa.", "Signup failed."));
       fetchUserProfile(user.id).catch(() => {});
-      showToast(L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."), "success");
+      showToast(
+        L("Karibu! Kamilisha wasifu wako.", "Welcome! Please complete your profile."),
+        "success",
+      );
       onSuccess?.("citizen");
       onClose();
-    } catch (err) { showToast(normaliseSignupError(err), "error"); }
-    finally { setLoading(false); }
+    } catch (_err) {
+      showToast(normaliseSignupError(err), "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -440,21 +628,46 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   return (
     <>
       {/* SMS OTP popup */}
-      <OtpModal open={otp.open} channel="sms" destination={cPhone ? toE164(cPhone) : ""}
-        loading={otp.loading} attempts={otp.attempts} maxAttempts={OTP_MAX_ATTEMPTS}
-        lockedUntil={otp.lockedUntil} error={otp.error} lang={lang}
-        onVerify={verifySmsOtp} onResend={sendSmsOtp} onClose={() => updOtp({ open: false })} />
+      <OtpModal
+        open={otp.open}
+        channel="sms"
+        destination={cPhone ? toE164(cPhone) : ""}
+        loading={otp.loading}
+        attempts={otp.attempts}
+        maxAttempts={OTP_MAX_ATTEMPTS}
+        lockedUntil={otp.lockedUntil}
+        error={otp.error}
+        lang={lang}
+        onVerify={verifySmsOtp}
+        onResend={sendSmsOtp}
+        onClose={() => updOtp({ open: false })}
+      />
 
       {/* Email OTP popup */}
-      <OtpModal open={emailOtp.open} channel="email" destination={dEmail}
-        loading={emailOtp.loading} attempts={emailOtp.attempts} maxAttempts={OTP_MAX_ATTEMPTS}
-        lockedUntil={emailOtp.lockedUntil} error={emailOtp.error} lang={lang}
-        onVerify={verifyEmailOtp} onResend={sendEmailOtp} onClose={() => updEmailOtp({ open: false })} />
+      <OtpModal
+        open={emailOtp.open}
+        channel="email"
+        destination={dEmail}
+        loading={emailOtp.loading}
+        attempts={emailOtp.attempts}
+        maxAttempts={OTP_MAX_ATTEMPTS}
+        lockedUntil={emailOtp.lockedUntil}
+        error={emailOtp.error}
+        lang={lang}
+        onVerify={verifyEmailOtp}
+        onResend={sendEmailOtp}
+        onClose={() => updEmailOtp({ open: false })}
+      />
 
       {/* Modal shell */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={onClose} className="absolute inset-0 bg-stone-900/65 backdrop-blur-sm" />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-stone-900/65 backdrop-blur-sm"
+        />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.97, y: 12 }}
@@ -467,40 +680,60 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
           <div className="px-5 py-3.5 border-b border-stone-100 flex items-center justify-between bg-white sticky top-0 z-10 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-                <img src={TANZANIA_LOGO_URL} alt="TZ" className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
+                <img
+                  src={TANZANIA_LOGO_URL}
+                  alt="TZ"
+                  className="w-5 h-5 object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <div>
                 <h2 className="text-sm font-black tracking-tight text-stone-900 leading-tight">
-                  {mode === "login" ? L("Ingia Mfumoni", "Sign In")
-                    : regType === "diaspora" ? L("Usajili — Diaspora", "Diaspora Registration")
-                    : L("Usajili wa Raia", "Citizen Registration")}
+                  {mode === "login"
+                    ? L("Ingia Mfumoni", "Sign In")
+                    : regType === "diaspora"
+                      ? L("Usajili — Diaspora", "Diaspora Registration")
+                      : L("Usajili wa Raia", "Citizen Registration")}
                 </h2>
-                <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest leading-none">E-SERIKALI MTAA</p>
+                <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest leading-none">
+                  E-SERIKALI MTAA
+                </p>
               </div>
             </div>
-            <button onClick={onClose} className="p-1.5 hover:bg-stone-100 rounded-full transition-colors text-stone-400" aria-label="Close">
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-stone-100 rounded-full transition-colors text-stone-400"
+              aria-label="Close"
+            >
               <X size={18} />
             </button>
           </div>
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto px-5 py-5">
-
             {/* ══════════════════════════════════════════
                 LOGIN
             ══════════════════════════════════════════ */}
             {mode === "login" && (
               <AnimatePresence mode="wait">
                 {!showForgot ? (
-                  <motion.div key="login" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
+                  <motion.div
+                    key="login"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                  >
                     <form onSubmit={handleLogin} className="space-y-4">
-
                       {/* Method toggle */}
                       <div className="flex bg-stone-100 rounded-xl p-1 gap-1">
                         {(["email", "phone"] as const).map((m) => (
                           <button
-                            key={m} type="button"
-                            onClick={() => { setLoginMethod(m); setLoginId(""); }}
+                            key={m}
+                            type="button"
+                            onClick={() => {
+                              setLoginMethod(m);
+                              setLoginId("");
+                            }}
                             className={cn(
                               "flex-1 h-9 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all",
                               loginMethod === m
@@ -508,7 +741,17 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                                 : "text-stone-500 hover:text-stone-700",
                             )}
                           >
-                            {m === "email" ? <><Mail size={13} />{L("Barua Pepe", "Email")}</> : <><Phone size={13} />{L("Simu", "Phone")}</>}
+                            {m === "email" ? (
+                              <>
+                                <Mail size={13} />
+                                {L("Barua Pepe", "Email")}
+                              </>
+                            ) : (
+                              <>
+                                <Phone size={13} />
+                                {L("Simu", "Phone")}
+                              </>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -516,19 +759,25 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                       {/* Identifier field */}
                       <div>
                         <Label required>
-                          {loginMethod === "email" ? L("Barua Pepe", "Email") : L("Namba ya Simu", "Mobile Number")}
+                          {loginMethod === "email"
+                            ? L("Barua Pepe", "Email")
+                            : L("Namba ya Simu", "Mobile Number")}
                         </Label>
                         {loginMethod === "email" ? (
                           <TxtInput
-                            type="email" value={loginId}
+                            type="email"
+                            value={loginId}
                             onChange={(e) => setLoginId(e.target.value)}
                             placeholder="juma@mfano.co.tz"
-                            icon={<Mail size={15} />} required autoComplete="email"
+                            icon={<Mail size={15} />}
+                            required
+                            autoComplete="email"
                           />
                         ) : (
                           <div className="border border-stone-200 rounded-xl overflow-hidden bg-stone-50 focus-within:ring-2 focus-within:ring-emerald-500 transition-all">
                             <PhoneInput
-                              international defaultCountry="TZ"
+                              international
+                              defaultCountry="TZ"
                               value={loginId}
                               onChange={(v) => setLoginId(v ?? "")}
                               className="h-11 px-3.5 text-sm font-medium bg-transparent outline-none w-full"
@@ -541,57 +790,116 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <Label required>{L("Nywila", "Password")}</Label>
-                          <button type="button" onClick={() => setShowForgot(true)} className="text-xs font-bold text-emerald-600 hover:underline">
+                          <button
+                            type="button"
+                            onClick={() => setShowForgot(true)}
+                            className="text-xs font-bold text-emerald-600 hover:underline"
+                          >
                             {L("Umesahau?", "Forgot?")}
                           </button>
                         </div>
                         <div className="relative">
-                          <TxtInput type={showPwd ? "text" : "password"} value={loginPwd}
+                          <TxtInput
+                            type={showPwd ? "text" : "password"}
+                            value={loginPwd}
                             onChange={(e) => setLoginPwd(e.target.value)}
-                            placeholder="••••••••" icon={<Lock size={15} />} required autoComplete="current-password" />
-                          <button type="button" onClick={() => setShowPwd((v) => !v)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600" aria-label="Toggle">
+                            placeholder="••••••••"
+                            icon={<Lock size={15} />}
+                            required
+                            autoComplete="current-password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPwd((v) => !v)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                            aria-label="Toggle"
+                          >
                             {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                           </button>
                         </div>
                         {loginMethod === "phone" && (
                           <p className="mt-1 text-[11px] text-stone-400">
-                            {L("Ingia kwa simu yako ya Tanzania", "Sign in with your Tanzanian mobile number")}
+                            {L(
+                              "Ingia kwa simu yako ya Tanzania",
+                              "Sign in with your Tanzanian mobile number",
+                            )}
                           </p>
                         )}
                       </div>
 
-                      <button type="submit" disabled={loading}
-                        className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100">
-                        {loading ? <Loader2 size={16} className="animate-spin" /> : L("Ingia", "Sign In")}
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100"
+                      >
+                        {loading ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          L("Ingia", "Sign In")
+                        )}
                       </button>
 
                       <p className="text-center text-sm text-stone-500">
                         {L("Huna akaunti?", "No account?")}{" "}
-                        <button type="button" onClick={() => setMode("signup")} className="text-emerald-600 font-bold hover:underline">
+                        <button
+                          type="button"
+                          onClick={() => setMode("signup")}
+                          className="text-emerald-600 font-bold hover:underline"
+                        >
                           {L("Jisajili", "Sign up")}
                         </button>
                       </p>
                     </form>
                   </motion.div>
                 ) : (
-                  <motion.div key="forgot" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="space-y-4">
-                    <button onClick={() => { setShowForgot(false); setForgotSent(false); }}
-                      className="flex items-center gap-1 text-sm font-bold text-stone-500 hover:text-stone-800">
+                  <motion.div
+                    key="forgot"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="space-y-4"
+                  >
+                    <button
+                      onClick={() => {
+                        setShowForgot(false);
+                        setForgotSent(false);
+                      }}
+                      className="flex items-center gap-1 text-sm font-bold text-stone-500 hover:text-stone-800"
+                    >
                       ← {L("Rudi", "Back")}
                     </button>
                     {!forgotSent ? (
                       <form onSubmit={handleForgotPwd} className="space-y-4">
                         <div>
-                          <p className="font-black text-stone-900 mb-0.5">{L("Rudisha Nywila", "Reset Password")}</p>
-                          <p className="text-xs text-stone-500 mb-4">{L("Tutakutumia kiungo cha kubadilisha nywila.", "We'll send a reset link to your email.")}</p>
+                          <p className="font-black text-stone-900 mb-0.5">
+                            {L("Rudisha Nywila", "Reset Password")}
+                          </p>
+                          <p className="text-xs text-stone-500 mb-4">
+                            {L(
+                              "Tutakutumia kiungo cha kubadilisha nywila.",
+                              "We'll send a reset link to your email.",
+                            )}
+                          </p>
                           <Label required>{L("Barua Pepe", "Email")}</Label>
-                          <TxtInput type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)}
-                            placeholder="juma@mfano.co.tz" icon={<Mail size={15} />} required />
+                          <TxtInput
+                            type="email"
+                            value={forgotEmail}
+                            onChange={(e) => setForgotEmail(e.target.value)}
+                            placeholder="juma@mfano.co.tz"
+                            icon={<Mail size={15} />}
+                            required
+                          />
                         </div>
-                        <button type="submit" disabled={loading}
-                          className="w-full h-11 bg-stone-900 hover:bg-black text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all">
-                          {loading ? <Loader2 size={16} className="animate-spin" /> : L("Tuma Kiungo", "Send Reset Link")}
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="w-full h-11 bg-stone-900 hover:bg-black text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
+                        >
+                          {loading ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            L("Tuma Kiungo", "Send Reset Link")
+                          )}
                         </button>
                       </form>
                     ) : (
@@ -599,9 +907,22 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                         <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto">
                           <Mail size={22} className="text-emerald-600" />
                         </div>
-                        <p className="font-black text-stone-900">{L("Angalia barua pepe yako", "Check your email")}</p>
-                        <p className="text-xs text-stone-500">{L(`Kiungo kimetumwa kwa ${forgotEmail}`, `Reset link sent to ${forgotEmail}`)}</p>
-                        <button onClick={() => { setShowForgot(false); setForgotSent(false); }} className="text-sm font-bold text-emerald-600 hover:underline">
+                        <p className="font-black text-stone-900">
+                          {L("Angalia barua pepe yako", "Check your email")}
+                        </p>
+                        <p className="text-xs text-stone-500">
+                          {L(
+                            `Kiungo kimetumwa kwa ${forgotEmail}`,
+                            `Reset link sent to ${forgotEmail}`,
+                          )}
+                        </p>
+                        <button
+                          onClick={() => {
+                            setShowForgot(false);
+                            setForgotSent(false);
+                          }}
+                          className="text-sm font-bold text-emerald-600 hover:underline"
+                        >
                           {L("Rudi kuingia", "Back to sign in")}
                         </button>
                       </div>
@@ -616,7 +937,6 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
             ══════════════════════════════════════════ */}
             {mode === "signup" && regType === "citizen" && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-
                 {/* Registration type toggle */}
                 <div className="flex bg-stone-100 rounded-2xl p-1 gap-1 mb-5">
                   <button
@@ -642,30 +962,63 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label required>{L("Jina la Kwanza", "First Name")}</Label>
-                      <TxtInput value={cFirst} onChange={(e) => { setCFirst(e.target.value); clearErr("cFirst"); }}
-                        placeholder="Juma" icon={<User size={13} />} hasError={!!errs.cFirst} />
+                      <TxtInput
+                        value={cFirst}
+                        onChange={(e) => {
+                          setCFirst(e.target.value);
+                          clearErr("cFirst");
+                        }}
+                        placeholder="Juma"
+                        icon={<User size={13} />}
+                        hasError={!!errs.cFirst}
+                      />
                       <Err msg={errs.cFirst} />
                     </div>
                     <div>
                       <Label>{L("Jina la Kati", "Middle Name")}</Label>
-                      <TxtInput value={cMiddle} onChange={(e) => setCMiddle(e.target.value)} placeholder="Rashidi" />
+                      <TxtInput
+                        value={cMiddle}
+                        onChange={(e) => setCMiddle(e.target.value)}
+                        placeholder="Rashidi"
+                      />
                     </div>
                   </div>
                   <div>
                     <Label required>{L("Jina la Mwisho", "Last Name")}</Label>
-                    <TxtInput value={cLast} onChange={(e) => { setCLast(e.target.value); clearErr("cLast"); }}
-                      placeholder="Mkubwa" hasError={!!errs.cLast} />
+                    <TxtInput
+                      value={cLast}
+                      onChange={(e) => {
+                        setCLast(e.target.value);
+                        clearErr("cLast");
+                      }}
+                      placeholder="Mkubwa"
+                      hasError={!!errs.cLast}
+                    />
                     <Err msg={errs.cLast} />
                   </div>
 
                   {/* Phone */}
                   <div>
                     <Label required>{L("Namba ya Simu", "Mobile Number")}</Label>
-                    <p className="text-[11px] text-stone-400 mb-1.5">{L("Namba za Tanzania pekee: 06x au 07x", "Tanzania only: 06x or 07x")}</p>
-                    <div className={cn("border rounded-xl overflow-hidden bg-stone-50 focus-within:ring-2 focus-within:ring-emerald-500 transition-all", errs.cPhone ? "border-red-300 bg-red-50" : "border-stone-200")}>
-                      <PhoneInput international defaultCountry="TZ" value={cPhone}
-                        onChange={(v) => { setCPhone(v ?? ""); clearErr("cPhone"); }}
-                        className="h-11 px-3.5 text-sm font-medium bg-transparent outline-none w-full" />
+                    <p className="text-[11px] text-stone-400 mb-1.5">
+                      {L("Namba za Tanzania pekee: 06x au 07x", "Tanzania only: 06x or 07x")}
+                    </p>
+                    <div
+                      className={cn(
+                        "border rounded-xl overflow-hidden bg-stone-50 focus-within:ring-2 focus-within:ring-emerald-500 transition-all",
+                        errs.cPhone ? "border-red-300 bg-red-50" : "border-stone-200",
+                      )}
+                    >
+                      <PhoneInput
+                        international
+                        defaultCountry="TZ"
+                        value={cPhone}
+                        onChange={(v) => {
+                          setCPhone(v ?? "");
+                          clearErr("cPhone");
+                        }}
+                        className="h-11 px-3.5 text-sm font-medium bg-transparent outline-none w-full"
+                      />
                     </div>
                     <Err msg={errs.cPhone} />
                   </div>
@@ -673,8 +1026,17 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   {/* Email */}
                   <div>
                     <Label required>{L("Barua Pepe", "Email")}</Label>
-                    <TxtInput type="email" value={cEmail} onChange={(e) => { setCEmail(e.target.value); clearErr("cEmail"); }}
-                      placeholder="juma@mfano.co.tz" icon={<Mail size={15} />} hasError={!!errs.cEmail} />
+                    <TxtInput
+                      type="email"
+                      value={cEmail}
+                      onChange={(e) => {
+                        setCEmail(e.target.value);
+                        clearErr("cEmail");
+                      }}
+                      placeholder="juma@mfano.co.tz"
+                      icon={<Mail size={15} />}
+                      hasError={!!errs.cEmail}
+                    />
                     <Err msg={errs.cEmail} />
                   </div>
 
@@ -682,11 +1044,23 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   <div>
                     <Label required>{L("Nywila", "Password")}</Label>
                     <div className="relative">
-                      <TxtInput type={showPwd ? "text" : "password"} value={cPwd}
-                        onChange={(e) => { setCPwd(e.target.value); clearErr("cPwd"); }}
-                        placeholder="••••••••" icon={<Lock size={15} />} hasError={!!errs.cPwd} />
-                      <button type="button" onClick={() => setShowPwd((v) => !v)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400" aria-label="Toggle">
+                      <TxtInput
+                        type={showPwd ? "text" : "password"}
+                        value={cPwd}
+                        onChange={(e) => {
+                          setCPwd(e.target.value);
+                          clearErr("cPwd");
+                        }}
+                        placeholder="••••••••"
+                        icon={<Lock size={15} />}
+                        hasError={!!errs.cPwd}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400"
+                        aria-label="Toggle"
+                      >
                         {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                       </button>
                     </div>
@@ -695,9 +1069,17 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   </div>
                   <div>
                     <Label required>{L("Thibitisha Nywila", "Confirm Password")}</Label>
-                    <TxtInput type={showPwd ? "text" : "password"} value={cPwd2}
-                      onChange={(e) => { setCPwd2(e.target.value); clearErr("cPwd2"); }}
-                      placeholder="••••••••" icon={<Lock size={15} />} hasError={!!errs.cPwd2} />
+                    <TxtInput
+                      type={showPwd ? "text" : "password"}
+                      value={cPwd2}
+                      onChange={(e) => {
+                        setCPwd2(e.target.value);
+                        clearErr("cPwd2");
+                      }}
+                      placeholder="••••••••"
+                      icon={<Lock size={15} />}
+                      hasError={!!errs.cPwd2}
+                    />
                     <Err msg={errs.cPwd2} />
                   </div>
 
@@ -710,8 +1092,12 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                           {L("Thibitisha simu (hiari)", "Verify phone (optional)")}
                         </p>
                       </div>
-                      <button type="button" onClick={sendSmsOtp} disabled={!cPhone || otp.loading}
-                        className="shrink-0 text-xs font-bold text-emerald-600 hover:underline disabled:opacity-40 flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={sendSmsOtp}
+                        disabled={!cPhone || otp.loading}
+                        className="shrink-0 text-xs font-bold text-emerald-600 hover:underline disabled:opacity-40 flex items-center gap-1"
+                      >
                         {otp.loading ? <Loader2 size={11} className="animate-spin" /> : null}
                         {L("Tuma OTP", "Send OTP")}
                       </button>
@@ -719,7 +1105,9 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   ) : (
                     <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
                       <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
-                      <p className="text-xs font-bold text-emerald-700">{L("Simu imethibitishwa ✓", "Phone verified ✓")}</p>
+                      <p className="text-xs font-bold text-emerald-700">
+                        {L("Simu imethibitishwa ✓", "Phone verified ✓")}
+                      </p>
                     </div>
                   )}
 
@@ -727,35 +1115,64 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
                     <Shield size={12} className="text-amber-600 shrink-0 mt-0.5" />
                     <p className="text-[11px] text-amber-700 leading-relaxed">
-                      {L("Baada ya usajili utaelekeza kwenye dashibodi. Kamilisha wasifu kupata huduma zote.", "After signup you'll go to your dashboard. Complete your profile to unlock all services.")}
+                      {L(
+                        "Baada ya usajili utaelekeza kwenye dashibodi. Kamilisha wasifu kupata huduma zote.",
+                        "After signup you'll go to your dashboard. Complete your profile to unlock all services.",
+                      )}
                     </p>
                   </div>
 
                   <label className="flex items-start gap-2 cursor-pointer">
-                    <input type="checkbox" required className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 shrink-0" />
+                    <input
+                      type="checkbox"
+                      required
+                      className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 shrink-0"
+                    />
                     <span className="text-xs text-stone-500 leading-relaxed">
-                      {L("Nakubali Masharti na Sera ya Faragha ya E-Mtaa.", "I agree to E-Mtaa's Terms and Privacy Policy.")}
+                      {L(
+                        "Nakubali Masharti na Sera ya Faragha ya E-Mtaa.",
+                        "I agree to E-Mtaa's Terms and Privacy Policy.",
+                      )}
                     </span>
                   </label>
 
-                  <button type="submit" disabled={loading}
-                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100">
-                    {rateCooldown > 0
-                      ? <><span className="animate-pulse">⏳</span> {rateCooldown}s</>
-                      : loading
-                        ? <Loader2 size={16} className="animate-spin" />
-                        : <><CheckCircle2 size={15} />{L("Tengeneza Akaunti", "Create Account")}</>}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100"
+                  >
+                    {rateCooldown > 0 ? (
+                      <>
+                        <span className="animate-pulse">⏳</span> {rateCooldown}s
+                      </>
+                    ) : loading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle2 size={15} />
+                        {L("Tengeneza Akaunti", "Create Account")}
+                      </>
+                    )}
                   </button>
 
                   {rateCooldown > 0 && (
                     <p className="text-center text-xs text-amber-600 font-medium animate-pulse">
-                      {L(`Subiri sekunde ${rateCooldown} kisha jaribu tena (kikomo cha majaribio)`, `Wait ${rateCooldown}s then retry (rate limited)`)}
+                      {L(
+                        `Subiri sekunde ${rateCooldown} kisha jaribu tena (kikomo cha majaribio)`,
+                        `Wait ${rateCooldown}s then retry (rate limited)`,
+                      )}
                     </p>
                   )}
 
                   <p className="text-center text-xs text-stone-500">
                     {L("Una akaunti?", "Have an account?")}{" "}
-                    <button type="button" onClick={() => setMode("login")} className="text-emerald-600 font-bold hover:underline">{L("Ingia", "Sign in")}</button>
+                    <button
+                      type="button"
+                      onClick={() => setMode("login")}
+                      className="text-emerald-600 font-bold hover:underline"
+                    >
+                      {L("Ingia", "Sign in")}
+                    </button>
                   </p>
                 </form>
               </motion.div>
@@ -766,7 +1183,6 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
             ══════════════════════════════════════════ */}
             {mode === "signup" && regType === "diaspora" && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-
                 {/* Registration type toggle */}
                 <div className="flex bg-stone-100 rounded-2xl p-1 gap-1 mb-5">
                   <button
@@ -792,28 +1208,61 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label required>{L("Jina la Kwanza", "First Name")}</Label>
-                      <TxtInput value={dFirst} onChange={(e) => { setDFirst(e.target.value); clearErr("dFirst"); }}
-                        placeholder="Amina" icon={<User size={13} />} hasError={!!errs.dFirst} />
+                      <TxtInput
+                        value={dFirst}
+                        onChange={(e) => {
+                          setDFirst(e.target.value);
+                          clearErr("dFirst");
+                        }}
+                        placeholder="Amina"
+                        icon={<User size={13} />}
+                        hasError={!!errs.dFirst}
+                      />
                       <Err msg={errs.dFirst} />
                     </div>
                     <div>
                       <Label>{L("Jina la Kati", "Middle Name")}</Label>
-                      <TxtInput value={dMiddle} onChange={(e) => setDMiddle(e.target.value)} placeholder="Mwajuma" />
+                      <TxtInput
+                        value={dMiddle}
+                        onChange={(e) => setDMiddle(e.target.value)}
+                        placeholder="Mwajuma"
+                      />
                     </div>
                   </div>
                   <div>
                     <Label required>{L("Jina la Mwisho", "Last Name")}</Label>
-                    <TxtInput value={dLast} onChange={(e) => { setDLast(e.target.value); clearErr("dLast"); }}
-                      placeholder="Hassan" hasError={!!errs.dLast} />
+                    <TxtInput
+                      value={dLast}
+                      onChange={(e) => {
+                        setDLast(e.target.value);
+                        clearErr("dLast");
+                      }}
+                      placeholder="Hassan"
+                      hasError={!!errs.dLast}
+                    />
                     <Err msg={errs.dLast} />
                   </div>
 
                   {/* Email */}
                   <div>
                     <Label required>{L("Barua Pepe", "Email")}</Label>
-                    <p className="text-[11px] text-stone-400 mb-1.5">{L("Uthibitisho utatumia barua pepe — hakuna SMS", "Verification is email-only, no SMS needed")}</p>
-                    <TxtInput type="email" value={dEmail} onChange={(e) => { setDEmail(e.target.value); clearErr("dEmail"); }}
-                      placeholder="amina@example.com" icon={<Mail size={15} />} hasError={!!errs.dEmail} />
+                    <p className="text-[11px] text-stone-400 mb-1.5">
+                      {L(
+                        "Uthibitisho utatumia barua pepe — hakuna SMS",
+                        "Verification is email-only, no SMS needed",
+                      )}
+                    </p>
+                    <TxtInput
+                      type="email"
+                      value={dEmail}
+                      onChange={(e) => {
+                        setDEmail(e.target.value);
+                        clearErr("dEmail");
+                      }}
+                      placeholder="amina@example.com"
+                      icon={<Mail size={15} />}
+                      hasError={!!errs.dEmail}
+                    />
                     <Err msg={errs.dEmail} />
                   </div>
 
@@ -821,11 +1270,23 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   <div>
                     <Label required>{L("Nywila", "Password")}</Label>
                     <div className="relative">
-                      <TxtInput type={showPwd ? "text" : "password"} value={dPwd}
-                        onChange={(e) => { setDPwd(e.target.value); clearErr("dPwd"); }}
-                        placeholder="••••••••" icon={<Lock size={15} />} hasError={!!errs.dPwd} />
-                      <button type="button" onClick={() => setShowPwd((v) => !v)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400" aria-label="Toggle">
+                      <TxtInput
+                        type={showPwd ? "text" : "password"}
+                        value={dPwd}
+                        onChange={(e) => {
+                          setDPwd(e.target.value);
+                          clearErr("dPwd");
+                        }}
+                        placeholder="••••••••"
+                        icon={<Lock size={15} />}
+                        hasError={!!errs.dPwd}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400"
+                        aria-label="Toggle"
+                      >
                         {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                       </button>
                     </div>
@@ -834,9 +1295,17 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   </div>
                   <div>
                     <Label required>{L("Thibitisha Nywila", "Confirm Password")}</Label>
-                    <TxtInput type={showPwd ? "text" : "password"} value={dPwd2}
-                      onChange={(e) => { setDPwd2(e.target.value); clearErr("dPwd2"); }}
-                      placeholder="••••••••" icon={<Lock size={15} />} hasError={!!errs.dPwd2} />
+                    <TxtInput
+                      type={showPwd ? "text" : "password"}
+                      value={dPwd2}
+                      onChange={(e) => {
+                        setDPwd2(e.target.value);
+                        clearErr("dPwd2");
+                      }}
+                      placeholder="••••••••"
+                      icon={<Lock size={15} />}
+                      hasError={!!errs.dPwd2}
+                    />
                     <Err msg={errs.dPwd2} />
                   </div>
 
@@ -849,8 +1318,12 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                           {L("Thibitisha barua pepe (hiari)", "Verify email (optional)")}
                         </p>
                       </div>
-                      <button type="button" onClick={sendEmailOtp} disabled={!dEmail || emailOtp.loading}
-                        className="shrink-0 text-xs font-bold text-blue-600 hover:underline disabled:opacity-40 flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={sendEmailOtp}
+                        disabled={!dEmail || emailOtp.loading}
+                        className="shrink-0 text-xs font-bold text-blue-600 hover:underline disabled:opacity-40 flex items-center gap-1"
+                      >
                         {emailOtp.loading ? <Loader2 size={11} className="animate-spin" /> : null}
                         {L("Tuma OTP", "Send OTP")}
                       </button>
@@ -858,47 +1331,77 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                   ) : (
                     <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
                       <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
-                      <p className="text-xs font-bold text-emerald-700">{L("Barua pepe imethibitishwa ✓", "Email verified ✓")}</p>
+                      <p className="text-xs font-bold text-emerald-700">
+                        {L("Barua pepe imethibitishwa ✓", "Email verified ✓")}
+                      </p>
                     </div>
                   )}
 
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2">
                     <Globe2 size={12} className="text-blue-600 shrink-0 mt-0.5" />
                     <p className="text-[11px] text-blue-700 leading-relaxed">
-                      {L("Utaelekeza kwenye dashibodi. Ongeza nchi, mkoa wa asili, na pasipoti katika wasifu wako.", "You'll go to your dashboard. Add country, origin region, and passport in your profile.")}
+                      {L(
+                        "Utaelekeza kwenye dashibodi. Ongeza nchi, mkoa wa asili, na pasipoti katika wasifu wako.",
+                        "You'll go to your dashboard. Add country, origin region, and passport in your profile.",
+                      )}
                     </p>
                   </div>
 
                   <label className="flex items-start gap-2 cursor-pointer">
-                    <input type="checkbox" required className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 shrink-0" />
+                    <input
+                      type="checkbox"
+                      required
+                      className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 shrink-0"
+                    />
                     <span className="text-xs text-stone-500 leading-relaxed">
-                      {L("Nakubali Masharti na Sera ya Faragha ya E-Mtaa.", "I agree to E-Mtaa's Terms and Privacy Policy.")}
+                      {L(
+                        "Nakubali Masharti na Sera ya Faragha ya E-Mtaa.",
+                        "I agree to E-Mtaa's Terms and Privacy Policy.",
+                      )}
                     </span>
                   </label>
 
-                  <button type="submit" disabled={loading}
-                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100">
-                    {rateCooldown > 0
-                      ? <><span className="animate-pulse">⏳</span> {rateCooldown}s</>
-                      : loading
-                        ? <Loader2 size={16} className="animate-spin" />
-                        : <><CheckCircle2 size={15} />{L("Tengeneza Akaunti", "Create Account")}</>}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-100"
+                  >
+                    {rateCooldown > 0 ? (
+                      <>
+                        <span className="animate-pulse">⏳</span> {rateCooldown}s
+                      </>
+                    ) : loading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle2 size={15} />
+                        {L("Tengeneza Akaunti", "Create Account")}
+                      </>
+                    )}
                   </button>
 
                   {rateCooldown > 0 && (
                     <p className="text-center text-xs text-amber-600 font-medium animate-pulse">
-                      {L(`Subiri sekunde ${rateCooldown} kisha jaribu tena`, `Wait ${rateCooldown}s then retry`)}
+                      {L(
+                        `Subiri sekunde ${rateCooldown} kisha jaribu tena`,
+                        `Wait ${rateCooldown}s then retry`,
+                      )}
                     </p>
                   )}
 
                   <p className="text-center text-xs text-stone-500">
                     {L("Una akaunti?", "Have an account?")}{" "}
-                    <button type="button" onClick={() => setMode("login")} className="text-emerald-600 font-bold hover:underline">{L("Ingia", "Sign in")}</button>
+                    <button
+                      type="button"
+                      onClick={() => setMode("login")}
+                      className="text-emerald-600 font-bold hover:underline"
+                    >
+                      {L("Ingia", "Sign in")}
+                    </button>
                   </p>
                 </form>
               </motion.div>
             )}
-
           </div>
         </motion.div>
       </div>

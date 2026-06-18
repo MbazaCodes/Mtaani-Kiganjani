@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp, HelpCircle, FileText, Clock, Shield, CreditCard, MessageCircle, Phone } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  HelpCircle,
+  FileText,
+  Clock,
+  Shield,
+  CreditCard,
+  MessageCircle,
+  Phone,
+} from "lucide-react";
 
 interface HelpPageProps {
   lang: string;
@@ -61,7 +71,10 @@ const FAQS: FaqItem[] = [
     icon: <Shield size={16} className="text-blue-600" />,
   },
   {
-    q: { sw: "Nifanye nini kama maombi yangu yamekataliwa?", en: "What if my application is rejected?" },
+    q: {
+      sw: "Nifanye nini kama maombi yangu yamekataliwa?",
+      en: "What if my application is rejected?",
+    },
     a: {
       sw: "Ukipokea arifa ya kukataliwa, angalia sababu iliyotolewa. Unaweza:\n1. Kurekebisha taarifa na kuwasilisha tena\n2. Kuwasiliana na ofisi ya kata kupitia 'Msaada'\n3. Kutuma ujumbe kupitia 'Mazungumzo ya Maombi' kuuliza maelezo zaidi",
       en: "If you receive a rejection notification, check the reason provided. You can:\n1. Correct the information and resubmit\n2. Contact the ward office through 'Support'\n3. Send a message via 'Application Chat' to ask for more details",
@@ -100,19 +113,14 @@ export const HelpPage: React.FC<HelpPageProps> = ({ lang }) => {
 
       <div className="space-y-2">
         {FAQS.map((faq, i) => (
-          <div
-            key={i}
-            className="bg-white border border-stone-200 rounded-xl overflow-hidden"
-          >
+          <div key={i} className="bg-white border border-stone-200 rounded-xl overflow-hidden">
             <button
               onClick={() => setOpenIdx(openIdx === i ? null : i)}
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-stone-50 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 {faq.icon}
-                <span className="text-sm font-bold text-stone-800">
-                  {sw ? faq.q.sw : faq.q.en}
-                </span>
+                <span className="text-sm font-bold text-stone-800">{sw ? faq.q.sw : faq.q.en}</span>
               </div>
               {openIdx === i ? (
                 <ChevronUp size={16} className="text-stone-400 shrink-0" />

@@ -132,7 +132,14 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
             )
             .reduce(
               (s: number, a: import("@/lib/supabase").Application) =>
-                s + getApplicationAmount(a as { service_name?: string; form_data?: Record<string, unknown>; payment_data?: Record<string, unknown> }),
+                s +
+                getApplicationAmount(
+                  a as {
+                    service_name?: string;
+                    form_data?: Record<string, unknown>;
+                    payment_data?: Record<string, unknown>;
+                  },
+                ),
               0,
             ),
         });
@@ -147,7 +154,9 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         setLoading(false);
         return;
       }
-      let statsQuery = supabase.from("applications").select("status, service_name, form_data, payment_data");
+      let statsQuery = supabase
+        .from("applications")
+        .select("status, service_name, form_data, payment_data");
 
       if (["staff", "admin"].includes(user?.role || "")) {
         if (user?.ward) {
@@ -192,7 +201,18 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
           paid: allApps.filter((a) => a.status === "paid").length,
           revenue: allApps
             .filter((a) => ["paid", "approved", "issued"].includes(a.status as string))
-            .reduce((s, a) => s + getApplicationAmount(a as { service_name?: string; form_data?: Record<string, unknown>; payment_data?: Record<string, unknown> }), 0),
+            .reduce(
+              (s, a) =>
+                s +
+                getApplicationAmount(
+                  a as {
+                    service_name?: string;
+                    form_data?: Record<string, unknown>;
+                    payment_data?: Record<string, unknown>;
+                  },
+                ),
+              0,
+            ),
           returned: allApps.filter((a) => a.status === "returned").length,
           approved: allApps.filter((a) => a.status === "approved" || a.status === "issued").length,
           total: allApps.length,
@@ -226,7 +246,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       } else if (error) {
         console.error("Error fetching applications:", error);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error("Error fetching staff dashboard data:", error);
     } finally {
       setLoading(false);

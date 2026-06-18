@@ -269,7 +269,7 @@ export function AdminLogs() {
           setTotalPages(Math.ceil((count || 0) / itemsPerPage));
           calculateStats(data as ActivityLog[]);
         }
-      } catch (error) {
+      } catch (_error) {
         console.error("Error fetching logs:", error);
         showToast(lang === "sw" ? "Hitilafu kupakia kumbukumbu" : "Error loading logs", "error");
         setLogs([]);
@@ -388,7 +388,7 @@ export function AdminLogs() {
       if (data) {
         setLogs((prev) => [data as ActivityLog, ...prev.slice(0, -1)]);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error("Error fetching new log:", error);
     }
   };
@@ -500,7 +500,7 @@ export function AdminLogs() {
         lang === "sw" ? "Kumbukumbu zimepakuliwa" : "Logs exported successfully",
         "success",
       );
-    } catch (error) {
+    } catch (_error) {
       showToast(lang === "sw" ? "Hitilafu kupakua kumbukumbu" : "Error exporting logs", "error");
     }
   };

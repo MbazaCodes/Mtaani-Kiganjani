@@ -7,13 +7,26 @@
 import React from "react";
 import { motion } from "framer-motion";
 import {
-  ShieldCheck, Shield, ShieldAlert, Phone, Mail, Clock,
-  CheckCircle2, Lock, ChevronRight, ArrowUpRight, Zap, Star,
+  ShieldCheck,
+  Shield,
+  ShieldAlert,
+  Phone,
+  Mail,
+  Clock,
+  CheckCircle2,
+  Lock,
+  ChevronRight,
+  ArrowUpRight,
+  Zap,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  type VerificationTier, type TierInfo,
-  getUserTier, getProfileCompletion, getTierInfo,
+  type VerificationTier,
+  type TierInfo,
+  getUserTier,
+  getProfileCompletion,
+  getTierInfo,
 } from "@/lib/verification";
 import type { UserProfile } from "@/lib/supabase";
 
@@ -58,8 +71,12 @@ const STEPS: Step[] = [
 ];
 
 const TIER_ORDER: VerificationTier[] = [
-  "UNVERIFIED", "PHONE_VERIFIED", "EMAIL_VERIFIED",
-  "PROFILE_COMPLETED", "PENDING_OFFICE_VISIT", "NIDA_VERIFIED",
+  "UNVERIFIED",
+  "PHONE_VERIFIED",
+  "EMAIL_VERIFIED",
+  "PROFILE_COMPLETED",
+  "PENDING_OFFICE_VISIT",
+  "NIDA_VERIFIED",
 ];
 
 function tierRank(t: VerificationTier): number {
@@ -92,20 +109,25 @@ const BENEFITS: Record<
 };
 
 export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
-  user, lang, onCompleteProfile, onUploadId, onBookVisit,
+  user,
+  lang,
+  onCompleteProfile,
+  onUploadId,
+  onBookVisit,
 }) => {
   const tier = getUserTier(user);
   const info = getTierInfo(tier);
   const completion = getProfileCompletion(user);
   const isNida = tier === "NIDA_VERIFIED";
   const isPending = tier === "PENDING_OFFICE_VISIT";
-  const L = (s: string, e: string) => lang === "sw" ? s : e;
+  const L = (s: string, e: string) => (lang === "sw" ? s : e);
 
   // ── NIDA_VERIFIED — success card ──────────────────────────────────────────
   if (isNida) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
         className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-5 text-white shadow-lg shadow-emerald-200"
       >
         <div className="flex items-start justify-between mb-4">
@@ -115,7 +137,9 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
             </div>
             <div>
               <p className="font-black text-sm">{L("NIDA Imethibitishwa", "NIDA Verified")}</p>
-              <p className="text-emerald-200 text-[11px] font-medium">{L("Ufikiaji Kamili", "Full Access")}</p>
+              <p className="text-emerald-200 text-[11px] font-medium">
+                {L("Ufikiaji Kamili", "Full Access")}
+              </p>
             </div>
           </div>
           <span className="px-2 py-1 bg-white/20 rounded-lg text-[10px] font-black uppercase tracking-wide">
@@ -124,7 +148,10 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-2">
           {BENEFITS.full.map((b, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-100">
+            <div
+              key={i}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-100"
+            >
               <Zap size={10} className="text-emerald-300 shrink-0" />
               {lang === "sw" ? b.sw : b.en}
             </div>
@@ -138,7 +165,8 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
   if (isPending) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
         className="bg-stone-50 border border-stone-200 rounded-2xl p-5"
       >
         <div className="flex items-center gap-3 mb-3">
@@ -146,12 +174,18 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
             <Clock size={16} className="text-stone-500" />
           </div>
           <div>
-            <p className="font-black text-sm text-stone-800">{L("Inasubiri Ziara ya Ofisi", "Office Visit Scheduled")}</p>
-            <p className="text-stone-500 text-xs">{L("Tembelea ofisi ulete vitambulisho vyako", "Visit office with your ID documents")}</p>
+            <p className="font-black text-sm text-stone-800">
+              {L("Inasubiri Ziara ya Ofisi", "Office Visit Scheduled")}
+            </p>
+            <p className="text-stone-500 text-xs">
+              {L("Tembelea ofisi ulete vitambulisho vyako", "Visit office with your ID documents")}
+            </p>
           </div>
         </div>
-        <button onClick={onBookVisit}
-          className="w-full h-9 bg-stone-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-black transition-all">
+        <button
+          onClick={onBookVisit}
+          className="w-full h-9 bg-stone-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-black transition-all"
+        >
           <ArrowUpRight size={13} /> {L("Angalia Miadi", "View Appointment")}
         </button>
       </motion.div>
@@ -163,16 +197,19 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
       className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm"
     >
       {/* Header */}
       <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", info.badgeBg)}>
-            {tier === "UNVERIFIED"
-              ? <ShieldAlert size={15} className={info.badgeText} />
-              : <Shield size={15} className={info.badgeText} />}
+            {tier === "UNVERIFIED" ? (
+              <ShieldAlert size={15} className={info.badgeText} />
+            ) : (
+              <Shield size={15} className={info.badgeText} />
+            )}
           </div>
           <div>
             <p className="text-sm font-black text-stone-900">
@@ -193,9 +230,13 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
       <div className="px-5 pt-3 pb-1">
         <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
           <motion.div
-            initial={{ width: 0 }} animate={{ width: `${completion}%` }}
+            initial={{ width: 0 }}
+            animate={{ width: `${completion}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className={cn("h-full rounded-full", isNida ? "bg-emerald-500" : completion >= 60 ? "bg-amber-400" : "bg-red-400")}
+            className={cn(
+              "h-full rounded-full",
+              isNida ? "bg-emerald-500" : completion >= 60 ? "bg-amber-400" : "bg-red-400",
+            )}
           />
         </div>
       </div>
@@ -207,18 +248,36 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
           const done = tierRankCurrent >= stepRank;
           const active = tierRankCurrent === stepRank - 1; // next step
           return (
-            <div key={step.id} className={cn(
-              "flex items-center gap-3 p-2.5 rounded-xl transition-all",
-              done ? "bg-emerald-50" : active ? "bg-amber-50 border border-amber-200" : "bg-stone-50",
-            )}>
-              <div className={cn(
-                "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                done ? "bg-emerald-500 text-white" : active ? "bg-amber-400 text-white" : "bg-stone-200 text-stone-400",
-              )}>
+            <div
+              key={step.id}
+              className={cn(
+                "flex items-center gap-3 p-2.5 rounded-xl transition-all",
+                done
+                  ? "bg-emerald-50"
+                  : active
+                    ? "bg-amber-50 border border-amber-200"
+                    : "bg-stone-50",
+              )}
+            >
+              <div
+                className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
+                  done
+                    ? "bg-emerald-500 text-white"
+                    : active
+                      ? "bg-amber-400 text-white"
+                      : "bg-stone-200 text-stone-400",
+                )}
+              >
                 {done ? <CheckCircle2 size={14} /> : <Lock size={12} />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className={cn("text-xs font-bold", done ? "text-emerald-700" : active ? "text-amber-700" : "text-stone-400")}>
+                <p
+                  className={cn(
+                    "text-xs font-bold",
+                    done ? "text-emerald-700" : active ? "text-amber-700" : "text-stone-400",
+                  )}
+                >
                   {lang === "sw" ? step.label.sw : step.label.en}
                 </p>
                 <p className="text-[10px] text-stone-400">
@@ -248,14 +307,16 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
           {(tier === "UNVERIFIED" || tier === "PHONE_VERIFIED" || tier === "EMAIL_VERIFIED"
             ? BENEFITS.basic
             : tier === "PROFILE_COMPLETED"
-            ? [...BENEFITS.basic, ...BENEFITS.standard]
-            : BENEFITS.full
-          ).slice(0, 3).map((b, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-[11px] text-stone-600">
-              <CheckCircle2 size={10} className="text-emerald-500 shrink-0" />
-              {lang === "sw" ? b.sw : b.en}
-            </div>
-          ))}
+              ? [...BENEFITS.basic, ...BENEFITS.standard]
+              : BENEFITS.full
+          )
+            .slice(0, 3)
+            .map((b, i) => (
+              <div key={i} className="flex items-center gap-1.5 text-[11px] text-stone-600">
+                <CheckCircle2 size={10} className="text-emerald-500 shrink-0" />
+                {lang === "sw" ? b.sw : b.en}
+              </div>
+            ))}
         </div>
       </div>
 
@@ -263,17 +324,23 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
       {tier !== "NIDA_VERIFIED" && (
         <div className="px-5 pb-5 flex gap-2">
           {tier !== "PROFILE_COMPLETED" && (
-            <button onClick={onCompleteProfile}
-              className="flex-1 h-9 bg-stone-900 hover:bg-black text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all">
+            <button
+              onClick={onCompleteProfile}
+              className="flex-1 h-9 bg-stone-900 hover:bg-black text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
+            >
               <Star size={11} /> {L("Kamilisha Wasifu", "Complete Profile")}
             </button>
           )}
-          <button onClick={onUploadId}
-            className="flex-1 h-9 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all">
+          <button
+            onClick={onUploadId}
+            className="flex-1 h-9 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
+          >
             <Shield size={11} /> {L("Pakia NIDA", "Upload ID")}
           </button>
-          <button onClick={onBookVisit}
-            className="flex-1 h-9 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all">
+          <button
+            onClick={onBookVisit}
+            className="flex-1 h-9 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
+          >
             <ArrowUpRight size={11} /> {L("Tembelea Ofisi", "Book Visit")}
           </button>
         </div>

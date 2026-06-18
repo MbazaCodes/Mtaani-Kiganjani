@@ -61,7 +61,13 @@ const ls = StyleSheet.create({
   distAlt: { backgroundColor: "#f9fafb" },
   distLabel: { width: "55%", fontSize: 8.5, color: "#374151" },
   distPct: { width: "20%", fontSize: 8.5, color: "#6b7280", textAlign: "right" },
-  distAmt: { width: "25%", fontSize: 8.5, color: "#1c1917", fontWeight: "bold", textAlign: "right" },
+  distAmt: {
+    width: "25%",
+    fontSize: 8.5,
+    color: "#1c1917",
+    fontWeight: "bold",
+    textAlign: "right",
+  },
   distTotalRow: {
     flexDirection: "row",
     paddingVertical: 6,
@@ -71,7 +77,13 @@ const ls = StyleSheet.create({
   },
   distTotalLabel: { width: "55%", fontSize: 9, color: "#ffffff", fontWeight: "bold" },
   distTotalPct: { width: "20%", fontSize: 9, color: "#d1fae5", textAlign: "right" },
-  distTotalAmt: { width: "25%", fontSize: 9, color: "#ffffff", fontWeight: "bold", textAlign: "right" },
+  distTotalAmt: {
+    width: "25%",
+    fontSize: 9,
+    color: "#ffffff",
+    fontWeight: "bold",
+    textAlign: "right",
+  },
 });
 
 const PAYMENT_METHODS: Record<string, { sw: string; en: string }> = {

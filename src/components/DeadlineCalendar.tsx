@@ -45,16 +45,19 @@ export const DeadlineCalendar: React.FC<DeadlineCalendarProps> = ({ lang }) => {
         const date = new Date(dateStr);
         if (isNaN(date.getTime())) continue;
 
-        const daysLeft = Math.ceil((date.getTime() - now.getTime()) / (86400000));
+        const daysLeft = Math.ceil((date.getTime() - now.getTime()) / 86400000);
         const svc = app.service_name || "";
         items.push({
           id: app.id,
           title: svc,
           date: dateStr,
-          type: svc.includes("Sherehe") ? "event"
-            : svc.includes("Ujezi") ? "permit"
-            : svc.includes("Pango") || svc.includes("Mauzo") ? "agreement"
-            : "expiry",
+          type: svc.includes("Sherehe")
+            ? "event"
+            : svc.includes("Ujezi")
+              ? "permit"
+              : svc.includes("Pango") || svc.includes("Mauzo")
+                ? "agreement"
+                : "expiry",
           applicationNumber: app.application_number || "",
           daysLeft,
         });
@@ -134,7 +137,12 @@ export const DeadlineCalendar: React.FC<DeadlineCalendarProps> = ({ lang }) => {
                 .filter((d) => d.daysLeft <= 7 && d.daysLeft >= 0)
                 .map((d) => (
                   <p key={d.id} className="text-xs text-red-600">
-                    {d.title} — {d.daysLeft === 0 ? (sw ? "Leo!" : "Today!") : `${d.daysLeft} ${sw ? "siku" : "days"}`}
+                    {d.title} —{" "}
+                    {d.daysLeft === 0
+                      ? sw
+                        ? "Leo!"
+                        : "Today!"
+                      : `${d.daysLeft} ${sw ? "siku" : "days"}`}
                   </p>
                 ))}
             </div>
@@ -156,9 +164,13 @@ export const DeadlineCalendar: React.FC<DeadlineCalendarProps> = ({ lang }) => {
                   <p className="flex items-center gap-0.5 text-[10px]">
                     <Clock size={8} />
                     {d.daysLeft < 0
-                      ? sw ? "Imepita" : "Expired"
+                      ? sw
+                        ? "Imepita"
+                        : "Expired"
                       : d.daysLeft === 0
-                        ? sw ? "Leo" : "Today"
+                        ? sw
+                          ? "Leo"
+                          : "Today"
                         : `${d.daysLeft} ${sw ? "siku" : "days"}`}
                   </p>
                 </div>

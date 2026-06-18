@@ -343,7 +343,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
         // Set the target_user_id in the form
         setValue("target_user_id", data.id);
       }
-    } catch (err) {
+    } catch (_err) {
       console.error("NIDA lookup error:", err);
       setNidaLookupResults((prev) => ({
         ...prev,
@@ -429,7 +429,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
         setValue("second_party_citizen_id", data.citizen_id);
         setValue("second_party_name", fullName);
       }
-    } catch (err) {
+    } catch (_err) {
       console.error("Citizen ID lookup error:", err);
       setCitizenIdLookupResults((prev) => ({
         ...prev,

@@ -194,13 +194,21 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
               value={
                 (fd as any).landlord_name ||
                 (application.users
-                  ? `${application.users.first_name || ""} ${application.users.middle_name || ""} ${application.users.last_name || ""}`.replace(/\s+/g, " ").trim()
+                  ? `${application.users.first_name || ""} ${application.users.middle_name || ""} ${application.users.last_name || ""}`
+                      .replace(/\s+/g, " ")
+                      .trim()
                   : "") ||
                 `${(fd as any).first_name || ""} ${(fd as any).last_name || ""}`.trim()
               }
             />
-            <Row label="NIDA" value={(fd as any).landlord_nida || application.users?.nida_number || ""} />
-            <Row label={sw ? "Simu" : "Phone"} value={(fd as any).landlord_phone || application.users?.phone || ""} />
+            <Row
+              label="NIDA"
+              value={(fd as any).landlord_nida || application.users?.nida_number || ""}
+            />
+            <Row
+              label={sw ? "Simu" : "Phone"}
+              value={(fd as any).landlord_phone || application.users?.phone || ""}
+            />
           </View>
           <View style={[s.colRight, ls.partyBox]}>
             <Text style={ls.partyLabel}>{sw ? "MPANGAJI" : "TENANT"}</Text>
@@ -287,71 +295,113 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
         {(() => {
           const L = {
             terms: sw ? "MASHARTI YA MAKUBALIANO" : "TERMS & CONDITIONS",
-            termsIntro: sw ? "Pande zote zinakubaliana na masharti yafuatayo:" : "Both parties agree to the following terms:",
-            clause1: sw ? "Mpangaji atalipa kodi kwa wakati uliokubaliwa kila mwezi." : "The tenant shall pay rent on the agreed date each month.",
-            clause2: sw ? "Mpangishaji atatoa nyumba katika hali nzuri na salama ya kuishi." : "The landlord shall provide the premises in good and habitable condition.",
-            clause3: sw ? "Mpangaji hatafanya mabadiliko yoyote ya kudumu kwenye nyumba bila idhini ya mpangishaji." : "The tenant shall not make permanent modifications without the landlord\'s written consent.",
-            clause4: sw ? "Notisi ya siku 30 inahitajika kutoka upande wowote kutaka kusitisha makubaliano." : "A 30-day notice is required from either party to terminate the agreement.",
-            clause5: sw ? "Amana ya usalama itarudishwa ndani ya siku 14 baada ya kuondoka." : "The security deposit shall be returned within 14 days of vacating.",
-            clause6: sw ? "Mgogoro wowote utatatuliwa kupitia ofisi ya serikali ya mtaa husika." : "Any disputes shall be resolved through the relevant local government office.",
+            termsIntro: sw
+              ? "Pande zote zinakubaliana na masharti yafuatayo:"
+              : "Both parties agree to the following terms:",
+            clause1: sw
+              ? "Mpangaji atalipa kodi kwa wakati uliokubaliwa kila mwezi."
+              : "The tenant shall pay rent on the agreed date each month.",
+            clause2: sw
+              ? "Mpangishaji atatoa nyumba katika hali nzuri na salama ya kuishi."
+              : "The landlord shall provide the premises in good and habitable condition.",
+            clause3: sw
+              ? "Mpangaji hatafanya mabadiliko yoyote ya kudumu kwenye nyumba bila idhini ya mpangishaji."
+              : "The tenant shall not make permanent modifications without the landlord's written consent.",
+            clause4: sw
+              ? "Notisi ya siku 30 inahitajika kutoka upande wowote kutaka kusitisha makubaliano."
+              : "A 30-day notice is required from either party to terminate the agreement.",
+            clause5: sw
+              ? "Amana ya usalama itarudishwa ndani ya siku 14 baada ya kuondoka."
+              : "The security deposit shall be returned within 14 days of vacating.",
+            clause6: sw
+              ? "Mgogoro wowote utatatuliwa kupitia ofisi ya serikali ya mtaa husika."
+              : "Any disputes shall be resolved through the relevant local government office.",
             landlordObligations: sw ? "WAJIBU WA MPANGISHAJI" : "LANDLORD OBLIGATIONS",
             tenantObligations: sw ? "WAJIBU WA MPANGAJI" : "TENANT OBLIGATIONS",
-            landlordOb1: sw ? "Kutoa nyumba katika hali nzuri." : "Provide the premises in good condition.",
-            landlordOb2: sw ? "Kufanya matengenezo makubwa ya nyumba." : "Perform major repairs and maintenance.",
-            landlordOb3: sw ? "Kuheshimu faragha ya mpangaji." : "Respect the tenant\'s privacy.",
+            landlordOb1: sw
+              ? "Kutoa nyumba katika hali nzuri."
+              : "Provide the premises in good condition.",
+            landlordOb2: sw
+              ? "Kufanya matengenezo makubwa ya nyumba."
+              : "Perform major repairs and maintenance.",
+            landlordOb3: sw ? "Kuheshimu faragha ya mpangaji." : "Respect the tenant's privacy.",
             tenantOb1: sw ? "Kulipa kodi kwa wakati." : "Pay rent on time.",
             tenantOb2: sw ? "Kutunza nyumba kwa uangalifu." : "Maintain the premises with care.",
-            tenantOb3: sw ? "Kurudisha nyumba katika hali nzuri mwishoni mwa mkataba." : "Return the premises in good condition at end of lease.",
+            tenantOb3: sw
+              ? "Kurudisha nyumba katika hali nzuri mwishoni mwa mkataba."
+              : "Return the premises in good condition at end of lease.",
             declaration: sw
               ? "Sisi wahusika tuliotajwa hapo juu tunashuhudia kwamba tumesoma, tumeelewa na tunakubaliana na masharti yote ya makubaliano haya ya upangaji. Tunasaini kwa hiari yetu."
               : "We, the undersigned parties, hereby declare that we have read, understood, and agree to all terms and conditions of this rental agreement. We sign of our own free will.",
           };
-          return (<>
-        <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>{L.terms}</Text>
-        </View>
-        <Text style={[s.body, { marginBottom: 5 }]}>{L.termsIntro}</Text>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>1. {L.clause1}</Text>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>2. {L.clause2}</Text>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>3. {L.clause3}</Text>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>4. {L.clause4}</Text>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>5. {L.clause5}</Text>
-        <Text style={[s.body, { marginBottom: 5, paddingLeft: 12 }]}>6. {L.clause6}</Text>
+          return (
+            <>
+              <View style={s.sectionHeader}>
+                <Text style={s.sectionTitle}>{L.terms}</Text>
+              </View>
+              <Text style={[s.body, { marginBottom: 5 }]}>{L.termsIntro}</Text>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>1. {L.clause1}</Text>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>2. {L.clause2}</Text>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>3. {L.clause3}</Text>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>4. {L.clause4}</Text>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>5. {L.clause5}</Text>
+              <Text style={[s.body, { marginBottom: 5, paddingLeft: 12 }]}>6. {L.clause6}</Text>
 
-        {/* Obligations */}
-        <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>{L.landlordObligations}</Text>
-        </View>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>a) {L.landlordOb1}</Text>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>b) {L.landlordOb2}</Text>
-        <Text style={[s.body, { marginBottom: 5, paddingLeft: 12 }]}>c) {L.landlordOb3}</Text>
+              {/* Obligations */}
+              <View style={s.sectionHeader}>
+                <Text style={s.sectionTitle}>{L.landlordObligations}</Text>
+              </View>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>a) {L.landlordOb1}</Text>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>b) {L.landlordOb2}</Text>
+              <Text style={[s.body, { marginBottom: 5, paddingLeft: 12 }]}>c) {L.landlordOb3}</Text>
 
-        <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>{L.tenantObligations}</Text>
-        </View>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>a) {L.tenantOb1}</Text>
-        <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>b) {L.tenantOb2}</Text>
-        <Text style={[s.body, { marginBottom: 5, paddingLeft: 12 }]}>c) {L.tenantOb3}</Text>
+              <View style={s.sectionHeader}>
+                <Text style={s.sectionTitle}>{L.tenantObligations}</Text>
+              </View>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>a) {L.tenantOb1}</Text>
+              <Text style={[s.body, { marginBottom: 3, paddingLeft: 12 }]}>b) {L.tenantOb2}</Text>
+              <Text style={[s.body, { marginBottom: 5, paddingLeft: 12 }]}>c) {L.tenantOb3}</Text>
 
-        {/* Declaration */}
-        <View style={{ backgroundColor: "#f7f7f7", borderWidth: 0.5, borderColor: "#c0c0c0", padding: 8, marginVertical: 5, borderRadius: 4 }}>
-          <Text style={[s.body, { fontStyle: "italic", lineHeight: 1.5 }]}>{L.declaration}</Text>
-        </View>
-
-          </>);
+              {/* Declaration */}
+              <View
+                style={{
+                  backgroundColor: "#f7f7f7",
+                  borderWidth: 0.5,
+                  borderColor: "#c0c0c0",
+                  padding: 8,
+                  marginVertical: 5,
+                  borderRadius: 4,
+                }}
+              >
+                <Text style={[s.body, { fontStyle: "italic", lineHeight: 1.5 }]}>
+                  {L.declaration}
+                </Text>
+              </View>
+            </>
+          );
         })()}
 
         {/* Signature grid: Landlord, Tenant, 2 Witnesses, Office */}
         <View style={ls.fourSigGrid}>
           <View style={ls.fourSigBox}>
             {fd.applicant_signature ? (
-              <Image src={fd.applicant_signature} style={{ width: 60, height: 30, marginBottom: 2 }} />
+              <Image
+                src={fd.applicant_signature}
+                style={{ width: 60, height: 30, marginBottom: 2 }}
+              />
             ) : (
               <View />
             )}
             <View style={ls.fourSigLine} />
             <Text style={ls.fourSigName}>{sw ? "MPANGISHAJI" : "LANDLORD"}</Text>
-            <Text style={ls.fourSigSub}>{String(fd.landlord_name || (application.users ? `${application.users.first_name || ""} ${application.users.last_name || ""}`.trim() : ""))}</Text>
+            <Text style={ls.fourSigSub}>
+              {String(
+                fd.landlord_name ||
+                  (application.users
+                    ? `${application.users.first_name || ""} ${application.users.last_name || ""}`.trim()
+                    : ""),
+              )}
+            </Text>
           </View>
           <View style={ls.fourSigBox}>
             {fd.buyer_signature ? (

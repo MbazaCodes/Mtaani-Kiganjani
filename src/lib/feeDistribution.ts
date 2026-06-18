@@ -19,13 +19,17 @@ export interface FeeShare {
   amount: number;
 }
 
-export const FEE_DISTRIBUTION: { key: string; label: { sw: string; en: string }; percent: number }[] = [
-  { key: "street",   label: { sw: "Mtaa / Kijiji",  en: "Street / Village" }, percent: 50 },
-  { key: "ward",     label: { sw: "Kata",            en: "Ward" },             percent: 20 },
-  { key: "district", label: { sw: "Wilaya",          en: "District" },         percent: 10 },
-  { key: "service",  label: { sw: "Ada ya Huduma",   en: "Service Fee" },      percent: 10 },
-  { key: "regional", label: { sw: "Mkoa",            en: "Regional" },         percent: 5 },
-  { key: "vat",      label: { sw: "VAT (Kodi)",      en: "VAT (Tax)" },        percent: 5 },
+export const FEE_DISTRIBUTION: {
+  key: string;
+  label: { sw: string; en: string };
+  percent: number;
+}[] = [
+  { key: "street", label: { sw: "Mtaa / Kijiji", en: "Street / Village" }, percent: 50 },
+  { key: "ward", label: { sw: "Kata", en: "Ward" }, percent: 20 },
+  { key: "district", label: { sw: "Wilaya", en: "District" }, percent: 10 },
+  { key: "service", label: { sw: "Ada ya Huduma", en: "Service Fee" }, percent: 10 },
+  { key: "regional", label: { sw: "Mkoa", en: "Regional" }, percent: 5 },
+  { key: "vat", label: { sw: "VAT (Kodi)", en: "VAT (Tax)" }, percent: 5 },
 ];
 
 /**

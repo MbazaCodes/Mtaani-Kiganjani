@@ -257,7 +257,7 @@ export function VerifyDocuments({
         // Other government documents - simulate verification
         await verifyOtherDocument();
       }
-    } catch (err) {
+    } catch (_err) {
       setVerificationStatus("invalid");
     } finally {
       setLoading(false);

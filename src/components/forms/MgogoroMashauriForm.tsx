@@ -179,19 +179,53 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
   const [respondentFound, setRespondentFound] = useState<RespondentProfile | null>(null);
   const [respondentSearching, setRSearching] = useState(false);
   const [respondentError, setRespondentError] = useState("");
-  const [witnessSearch, setWitnessSearch] = useState<{ w1: string; w2: string }>({ w1: "", w2: "" });
-  const [witnessResults, setWitnessResults] = useState<{ w1: { id: string; name: string; phone: string }[]; w2: { id: string; name: string; phone: string }[] }>({ w1: [], w2: [] });
+  const [witnessSearch, setWitnessSearch] = useState<{ w1: string; w2: string }>({
+    w1: "",
+    w2: "",
+  });
+  const [witnessResults, setWitnessResults] = useState<{
+    w1: { id: string; name: string; phone: string }[];
+    w2: { id: string; name: string; phone: string }[];
+  }>({ w1: [], w2: [] });
   const searchDisputeWitness = async (q: string, wKey: "w1" | "w2") => {
     setWitnessSearch((prev) => ({ ...prev, [wKey]: q }));
-    if (q.length < 2) { setWitnessResults((prev) => ({ ...prev, [wKey]: [] })); return; }
+    if (q.length < 2) {
+      setWitnessResults((prev) => ({ ...prev, [wKey]: [] }));
+      return;
+    }
     const term = "%" + q + "%";
-    const { data } = await supabase.from("profiles").select("id, first_name, last_name, phone, nida_number")
-      .or("first_name.ilike." + term + ",last_name.ilike." + term + ",nida_number.ilike." + term + ",phone.ilike." + term)
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name, phone, nida_number")
+      .or(
+        "first_name.ilike." +
+          term +
+          ",last_name.ilike." +
+          term +
+          ",nida_number.ilike." +
+          term +
+          ",phone.ilike." +
+          term,
+      )
       .limit(4);
-    setWitnessResults((prev) => ({ ...prev, [wKey]: (data || []).map((u: { id: string; first_name?: string; last_name?: string; phone?: string }) => ({ id: u.id, name: (u.first_name || "") + " " + (u.last_name || ""), phone: u.phone || "" })) }));
+    setWitnessResults((prev) => ({
+      ...prev,
+      [wKey]: (data || []).map(
+        (u: { id: string; first_name?: string; last_name?: string; phone?: string }) => ({
+          id: u.id,
+          name: (u.first_name || "") + " " + (u.last_name || ""),
+          phone: u.phone || "",
+        }),
+      ),
+    }));
   };
   const selectDisputeWitness = (wNum: 1 | 2, w: { id: string; name: string; phone: string }) => {
-    setVals((p) => ({ ...p, ["witness" + wNum + "_name"]: w.name, ["witness" + wNum + "_phone"]: w.phone, ["witness" + wNum + "_user_id"]: w.id }));
+    setVals((p) => ({
+      ...p,
+      ["witness" + wNum + "_name"]: w.name,
+      ["witness" + wNum + "_phone"]: w.phone,
+      ["witness" + wNum + "_user_id"]: w.id,
+    }));
     setWitnessSearch((prev) => ({ ...prev, ["w" + wNum]: "" }));
     setWitnessResults((prev) => ({ ...prev, ["w" + wNum]: [] }));
   };
@@ -414,7 +448,10 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
       if (respondentFound?.id) {
         await supabase.from("notifications").insert({
           user_id: respondentFound.id,
-          title: lang === "sw" ? "Malalamiko Yamewasilishwa Dhidi Yako" : "A Dispute Has Been Filed Against You",
+          title:
+            lang === "sw"
+              ? "Malalamiko Yamewasilishwa Dhidi Yako"
+              : "A Dispute Has Been Filed Against You",
           message:
             lang === "sw"
               ? `Malalamiko (${ref}) yamewasilishwa dhidi yako. Fungua kuona maelezo na kujibu.`
@@ -1277,23 +1314,37 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
                             <Search size={13} className="text-emerald-600 shrink-0" />
                             <input
                               value={witnessSearch[("w" + w.num) as "w1" | "w2"]}
-                              onChange={(e) => searchDisputeWitness(e.target.value, ("w" + w.num) as "w1" | "w2")}
-                              placeholder={L(`Tafuta shahidi ${w.num}...`, `Search witness ${w.num}...`)}
+                              onChange={(e) =>
+                                searchDisputeWitness(e.target.value, ("w" + w.num) as "w1" | "w2")
+                              }
+                              placeholder={L(
+                                `Tafuta shahidi ${w.num}...`,
+                                `Search witness ${w.num}...`,
+                              )}
                               className="flex-1 text-xs bg-transparent outline-none placeholder-emerald-400"
                             />
                           </div>
                           {witnessResults[("w" + w.num) as "w1" | "w2"].length > 0 && (
                             <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg max-h-32 overflow-y-auto">
                               {witnessResults[("w" + w.num) as "w1" | "w2"].map((r) => (
-                                <button key={r.id} type="button" onClick={() => selectDisputeWitness(w.num as 1 | 2, r)}
-                                  className="w-full px-3 py-2 hover:bg-emerald-50 flex items-center gap-2 text-left border-b border-stone-50">
+                                <button
+                                  key={r.id}
+                                  type="button"
+                                  onClick={() => selectDisputeWitness(w.num as 1 | 2, r)}
+                                  className="w-full px-3 py-2 hover:bg-emerald-50 flex items-center gap-2 text-left border-b border-stone-50"
+                                >
                                   <Users size={12} className="text-emerald-600" />
-                                  <div><p className="text-xs font-bold">{r.name}</p><p className="text-[10px] text-stone-400">{r.phone}</p></div>
+                                  <div>
+                                    <p className="text-xs font-bold">{r.name}</p>
+                                    <p className="text-[10px] text-stone-400">{r.phone}</p>
+                                  </div>
                                 </button>
                               ))}
                             </div>
                           )}
-                          <p className="text-[9px] text-stone-400 mt-0.5">{L("Au ingiza kwa mkono", "Or enter manually below")}</p>
+                          <p className="text-[9px] text-stone-400 mt-0.5">
+                            {L("Au ingiza kwa mkono", "Or enter manually below")}
+                          </p>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <Field

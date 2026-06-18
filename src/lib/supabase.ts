@@ -37,7 +37,13 @@ export interface UserProfile {
   photo_url?: string;
   role: "citizen" | "staff" | "admin";
   is_verified: boolean;
-  verification_level?: "UNVERIFIED" | "PHONE_VERIFIED" | "EMAIL_VERIFIED" | "PROFILE_COMPLETED" | "PENDING_OFFICE_VISIT" | "NIDA_VERIFIED";
+  verification_level?:
+    | "UNVERIFIED"
+    | "PHONE_VERIFIED"
+    | "EMAIL_VERIFIED"
+    | "PROFILE_COMPLETED"
+    | "PENDING_OFFICE_VISIT"
+    | "NIDA_VERIFIED";
   is_diaspora?: boolean;
   account_status: string;
   is_department_member?: boolean;

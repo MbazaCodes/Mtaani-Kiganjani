@@ -53,16 +53,13 @@ export async function getExpiringDocuments(
 
   for (const app of data || []) {
     const fd = (app.form_data || {}) as Record<string, string>;
-    const expiryStr =
-      fd.end_date || fd.event_date || fd.expiry_date || fd.valid_until;
+    const expiryStr = fd.end_date || fd.event_date || fd.expiry_date || fd.valid_until;
     if (!expiryStr) continue;
 
     const expiry = new Date(expiryStr);
     if (isNaN(expiry.getTime())) continue;
 
-    const daysLeft = Math.ceil(
-      (expiry.getTime() - now.getTime()) / (24 * 60 * 60 * 1000),
-    );
+    const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
 
     if (expiry <= cutoff) {
       const user = app.users as {
@@ -74,9 +71,7 @@ export async function getExpiringDocuments(
         applicationNumber: app.application_number || "",
         serviceName: app.service_name || "",
         userId: app.user_id || "",
-        userName: user
-          ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
-          : "Unknown",
+        userName: user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() : "Unknown",
         expiryDate: expiryStr,
         daysLeft,
         status: daysLeft < 0 ? "expired" : daysLeft <= 7 ? "expiring_soon" : "valid",

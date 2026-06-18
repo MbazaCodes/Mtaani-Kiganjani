@@ -17,7 +17,10 @@ interface RefreshButtonProps {
 }
 
 export const RefreshButton: React.FC<RefreshButtonProps> = ({
-  onRefresh, lang = "en", variant = "icon", className,
+  onRefresh,
+  lang = "en",
+  variant = "icon",
+  className,
 }) => {
   const [spinning, setSpinning] = useState(false);
   const label = lang === "sw" ? "Sasisha" : "Refresh";

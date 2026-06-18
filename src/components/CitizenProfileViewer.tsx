@@ -117,13 +117,22 @@ export const CitizenProfileViewer: React.FC<CitizenProfileViewerProps> = ({
   }, [citizenId, nidaNumber, citizenCode]);
 
   const statusColor = (s: string) => {
-    if (s === "issued" || s === "approved") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    if (s === "issued" || s === "approved")
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
     if (s === "rejected") return "bg-red-50 text-red-700 border-red-200";
     if (s === "submitted" || s === "pending") return "bg-amber-50 text-amber-700 border-amber-200";
     return "bg-stone-50 text-stone-600 border-stone-200";
   };
 
-  const Row = ({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string | null }) => {
+  const Row = ({
+    icon,
+    label,
+    value,
+  }: {
+    icon: React.ReactNode;
+    label: string;
+    value?: string | null;
+  }) => {
     if (!value) return null;
     return (
       <div className="flex items-start gap-3 py-2 border-b border-stone-100 last:border-0">
@@ -138,10 +147,7 @@ export const CitizenProfileViewer: React.FC<CitizenProfileViewerProps> = ({
 
   return (
     <>
-      <div
-        className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40" onClick={onClose} />
       <div className="fixed inset-y-0 right-0 w-full sm:w-[520px] max-w-full bg-white shadow-2xl z-50 flex flex-col">
         {/* Header */}
         <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between shrink-0 bg-stone-50">
@@ -177,7 +183,9 @@ export const CitizenProfileViewer: React.FC<CitizenProfileViewerProps> = ({
           ) : notFound ? (
             <div className="text-center py-12">
               <Search size={32} className="mx-auto text-stone-300 mb-3" />
-              <p className="text-stone-500 font-bold">{L("Raia hajapatikana", "Citizen not found")}</p>
+              <p className="text-stone-500 font-bold">
+                {L("Raia hajapatikana", "Citizen not found")}
+              </p>
               <p className="text-xs text-stone-400 mt-1">
                 {citizenId || nidaNumber || citizenCode}
               </p>
@@ -189,15 +197,34 @@ export const CitizenProfileViewer: React.FC<CitizenProfileViewerProps> = ({
                 <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">
                   {L("Taarifa Binafsi", "Personal Information")}
                 </p>
-                <Row icon={<User size={14} />} label={L("Jina Kamili", "Full Name")}
-                  value={`${citizen.first_name} ${citizen.middle_name || ""} ${citizen.last_name}`.trim()} />
+                <Row
+                  icon={<User size={14} />}
+                  label={L("Jina Kamili", "Full Name")}
+                  value={`${citizen.first_name} ${citizen.middle_name || ""} ${citizen.last_name}`.trim()}
+                />
                 <Row icon={<Hash size={14} />} label="NIDA" value={citizen.nida_number} />
-                <Row icon={<Shield size={14} />} label={L("Namba ya Raia", "Citizen ID")} value={citizen.citizen_id} />
+                <Row
+                  icon={<Shield size={14} />}
+                  label={L("Namba ya Raia", "Citizen ID")}
+                  value={citizen.citizen_id}
+                />
                 <Row icon={<Phone size={14} />} label={L("Simu", "Phone")} value={citizen.phone} />
-                <Row icon={<Mail size={14} />} label={L("Barua pepe", "Email")} value={citizen.email} />
-                <Row icon={<Calendar size={14} />} label={L("Tarehe ya Kuzaliwa", "Date of Birth")} value={citizen.date_of_birth} />
+                <Row
+                  icon={<Mail size={14} />}
+                  label={L("Barua pepe", "Email")}
+                  value={citizen.email}
+                />
+                <Row
+                  icon={<Calendar size={14} />}
+                  label={L("Tarehe ya Kuzaliwa", "Date of Birth")}
+                  value={citizen.date_of_birth}
+                />
                 <Row icon={<User size={14} />} label={L("Jinsia", "Sex")} value={citizen.sex} />
-                <Row icon={<FileText size={14} />} label={L("Uraia", "Nationality")} value={citizen.nationality} />
+                <Row
+                  icon={<FileText size={14} />}
+                  label={L("Uraia", "Nationality")}
+                  value={citizen.nationality}
+                />
               </div>
 
               {/* Location */}
@@ -205,21 +232,48 @@ export const CitizenProfileViewer: React.FC<CitizenProfileViewerProps> = ({
                 <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">
                   {L("Mahali", "Location")}
                 </p>
-                <Row icon={<MapPin size={14} />} label={L("Mkoa", "Region")} value={citizen.region} />
-                <Row icon={<MapPin size={14} />} label={L("Wilaya", "District")} value={citizen.district} />
+                <Row
+                  icon={<MapPin size={14} />}
+                  label={L("Mkoa", "Region")}
+                  value={citizen.region}
+                />
+                <Row
+                  icon={<MapPin size={14} />}
+                  label={L("Wilaya", "District")}
+                  value={citizen.district}
+                />
                 <Row icon={<MapPin size={14} />} label={L("Kata", "Ward")} value={citizen.ward} />
               </div>
 
               {/* ID Documents */}
-              {(citizen.id_number || citizen.passport_number || citizen.voter_id_number || citizen.driving_license_number) && (
+              {(citizen.id_number ||
+                citizen.passport_number ||
+                citizen.voter_id_number ||
+                citizen.driving_license_number) && (
                 <div className="bg-white border border-stone-200 rounded-xl p-4">
                   <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">
                     {L("Vitambulisho", "ID Documents")}
                   </p>
-                  <Row icon={<FileText size={14} />} label={L("Namba ya Kitambulisho", "ID Number")} value={citizen.id_number} />
-                  <Row icon={<FileText size={14} />} label={L("Pasipoti", "Passport")} value={citizen.passport_number} />
-                  <Row icon={<FileText size={14} />} label={L("Kadi ya Mpiga Kura", "Voter ID")} value={citizen.voter_id_number} />
-                  <Row icon={<FileText size={14} />} label={L("Leseni ya Udereva", "Driving License")} value={citizen.driving_license_number} />
+                  <Row
+                    icon={<FileText size={14} />}
+                    label={L("Namba ya Kitambulisho", "ID Number")}
+                    value={citizen.id_number}
+                  />
+                  <Row
+                    icon={<FileText size={14} />}
+                    label={L("Pasipoti", "Passport")}
+                    value={citizen.passport_number}
+                  />
+                  <Row
+                    icon={<FileText size={14} />}
+                    label={L("Kadi ya Mpiga Kura", "Voter ID")}
+                    value={citizen.voter_id_number}
+                  />
+                  <Row
+                    icon={<FileText size={14} />}
+                    label={L("Leseni ya Udereva", "Driving License")}
+                    value={citizen.driving_license_number}
+                  />
                 </div>
               )}
 
@@ -228,10 +282,19 @@ export const CitizenProfileViewer: React.FC<CitizenProfileViewerProps> = ({
                 <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">
                   {L("Akaunti", "Account")}
                 </p>
-                <Row icon={<Shield size={14} />} label={L("Hali", "Status")} value={citizen.account_status} />
+                <Row
+                  icon={<Shield size={14} />}
+                  label={L("Hali", "Status")}
+                  value={citizen.account_status}
+                />
                 <Row icon={<User size={14} />} label={L("Jukumu", "Role")} value={citizen.role} />
-                <Row icon={<Calendar size={14} />} label={L("Tarehe ya Kusajiliwa", "Registered")}
-                  value={citizen.created_at ? new Date(citizen.created_at).toLocaleDateString() : null} />
+                <Row
+                  icon={<Calendar size={14} />}
+                  label={L("Tarehe ya Kusajiliwa", "Registered")}
+                  value={
+                    citizen.created_at ? new Date(citizen.created_at).toLocaleDateString() : null
+                  }
+                />
               </div>
 
               {/* Applications History */}
@@ -240,17 +303,28 @@ export const CitizenProfileViewer: React.FC<CitizenProfileViewerProps> = ({
                   {L("Historia ya Maombi", "Application History")} ({apps.length})
                 </p>
                 {apps.length === 0 ? (
-                  <p className="text-xs text-stone-400 py-2">{L("Hakuna maombi", "No applications")}</p>
+                  <p className="text-xs text-stone-400 py-2">
+                    {L("Hakuna maombi", "No applications")}
+                  </p>
                 ) : (
                   <div className="space-y-1.5">
                     {apps.map((a) => (
-                      <div key={a.id} className="flex items-center justify-between py-1.5 border-b border-stone-50 last:border-0">
+                      <div
+                        key={a.id}
+                        className="flex items-center justify-between py-1.5 border-b border-stone-50 last:border-0"
+                      >
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-stone-700 truncate">{a.service_name}</p>
-                          <p className="text-[10px] text-stone-400 font-mono">{a.application_number}</p>
+                          <p className="text-xs font-bold text-stone-700 truncate">
+                            {a.service_name}
+                          </p>
+                          <p className="text-[10px] text-stone-400 font-mono">
+                            {a.application_number}
+                          </p>
                         </div>
                         <div className="text-right shrink-0 ml-2">
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusColor(a.status)}`}>
+                          <span
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusColor(a.status)}`}
+                          >
                             {a.status}
                           </span>
                           <p className="text-[9px] text-stone-400 mt-0.5">

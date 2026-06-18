@@ -221,7 +221,10 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
     setVals((p) => ({ ...p, [k]: v }));
 
   // Witness citizen lookup
-  const [witnessSearch, setWitnessSearch] = useState<{ w1: string; w2: string }>({ w1: "", w2: "" });
+  const [witnessSearch, setWitnessSearch] = useState<{ w1: string; w2: string }>({
+    w1: "",
+    w2: "",
+  });
   const [witnessResults, setWitnessResults] = useState<{
     w1: { id: string; name: string; phone: string; nida: string }[];
     w2: { id: string; name: string; phone: string; nida: string }[];
@@ -237,7 +240,16 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
     const { data } = await supabase
       .from("users")
       .select("id, first_name, last_name, phone, nida_number")
-      .or("first_name.ilike." + term + ",last_name.ilike." + term + ",nida_number.ilike." + term + ",phone.ilike." + term)
+      .or(
+        "first_name.ilike." +
+          term +
+          ",last_name.ilike." +
+          term +
+          ",nida_number.ilike." +
+          term +
+          ",phone.ilike." +
+          term,
+      )
       .eq("role", "citizen")
       .limit(4);
     setWitnessResults((prev) => ({
@@ -251,7 +263,10 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
     }));
   };
 
-  const selectWitness = (wNum: 1 | 2, w: { id: string; name: string; phone: string; nida: string }) => {
+  const selectWitness = (
+    wNum: 1 | 2,
+    w: { id: string; name: string; phone: string; nida: string },
+  ) => {
     setVals((p) => ({
       ...p,
       ["witness" + wNum + "_name"]: w.name,
@@ -320,7 +335,7 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
         return;
       }
       setTenantFound(data as TenantProfile);
-    } catch (error) {
+    } catch (_error) {
       console.error("tenant lookup failed", error);
       setTenantError(L("Hitilafu ya mtandao. Jaribu tena.", "Network error. Please try again."));
     } finally {
@@ -405,7 +420,10 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
           tenant_nida: tenantFound?.nida_number,
           tenant_phone: tenantFound?.phone,
           landlord_id: userProfile?.id,
-          landlord_name: `${userProfile?.first_name || ""} ${userProfile?.middle_name || ""} ${userProfile?.last_name || ""}`.replace(/\s+/g, " ").trim(),
+          landlord_name:
+            `${userProfile?.first_name || ""} ${userProfile?.middle_name || ""} ${userProfile?.last_name || ""}`
+              .replace(/\s+/g, " ")
+              .trim(),
           landlord_nida: userProfile?.nida_number || "",
           landlord_phone: userProfile?.phone || "",
           total_fee: serviceFee,
@@ -1288,7 +1306,9 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
                       <Search size={13} className="text-emerald-600 shrink-0" />
                       <input
                         value={witnessSearch[("w" + w.num) as "w1" | "w2"]}
-                        onChange={(e) => searchWitness(e.target.value, ("w" + w.num) as "w1" | "w2")}
+                        onChange={(e) =>
+                          searchWitness(e.target.value, ("w" + w.num) as "w1" | "w2")
+                        }
                         placeholder={L("Tafuta shahidi...", "Search witness...")}
                         className="flex-1 text-xs bg-transparent outline-none placeholder-emerald-400"
                       />
@@ -1296,15 +1316,24 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
                     {witnessResults[("w" + w.num) as "w1" | "w2"].length > 0 && (
                       <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg max-h-32 overflow-y-auto">
                         {witnessResults[("w" + w.num) as "w1" | "w2"].map((r) => (
-                          <button key={r.id} type="button" onClick={() => selectWitness(w.num as 1 | 2, r)}
-                            className="w-full px-3 py-2 hover:bg-emerald-50 flex items-center gap-2 text-left border-b border-stone-50">
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => selectWitness(w.num as 1 | 2, r)}
+                            className="w-full px-3 py-2 hover:bg-emerald-50 flex items-center gap-2 text-left border-b border-stone-50"
+                          >
                             <Users size={12} className="text-emerald-600" />
-                            <div><p className="text-xs font-bold">{r.name}</p><p className="text-[10px] text-stone-400">{r.phone}</p></div>
+                            <div>
+                              <p className="text-xs font-bold">{r.name}</p>
+                              <p className="text-[10px] text-stone-400">{r.phone}</p>
+                            </div>
                           </button>
                         ))}
                       </div>
                     )}
-                    <p className="text-[9px] text-stone-400 mt-0.5">{L("Au ingiza kwa mkono", "Or enter manually below")}</p>
+                    <p className="text-[9px] text-stone-400 mt-0.5">
+                      {L("Au ingiza kwa mkono", "Or enter manually below")}
+                    </p>
                   </div>
                   <Field name={w.nameKey} label={L("Jina Kamili", "Full Name")} required>
                     <TI

@@ -7,10 +7,7 @@ interface SessionTimeoutProps {
   timeoutMinutes?: number;
 }
 
-export const SessionTimeout: React.FC<SessionTimeoutProps> = ({
-  lang,
-  timeoutMinutes = 30,
-}) => {
+export const SessionTimeout: React.FC<SessionTimeoutProps> = ({ lang, timeoutMinutes = 30 }) => {
   const sw = lang === "sw";
   const [expired, setExpired] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
@@ -45,14 +42,14 @@ export const SessionTimeout: React.FC<SessionTimeoutProps> = ({
 
   // Also listen for auth state changes
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event) => {
-        if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
-          if (event === "SIGNED_OUT") setExpired(true);
-          if (event === "TOKEN_REFRESHED") setExpired(false);
-        }
-      },
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+        if (event === "SIGNED_OUT") setExpired(true);
+        if (event === "TOKEN_REFRESHED") setExpired(false);
+      }
+    });
     return () => subscription.unsubscribe();
   }, []);
 

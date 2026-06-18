@@ -218,10 +218,7 @@ export const OtpModal: React.FC<OtpModalProps> = ({
                 <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
                   <ShieldCheck size={13} className="text-amber-600 shrink-0" />
                   <p className="text-[11px] text-amber-700 font-medium">
-                    {L(
-                      "Demo: Namba ya default ni 123456",
-                      "Demo mode: default code is 123456",
-                    )}
+                    {L("Demo: Namba ya default ni 123456", "Demo mode: default code is 123456")}
                   </p>
                 </div>
 
@@ -246,7 +243,9 @@ export const OtpModal: React.FC<OtpModalProps> = ({
                       {Array.from({ length: DIGIT_COUNT }).map((_, idx) => (
                         <input
                           key={idx}
-                          ref={(el) => { inputRefs.current[idx] = el; }}
+                          ref={(el) => {
+                            inputRefs.current[idx] = el;
+                          }}
                           type="text"
                           inputMode="numeric"
                           maxLength={6}

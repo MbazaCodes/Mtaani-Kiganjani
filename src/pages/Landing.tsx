@@ -71,7 +71,12 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                 </button>
               ))}
             </div>
-            <button onClick={toggleDark} type="button" className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors" title={isDark ? "Light mode" : "Dark mode"}>
+            <button
+              onClick={toggleDark}
+              type="button"
+              className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors"
+              title={isDark ? "Light mode" : "Dark mode"}
+            >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             {onShowVerify && (
@@ -127,7 +132,12 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden bg-white border-t border-stone-100 px-4 py-3 space-y-1">
-            <button onClick={toggleDark} type="button" className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors" title={isDark ? "Light mode" : "Dark mode"}>
+            <button
+              onClick={toggleDark}
+              type="button"
+              className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors"
+              title={isDark ? "Light mode" : "Dark mode"}
+            >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             {onShowVerify && (
@@ -208,10 +218,15 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                     className="group-hover:translate-x-1 transition-transform"
                   />
                 </button>
-                <button onClick={toggleDark} type="button" className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors" title={isDark ? "Light mode" : "Dark mode"}>
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-            {onShowVerify && (
+                <button
+                  onClick={toggleDark}
+                  type="button"
+                  className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors"
+                  title={isDark ? "Light mode" : "Dark mode"}
+                >
+                  {isDark ? <Sun size={16} /> : <Moon size={16} />}
+                </button>
+                {onShowVerify && (
                   <button
                     onClick={onShowVerify}
                     type="button"
@@ -693,17 +708,32 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               </h4>
               <ul className="space-y-2.5 text-sm font-semibold text-stone-500">
                 <li>
-                  <a href="https://www.tamisemi.go.tz" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+                  <a
+                    href="https://www.tamisemi.go.tz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-emerald-600 transition-colors flex items-center gap-1.5"
+                  >
                     PO-RALG (TAMISEMI)
                   </a>
                 </li>
                 <li>
-                  <a href="https://www.ega.go.tz" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+                  <a
+                    href="https://www.ega.go.tz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-emerald-600 transition-colors flex items-center gap-1.5"
+                  >
                     e-Government Agency
                   </a>
                 </li>
                 <li>
-                  <a href="https://www.nida.go.tz" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+                  <a
+                    href="https://www.nida.go.tz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-emerald-600 transition-colors flex items-center gap-1.5"
+                  >
                     NIDA
                   </a>
                 </li>

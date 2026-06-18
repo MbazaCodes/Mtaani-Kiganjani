@@ -3,5 +3,4 @@ export const TANZANIA_LOGO_BASE64 =
 
 // ── Supabase Storage URL (preferred for web display) ────────────────────
 // Upload the logo PNG to the "assets" bucket in Supabase Storage, then use:
-export const TANZANIA_LOGO_STORAGE_URL =
-  `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/assets/tanzania-logo.png`;
+export const TANZANIA_LOGO_STORAGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/assets/tanzania-logo.png`;

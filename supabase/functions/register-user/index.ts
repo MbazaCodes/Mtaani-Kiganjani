@@ -18,7 +18,8 @@ Deno.serve(async (req) => {
 
     if (!email || !password) {
       return new Response(JSON.stringify({ error: "email and password required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -26,7 +27,7 @@ Deno.serve(async (req) => {
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { autoRefreshToken: false, persistSession: false } }
+      { auth: { autoRefreshToken: false, persistSession: false } },
     );
 
     // Create user via admin API (no rate limit)
@@ -39,32 +40,44 @@ Deno.serve(async (req) => {
 
     if (error) {
       // User already exists
-      if (error.message.includes("already been registered") || error.message.includes("already registered")) {
+      if (
+        error.message.includes("already been registered") ||
+        error.message.includes("already registered")
+      ) {
         return new Response(JSON.stringify({ error: "EMAIL_EXISTS" }), {
-          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       return new Response(JSON.stringify({ error: error.message }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Insert profile row immediately (trigger may also do this)
     if (data.user) {
-      await supabaseAdmin.from("users").upsert({
-        id: data.user.id,
-        email: email.toLowerCase().trim(),
-        ...meta,
-      }, { onConflict: "id" }).catch(() => {});
+      await supabaseAdmin
+        .from("users")
+        .upsert(
+          {
+            id: data.user.id,
+            email: email.toLowerCase().trim(),
+            ...meta,
+          },
+          { onConflict: "id" },
+        )
+        .catch(() => {});
     }
 
-    return new Response(
-      JSON.stringify({ user: { id: data.user?.id, email: data.user?.email } }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ user: { id: data.user?.id, email: data.user?.email } }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

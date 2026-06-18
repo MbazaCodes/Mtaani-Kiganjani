@@ -21,7 +21,16 @@ interface AnalyticsChartsProps {
   lang: string;
 }
 
-const COLORS = ["#059669", "#0ea5e9", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
+const COLORS = [
+  "#059669",
+  "#0ea5e9",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+  "#ec4899",
+  "#14b8a6",
+  "#f97316",
+];
 const STATUS_COLORS: Record<string, string> = {
   submitted: "#f59e0b",
   pending: "#f59e0b",
@@ -38,7 +47,13 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
   const [byService, setByService] = useState<{ name: string; count: number }[]>([]);
   const [byStatus, setByStatus] = useState<{ name: string; value: number }[]>([]);
   const [monthly, setMonthly] = useState<{ month: string; count: number }[]>([]);
-  const [stats, setStats] = useState({ total: 0, approved: 0, rejected: 0, avgDays: 0, revenue: 0 });
+  const [stats, setStats] = useState({
+    total: 0,
+    approved: 0,
+    rejected: 0,
+    avgDays: 0,
+    revenue: 0,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,7 +70,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
         // By service
         const svcMap: Record<string, number> = {};
         apps.forEach((a) => {
-          const svc = (a.service_name || "Other").replace("Makubaliano ya ", "").replace("Kibari cha ", "");
+          const svc = (a.service_name || "Other")
+            .replace("Makubaliano ya ", "")
+            .replace("Kibari cha ", "");
           svcMap[svc] = (svcMap[svc] || 0) + 1;
         });
         setByService(
@@ -91,13 +108,17 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
         );
 
         // Summary stats
-        const approved = apps.filter((a) => a.status === "approved" || a.status === "issued").length;
+        const approved = apps.filter(
+          (a) => a.status === "approved" || a.status === "issued",
+        ).length;
         const rejected = apps.filter((a) => a.status === "rejected").length;
         let totalDays = 0;
         let daysCount = 0;
         apps.forEach((a) => {
           if (a.approved_at && a.created_at) {
-            const diff = (new Date(a.approved_at).getTime() - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24);
+            const diff =
+              (new Date(a.approved_at).getTime() - new Date(a.created_at).getTime()) /
+              (1000 * 60 * 60 * 24);
             if (diff > 0 && diff < 365) {
               totalDays += diff;
               daysCount++;
@@ -138,15 +159,23 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white border border-stone-200 rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-stone-900">{stats.total}</p>
-          <p className="text-[10px] text-stone-500 uppercase">{sw ? "Jumla ya Maombi" : "Total Applications"}</p>
+          <p className="text-[10px] text-stone-500 uppercase">
+            {sw ? "Jumla ya Maombi" : "Total Applications"}
+          </p>
         </div>
         <div className="bg-white border border-stone-200 rounded-xl p-4 text-center">
-          <p className="text-2xl font-black text-emerald-600">{Math.round((stats.approved / (stats.total || 1)) * 100)}%</p>
-          <p className="text-[10px] text-stone-500 uppercase">{sw ? "Kiwango cha Kuidhinishwa" : "Approval Rate"}</p>
+          <p className="text-2xl font-black text-emerald-600">
+            {Math.round((stats.approved / (stats.total || 1)) * 100)}%
+          </p>
+          <p className="text-[10px] text-stone-500 uppercase">
+            {sw ? "Kiwango cha Kuidhinishwa" : "Approval Rate"}
+          </p>
         </div>
         <div className="bg-white border border-stone-200 rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-blue-600">{stats.avgDays}</p>
-          <p className="text-[10px] text-stone-500 uppercase">{sw ? "Wastani wa Siku" : "Avg. Processing Days"}</p>
+          <p className="text-[10px] text-stone-500 uppercase">
+            {sw ? "Wastani wa Siku" : "Avg. Processing Days"}
+          </p>
         </div>
         <div className="bg-white border border-stone-200 rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-amber-600">TSh {stats.revenue.toLocaleString()}</p>
@@ -159,12 +188,20 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
         <div className="bg-white border border-stone-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 size={16} className="text-emerald-600" />
-            <p className="text-xs font-black text-stone-600 uppercase">{sw ? "Maombi kwa Huduma" : "Applications by Service"}</p>
+            <p className="text-xs font-black text-stone-600 uppercase">
+              {sw ? "Maombi kwa Huduma" : "Applications by Service"}
+            </p>
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={byService} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f1f1" />
-              <XAxis dataKey="name" tick={{ fontSize: 9 }} angle={-20} textAnchor="end" height={50} />
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 9 }}
+                angle={-20}
+                textAnchor="end"
+                height={50}
+              />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
@@ -180,11 +217,22 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
         <div className="bg-white border border-stone-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-4">
             <PieIcon size={16} className="text-blue-600" />
-            <p className="text-xs font-black text-stone-600 uppercase">{sw ? "Maombi kwa Hali" : "Applications by Status"}</p>
+            <p className="text-xs font-black text-stone-600 uppercase">
+              {sw ? "Maombi kwa Hali" : "Applications by Status"}
+            </p>
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
-              <Pie data={byStatus} cx="50%" cy="50%" innerRadius={40} outerRadius={75} paddingAngle={3} dataKey="value" label={({ name, value }) => `${name} (${value})`}>
+              <Pie
+                data={byStatus}
+                cx="50%"
+                cy="50%"
+                innerRadius={40}
+                outerRadius={75}
+                paddingAngle={3}
+                dataKey="value"
+                label={({ name, value }) => `${name} (${value})`}
+              >
                 {byStatus.map((entry, i) => (
                   <Cell key={i} fill={STATUS_COLORS[entry.name] || COLORS[i % COLORS.length]} />
                 ))}
@@ -198,7 +246,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
         <div className="bg-white border border-stone-200 rounded-xl p-4 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={16} className="text-amber-600" />
-            <p className="text-xs font-black text-stone-600 uppercase">{sw ? "Mwelekeo wa Kila Mwezi" : "Monthly Trend"}</p>
+            <p className="text-xs font-black text-stone-600 uppercase">
+              {sw ? "Mwelekeo wa Kila Mwezi" : "Monthly Trend"}
+            </p>
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={monthly} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
@@ -206,7 +256,13 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
               <XAxis dataKey="month" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#059669" strokeWidth={3} dot={{ r: 5, fill: "#059669" }} />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#059669"
+                strokeWidth={3}
+                dot={{ r: 5, fill: "#059669" }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>

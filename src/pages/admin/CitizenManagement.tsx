@@ -140,7 +140,7 @@ export function CitizenManagement() {
       }
 
       setPendingChanges(data || []);
-    } catch (error) {
+    } catch (_error) {
       console.error("Exception fetching profile changes:", error);
       setPendingChanges([]);
     } finally {
@@ -247,7 +247,7 @@ export function CitizenManagement() {
         return;
       }
       setCitizens(data || []);
-    } catch (error) {
+    } catch (_error) {
       console.error("Exception in fetchCitizens:", error);
       showToast(lang === "sw" ? "Hitilafu kupata wananchi" : "Error fetching citizens", "error");
       setCitizens([]);
@@ -334,7 +334,7 @@ export function CitizenManagement() {
           district: data.district || "",
         });
       }
-    } catch (err) {
+    } catch (_err) {
       console.error("Error fetching full citizen profile:", err);
     }
   };

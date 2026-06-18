@@ -139,7 +139,7 @@ export function CustomerSupport() {
       } else {
         setApplication(data);
       }
-    } catch (err) {
+    } catch (_err) {
       setError(
         lang === "sw"
           ? "Hitilafu imetokea wakati wa kutafuta."

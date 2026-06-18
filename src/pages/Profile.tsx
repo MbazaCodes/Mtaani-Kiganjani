@@ -741,7 +741,7 @@ export function Profile() {
         religious_affiliation: data.religious_affiliation || "",
         tribe: data.tribe || "",
       });
-    } catch (error) {
+    } catch (_error) {
       console.error("Error fetching profile:", error);
 
       // React StrictMode can trigger duplicate effects in dev; show at most one toast until success.
@@ -772,7 +772,7 @@ export function Profile() {
         setDocuments(data);
         setFailedDocumentPreviews({});
       }
-    } catch (error) {
+    } catch (_error) {
       console.error("Error fetching documents:", error);
     }
   };
@@ -790,7 +790,7 @@ export function Profile() {
 
       if (error) throw error;
       if (data) setPendingChanges(data);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error fetching pending changes:", error);
     }
   };
@@ -890,7 +890,7 @@ export function Profile() {
       await fetchPendingChanges();
       await fetchDocuments();
       showToast(lang === "sw" ? "Wasifu umeonyeshwa upya" : "Profile refreshed", "success");
-    } catch (error) {
+    } catch (_error) {
       showToast(
         lang === "sw" ? "Hitilafu kuonyesha upya wasifu" : "Error refreshing profile",
         "error",
@@ -952,7 +952,7 @@ export function Profile() {
       setIsProfileImageBroken(false); // reset broken-image flag so new photo renders
       await fetchCompleteProfile();
       await refreshProfile(); // update user.photo_url in AuthContext
-    } catch (error) {
+    } catch (_error) {
       console.error("Error uploading photo:", error);
       showToast(
         lang === "sw" ? "Hitilafu imetokea wakati wa kupakia." : "Error occurred during upload.",
@@ -1035,7 +1035,7 @@ export function Profile() {
         documentInputRef.current.value = "";
       }
       await fetchDocuments();
-    } catch (error) {
+    } catch (_error) {
       console.error("Error uploading document:", error);
       showToast(
         lang === "sw"
@@ -1075,7 +1075,7 @@ export function Profile() {
       );
 
       await fetchDocuments();
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting document:", error);
       showToast(
         lang === "sw"
@@ -1208,7 +1208,8 @@ export function Profile() {
         );
         if (addressChanged && user?.id && !user?.is_diaspora) {
           const region = (directUpdates as Record<string, string>).region ?? user.region ?? "";
-          const district = (directUpdates as Record<string, string>).district ?? user.district ?? "";
+          const district =
+            (directUpdates as Record<string, string>).district ?? user.district ?? "";
           const ward = (directUpdates as Record<string, string>).ward ?? user.ward ?? "";
           const street = (directUpdates as Record<string, string>).street ?? user.street ?? "";
           if (region && district && ward) {

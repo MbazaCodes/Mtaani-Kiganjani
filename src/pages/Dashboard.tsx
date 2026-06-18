@@ -193,7 +193,9 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
                   style={{ width: `${profileCompletion}%` }}
                 />
               </div>
-              <span className="text-[11px] font-black text-amber-700 shrink-0">{profileCompletion}%</span>
+              <span className="text-[11px] font-black text-amber-700 shrink-0">
+                {profileCompletion}%
+              </span>
             </div>
           </div>
           <button

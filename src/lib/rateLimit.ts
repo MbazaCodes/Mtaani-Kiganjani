@@ -11,11 +11,7 @@ const timestamps: Map<string, number[]> = new Map();
  * @param windowMs - time window in ms (default: 60000 = 1 minute)
  * @returns true if the action is ALLOWED, false if rate-limited
  */
-export function checkRateLimit(
-  key: string,
-  maxAttempts = 3,
-  windowMs = 60_000,
-): boolean {
+export function checkRateLimit(key: string, maxAttempts = 3, windowMs = 60_000): boolean {
   const now = Date.now();
   const prev = timestamps.get(key) || [];
 
@@ -35,11 +31,7 @@ export function checkRateLimit(
  * Get remaining cooldown time in seconds.
  * Returns 0 if not rate-limited.
  */
-export function getRateLimitCooldown(
-  key: string,
-  maxAttempts = 3,
-  windowMs = 60_000,
-): number {
+export function getRateLimitCooldown(key: string, maxAttempts = 3, windowMs = 60_000): number {
   const now = Date.now();
   const prev = timestamps.get(key) || [];
   const recent = prev.filter((t) => now - t < windowMs);

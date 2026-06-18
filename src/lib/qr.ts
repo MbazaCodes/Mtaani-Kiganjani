@@ -13,9 +13,9 @@ import { Application } from "@/lib/supabase";
 
 export interface QRPayload {
   ref: string; // application_number — short, readable
-  id: string;  // full UUID — for exact DB lookup
+  id: string; // full UUID — for exact DB lookup
   svc: string; // service code abbreviation
-  dt: string;  // issue date YYYY-MM-DD
+  dt: string; // issue date YYYY-MM-DD
 }
 
 /** 1×1 transparent PNG — safe placeholder when QR generation fails */
@@ -56,9 +56,6 @@ export async function generateQRDataUrl(
  * Always use the async version (generateQRDataUrl) via useQRCode hook instead;
  * this exists only for legacy call-sites that cannot await.
  */
-export function generateQRDataUrlSync(
-  _application: Application,
-  _serviceCode: string,
-): string {
+export function generateQRDataUrlSync(_application: Application, _serviceCode: string): string {
   return BLANK_PNG;
 }

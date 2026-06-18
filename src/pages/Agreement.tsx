@@ -208,7 +208,13 @@ export function Agreement() {
 
   const handleDownloadAgreement = async (agr: AgreementApp) => {
     setDownloading(true);
-    await downloadAgreementPDF(supabase, agr.id, agr.application_number ?? "", agr.service_name ?? "", lang);
+    await downloadAgreementPDF(
+      supabase,
+      agr.id,
+      agr.application_number ?? "",
+      agr.service_name ?? "",
+      lang,
+    );
     setDownloading(false);
   };
   const [buyerSignature, setBuyerSignature] = useState("");
@@ -291,7 +297,8 @@ export function Agreement() {
             buyer_signature: signature,
             // Store buyer's profile data for the PDF
             second_party_citizen_id: user.citizen_id || "",
-            buyer_nida: user.nida_number || (current.form_data as Record<string, string>)?.buyer_nida || "",
+            buyer_nida:
+              user.nida_number || (current.form_data as Record<string, string>)?.buyer_nida || "",
             buyer_phone: user.phone || "",
             buyer_email: user.email || "",
             buyer_region: user.region || "",
@@ -1488,7 +1495,11 @@ export function Agreement() {
                         ? "bg-amber-100 text-amber-800"
                         : "bg-blue-100 text-blue-800";
                 return (
-                  <div key={agr.id} onClick={() => setViewingAgr(agr)} className="bg-white rounded-xl p-4 border border-amber-100 cursor-pointer hover:border-amber-300 hover:shadow-sm transition-all">
+                  <div
+                    key={agr.id}
+                    onClick={() => setViewingAgr(agr)}
+                    className="bg-white rounded-xl p-4 border border-amber-100 cursor-pointer hover:border-amber-300 hover:shadow-sm transition-all"
+                  >
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -1550,7 +1561,10 @@ export function Agreement() {
                             {lang === "sw" ? "Kubali na Saini" : "Accept & Sign"}
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); handleAgreementAction(agr, "reject"); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAgreementAction(agr, "reject");
+                            }}
                             disabled={processingId === agr.id}
                             className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
                           >
@@ -1638,262 +1652,594 @@ export function Agreement() {
       )}
 
       {/* ── Agreement Detail View (Second Party / Buyer) ── */}
-      {viewingAgr && (() => {
-        const fd = (viewingAgr.form_data || {}) as Record<string, string>;
-        const isPending = !viewingAgr.agreement_status || viewingAgr.agreement_status === "pending";
-        const isAccepted = viewingAgr.agreement_status === "buyer_accepted";
-        const isWitness = !!viewingAgr.isWitness;
-        const isSale = (viewingAgr.service_name || "").includes("Mauzo") || (viewingAgr.service_name || "").includes("Sale");
-        const L2 = (s: string, e: string) => (lang === "sw" ? s : e);
-        const fmtCurrency = (v: unknown) => {
-          const n = Number(v);
-          return isNaN(n) ? String(v || "—") : `TSh ${n.toLocaleString()}`;
-        };
-        return (
-          <>
-            <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40" onClick={() => setViewingAgr(null)} />
-            <div className="fixed inset-y-0 right-0 w-full sm:w-[600px] max-w-full bg-white shadow-2xl z-50 flex flex-col">
-              {/* Header */}
-              <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between shrink-0 bg-emerald-50">
-                <div>
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{viewingAgr.service_name}</p>
-                  <p className="text-lg font-black text-stone-900">{viewingAgr.application_number}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${isPending ? "bg-amber-50 text-amber-700 border-amber-200" : isAccepted ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-red-50 text-red-700 border-red-200"}`}>
-                    {isPending ? L2("Inasubiri", "Pending") : isAccepted ? L2("Imekubaliwa", "Accepted") : L2("Imekataliwa", "Rejected")}
-                  </span>
-                  <button onClick={() => setViewingAgr(null)} className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg"><X size={20} /></button>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="flex-1 overflow-y-auto p-5 space-y-4">
-                {/* Parties */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
-                    <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">{isSale ? L2("Muuzaji", "Seller") : L2("Mwenye Nyumba", "Landlord")}</p>
-                    {(() => {
-                      const init = Array.isArray(viewingAgr.initiator) ? viewingAgr.initiator[0] : viewingAgr.initiator;
-                      const initName = fd.seller_name || fd.landlord_name || (init ? `${init.first_name} ${init.last_name}` : "—");
-                      return (
-                        <>
-                          <p className="font-black text-stone-900 text-sm">{initName}</p>
-                          {init?.phone && <p className="text-xs text-stone-500 mt-1">{init.phone}</p>}
-                          {init?.citizen_id && <p className="text-xs text-blue-600 font-mono">{init.citizen_id}</p>}
-                        </>
-                      );
-                    })()}
+      {viewingAgr &&
+        (() => {
+          const fd = (viewingAgr.form_data || {}) as Record<string, string>;
+          const isPending =
+            !viewingAgr.agreement_status || viewingAgr.agreement_status === "pending";
+          const isAccepted = viewingAgr.agreement_status === "buyer_accepted";
+          const isWitness = !!viewingAgr.isWitness;
+          const isSale =
+            (viewingAgr.service_name || "").includes("Mauzo") ||
+            (viewingAgr.service_name || "").includes("Sale");
+          const L2 = (s: string, e: string) => (lang === "sw" ? s : e);
+          const fmtCurrency = (v: unknown) => {
+            const n = Number(v);
+            return isNaN(n) ? String(v || "—") : `TSh ${n.toLocaleString()}`;
+          };
+          return (
+            <>
+              <div
+                className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40"
+                onClick={() => setViewingAgr(null)}
+              />
+              <div className="fixed inset-y-0 right-0 w-full sm:w-[600px] max-w-full bg-white shadow-2xl z-50 flex flex-col">
+                {/* Header */}
+                <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between shrink-0 bg-emerald-50">
+                  <div>
+                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                      {viewingAgr.service_name}
+                    </p>
+                    <p className="text-lg font-black text-stone-900">
+                      {viewingAgr.application_number}
+                    </p>
                   </div>
-                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
-                    <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">{isSale ? L2("Mnunuzi (Wewe)", "Buyer (You)") : L2("Mpangaji (Wewe)", "Tenant (You)")}</p>
-                    <p className="font-black text-stone-900 text-sm">{fd.buyer_name || fd.tenant_name || user?.first_name || "—"}</p>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-bold border ${isPending ? "bg-amber-50 text-amber-700 border-amber-200" : isAccepted ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-red-50 text-red-700 border-red-200"}`}
+                    >
+                      {isPending
+                        ? L2("Inasubiri", "Pending")
+                        : isAccepted
+                          ? L2("Imekubaliwa", "Accepted")
+                          : L2("Imekataliwa", "Rejected")}
+                    </span>
+                    <button
+                      onClick={() => setViewingAgr(null)}
+                      className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg"
+                    >
+                      <X size={20} />
+                    </button>
                   </div>
                 </div>
 
-                {/* Property / Asset Details */}
-                <div className="bg-white border border-stone-200 rounded-xl p-4">
-                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{isSale ? L2("MAELEZO YA MALI", "ASSET DETAILS") : L2("MAELEZO YA NYUMBA/MALI", "PROPERTY DETAILS")}</p>
-                  <div className="space-y-2">
-                    {fd.property_type && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Aina", "Type")}</span><span className="text-sm font-bold">{fd.property_type}</span></div>}
-                    {fd.asset_type && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Aina ya Mali", "Asset Type")}</span><span className="text-sm font-bold">{fd.asset_type}</span></div>}
-                    {fd.num_rooms && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Vyumba", "Rooms")}</span><span className="text-sm font-bold">{fd.num_rooms}</span></div>}
-                    {fd.furnished && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Samani", "Furnished")}</span><span className="text-sm font-bold">{fd.furnished}</span></div>}
-                    {fd.parking && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Maegesho", "Parking")}</span><span className="text-sm font-bold">{fd.parking}</span></div>}
-                    {fd.location && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mahali", "Location")}</span><span className="text-sm font-bold text-right max-w-[60%]">{fd.location}</span></div>}
-                    {fd.address && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Anwani", "Address")}</span><span className="text-sm font-bold text-right max-w-[60%]">{fd.address}</span></div>}
-                    {fd.plot_number && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Kiwanja", "Plot No")}</span><span className="text-sm font-bold">{fd.plot_number}</span></div>}
-                    {fd.asset_description && <div className="pt-1"><span className="text-xs text-stone-500 block mb-1">{L2("Maelezo", "Description")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2.5">{fd.asset_description}</p></div>}
-                  </div>
-                </div>
-
-                {/* Financial Terms */}
-                <div className="bg-white border border-stone-200 rounded-xl p-4">
-                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("MASHARTI YA FEDHA", "FINANCIAL TERMS")}</p>
-                  <div className="space-y-2">
-                    {(fd.price || fd.monthly_rent) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{isSale ? L2("Bei", "Price") : L2("Kodi ya Mwezi", "Monthly Rent")}</span><span className="text-sm font-black text-emerald-700">{fmtCurrency(fd.price || fd.monthly_rent)}</span></div>}
-                    {fd.security_deposit && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Amana ya Usalama", "Security Deposit")}</span><span className="text-sm font-bold">{fmtCurrency(fd.security_deposit)}</span></div>}
-                    {fd.payment_due_day && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Siku ya Malipo", "Payment Due Day")}</span><span className="text-sm font-bold">{L2("Tarehe", "Day")} {fd.payment_due_day}</span></div>}
-                    {fd.utilities_included && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Huduma", "Utilities")}</span><span className="text-sm font-bold text-right max-w-[60%]">{fd.utilities_included}</span></div>}
-                    {fd.payment_method && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Njia ya Malipo", "Payment Method")}</span><span className="text-sm font-bold">{fd.payment_method}</span></div>}
-                  </div>
-                </div>
-
-                {/* Lease Period / Duration */}
-                <div className="bg-white border border-stone-200 rounded-xl p-4">
-                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{isSale ? L2("TAREHE", "DATES") : L2("MUDA WA PANGO", "LEASE PERIOD")}</p>
-                  <div className="space-y-2">
-                    {fd.duration && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Muda", "Duration")}</span><span className="text-sm font-bold">{fd.duration}</span></div>}
-                    {(fd.start_date || fd.lease_start) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Kuanza", "Start Date")}</span><span className="text-sm font-bold">{fd.start_date || fd.lease_start}</span></div>}
-                    {(fd.end_date || fd.lease_end) && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Mwisho", "End Date")}</span><span className="text-sm font-bold">{fd.end_date || fd.lease_end}</span></div>}
-                    {fd.notice_period && <div className="flex justify-between border-b border-stone-50 pb-1.5"><span className="text-xs text-stone-500">{L2("Notisi ya Kuondoka", "Notice Period")}</span><span className="text-sm font-bold">{fd.notice_period}</span></div>}
-                  </div>
-                </div>
-
-                {/* Terms, Rules & Conditions */}
-                {(fd.terms || fd.house_rules || fd.special_conditions) && (
-                  <div className="bg-white border border-stone-200 rounded-xl p-4">
-                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("MASHARTI NA SHERIA", "TERMS & CONDITIONS")}</p>
-                    <div className="space-y-3">
-                      {fd.terms && <div><span className="text-xs font-bold text-stone-600 block mb-1">{L2("Masharti", "Terms")}</span><p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2.5 whitespace-pre-wrap">{fd.terms}</p></div>}
-                      {fd.house_rules && <div><span className="text-xs font-bold text-stone-600 block mb-1">{L2("Sheria za Nyumba", "House Rules")}</span><p className="text-sm text-stone-800 bg-amber-50 border border-amber-100 rounded-lg p-2.5 whitespace-pre-wrap">{fd.house_rules}</p></div>}
-                      {fd.special_conditions && <div><span className="text-xs font-bold text-stone-600 block mb-1">{L2("Masharti Maalum", "Special Conditions")}</span><p className="text-sm text-stone-800 bg-blue-50 border border-blue-100 rounded-lg p-2.5 whitespace-pre-wrap">{fd.special_conditions}</p></div>}
+                {/* Body */}
+                <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                  {/* Parties */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">
+                        {isSale ? L2("Muuzaji", "Seller") : L2("Mwenye Nyumba", "Landlord")}
+                      </p>
+                      {(() => {
+                        const init = Array.isArray(viewingAgr.initiator)
+                          ? viewingAgr.initiator[0]
+                          : viewingAgr.initiator;
+                        const initName =
+                          fd.seller_name ||
+                          fd.landlord_name ||
+                          (init ? `${init.first_name} ${init.last_name}` : "—");
+                        return (
+                          <>
+                            <p className="font-black text-stone-900 text-sm">{initName}</p>
+                            {init?.phone && (
+                              <p className="text-xs text-stone-500 mt-1">{init.phone}</p>
+                            )}
+                            {init?.citizen_id && (
+                              <p className="text-xs text-blue-600 font-mono">{init.citizen_id}</p>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">
+                        {isSale
+                          ? L2("Mnunuzi (Wewe)", "Buyer (You)")
+                          : L2("Mpangaji (Wewe)", "Tenant (You)")}
+                      </p>
+                      <p className="font-black text-stone-900 text-sm">
+                        {fd.buyer_name || fd.tenant_name || user?.first_name || "—"}
+                      </p>
                     </div>
                   </div>
-                )}
 
-                {/* Witnesses */}
-                {(fd.witness1_name || fd.witness_1) && (
+                  {/* Property / Asset Details */}
                   <div className="bg-white border border-stone-200 rounded-xl p-4">
-                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">{L2("MASHAHIDI", "WITNESSES")}</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-stone-50 rounded-lg p-2.5">
-                        <p className="text-[10px] font-bold text-stone-400 uppercase">{L2("Shahidi 1", "Witness 1")}</p>
-                        <p className="text-sm font-bold text-stone-800">{fd.witness1_name || fd.witness_1 || "—"}</p>
-                        {(fd.witness1_phone) && <p className="text-xs text-stone-500">{fd.witness1_phone}</p>}
-                        {(fd.witness1_nida) && <p className="text-[10px] text-stone-400 font-mono">{fd.witness1_nida}</p>}
-                      </div>
-                      <div className="bg-stone-50 rounded-lg p-2.5">
-                        <p className="text-[10px] font-bold text-stone-400 uppercase">{L2("Shahidi 2", "Witness 2")}</p>
-                        <p className="text-sm font-bold text-stone-800">{fd.witness2_name || fd.witness_2 || "—"}</p>
-                        {(fd.witness2_phone) && <p className="text-xs text-stone-500">{fd.witness2_phone}</p>}
-                        {(fd.witness2_nida) && <p className="text-[10px] text-stone-400 font-mono">{fd.witness2_nida}</p>}
-                      </div>
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">
+                      {isSale
+                        ? L2("MAELEZO YA MALI", "ASSET DETAILS")
+                        : L2("MAELEZO YA NYUMBA/MALI", "PROPERTY DETAILS")}
+                    </p>
+                    <div className="space-y-2">
+                      {fd.property_type && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">{L2("Aina", "Type")}</span>
+                          <span className="text-sm font-bold">{fd.property_type}</span>
+                        </div>
+                      )}
+                      {fd.asset_type && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Aina ya Mali", "Asset Type")}
+                          </span>
+                          <span className="text-sm font-bold">{fd.asset_type}</span>
+                        </div>
+                      )}
+                      {fd.num_rooms && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">{L2("Vyumba", "Rooms")}</span>
+                          <span className="text-sm font-bold">{fd.num_rooms}</span>
+                        </div>
+                      )}
+                      {fd.furnished && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Samani", "Furnished")}
+                          </span>
+                          <span className="text-sm font-bold">{fd.furnished}</span>
+                        </div>
+                      )}
+                      {fd.parking && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Maegesho", "Parking")}
+                          </span>
+                          <span className="text-sm font-bold">{fd.parking}</span>
+                        </div>
+                      )}
+                      {fd.location && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">{L2("Mahali", "Location")}</span>
+                          <span className="text-sm font-bold text-right max-w-[60%]">
+                            {fd.location}
+                          </span>
+                        </div>
+                      )}
+                      {fd.address && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">{L2("Anwani", "Address")}</span>
+                          <span className="text-sm font-bold text-right max-w-[60%]">
+                            {fd.address}
+                          </span>
+                        </div>
+                      )}
+                      {fd.plot_number && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">{L2("Kiwanja", "Plot No")}</span>
+                          <span className="text-sm font-bold">{fd.plot_number}</span>
+                        </div>
+                      )}
+                      {fd.asset_description && (
+                        <div className="pt-1">
+                          <span className="text-xs text-stone-500 block mb-1">
+                            {L2("Maelezo", "Description")}
+                          </span>
+                          <p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2.5">
+                            {fd.asset_description}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
 
-                {/* Financials */}
-                {(fd.total_amount || fd.service_fee || fd.vat_amount) && (
-                  <div className="bg-stone-50 border border-stone-200 rounded-xl p-4">
-                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">{L2("Fedha", "Financials")}</p>
-                    {fd.total_amount && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Jumla", "Total")}</span><span className="text-sm font-black">{fmtCurrency(fd.total_amount)}</span></div>}
-                    {fd.vat_amount && <div className="flex justify-between"><span className="text-xs text-stone-500">VAT</span><span className="text-sm font-bold">{fmtCurrency(fd.vat_amount)}</span></div>}
-                    {fd.service_fee && <div className="flex justify-between"><span className="text-xs text-stone-500">{L2("Ada", "Fee")}</span><span className="text-sm font-bold">{fmtCurrency(fd.service_fee)}</span></div>}
+                  {/* Financial Terms */}
+                  <div className="bg-white border border-stone-200 rounded-xl p-4">
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">
+                      {L2("MASHARTI YA FEDHA", "FINANCIAL TERMS")}
+                    </p>
+                    <div className="space-y-2">
+                      {(fd.price || fd.monthly_rent) && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {isSale ? L2("Bei", "Price") : L2("Kodi ya Mwezi", "Monthly Rent")}
+                          </span>
+                          <span className="text-sm font-black text-emerald-700">
+                            {fmtCurrency(fd.price || fd.monthly_rent)}
+                          </span>
+                        </div>
+                      )}
+                      {fd.security_deposit && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Amana ya Usalama", "Security Deposit")}
+                          </span>
+                          <span className="text-sm font-bold">
+                            {fmtCurrency(fd.security_deposit)}
+                          </span>
+                        </div>
+                      )}
+                      {fd.payment_due_day && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Siku ya Malipo", "Payment Due Day")}
+                          </span>
+                          <span className="text-sm font-bold">
+                            {L2("Tarehe", "Day")} {fd.payment_due_day}
+                          </span>
+                        </div>
+                      )}
+                      {fd.utilities_included && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Huduma", "Utilities")}
+                          </span>
+                          <span className="text-sm font-bold text-right max-w-[60%]">
+                            {fd.utilities_included}
+                          </span>
+                        </div>
+                      )}
+                      {fd.payment_method && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Njia ya Malipo", "Payment Method")}
+                          </span>
+                          <span className="text-sm font-bold">{fd.payment_method}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
 
-                {/* Attachments from form_data */}
-                {fd.uploaded_documents && (() => {
-                  try {
-                    const docs = typeof fd.uploaded_documents === "string" ? JSON.parse(fd.uploaded_documents) : fd.uploaded_documents;
-                    if (!Array.isArray(docs) || docs.length === 0) return null;
-                    return (
-                      <div className="bg-white border border-stone-200 rounded-xl p-4">
-                        <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">{L2("Viambatisho", "Attachments")} ({docs.length})</p>
-                        <div className="space-y-1.5">
-                          {docs.map((doc: { name?: string; type?: string; dataUrl?: string }, i: number) => (
-                            <a key={i} href={doc.dataUrl || "#"} download={doc.name || `document-${i}`} target="_blank" rel="noopener noreferrer"
-                              className="flex items-center gap-2 bg-stone-50 rounded-lg px-3 py-2 text-sm hover:bg-stone-100">
-                              {doc.type?.startsWith("image/") ? <img src={doc.dataUrl} alt="" className="w-8 h-8 rounded object-cover" /> : <FileText size={16} className="text-stone-400" />}
-                              <span className="flex-1 truncate text-stone-700">{doc.name || `Document ${i + 1}`}</span>
-                              <Download size={14} className="text-emerald-600" />
-                            </a>
-                          ))}
+                  {/* Lease Period / Duration */}
+                  <div className="bg-white border border-stone-200 rounded-xl p-4">
+                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">
+                      {isSale ? L2("TAREHE", "DATES") : L2("MUDA WA PANGO", "LEASE PERIOD")}
+                    </p>
+                    <div className="space-y-2">
+                      {fd.duration && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">{L2("Muda", "Duration")}</span>
+                          <span className="text-sm font-bold">{fd.duration}</span>
+                        </div>
+                      )}
+                      {(fd.start_date || fd.lease_start) && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Kuanza", "Start Date")}
+                          </span>
+                          <span className="text-sm font-bold">
+                            {fd.start_date || fd.lease_start}
+                          </span>
+                        </div>
+                      )}
+                      {(fd.end_date || fd.lease_end) && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">{L2("Mwisho", "End Date")}</span>
+                          <span className="text-sm font-bold">{fd.end_date || fd.lease_end}</span>
+                        </div>
+                      )}
+                      {fd.notice_period && (
+                        <div className="flex justify-between border-b border-stone-50 pb-1.5">
+                          <span className="text-xs text-stone-500">
+                            {L2("Notisi ya Kuondoka", "Notice Period")}
+                          </span>
+                          <span className="text-sm font-bold">{fd.notice_period}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Terms, Rules & Conditions */}
+                  {(fd.terms || fd.house_rules || fd.special_conditions) && (
+                    <div className="bg-white border border-stone-200 rounded-xl p-4">
+                      <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">
+                        {L2("MASHARTI NA SHERIA", "TERMS & CONDITIONS")}
+                      </p>
+                      <div className="space-y-3">
+                        {fd.terms && (
+                          <div>
+                            <span className="text-xs font-bold text-stone-600 block mb-1">
+                              {L2("Masharti", "Terms")}
+                            </span>
+                            <p className="text-sm text-stone-800 bg-stone-50 rounded-lg p-2.5 whitespace-pre-wrap">
+                              {fd.terms}
+                            </p>
+                          </div>
+                        )}
+                        {fd.house_rules && (
+                          <div>
+                            <span className="text-xs font-bold text-stone-600 block mb-1">
+                              {L2("Sheria za Nyumba", "House Rules")}
+                            </span>
+                            <p className="text-sm text-stone-800 bg-amber-50 border border-amber-100 rounded-lg p-2.5 whitespace-pre-wrap">
+                              {fd.house_rules}
+                            </p>
+                          </div>
+                        )}
+                        {fd.special_conditions && (
+                          <div>
+                            <span className="text-xs font-bold text-stone-600 block mb-1">
+                              {L2("Masharti Maalum", "Special Conditions")}
+                            </span>
+                            <p className="text-sm text-stone-800 bg-blue-50 border border-blue-100 rounded-lg p-2.5 whitespace-pre-wrap">
+                              {fd.special_conditions}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Witnesses */}
+                  {(fd.witness1_name || fd.witness_1) && (
+                    <div className="bg-white border border-stone-200 rounded-xl p-4">
+                      <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-3">
+                        {L2("MASHAHIDI", "WITNESSES")}
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-stone-50 rounded-lg p-2.5">
+                          <p className="text-[10px] font-bold text-stone-400 uppercase">
+                            {L2("Shahidi 1", "Witness 1")}
+                          </p>
+                          <p className="text-sm font-bold text-stone-800">
+                            {fd.witness1_name || fd.witness_1 || "—"}
+                          </p>
+                          {fd.witness1_phone && (
+                            <p className="text-xs text-stone-500">{fd.witness1_phone}</p>
+                          )}
+                          {fd.witness1_nida && (
+                            <p className="text-[10px] text-stone-400 font-mono">
+                              {fd.witness1_nida}
+                            </p>
+                          )}
+                        </div>
+                        <div className="bg-stone-50 rounded-lg p-2.5">
+                          <p className="text-[10px] font-bold text-stone-400 uppercase">
+                            {L2("Shahidi 2", "Witness 2")}
+                          </p>
+                          <p className="text-sm font-bold text-stone-800">
+                            {fd.witness2_name || fd.witness_2 || "—"}
+                          </p>
+                          {fd.witness2_phone && (
+                            <p className="text-xs text-stone-500">{fd.witness2_phone}</p>
+                          )}
+                          {fd.witness2_nida && (
+                            <p className="text-[10px] text-stone-400 font-mono">
+                              {fd.witness2_nida}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    );
-                  } catch { return null; }
-                })()}
+                    </div>
+                  )}
 
-                {/* Download Agreement PDF (if issued) */}
-                {viewingAgr.status === "issued" && (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mb-2">{L2("Hati ya Makubaliano", "Agreement Document")}</p>
-                    <p className="text-xs text-stone-500 mb-3">{L2("Soma hati kamili ya makubaliano kabla ya kukubali au kukataa.", "Read the full agreement document before accepting or rejecting.")}</p>
+                  {/* Financials */}
+                  {(fd.total_amount || fd.service_fee || fd.vat_amount) && (
+                    <div className="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                      <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">
+                        {L2("Fedha", "Financials")}
+                      </p>
+                      {fd.total_amount && (
+                        <div className="flex justify-between">
+                          <span className="text-xs text-stone-500">{L2("Jumla", "Total")}</span>
+                          <span className="text-sm font-black">{fmtCurrency(fd.total_amount)}</span>
+                        </div>
+                      )}
+                      {fd.vat_amount && (
+                        <div className="flex justify-between">
+                          <span className="text-xs text-stone-500">VAT</span>
+                          <span className="text-sm font-bold">{fmtCurrency(fd.vat_amount)}</span>
+                        </div>
+                      )}
+                      {fd.service_fee && (
+                        <div className="flex justify-between">
+                          <span className="text-xs text-stone-500">{L2("Ada", "Fee")}</span>
+                          <span className="text-sm font-bold">{fmtCurrency(fd.service_fee)}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Attachments from form_data */}
+                  {fd.uploaded_documents &&
+                    (() => {
+                      try {
+                        const docs =
+                          typeof fd.uploaded_documents === "string"
+                            ? JSON.parse(fd.uploaded_documents)
+                            : fd.uploaded_documents;
+                        if (!Array.isArray(docs) || docs.length === 0) return null;
+                        return (
+                          <div className="bg-white border border-stone-200 rounded-xl p-4">
+                            <p className="text-[10px] font-black text-stone-400 uppercase tracking-wider mb-2">
+                              {L2("Viambatisho", "Attachments")} ({docs.length})
+                            </p>
+                            <div className="space-y-1.5">
+                              {docs.map(
+                                (
+                                  doc: { name?: string; type?: string; dataUrl?: string },
+                                  i: number,
+                                ) => (
+                                  <a
+                                    key={i}
+                                    href={doc.dataUrl || "#"}
+                                    download={doc.name || `document-${i}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 bg-stone-50 rounded-lg px-3 py-2 text-sm hover:bg-stone-100"
+                                  >
+                                    {doc.type?.startsWith("image/") ? (
+                                      <img
+                                        src={doc.dataUrl}
+                                        alt=""
+                                        className="w-8 h-8 rounded object-cover"
+                                      />
+                                    ) : (
+                                      <FileText size={16} className="text-stone-400" />
+                                    )}
+                                    <span className="flex-1 truncate text-stone-700">
+                                      {doc.name || `Document ${i + 1}`}
+                                    </span>
+                                    <Download size={14} className="text-emerald-600" />
+                                  </a>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        );
+                      } catch {
+                        return null;
+                      }
+                    })()}
+
+                  {/* Download Agreement PDF (if issued) */}
+                  {viewingAgr.status === "issued" && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mb-2">
+                        {L2("Hati ya Makubaliano", "Agreement Document")}
+                      </p>
+                      <p className="text-xs text-stone-500 mb-3">
+                        {L2(
+                          "Soma hati kamili ya makubaliano kabla ya kukubali au kukataa.",
+                          "Read the full agreement document before accepting or rejecting.",
+                        )}
+                      </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownloadAgreement(viewingAgr);
+                        }}
+                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                      >
+                        <Download size={16} />
+                        {L2("Pakua Hati ya Makubaliano", "Download Agreement Document")}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Application Chat */}
+                  <ApplicationChat
+                    applicationId={viewingAgr.id}
+                    applicationNumber={viewingAgr.application_number || ""}
+                    applicantId={viewingAgr.user_id || ""}
+                    lang={lang}
+                    defaultExpanded
+                  />
+                </div>
+
+                {/* Action Footer */}
+                {isWitness ? (
+                  <div className="px-5 py-4 border-t border-stone-200 bg-blue-50 shrink-0 space-y-2">
+                    <p className="text-xs text-blue-700 font-bold text-center">
+                      {L2(
+                        "Wewe ni shahidi kwenye makubaliano haya",
+                        "You are a witness on this agreement",
+                      )}
+                    </p>
+                    {viewingAgr.status === "issued" && (
+                      <button
+                        onClick={() => handleDownloadAgreement(viewingAgr)}
+                        disabled={downloading}
+                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {downloading ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Download size={16} />
+                        )}
+                        {downloading
+                          ? L2("Inaandaa...", "Generating...")
+                          : L2("Pakua Nakala ya Shahidi", "Download Witness Copy")}
+                      </button>
+                    )}
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleDownloadAgreement(viewingAgr); }}
-                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                      onClick={async () => {
+                        const wField =
+                          (viewingAgr.form_data as Record<string, unknown>)?.witness1_user_id ===
+                          user?.id
+                            ? "witness1_acknowledged"
+                            : "witness2_acknowledged";
+                        await supabase
+                          .from("applications")
+                          .update({
+                            form_data: {
+                              ...(viewingAgr.form_data as Record<string, unknown>),
+                              [wField]: true,
+                              [`${wField}_at`]: new Date().toISOString(),
+                            },
+                          })
+                          .eq("id", viewingAgr.id);
+                        alert(
+                          L2("Umethibitisha kuwa shahidi!", "You have acknowledged as witness!"),
+                        );
+                        setViewingAgr(null);
+                      }}
+                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                     >
-                      <Download size={16} />
-                      {L2("Pakua Hati ya Makubaliano", "Download Agreement Document")}
+                      <CheckCircle size={16} />
+                      {L2("Thibitisha kama Shahidi", "Acknowledge as Witness")}
+                    </button>
+                    <button
+                      onClick={() => setViewingAgr(null)}
+                      className="w-full py-2 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700"
+                    >
+                      {L2("Funga", "Close")}
+                    </button>
+                  </div>
+                ) : isPending ? (
+                  <div className="px-5 py-4 border-t border-stone-200 bg-stone-50 shrink-0 space-y-2">
+                    <p className="text-[10px] text-stone-500 text-center">
+                      {L2(
+                        "Soma makubaliano kwa makini kabla ya kukubali.",
+                        "Read the agreement carefully before accepting.",
+                      )}
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setViewingAgr(null);
+                          setSigningAgr(viewingAgr);
+                          setBuyerSignature("");
+                        }}
+                        disabled={processingId === viewingAgr.id}
+                        className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        <CheckCircle size={16} />
+                        {L2("Kubali na Saini", "Accept & Sign")}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setViewingAgr(null);
+                          handleAgreementAction(viewingAgr, "reject");
+                        }}
+                        disabled={processingId === viewingAgr.id}
+                        className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        <X size={16} />
+                        {L2("Kataa", "Reject")}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="px-5 py-3 border-t border-stone-100 bg-stone-50 shrink-0 space-y-2">
+                    {viewingAgr.status === "issued" && (
+                      <button
+                        onClick={() => handleDownloadAgreement(viewingAgr)}
+                        disabled={downloading}
+                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {downloading ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Download size={16} />
+                        )}
+                        {downloading
+                          ? L2("Inaandaa...", "Generating...")
+                          : L2("Pakua Hati ya Makubaliano", "Download Agreement")}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setViewingAgr(null)}
+                      className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700"
+                    >
+                      {L2("Funga", "Close")}
                     </button>
                   </div>
                 )}
-
-                {/* Application Chat */}
-                <ApplicationChat
-                  applicationId={viewingAgr.id}
-                  applicationNumber={viewingAgr.application_number || ""}
-                  applicantId={viewingAgr.user_id || ""}
-                  lang={lang}
-                  defaultExpanded
-                />
               </div>
-
-              {/* Action Footer */}
-              {isWitness ? (
-                <div className="px-5 py-4 border-t border-stone-200 bg-blue-50 shrink-0 space-y-2">
-                  <p className="text-xs text-blue-700 font-bold text-center">
-                    {L2("Wewe ni shahidi kwenye makubaliano haya", "You are a witness on this agreement")}
-                  </p>
-                  {viewingAgr.status === "issued" && (
-                    <button
-                      onClick={() => handleDownloadAgreement(viewingAgr)}
-                      disabled={downloading}
-                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {downloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                      {downloading ? L2("Inaandaa...", "Generating...") : L2("Pakua Nakala ya Shahidi", "Download Witness Copy")}
-                    </button>
-                  )}
-                  <button
-                    onClick={async () => {
-                      const wField = (viewingAgr.form_data as Record<string, unknown>)?.witness1_user_id === user?.id ? "witness1_acknowledged" : "witness2_acknowledged";
-                      await supabase.from("applications").update({
-                        form_data: { ...(viewingAgr.form_data as Record<string, unknown>), [wField]: true, [`${wField}_at`]: new Date().toISOString() },
-                      }).eq("id", viewingAgr.id);
-                      alert(L2("Umethibitisha kuwa shahidi!", "You have acknowledged as witness!"));
-                      setViewingAgr(null);
-                    }}
-                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle size={16} />
-                    {L2("Thibitisha kama Shahidi", "Acknowledge as Witness")}
-                  </button>
-                  <button onClick={() => setViewingAgr(null)} className="w-full py-2 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{L2("Funga", "Close")}</button>
-                </div>
-              ) : isPending ? (
-                <div className="px-5 py-4 border-t border-stone-200 bg-stone-50 shrink-0 space-y-2">
-                  <p className="text-[10px] text-stone-500 text-center">{L2("Soma makubaliano kwa makini kabla ya kukubali.", "Read the agreement carefully before accepting.")}</p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => { setViewingAgr(null); setSigningAgr(viewingAgr); setBuyerSignature(""); }}
-                      disabled={processingId === viewingAgr.id}
-                      className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      <CheckCircle size={16} />
-                      {L2("Kubali na Saini", "Accept & Sign")}
-                    </button>
-                    <button
-                      onClick={() => { setViewingAgr(null); handleAgreementAction(viewingAgr, "reject"); }}
-                      disabled={processingId === viewingAgr.id}
-                      className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      <X size={16} />
-                      {L2("Kataa", "Reject")}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="px-5 py-3 border-t border-stone-100 bg-stone-50 shrink-0 space-y-2">
-                  {viewingAgr.status === "issued" && (
-                    <button
-                      onClick={() => handleDownloadAgreement(viewingAgr)}
-                      disabled={downloading}
-                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {downloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                      {downloading ? L2("Inaandaa...", "Generating...") : L2("Pakua Hati ya Makubaliano", "Download Agreement")}
-                    </button>
-                  )}
-                  <button onClick={() => setViewingAgr(null)} className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 rounded-xl text-sm font-bold text-stone-700">{L2("Funga", "Close")}</button>
-                </div>
-              )}
-            </div>
-          </>
-        );
-      })()}
+            </>
+          );
+        })()}
 
       {/* Buyer Signature Modal */}
       {signingAgr && (

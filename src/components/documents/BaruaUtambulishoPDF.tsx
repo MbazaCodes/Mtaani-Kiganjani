@@ -58,13 +58,22 @@ const PURPOSE_LABELS: Record<string, { sw: string; en: string }> = {
   MKOPO: { sw: "maombi ya mkopo", en: "loan application" },
   ARDHI: { sw: "ununuzi / upangaji wa ardhi au nyumba", en: "property purchase / rental" },
   MALI: { sw: "usajili wa mali isiyohamishika", en: "property registration" },
-  HUDUMA_UMEME_MAJI: { sw: "huduma za umeme na maji (TANESCO/DAWASA)", en: "utilities (TANESCO/DAWASA)" },
-  HUDUMA_ZA_KIMSINGI: { sw: "huduma za kimsingi (umeme, maji, n.k.)", en: "utilities (water, electricity)" },
+  HUDUMA_UMEME_MAJI: {
+    sw: "huduma za umeme na maji (TANESCO/DAWASA)",
+    en: "utilities (TANESCO/DAWASA)",
+  },
+  HUDUMA_ZA_KIMSINGI: {
+    sw: "huduma za kimsingi (umeme, maji, n.k.)",
+    en: "utilities (water, electricity)",
+  },
   WAAJIRI: { sw: "uthibitisho wa kazi kutoka kwa mwajiri", en: "employer verification" },
   UTHIBITISHO_KAZI: { sw: "uthibitisho wa kazi kutoka kwa mwajiri", en: "employer verification" },
   SERIKALI: { sw: "huduma za serikali", en: "government services" },
   // Bail & Surety
-  DHAMANA_POLISI: { sw: "dhamana ya kutoka polisi (bail bond)", en: "bail bond / release from police custody" },
+  DHAMANA_POLISI: {
+    sw: "dhamana ya kutoka polisi (bail bond)",
+    en: "bail bond / release from police custody",
+  },
   UDHAMINI: { sw: "udhamini wa mtu (personal surety)", en: "personal surety / guarantee" },
   NYINGINEZO: { sw: "madhumuni mengine", en: "other purposes" },
   NYINGINE: { sw: "madhumuni mengine", en: "other purposes" },

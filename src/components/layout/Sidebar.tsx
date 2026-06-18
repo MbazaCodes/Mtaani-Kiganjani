@@ -80,7 +80,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         } else {
           setActualRole(user?.role || null);
         }
-      } catch (err) {
+      } catch (_err) {
         console.error("Error fetching role from DB:", err);
         setActualRole(user?.role || null);
       } finally {

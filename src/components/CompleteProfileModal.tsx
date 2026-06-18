@@ -8,8 +8,18 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, User, Phone, Mail, MapPin, Calendar, Shield,
-  Loader2, CheckCircle2, AlertCircle, ChevronDown, Globe2,
+  X,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Shield,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  ChevronDown,
+  Globe2,
 } from "lucide-react";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -29,20 +39,33 @@ interface CompleteProfileModalProps {
 }
 
 // ── Mini primitives ────────────────────────────────────────────────────────────
-const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({ children, required }) => (
+const Label: React.FC<{ children: React.ReactNode; required?: boolean }> = ({
+  children,
+  required,
+}) => (
   <label className="block text-[11px] font-black text-stone-500 uppercase tracking-widest mb-1.5">
-    {children}{required && <span className="text-red-400 ml-0.5">*</span>}
+    {children}
+    {required && <span className="text-red-400 ml-0.5">*</span>}
   </label>
 );
 
 const Err: React.FC<{ msg?: string }> = ({ msg }) =>
-  msg ? <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{msg}</p> : null;
+  msg ? (
+    <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+      <AlertCircle size={11} />
+      {msg}
+    </p>
+  ) : null;
 
-const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { icon?: React.ReactNode; hasError?: boolean }> = ({
-  icon, hasError, className, ...props
-}) => (
+const Input: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement> & { icon?: React.ReactNode; hasError?: boolean }
+> = ({ icon, hasError, className, ...props }) => (
   <div className="relative">
-    {icon && <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none">{icon}</span>}
+    {icon && (
+      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none">
+        {icon}
+      </span>
+    )}
     <input
       {...props}
       className={cn(
@@ -56,9 +79,9 @@ const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { icon?: Rea
   </div>
 );
 
-const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement> & { placeholder?: string; hasError?: boolean }> = ({
-  children, placeholder, hasError, ...props
-}) => (
+const Select: React.FC<
+  React.SelectHTMLAttributes<HTMLSelectElement> & { placeholder?: string; hasError?: boolean }
+> = ({ children, placeholder, hasError, ...props }) => (
   <select
     {...props}
     className={cn(
@@ -73,7 +96,11 @@ const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement> & { placeho
 );
 
 export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
-  open, user, lang, onClose, onSaved,
+  open,
+  user,
+  lang,
+  onClose,
+  onSaved,
 }) => {
   const { showToast } = useToast();
   const sw = lang === "sw";
@@ -90,7 +117,9 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
     try {
       const raw = sessionStorage.getItem(DRAFT_KEY);
       if (raw) return JSON.parse(raw) as Record<string, string>;
-    } catch {}
+    } catch {
+      // caught and ignored — non-critical draft parse
+    }
     return null;
   }, [DRAFT_KEY]);
 
@@ -109,20 +138,33 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
   const [ward, setWard] = useState(draft?.ward ?? user?.ward ?? "");
   const [street, setStreet] = useState(draft?.street ?? user?.street ?? "");
   const [nida, setNida] = useState(draft?.nida ?? user?.nida_number ?? "");
-  const [countryResidence, setCountryResidence] = useState(draft?.countryResidence ?? user?.country_of_residence ?? "");
-  const [cityResidence, setCityResidence] = useState(draft?.cityResidence ?? (user as Record<string, unknown>)?.city_of_residence as string ?? "");
+  const [countryResidence, setCountryResidence] = useState(
+    draft?.countryResidence ?? user?.country_of_residence ?? "",
+  );
+  const [cityResidence, setCityResidence] = useState(
+    draft?.cityResidence ?? ((user as Record<string, unknown>)?.city_of_residence as string) ?? "",
+  );
 
   // ── Auto-save draft to sessionStorage on every change ────────────────────
-  const saveDraft = useCallback((patch: Record<string, string>) => {
-    try {
-      const current = loadDraft() ?? {};
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ ...current, ...patch }));
-    } catch {}
-  }, [DRAFT_KEY, loadDraft]);
+  const saveDraft = useCallback(
+    (patch: Record<string, string>) => {
+      try {
+        const current = loadDraft() ?? {};
+        sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ ...current, ...patch }));
+      } catch {
+        // caught and ignored — non-critical auto-save
+      }
+    },
+    [DRAFT_KEY, loadDraft],
+  );
 
   // ── Clear draft after successful save ─────────────────────────────────────
   const clearDraft = useCallback(() => {
-    try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
+    try {
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // caught and ignored — non-critical draft cleanup
+    }
   }, [DRAFT_KEY]);
 
   const isDiaspora = !!user?.is_diaspora;
@@ -157,7 +199,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
         setStreet(user.street ?? "");
         setNida(user.nida_number ?? "");
         setCountryResidence(user.country_of_residence ?? "");
-        setCityResidence((user as Record<string, unknown>)?.city_of_residence as string ?? "");
+        setCityResidence(((user as Record<string, unknown>)?.city_of_residence as string) ?? "");
       }
     }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -191,7 +233,10 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
       updates.middle_name = middleName.trim() ? middleName.trim().toUpperCase() : null;
       if (lastName.trim()) updates.last_name = lastName.trim().toUpperCase();
       if (phone) updates.phone = phone;
-      if (gender) { updates.gender = gender; updates.sex = gender; }
+      if (gender) {
+        updates.gender = gender;
+        updates.sex = gender;
+      }
       if (dob) updates.date_of_birth = dob;
       if (marital) updates.marital_status = marital.toLowerCase();
       if (occupation.trim()) updates.occupation = occupation.trim();
@@ -212,10 +257,23 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
       // Race the DB call against a 8s timeout
       const dbPromise = supabase.from("users").update(updates).eq("id", user.id);
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(L("Muda umeisha. Angalia mtandao wako.", "Request timed out. Check your connection."))), 8000)
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                L(
+                  "Muda umeisha. Angalia mtandao wako.",
+                  "Request timed out. Check your connection.",
+                ),
+              ),
+            ),
+          8000,
+        ),
       );
 
-      const { error } = await Promise.race([dbPromise, timeoutPromise]) as Awaited<typeof dbPromise>;
+      const { error } = (await Promise.race([dbPromise, timeoutPromise])) as Awaited<
+        typeof dbPromise
+      >;
 
       if (error) {
         // RLS might be blocking — try upsert as fallback
@@ -226,7 +284,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
           if (upsertErr) throw new Error(upsertErr.message);
         } else {
           throw new Error(
-            (error as { details?: string }).details || error.message || "Update failed"
+            (error as { details?: string }).details || error.message || "Update failed",
           );
         }
       }
@@ -242,9 +300,16 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
       );
       if (isComplete) {
         const currentLevel = (user as Record<string, unknown>)?.verification_level as string;
-        if (!currentLevel || currentLevel === "PHONE_VERIFIED" || currentLevel === "EMAIL_VERIFIED") {
-          supabase.from("users").update({ verification_level: "PROFILE_COMPLETED" })
-            .eq("id", user!.id).then(() => {});
+        if (
+          !currentLevel ||
+          currentLevel === "PHONE_VERIFIED" ||
+          currentLevel === "EMAIL_VERIFIED"
+        ) {
+          supabase
+            .from("users")
+            .update({ verification_level: "PROFILE_COMPLETED" })
+            .eq("id", user!.id)
+            .then(() => {});
           updates.verification_level = "PROFILE_COMPLETED";
         }
       }
@@ -266,7 +331,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
       clearDraft();
       onSaved({ ...user, ...updates } as Partial<UserProfile>);
       onClose();
-    } catch (err) {
+    } catch (_err) {
       showToast((err as Error).message || L("Hitilafu imetokea", "An error occurred"), "error");
     } finally {
       clearTimeout(safetyTimer);
@@ -281,7 +346,9 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
           {/* Backdrop */}
           <motion.div
             key="cp-backdrop"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 z-[150] bg-stone-900/60 backdrop-blur-sm"
           />
@@ -306,22 +373,34 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <User size={18} className="text-emerald-600" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-black text-stone-900">{L("Kamilisha Wasifu Wako", "Complete Your Profile")}</h2>
+                    <h2 className="text-sm font-black text-stone-900">
+                      {L("Kamilisha Wasifu Wako", "Complete Your Profile")}
+                    </h2>
                     <p className="text-[10px] text-stone-400 font-medium">
-                      {draft
-                        ? <span className="text-amber-600 font-bold">↩ {L("Unaendelea ulipoacha", "Continuing where you left off")}</span>
-                        : L("Jaza taarifa zako — utahifadhiwa moja kwa moja", "Fill in your details — saved automatically")}
+                      {draft ? (
+                        <span className="text-amber-600 font-bold">
+                          ↩ {L("Unaendelea ulipoacha", "Continuing where you left off")}
+                        </span>
+                      ) : (
+                        L(
+                          "Jaza taarifa zako — utahifadhiwa moja kwa moja",
+                          "Fill in your details — saved automatically",
+                        )
+                      )}
                     </p>
                   </div>
                 </div>
-                <button onClick={onClose} className="p-1.5 hover:bg-stone-100 rounded-full text-stone-400" aria-label="Close">
+                <button
+                  onClick={onClose}
+                  className="p-1.5 hover:bg-stone-100 rounded-full text-stone-400"
+                  aria-label="Close"
+                >
                   <X size={18} />
                 </button>
               </div>
 
               {/* Body */}
               <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
-
                 {/* Personal info */}
                 <div>
                   <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
@@ -330,26 +409,65 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label required>{L("Jina la Kwanza", "First Name")}</Label>
-                      <Input value={firstName} onChange={(e) => { setFirstName(e.target.value); saveDraft({ firstName: e.target.value }); setErrs((p) => { const n={...p}; delete n.firstName; return n; }); }}
-                        placeholder="Juma" icon={<User size={13} />} hasError={!!errs.firstName} />
+                      <Input
+                        value={firstName}
+                        onChange={(e) => {
+                          setFirstName(e.target.value);
+                          saveDraft({ firstName: e.target.value });
+                          setErrs((p) => {
+                            const n = { ...p };
+                            delete n.firstName;
+                            return n;
+                          });
+                        }}
+                        placeholder="Juma"
+                        icon={<User size={13} />}
+                        hasError={!!errs.firstName}
+                      />
                       <Err msg={errs.firstName} />
                     </div>
                     <div>
                       <Label>{L("Jina la Kati", "Middle Name")}</Label>
-                      <Input value={middleName} onChange={(e) => { setMiddleName(e.target.value); saveDraft({ middleName: e.target.value }); }} placeholder="Rashidi" />
+                      <Input
+                        value={middleName}
+                        onChange={(e) => {
+                          setMiddleName(e.target.value);
+                          saveDraft({ middleName: e.target.value });
+                        }}
+                        placeholder="Rashidi"
+                      />
                     </div>
                   </div>
                   <div className="mt-3">
                     <Label required>{L("Jina la Mwisho", "Last Name")}</Label>
-                    <Input value={lastName} onChange={(e) => { setLastName(e.target.value); saveDraft({ lastName: e.target.value }); setErrs((p) => { const n={...p}; delete n.lastName; return n; }); }}
-                      placeholder="Mkubwa" hasError={!!errs.lastName} />
+                    <Input
+                      value={lastName}
+                      onChange={(e) => {
+                        setLastName(e.target.value);
+                        saveDraft({ lastName: e.target.value });
+                        setErrs((p) => {
+                          const n = { ...p };
+                          delete n.lastName;
+                          return n;
+                        });
+                      }}
+                      placeholder="Mkubwa"
+                      hasError={!!errs.lastName}
+                    />
                     <Err msg={errs.lastName} />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <Label>{L("Jinsia", "Gender")}</Label>
-                      <Select value={gender} onChange={(e) => { setGender(e.target.value); saveDraft({ gender: e.target.value }); }} placeholder={L("Chagua", "Select")}>
+                      <Select
+                        value={gender}
+                        onChange={(e) => {
+                          setGender(e.target.value);
+                          saveDraft({ gender: e.target.value });
+                        }}
+                        placeholder={L("Chagua", "Select")}
+                      >
                         <option value="M">{L("Mwanaume", "Male")}</option>
                         <option value="F">{L("Mwanamke", "Female")}</option>
                         <option value="O">{L("Nyingine", "Other")}</option>
@@ -357,12 +475,27 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     </div>
                     <div>
                       <Label>{L("Tarehe ya Kuzaliwa", "Date of Birth")}</Label>
-                      <Input type="date" value={dob} onChange={(e) => { setDob(e.target.value); saveDraft({ dob: e.target.value }); }}
-                        max={new Date().toISOString().split("T")[0]} icon={<Calendar size={13} />} />
+                      <Input
+                        type="date"
+                        value={dob}
+                        onChange={(e) => {
+                          setDob(e.target.value);
+                          saveDraft({ dob: e.target.value });
+                        }}
+                        max={new Date().toISOString().split("T")[0]}
+                        icon={<Calendar size={13} />}
+                      />
                     </div>
                     <div>
                       <Label>{L("Hali ya Ndoa", "Marital Status")}</Label>
-                      <Select value={marital} onChange={(e) => { setMarital(e.target.value); saveDraft({ marital: e.target.value }); }} placeholder={L("Chagua", "Select")}>
+                      <Select
+                        value={marital}
+                        onChange={(e) => {
+                          setMarital(e.target.value);
+                          saveDraft({ marital: e.target.value });
+                        }}
+                        placeholder={L("Chagua", "Select")}
+                      >
                         <option value="single">{L("Sijaoana", "Single")}</option>
                         <option value="married">{L("Nimeoa/Olewa", "Married")}</option>
                         <option value="divorced">{L("Talaka", "Divorced")}</option>
@@ -371,7 +504,14 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     </div>
                     <div>
                       <Label>{L("Kazi / Taaluma", "Occupation")}</Label>
-                      <Input value={occupation} onChange={(e) => { setOccupation(e.target.value); saveDraft({ occupation: e.target.value }); }} placeholder={L("Mfanyabiashara", "Business person")} />
+                      <Input
+                        value={occupation}
+                        onChange={(e) => {
+                          setOccupation(e.target.value);
+                          saveDraft({ occupation: e.target.value });
+                        }}
+                        placeholder={L("Mfanyabiashara", "Business person")}
+                      />
                     </div>
                   </div>
                 </div>
@@ -383,10 +523,27 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                       <Phone size={11} /> {L("Mawasiliano", "Contact")}
                     </p>
                     <Label required>{L("Namba ya Simu", "Phone Number")}</Label>
-                    <div className={cn("border rounded-xl overflow-hidden bg-stone-50 focus-within:ring-2 focus-within:ring-emerald-500 transition-all", errs.phone ? "border-red-300" : "border-stone-200")}>
-                      <PhoneInput international defaultCountry="TZ" value={phone}
-                        onChange={(v) => { setPhone(v ?? ""); saveDraft({ phone: v ?? "" }); setErrs((p) => { const n={...p}; delete n.phone; return n; }); }}
-                        className="h-11 px-3.5 text-sm font-medium bg-transparent outline-none w-full" />
+                    <div
+                      className={cn(
+                        "border rounded-xl overflow-hidden bg-stone-50 focus-within:ring-2 focus-within:ring-emerald-500 transition-all",
+                        errs.phone ? "border-red-300" : "border-stone-200",
+                      )}
+                    >
+                      <PhoneInput
+                        international
+                        defaultCountry="TZ"
+                        value={phone}
+                        onChange={(v) => {
+                          setPhone(v ?? "");
+                          saveDraft({ phone: v ?? "" });
+                          setErrs((p) => {
+                            const n = { ...p };
+                            delete n.phone;
+                            return n;
+                          });
+                        }}
+                        className="h-11 px-3.5 text-sm font-medium bg-transparent outline-none w-full"
+                      />
                     </div>
                     <Err msg={errs.phone} />
                   </div>
@@ -401,30 +558,83 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label required>{L("Mkoa", "Region")}</Label>
-                        <Select value={region} onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); saveDraft({ region: e.target.value, district: "", ward: "" }); }} hasError={!!errs.region} placeholder={L("Chagua Mkoa", "Select Region")}>
-                          {TANZANIA_ADDRESS_DATA.map((r) => <option key={r.name} value={r.name}>{r.name}</option>)}
+                        <Select
+                          value={region}
+                          onChange={(e) => {
+                            setRegion(e.target.value);
+                            setDistrict("");
+                            setWard("");
+                            saveDraft({ region: e.target.value, district: "", ward: "" });
+                          }}
+                          hasError={!!errs.region}
+                          placeholder={L("Chagua Mkoa", "Select Region")}
+                        >
+                          {TANZANIA_ADDRESS_DATA.map((r) => (
+                            <option key={r.name} value={r.name}>
+                              {r.name}
+                            </option>
+                          ))}
                         </Select>
                         <Err msg={errs.region} />
                       </div>
                       <div>
                         <Label required>{L("Wilaya", "District")}</Label>
-                        <Select value={district} onChange={(e) => { setDistrict(e.target.value); setWard(""); saveDraft({ district: e.target.value, ward: "" }); }} disabled={!region} hasError={!!errs.district} placeholder={L("Chagua Wilaya", "Select District")}>
-                          {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
+                        <Select
+                          value={district}
+                          onChange={(e) => {
+                            setDistrict(e.target.value);
+                            setWard("");
+                            saveDraft({ district: e.target.value, ward: "" });
+                          }}
+                          disabled={!region}
+                          hasError={!!errs.district}
+                          placeholder={L("Chagua Wilaya", "Select District")}
+                        >
+                          {districts.map((d) => (
+                            <option key={d.name} value={d.name}>
+                              {d.name}
+                            </option>
+                          ))}
                         </Select>
                         <Err msg={errs.district} />
                       </div>
                       <div>
                         <Label required>{L("Kata", "Ward")}</Label>
-                        <Select value={ward} onChange={(e) => { setWard(e.target.value); saveDraft({ ward: e.target.value }); }} disabled={!district} hasError={!!errs.ward} placeholder={L("Chagua Kata", "Select Ward")}>
-                          {wards.map((w) => <option key={w} value={w}>{w}</option>)}
+                        <Select
+                          value={ward}
+                          onChange={(e) => {
+                            setWard(e.target.value);
+                            saveDraft({ ward: e.target.value });
+                          }}
+                          disabled={!district}
+                          hasError={!!errs.ward}
+                          placeholder={L("Chagua Kata", "Select Ward")}
+                        >
+                          {wards.map((w) => (
+                            <option key={w} value={w}>
+                              {w}
+                            </option>
+                          ))}
                           <option value="Mengineyo">{L("Mengineyo", "Other")}</option>
                         </Select>
                         <Err msg={errs.ward} />
                       </div>
                       <div>
                         <Label required>{L("Mtaa / Kijiji", "Street / Village")}</Label>
-                        <Input value={street} onChange={(e) => { setStreet(e.target.value); saveDraft({ street: e.target.value }); setErrs((p) => { const n={...p}; delete n.street; return n; }); }}
-                          placeholder={L("Jina la mtaa", "Street name")} hasError={!!errs.street} />
+                        <Input
+                          value={street}
+                          onChange={(e) => {
+                            setStreet(e.target.value);
+                            saveDraft({ street: e.target.value });
+                            setErrs((p) => {
+                              const n = { ...p };
+                              delete n.street;
+                              return n;
+                            });
+                          }}
+                          placeholder={L("Jina la mtaa", "Street name")}
+                          hasError={!!errs.street}
+                        />
                         <Err msg={errs.street} />
                       </div>
                     </div>
@@ -440,24 +650,69 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label required>{L("Nchi ya Makazi", "Country of Residence")}</Label>
-                        <Input value={countryResidence} onChange={(e) => { setCountryResidence(e.target.value); saveDraft({ countryResidence: e.target.value }); setErrs((p) => { const n={...p}; delete n.countryResidence; return n; }); }}
-                          placeholder="UK, USA, UAE..." hasError={!!errs.countryResidence} />
+                        <Input
+                          value={countryResidence}
+                          onChange={(e) => {
+                            setCountryResidence(e.target.value);
+                            saveDraft({ countryResidence: e.target.value });
+                            setErrs((p) => {
+                              const n = { ...p };
+                              delete n.countryResidence;
+                              return n;
+                            });
+                          }}
+                          placeholder="UK, USA, UAE..."
+                          hasError={!!errs.countryResidence}
+                        />
                         <Err msg={errs.countryResidence} />
                       </div>
                       <div>
                         <Label>{L("Mji wa Makazi", "City of Residence")}</Label>
-                        <Input value={cityResidence} onChange={(e) => { setCityResidence(e.target.value); saveDraft({ cityResidence: e.target.value }); }} placeholder="London, Dubai..." />
+                        <Input
+                          value={cityResidence}
+                          onChange={(e) => {
+                            setCityResidence(e.target.value);
+                            saveDraft({ cityResidence: e.target.value });
+                          }}
+                          placeholder="London, Dubai..."
+                        />
                       </div>
                       <div>
                         <Label>{L("Mkoa wa Asili", "Home Region")}</Label>
-                        <Select value={region} onChange={(e) => { setRegion(e.target.value); setDistrict(""); setWard(""); saveDraft({ region: e.target.value, district: "", ward: "" }); }} placeholder={L("Chagua Mkoa", "Select Region")}>
-                          {TANZANIA_ADDRESS_DATA.map((r) => <option key={r.name} value={r.name}>{r.name}</option>)}
+                        <Select
+                          value={region}
+                          onChange={(e) => {
+                            setRegion(e.target.value);
+                            setDistrict("");
+                            setWard("");
+                            saveDraft({ region: e.target.value, district: "", ward: "" });
+                          }}
+                          placeholder={L("Chagua Mkoa", "Select Region")}
+                        >
+                          {TANZANIA_ADDRESS_DATA.map((r) => (
+                            <option key={r.name} value={r.name}>
+                              {r.name}
+                            </option>
+                          ))}
                         </Select>
                       </div>
                       <div>
                         <Label>{L("Wilaya ya Asili", "Home District")}</Label>
-                        <Select value={district} onChange={(e) => { setDistrict(e.target.value); setWard(""); saveDraft({ district: e.target.value, ward: "" }); }} disabled={!region} placeholder={L("Chagua", "Select")}>
-                          {districts.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
+                        <Select
+                          value={district}
+                          onChange={(e) => {
+                            setDistrict(e.target.value);
+                            setWard("");
+                            saveDraft({ district: e.target.value, ward: "" });
+                          }}
+                          disabled={!region}
+                          placeholder={L("Chagua", "Select")}
+                        >
+                          {districts.map((d) => (
+                            <option key={d.name} value={d.name}>
+                              {d.name}
+                            </option>
+                          ))}
                         </Select>
                       </div>
                     </div>
@@ -467,29 +722,54 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                 {/* Identity document */}
                 <div>
                   <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                    <Shield size={11} /> {L("Kitambulisho", "Identity Document")} <span className="normal-case text-stone-400 font-medium">({L("hiari", "optional")})</span>
+                    <Shield size={11} /> {L("Kitambulisho", "Identity Document")}{" "}
+                    <span className="normal-case text-stone-400 font-medium">
+                      ({L("hiari", "optional")})
+                    </span>
                   </p>
                   <Label>{isDiaspora ? L("Namba ya Pasipoti", "Passport Number") : "NIDA"}</Label>
-                  <Input value={nida} onChange={(e) => { setNida(e.target.value); saveDraft({ nida: e.target.value }); }}
+                  <Input
+                    value={nida}
+                    onChange={(e) => {
+                      setNida(e.target.value);
+                      saveDraft({ nida: e.target.value });
+                    }}
                     placeholder={isDiaspora ? "TZ1234567" : "XXXX-XXXXX-XXXXX-XX"}
-                    icon={<Shield size={13} />} />
+                    icon={<Shield size={13} />}
+                  />
                   {!isDiaspora && (
-                    <p className="mt-1 text-[11px] text-stone-400">{L("Kuingiza NIDA kutawezesha usindikaji wa papo hapo", "Adding NIDA enables instant processing")}</p>
+                    <p className="mt-1 text-[11px] text-stone-400">
+                      {L(
+                        "Kuingiza NIDA kutawezesha usindikaji wa papo hapo",
+                        "Adding NIDA enables instant processing",
+                      )}
+                    </p>
                   )}
                 </div>
-
               </div>
 
               {/* Footer */}
               <div className="px-5 pb-5 pt-3 border-t border-stone-100 bg-white sticky bottom-0 shrink-0">
                 <div className="flex gap-3">
-                  <button onClick={onClose}
-                    className="flex-1 h-11 bg-white border border-stone-200 text-stone-600 rounded-2xl font-bold text-sm hover:bg-stone-50 transition-all">
+                  <button
+                    onClick={onClose}
+                    className="flex-1 h-11 bg-white border border-stone-200 text-stone-600 rounded-2xl font-bold text-sm hover:bg-stone-50 transition-all"
+                  >
                     {L("Baadaye", "Later")}
                   </button>
-                  <button onClick={handleSave} disabled={saving}
-                    className="flex-[2] h-11 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100">
-                    {saving ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={15} />{L("Hifadhi Wasifu", "Save Profile")}</>}
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex-[2] h-11 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100"
+                  >
+                    {saving ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle2 size={15} />
+                        {L("Hifadhi Wasifu", "Save Profile")}
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

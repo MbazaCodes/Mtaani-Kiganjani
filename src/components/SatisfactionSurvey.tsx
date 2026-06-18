@@ -52,7 +52,9 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
           {sw ? "Asante kwa maoni yako!" : "Thank you for your feedback!"}
         </p>
         <p className="text-xs text-emerald-600">
-          {sw ? "Maoni yako yatasaidia kuboresha huduma zetu." : "Your feedback helps us improve our services."}
+          {sw
+            ? "Maoni yako yatasaidia kuboresha huduma zetu."
+            : "Your feedback helps us improve our services."}
         </p>
       </div>
     );
@@ -90,9 +92,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
             <Star
               size={28}
               className={`transition-colors ${
-                star <= (hover || rating)
-                  ? "text-amber-500 fill-amber-500"
-                  : "text-stone-300"
+                star <= (hover || rating) ? "text-amber-500 fill-amber-500" : "text-stone-300"
               }`}
             />
           </button>
@@ -100,14 +100,24 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
         <span className="text-xs text-stone-500 ml-2 self-center">
           {rating > 0 &&
             (rating === 1
-              ? sw ? "Mbaya" : "Poor"
+              ? sw
+                ? "Mbaya"
+                : "Poor"
               : rating === 2
-                ? sw ? "Wastani" : "Fair"
+                ? sw
+                  ? "Wastani"
+                  : "Fair"
                 : rating === 3
-                  ? sw ? "Nzuri" : "Good"
+                  ? sw
+                    ? "Nzuri"
+                    : "Good"
                   : rating === 4
-                    ? sw ? "Nzuri Sana" : "Very Good"
-                    : sw ? "Bora" : "Excellent")}
+                    ? sw
+                      ? "Nzuri Sana"
+                      : "Very Good"
+                    : sw
+                      ? "Bora"
+                      : "Excellent")}
         </span>
       </div>
 

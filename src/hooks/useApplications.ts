@@ -55,7 +55,7 @@ export function useApplications(user: UserProfile | null) {
               },
               users: user,
             });
-          } catch (err) {
+          } catch (_err) {
             console.error("Error parsing draft:", err);
           }
         }

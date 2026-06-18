@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  FileText,
-  Search,
-  CheckCircle,
-  CreditCard,
-  Award,
-  XCircle,
-} from "lucide-react";
+import { FileText, Search, CheckCircle, CreditCard, Award, XCircle } from "lucide-react";
 
 interface StatusTimelineProps {
   status: string;
@@ -100,7 +93,11 @@ export const StatusTimeline: React.FC<StatusTimelineProps> = ({
           const active = i === currentIdx;
           const Icon = step.icon;
           return (
-            <div key={step.key} className="flex flex-col items-center z-10 relative" style={{ width: `${100 / steps.length}%` }}>
+            <div
+              key={step.key}
+              className="flex flex-col items-center z-10 relative"
+              style={{ width: `${100 / steps.length}%` }}
+            >
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
                   done
@@ -126,18 +123,26 @@ export const StatusTimeline: React.FC<StatusTimelineProps> = ({
 
       {/* Agreement sub-status */}
       {agreementStatus && status === "issued" && (
-        <div className={`mt-3 text-center text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1 ${
-          agreementStatus === "buyer_accepted"
-            ? "bg-emerald-50 text-emerald-700"
-            : agreementStatus === "buyer_rejected"
-              ? "bg-red-50 text-red-700"
-              : "bg-amber-50 text-amber-700"
-        }`}>
+        <div
+          className={`mt-3 text-center text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1 ${
+            agreementStatus === "buyer_accepted"
+              ? "bg-emerald-50 text-emerald-700"
+              : agreementStatus === "buyer_rejected"
+                ? "bg-red-50 text-red-700"
+                : "bg-amber-50 text-amber-700"
+          }`}
+        >
           {agreementStatus === "buyer_accepted"
-            ? (sw ? "✅ Mnunuzi Amekubali" : "✅ Buyer Accepted")
+            ? sw
+              ? "✅ Mnunuzi Amekubali"
+              : "✅ Buyer Accepted"
             : agreementStatus === "buyer_rejected"
-              ? (sw ? "❌ Mnunuzi Amekataa" : "❌ Buyer Rejected")
-              : (sw ? "⏳ Inasubiri Mnunuzi" : "⏳ Awaiting Buyer")}
+              ? sw
+                ? "❌ Mnunuzi Amekataa"
+                : "❌ Buyer Rejected"
+              : sw
+                ? "⏳ Inasubiri Mnunuzi"
+                : "⏳ Awaiting Buyer"}
         </div>
       )}
     </div>

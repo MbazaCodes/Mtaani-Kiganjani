@@ -6,7 +6,7 @@
 /** Trap focus within a container (for modals/dialogs) */
 export function trapFocus(container: HTMLElement): () => void {
   const focusable = container.querySelectorAll<HTMLElement>(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
   );
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
@@ -33,7 +33,10 @@ export function trapFocus(container: HTMLElement): () => void {
 }
 
 /** Announce a message to screen readers via aria-live */
-export function announceToScreenReader(message: string, priority: "polite" | "assertive" = "polite"): void {
+export function announceToScreenReader(
+  message: string,
+  priority: "polite" | "assertive" = "polite",
+): void {
   let el = document.getElementById("sr-announcer");
   if (!el) {
     el = document.createElement("div");
@@ -46,7 +49,9 @@ export function announceToScreenReader(message: string, priority: "polite" | "as
   }
   el.setAttribute("aria-live", priority);
   el.textContent = "";
-  requestAnimationFrame(() => { el!.textContent = message; });
+  requestAnimationFrame(() => {
+    el!.textContent = message;
+  });
 }
 
 /** Skip to main content link (call once on app mount) */
@@ -61,7 +66,8 @@ export function setupSkipLink(): void {
   skip.id = "skip-to-main";
   (skip as HTMLAnchorElement).href = "#main-content";
   skip.textContent = "Skip to main content";
-  skip.className = "sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-emerald-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg";
+  skip.className =
+    "sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-emerald-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg";
   skip.addEventListener("click", (e) => {
     e.preventDefault();
     main.setAttribute("tabindex", "-1");
@@ -74,10 +80,13 @@ export function setupSkipLink(): void {
 /** Ensure color contrast meets WCAG AA (4.5:1 for normal text) */
 export function meetsContrastRatio(hex1: string, hex2: string, minRatio = 4.5): boolean {
   const luminance = (hex: string) => {
-    const rgb = hex.replace("#", "").match(/.{2}/g)!.map((c) => {
-      const v = parseInt(c, 16) / 255;
-      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    });
+    const rgb = hex
+      .replace("#", "")
+      .match(/.{2}/g)!
+      .map((c) => {
+        const v = parseInt(c, 16) / 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
     return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   };
   const l1 = luminance(hex1);

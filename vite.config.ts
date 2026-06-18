@@ -29,11 +29,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 1600,
   },
   optimizeDeps: {
-    include: [
-      "react",
-      "react-dom",
-      "react-router-dom",
-      "@react-pdf/renderer",
-    ],
+    include: ["react", "react-dom", "react-router-dom", "@react-pdf/renderer"],
   },
 });

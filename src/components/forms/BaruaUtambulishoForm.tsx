@@ -72,7 +72,10 @@ const PURPOSES = [
   { label: "Kupata Umeme / Maji (Utilities — TANESCO/DAWASA)", value: "HUDUMA_UMEME_MAJI" },
   { label: "Uthibitisho kwa Mwajiri (Employer Verification)", value: "WAAJIRI" },
   { label: "Maombi ya Serikali (Government Application)", value: "SERIKALI" },
-  { label: "Dhamana / Udhamini — Kutoka Polisi (Bail Bond / Police Release)", value: "DHAMANA_POLISI" },
+  {
+    label: "Dhamana / Udhamini — Kutoka Polisi (Bail Bond / Police Release)",
+    value: "DHAMANA_POLISI",
+  },
   { label: "Udhamini wa Mtu (Personal Surety / Guarantee)", value: "UDHAMINI" },
   { label: "Nyinginezo (Other — specify below)", value: "NYINGINEZO" },
 ];
@@ -1144,7 +1147,11 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
             <Field name="urgency" label={L("Kiwango cha Haraka", "Urgency Level")}>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: "NORMAL", sw: "Kawaida (Siku 1–5 za kazi)", en: "Normal (1–5 working days)" },
+                  {
+                    value: "NORMAL",
+                    sw: "Kawaida (Siku 1–5 za kazi)",
+                    en: "Normal (1–5 working days)",
+                  },
                   { value: "URGENT", sw: "Haraka (Siku moja)", en: "Urgent (Same day)" },
                 ].map((opt) => (
                   <button

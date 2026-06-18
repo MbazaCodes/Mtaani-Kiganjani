@@ -104,7 +104,7 @@ export function StaffCitizenManagement() {
       }
 
       setPendingChanges(data || []);
-    } catch (error) {
+    } catch (_error) {
       console.error("Exception fetching profile changes:", error);
       setPendingChanges([]);
     } finally {
@@ -220,7 +220,7 @@ export function StaffCitizenManagement() {
       }
 
       setCitizens(data || []);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error fetching citizens:", error);
       setCitizens([]);
     } finally {

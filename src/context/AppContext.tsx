@@ -132,14 +132,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // P2-T11: snapshot the citizen's assigned office at submission time
       // so applications in progress stay with this office even if the
       // citizen later changes address.
-      let officeRegistryId: string | null = (user as Record<string, unknown>).assigned_office_id as string ?? null;
+      let officeRegistryId: string | null =
+        ((user as Record<string, unknown>).assigned_office_id as string) ?? null;
       if (!officeRegistryId && user.region && user.district && user.ward && !user.is_diaspora) {
         try {
           const { data: oid } = await supabase.rpc("find_office_for_address", {
-            p_region: user.region, p_district: user.district, p_ward: user.ward, p_street: user.street || "",
+            p_region: user.region,
+            p_district: user.district,
+            p_ward: user.ward,
+            p_street: user.street || "",
           });
           officeRegistryId = (oid as string) || null;
-        } catch { /* optional */ }
+        } catch {
+          /* optional */
+        }
       }
 
       const newApp = {

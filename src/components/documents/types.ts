@@ -395,10 +395,8 @@ const BLANK_QR_PNG =
  *  This sync version returns a blank placeholder — it exists only so PDF components
  *  have a safe non-null fallback when qrDataUrl prop is not yet available.
  */
-export const generateQRCodeUrl = (
-  _application: Application,
-  _serviceCode: string,
-): string => BLANK_QR_PNG;
+export const generateQRCodeUrl = (_application: Application, _serviceCode: string): string =>
+  BLANK_QR_PNG;
 
 export const formatFullName = (
   user: Partial<Pick<UserProfile, "first_name" | "middle_name" | "last_name">> | null | undefined,

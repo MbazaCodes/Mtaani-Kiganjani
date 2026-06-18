@@ -11,10 +11,25 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, CheckCircle2, XCircle, Loader2, Shield,
-  User, MapPin, Phone, FileText, UserCheck, Clock,
-  Building2, ChevronDown, ChevronUp, Camera, Calendar,
-  AlertCircle, ShieldCheck, BadgeCheck,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Shield,
+  User,
+  MapPin,
+  Phone,
+  FileText,
+  UserCheck,
+  Clock,
+  Building2,
+  ChevronDown,
+  ChevronUp,
+  Camera,
+  Calendar,
+  AlertCircle,
+  ShieldCheck,
+  BadgeCheck,
 } from "lucide-react";
 import { supabase, UserProfile, Application } from "@/lib/supabase";
 import { useLanguage } from "@/context/LanguageContext";
@@ -61,14 +76,16 @@ export function ManualVerification() {
     try {
       const { data, error } = await supabase
         .from("applications")
-        .select(`
+        .select(
+          `
           *,
           user:users!applications_user_id_fkey (
             id, first_name, middle_name, last_name, phone, email,
             region, district, ward, nida_number, citizen_id,
             is_verified, is_diaspora, verification_level
           )
-        `)
+        `,
+        )
         .in("status", ["submitted", "pending_review", "returned"])
         .not("user_id", "is", null)
         .order("created_at", { ascending: true });
@@ -94,7 +111,9 @@ export function ManualVerification() {
     }
   }, []);
 
-  useEffect(() => { loadApps(); }, [loadApps]);
+  useEffect(() => {
+    loadApps();
+  }, [loadApps]);
 
   // ── Physical search ───────────────────────────────────────────────────────
   const handleSearch = async () => {
@@ -108,13 +127,20 @@ export function ManualVerification() {
         .from("users")
         .select("*")
         .or(
-          `phone.eq.${q},phone.eq.+255${q.replace(/^0/, "")},nida_number.eq.${q.replace(/-/g, "")},citizen_id.eq.${q},email.eq.${q.toLowerCase()}`
+          `phone.eq.${q},phone.eq.+255${q.replace(/^0/, "")},nida_number.eq.${q.replace(/-/g, "")},citizen_id.eq.${q},email.eq.${q.toLowerCase()}`,
         )
         .limit(1)
         .maybeSingle();
 
       if (data) setSearchResult(data as UserProfile);
-      else showToast(L("Raia hajapatikana. Jaribu namba nyingine.", "Citizen not found. Try a different number."), "error");
+      else
+        showToast(
+          L(
+            "Raia hajapatikana. Jaribu namba nyingine.",
+            "Citizen not found. Try a different number.",
+          ),
+          "error",
+        );
     } catch {
       showToast(L("Hitilafu ya utafutaji", "Search error"), "error");
     } finally {
@@ -151,18 +177,21 @@ export function ManualVerification() {
       });
 
       // Log audit
-      await supabase.from("audit_logs").insert({
-        user_id: officer?.id,
-        action: "physical_verification",
-        details: {
-          citizen_id: searchResult.id,
-          doc_type: docType,
-          doc_number: docNumber,
-          notes: officerNotes,
-          officer_id: officer?.id,
-          officer_name: `${officer?.first_name} ${officer?.last_name}`,
-        },
-      }).then(() => {});
+      await supabase
+        .from("audit_logs")
+        .insert({
+          user_id: officer?.id,
+          action: "physical_verification",
+          details: {
+            citizen_id: searchResult.id,
+            doc_type: docType,
+            doc_number: docNumber,
+            notes: officerNotes,
+            officer_id: officer?.id,
+            officer_name: `${officer?.first_name} ${officer?.last_name}`,
+          },
+        })
+        .then(() => {});
 
       setUpgraded(true);
       setSearchResult({ ...searchResult, verification_level: "NIDA_VERIFIED" } as UserProfile);
@@ -178,14 +207,18 @@ export function ManualVerification() {
   const filteredApps = apps.filter((a) => {
     const q = searchApp.toLowerCase();
     const name = `${a.user?.first_name || ""} ${a.user?.last_name || ""}`.toLowerCase();
-    return !q || name.includes(q) || a.application_number.toLowerCase().includes(q) ||
-      (a.user?.phone || "").includes(q) || (a.user?.nida_number || "").includes(q);
+    return (
+      !q ||
+      name.includes(q) ||
+      a.application_number.toLowerCase().includes(q) ||
+      (a.user?.phone || "").includes(q) ||
+      (a.user?.nida_number || "").includes(q)
+    );
   });
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-5">
-
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -193,7 +226,10 @@ export function ManualVerification() {
             {L("Uthibitisho wa Raia", "Citizen Verification")}
           </h1>
           <p className="text-xs text-stone-400 mt-0.5">
-            {L("Kagua maombi yanayohitaji muda wa afisa na thibitisha raia kwa mwili", "Review applications needing officer time and verify citizens in person")}
+            {L(
+              "Kagua maombi yanayohitaji muda wa afisa na thibitisha raia kwa mwili",
+              "Review applications needing officer time and verify citizens in person",
+            )}
           </p>
         </div>
         <RefreshButton onRefresh={loadApps} lang={lang} />
@@ -203,8 +239,12 @@ export function ManualVerification() {
       <div className="flex bg-stone-100 rounded-2xl p-1 gap-1">
         <button
           onClick={() => setTab("manual")}
-          className={cn("flex-1 flex items-center justify-center gap-2 h-10 rounded-xl text-sm font-bold transition-all",
-            tab === "manual" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-700")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 h-10 rounded-xl text-sm font-bold transition-all",
+            tab === "manual"
+              ? "bg-white text-stone-900 shadow-sm"
+              : "text-stone-500 hover:text-stone-700",
+          )}
         >
           <FileText size={15} />
           {L("Ukaguzi wa Mwongozo", "Manual Review")}
@@ -216,8 +256,12 @@ export function ManualVerification() {
         </button>
         <button
           onClick={() => setTab("physical")}
-          className={cn("flex-1 flex items-center justify-center gap-2 h-10 rounded-xl text-sm font-bold transition-all",
-            tab === "physical" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-700")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 h-10 rounded-xl text-sm font-bold transition-all",
+            tab === "physical"
+              ? "bg-white text-stone-900 shadow-sm"
+              : "text-stone-500 hover:text-stone-700",
+          )}
         >
           <UserCheck size={15} />
           {L("Uthibitisho wa Kimwili", "Physical Verification")}
@@ -242,9 +286,15 @@ export function ManualVerification() {
           {/* Search */}
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-            <input value={searchApp} onChange={(e) => setSearchApp(e.target.value)}
-              placeholder={L("Tafuta jina, namba ya maombi, simu...", "Search name, app number, phone...")}
-              className="w-full h-10 pl-9 pr-3 bg-white border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500" />
+            <input
+              value={searchApp}
+              onChange={(e) => setSearchApp(e.target.value)}
+              placeholder={L(
+                "Tafuta jina, namba ya maombi, simu...",
+                "Search name, app number, phone...",
+              )}
+              className="w-full h-10 pl-9 pr-3 bg-white border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+            />
           </div>
 
           {loadingApps ? (
@@ -266,16 +316,22 @@ export function ManualVerification() {
               {filteredApps.map((app) => {
                 const tier = getUserTier(app.user as Partial<UserProfile>);
                 const isOpen = expandedApp === app.id;
-                const citizenName = `${app.user?.first_name || ""} ${app.user?.last_name || ""}`.trim() || L("Haajulikani", "Unknown");
+                const citizenName =
+                  `${app.user?.first_name || ""} ${app.user?.last_name || ""}`.trim() ||
+                  L("Haajulikani", "Unknown");
 
                 return (
-                  <motion.div key={app.id}
-                    initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                    className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
-
+                  <motion.div
+                    key={app.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm"
+                  >
                     {/* App header */}
-                    <button className="w-full text-left p-4 hover:bg-stone-50 transition-all"
-                      onClick={() => setExpandedApp(isOpen ? null : app.id)}>
+                    <button
+                      className="w-full text-left p-4 hover:bg-stone-50 transition-all"
+                      onClick={() => setExpandedApp(isOpen ? null : app.id)}
+                    >
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-stone-100 rounded-xl flex items-center justify-center shrink-0">
                           <User size={16} className="text-stone-500" />
@@ -286,18 +342,36 @@ export function ManualVerification() {
                             <VerificationBadge tier={tier} lang={lang} showDot />
                           </div>
                           <p className="text-xs text-stone-500 mt-0.5">
-                            {app.service_name} · <span className="font-mono">{app.application_number}</span>
+                            {app.service_name} ·{" "}
+                            <span className="font-mono">{app.application_number}</span>
                           </p>
                           <div className="flex items-center gap-3 mt-1 text-[11px] text-stone-400 flex-wrap">
-                            {app.user?.phone && <span className="flex items-center gap-1"><Phone size={9} />{app.user.phone}</span>}
-                            {app.user?.region && <span className="flex items-center gap-1"><MapPin size={9} />{app.user.region}</span>}
+                            {app.user?.phone && (
+                              <span className="flex items-center gap-1">
+                                <Phone size={9} />
+                                {app.user.phone}
+                              </span>
+                            )}
+                            {app.user?.region && (
+                              <span className="flex items-center gap-1">
+                                <MapPin size={9} />
+                                {app.user.region}
+                              </span>
+                            )}
                             <span className="flex items-center gap-1">
                               <Clock size={9} />
-                              {new Date(app.created_at).toLocaleDateString(sw ? "sw-TZ" : "en-TZ", { day: "numeric", month: "short" })}
+                              {new Date(app.created_at).toLocaleDateString(sw ? "sw-TZ" : "en-TZ", {
+                                day: "numeric",
+                                month: "short",
+                              })}
                             </span>
                           </div>
                         </div>
-                        {isOpen ? <ChevronUp size={15} className="text-stone-400 shrink-0" /> : <ChevronDown size={15} className="text-stone-400 shrink-0" />}
+                        {isOpen ? (
+                          <ChevronUp size={15} className="text-stone-400 shrink-0" />
+                        ) : (
+                          <ChevronDown size={15} className="text-stone-400 shrink-0" />
+                        )}
                       </div>
                     </button>
 
@@ -305,9 +379,12 @@ export function ManualVerification() {
                     <AnimatePresence>
                       {isOpen && (
                         <motion.div
-                          initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
-                          className="overflow-hidden border-t border-stone-100">
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden border-t border-stone-100"
+                        >
                           <div className="p-4">
                             <VerificationChecklist
                               applicationId={app.id}
@@ -316,7 +393,10 @@ export function ManualVerification() {
                               citizenPhone={app.user?.phone}
                               lang={lang}
                               onAllComplete={() => {
-                                showToast(L("Ukaguzi umekamilika!", "Verification complete!"), "success");
+                                showToast(
+                                  L("Ukaguzi umekamilika!", "Verification complete!"),
+                                  "success",
+                                );
                                 loadApps();
                               }}
                             />
@@ -354,14 +434,26 @@ export function ManualVerification() {
             </p>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-                <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                <Search
+                  size={14}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
+                />
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  placeholder={L("Namba ya simu, NIDA, CT ID, au barua pepe...", "Phone, NIDA, CT ID, or email...")}
-                  className="w-full h-11 pl-9 pr-3 bg-white border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500" />
+                  placeholder={L(
+                    "Namba ya simu, NIDA, CT ID, au barua pepe...",
+                    "Phone, NIDA, CT ID, or email...",
+                  )}
+                  className="w-full h-11 pl-9 pr-3 bg-white border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                />
               </div>
-              <button onClick={handleSearch} disabled={searching || !searchQuery.trim()}
-                className="flex items-center gap-1.5 px-4 h-11 bg-stone-900 hover:bg-black disabled:opacity-40 text-white rounded-xl font-bold text-sm transition-all">
+              <button
+                onClick={handleSearch}
+                disabled={searching || !searchQuery.trim()}
+                className="flex items-center gap-1.5 px-4 h-11 bg-stone-900 hover:bg-black disabled:opacity-40 text-white rounded-xl font-bold text-sm transition-all"
+              >
                 {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
                 {L("Tafuta", "Search")}
               </button>
@@ -371,9 +463,12 @@ export function ManualVerification() {
           {/* Search result */}
           {searchResult && (
             <AnimatePresence>
-              <motion.div key="result" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
-
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm"
+              >
                 {/* Citizen info */}
                 <div className="p-5 space-y-4">
                   <div className="flex items-start gap-3">
@@ -385,25 +480,56 @@ export function ManualVerification() {
                         <p className="font-black text-stone-900">
                           {`${searchResult.first_name || ""} ${searchResult.middle_name || ""} ${searchResult.last_name || ""}`.trim()}
                         </p>
-                        <VerificationBadge tier={getUserTier(searchResult as Partial<UserProfile>)} lang={lang} showDot />
+                        <VerificationBadge
+                          tier={getUserTier(searchResult as Partial<UserProfile>)}
+                          lang={lang}
+                          showDot
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2 text-xs text-stone-500">
-                        {searchResult.phone && <span className="flex items-center gap-1"><Phone size={10} />{searchResult.phone}</span>}
-                        {searchResult.email && <span className="flex items-center gap-1 truncate">✉ {searchResult.email}</span>}
-                        {searchResult.region && <span className="flex items-center gap-1"><MapPin size={10} />{searchResult.region}, {searchResult.district}</span>}
-                        {searchResult.nida_number && <span className="flex items-center gap-1"><Shield size={10} />NIDA: {searchResult.nida_number}</span>}
+                        {searchResult.phone && (
+                          <span className="flex items-center gap-1">
+                            <Phone size={10} />
+                            {searchResult.phone}
+                          </span>
+                        )}
+                        {searchResult.email && (
+                          <span className="flex items-center gap-1 truncate">
+                            ✉ {searchResult.email}
+                          </span>
+                        )}
+                        {searchResult.region && (
+                          <span className="flex items-center gap-1">
+                            <MapPin size={10} />
+                            {searchResult.region}, {searchResult.district}
+                          </span>
+                        )}
+                        {searchResult.nida_number && (
+                          <span className="flex items-center gap-1">
+                            <Shield size={10} />
+                            NIDA: {searchResult.nida_number}
+                          </span>
+                        )}
                         {searchResult.citizen_id && <span>CT ID: {searchResult.citizen_id}</span>}
                       </div>
                     </div>
                   </div>
 
                   {/* Already NIDA_VERIFIED */}
-                  {upgraded || getUserTier(searchResult as Partial<UserProfile>) === "NIDA_VERIFIED" ? (
+                  {upgraded ||
+                  getUserTier(searchResult as Partial<UserProfile>) === "NIDA_VERIFIED" ? (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
                       <ShieldCheck size={20} className="text-emerald-600 shrink-0" />
                       <div>
-                        <p className="font-black text-emerald-800">{L("Amethibitishwa Kikamilifu ✓", "Fully Verified ✓")}</p>
-                        <p className="text-xs text-emerald-700 mt-0.5">{L("Raia huyu ana NIDA_VERIFIED — huduma zote zimefunguliwa.", "This citizen is NIDA_VERIFIED — all services unlocked.")}</p>
+                        <p className="font-black text-emerald-800">
+                          {L("Amethibitishwa Kikamilifu ✓", "Fully Verified ✓")}
+                        </p>
+                        <p className="text-xs text-emerald-700 mt-0.5">
+                          {L(
+                            "Raia huyu ana NIDA_VERIFIED — huduma zote zimefunguliwa.",
+                            "This citizen is NIDA_VERIFIED — all services unlocked.",
+                          )}
+                        </p>
                       </div>
                     </div>
                   ) : (
@@ -419,21 +545,29 @@ export function ManualVerification() {
                             <label className="text-[11px] font-black text-stone-500 uppercase tracking-widest mb-1.5 block">
                               {L("Aina ya Hati", "Document Type")}
                             </label>
-                            <select value={docType} onChange={(e) => setDocType(e.target.value)}
-                              className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            <select
+                              value={docType}
+                              onChange={(e) => setDocType(e.target.value)}
+                              className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                            >
                               <option value="NIDA">NIDA</option>
                               <option value="PASSPORT">{L("Pasipoti", "Passport")}</option>
                               <option value="VOTER_ID">{L("Kadi ya Kura", "Voter ID")}</option>
-                              <option value="DRIVING_LICENSE">{L("Leseni ya Udereva", "Driving License")}</option>
+                              <option value="DRIVING_LICENSE">
+                                {L("Leseni ya Udereva", "Driving License")}
+                              </option>
                             </select>
                           </div>
                           <div>
                             <label className="text-[11px] font-black text-stone-500 uppercase tracking-widest mb-1.5 block">
                               {L("Namba ya Hati", "Document Number")}
                             </label>
-                            <input value={docNumber} onChange={(e) => setDocNumber(e.target.value)}
+                            <input
+                              value={docNumber}
+                              onChange={(e) => setDocNumber(e.target.value)}
                               placeholder={docType === "NIDA" ? "XXXX-XXXXX-XXXXX-XX" : "..."}
-                              className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500" />
+                              className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                            />
                           </div>
                         </div>
 
@@ -441,15 +575,29 @@ export function ManualVerification() {
                           <label className="text-[11px] font-black text-stone-500 uppercase tracking-widest mb-1.5 block">
                             {L("Maelezo ya Afisa (hiari)", "Officer Notes (optional)")}
                           </label>
-                          <textarea value={officerNotes} onChange={(e) => setOfficerNotes(e.target.value)} rows={2}
+                          <textarea
+                            value={officerNotes}
+                            onChange={(e) => setOfficerNotes(e.target.value)}
+                            rows={2}
                             placeholder={L("Maelezo yoyote ya ziada...", "Any additional notes...")}
-                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 resize-none" />
+                            className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                          />
                         </div>
 
-                        <button onClick={handleUpgrade} disabled={upgrading || !docNumber.trim()}
-                          className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100">
-                          {upgrading ? <Loader2 size={16} className="animate-spin" /> : <BadgeCheck size={16} />}
-                          {L("Thibitisha & Sasishe hadi NIDA_VERIFIED", "Verify & Upgrade to NIDA_VERIFIED")}
+                        <button
+                          onClick={handleUpgrade}
+                          disabled={upgrading || !docNumber.trim()}
+                          className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-100"
+                        >
+                          {upgrading ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <BadgeCheck size={16} />
+                          )}
+                          {L(
+                            "Thibitisha & Sasishe hadi NIDA_VERIFIED",
+                            "Verify & Upgrade to NIDA_VERIFIED",
+                          )}
                         </button>
                       </div>
                     </>

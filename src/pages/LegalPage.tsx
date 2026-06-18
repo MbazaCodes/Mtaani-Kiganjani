@@ -14,17 +14,26 @@ export const LegalPage: React.FC<LegalPageProps> = ({ lang, initialTab = "terms"
   return (
     <div className="max-w-3xl mx-auto">
       {onBack && (
-        <button onClick={onBack} className="flex items-center gap-1 text-sm text-stone-500 hover:text-emerald-600 mb-4">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1 text-sm text-stone-500 hover:text-emerald-600 mb-4"
+        >
           <ChevronLeft size={16} /> {sw ? "Rudi" : "Back"}
         </button>
       )}
 
       <div className="flex gap-2 mb-6">
-        <button onClick={() => setTab("terms")} className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${tab === "terms" ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"}`}>
+        <button
+          onClick={() => setTab("terms")}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${tab === "terms" ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"}`}
+        >
           <FileText size={14} className="inline mr-1" />
           {sw ? "Masharti ya Huduma" : "Terms of Service"}
         </button>
-        <button onClick={() => setTab("privacy")} className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${tab === "privacy" ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"}`}>
+        <button
+          onClick={() => setTab("privacy")}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${tab === "privacy" ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"}`}
+        >
           <Shield size={14} className="inline mr-1" />
           {sw ? "Sera ya Faragha" : "Privacy Policy"}
         </button>
@@ -34,57 +43,141 @@ export const LegalPage: React.FC<LegalPageProps> = ({ lang, initialTab = "terms"
         {tab === "terms" ? (
           <>
             <h1 className="text-lg font-black">{sw ? "Masharti ya Huduma" : "Terms of Service"}</h1>
-            <p className="text-xs text-stone-400">{sw ? "Imesasishwa: Juni 2026" : "Last updated: June 2026"}</p>
+            <p className="text-xs text-stone-400">
+              {sw ? "Imesasishwa: Juni 2026" : "Last updated: June 2026"}
+            </p>
 
             <h2 className="text-sm font-black mt-6">{sw ? "1. Makubaliano" : "1. Agreement"}</h2>
-            <p>{sw ? "Kwa kutumia mfumo wa E-Mtaa (Mtaani Kiganjani), unakubali kufuata masharti haya. Mfumo huu unatolewa na E-Mtaa kwa madhumuni ya kurahisisha huduma za serikali za mitaa nchini Tanzania." : "By using the E-Mtaa (Mtaani Kiganjani) platform, you agree to these terms. This system is provided by E-Mtaa to facilitate local government services in Tanzania."}</p>
+            <p>
+              {sw
+                ? "Kwa kutumia mfumo wa E-Mtaa (Mtaani Kiganjani), unakubali kufuata masharti haya. Mfumo huu unatolewa na E-Mtaa kwa madhumuni ya kurahisisha huduma za serikali za mitaa nchini Tanzania."
+                : "By using the E-Mtaa (Mtaani Kiganjani) platform, you agree to these terms. This system is provided by E-Mtaa to facilitate local government services in Tanzania."}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "2. Hali ya Mfumo" : "2. System Status"}</h2>
-            <p>{sw ? "Mfumo huu kwa sasa uko katika hali ya MAONYESHO. Nyaraka, malipo, na huduma zote ni za majaribio na hazina nguvu za kisheria hadi mfumo uidhinishwe rasmi na mamlaka husika." : "This system is currently in DEMONSTRATION mode. All documents, payments, and services are for testing purposes and carry no legal authority until the system is officially approved by relevant authorities."}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "2. Hali ya Mfumo" : "2. System Status"}
+            </h2>
+            <p>
+              {sw
+                ? "Mfumo huu kwa sasa uko katika hali ya MAONYESHO. Nyaraka, malipo, na huduma zote ni za majaribio na hazina nguvu za kisheria hadi mfumo uidhinishwe rasmi na mamlaka husika."
+                : "This system is currently in DEMONSTRATION mode. All documents, payments, and services are for testing purposes and carry no legal authority until the system is officially approved by relevant authorities."}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "3. Akaunti ya Mtumiaji" : "3. User Account"}</h2>
-            <p>{sw ? "Unapaswa kutoa taarifa sahihi wakati wa kusajiliwa. Usishiriki taarifa zako za kuingia na mtu yeyote. Wewe ndiwe mhusika wa shughuli zote zinazofanywa kupitia akaunti yako." : "You must provide accurate information during registration. Do not share your login credentials. You are responsible for all activities conducted through your account."}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "3. Akaunti ya Mtumiaji" : "3. User Account"}
+            </h2>
+            <p>
+              {sw
+                ? "Unapaswa kutoa taarifa sahihi wakati wa kusajiliwa. Usishiriki taarifa zako za kuingia na mtu yeyote. Wewe ndiwe mhusika wa shughuli zote zinazofanywa kupitia akaunti yako."
+                : "You must provide accurate information during registration. Do not share your login credentials. You are responsible for all activities conducted through your account."}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "4. Matumizi Yanayoruhusiwa" : "4. Acceptable Use"}</h2>
-            <p>{sw ? "Hutaruhusiwa kutumia mfumo kwa shughuli za ulaghai, kutoa taarifa za uongo, au kujaribu kuingilia mfumo. Ukiukaji unaweza kusababisha kufungwa kwa akaunti yako." : "You may not use the system for fraudulent activities, provide false information, or attempt to compromise the system. Violations may result in account suspension."}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "4. Matumizi Yanayoruhusiwa" : "4. Acceptable Use"}
+            </h2>
+            <p>
+              {sw
+                ? "Hutaruhusiwa kutumia mfumo kwa shughuli za ulaghai, kutoa taarifa za uongo, au kujaribu kuingilia mfumo. Ukiukaji unaweza kusababisha kufungwa kwa akaunti yako."
+                : "You may not use the system for fraudulent activities, provide false information, or attempt to compromise the system. Violations may result in account suspension."}
+            </p>
 
             <h2 className="text-sm font-black mt-4">{sw ? "5. Nyaraka" : "5. Documents"}</h2>
-            <p>{sw ? "Nyaraka zinazotolewa na mfumo zinaweza kuthibitishwa kupitia QR code. Uhalali wa nyaraka unategemea idhini ya mamlaka ya serikali ya mtaa husika." : "Documents generated by the system can be verified via QR code. Document validity depends on authorization by the relevant local government authority."}</p>
+            <p>
+              {sw
+                ? "Nyaraka zinazotolewa na mfumo zinaweza kuthibitishwa kupitia QR code. Uhalali wa nyaraka unategemea idhini ya mamlaka ya serikali ya mtaa husika."
+                : "Documents generated by the system can be verified via QR code. Document validity depends on authorization by the relevant local government authority."}
+            </p>
 
             <h2 className="text-sm font-black mt-4">{sw ? "6. Malipo" : "6. Payments"}</h2>
-            <p>{sw ? "Ada za huduma zinaweza kutumika. Malipo yote yanategemewa kulipwa kwa njia zilizoidhinishwa. Sera ya kurudisha fedha inategemea aina ya huduma." : "Service fees may apply. All payments are expected through authorized channels. Refund policy depends on the service type."}</p>
+            <p>
+              {sw
+                ? "Ada za huduma zinaweza kutumika. Malipo yote yanategemewa kulipwa kwa njia zilizoidhinishwa. Sera ya kurudisha fedha inategemea aina ya huduma."
+                : "Service fees may apply. All payments are expected through authorized channels. Refund policy depends on the service type."}
+            </p>
 
             <h2 className="text-sm font-black mt-4">{sw ? "7. Mabadiliko" : "7. Changes"}</h2>
-            <p>{sw ? "Tunaweza kubadilisha masharti haya wakati wowote. Mabadiliko yatatangazwa kupitia mfumo. Kuendelea kutumia mfumo baada ya mabadiliko kunamaanisha umekubali masharti mapya." : "We may update these terms at any time. Changes will be announced through the system. Continued use after changes constitutes acceptance of new terms."}</p>
+            <p>
+              {sw
+                ? "Tunaweza kubadilisha masharti haya wakati wowote. Mabadiliko yatatangazwa kupitia mfumo. Kuendelea kutumia mfumo baada ya mabadiliko kunamaanisha umekubali masharti mapya."
+                : "We may update these terms at any time. Changes will be announced through the system. Continued use after changes constitutes acceptance of new terms."}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "8. Wasiliana Nasi" : "8. Contact Us"}</h2>
-            <p>{sw ? "Kwa maswali kuhusu masharti haya, tumia mfumo wa msaada ndani ya E-Mtaa au tembelea ofisi ya serikali ya mtaa wako." : "For questions about these terms, use the support system within E-Mtaa or visit your local government office."}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "8. Wasiliana Nasi" : "8. Contact Us"}
+            </h2>
+            <p>
+              {sw
+                ? "Kwa maswali kuhusu masharti haya, tumia mfumo wa msaada ndani ya E-Mtaa au tembelea ofisi ya serikali ya mtaa wako."
+                : "For questions about these terms, use the support system within E-Mtaa or visit your local government office."}
+            </p>
           </>
         ) : (
           <>
             <h1 className="text-lg font-black">{sw ? "Sera ya Faragha" : "Privacy Policy"}</h1>
-            <p className="text-xs text-stone-400">{sw ? "Imesasishwa: Juni 2026" : "Last updated: June 2026"}</p>
+            <p className="text-xs text-stone-400">
+              {sw ? "Imesasishwa: Juni 2026" : "Last updated: June 2026"}
+            </p>
 
-            <h2 className="text-sm font-black mt-6">{sw ? "1. Taarifa Tunazokusanya" : "1. Information We Collect"}</h2>
-            <p>{sw ? "Tunakusanya taarifa unazotoa wakati wa kusajiliwa na kutumia huduma, ikiwa ni pamoja na: jina kamili, namba ya NIDA, namba ya simu, barua pepe, anwani ya makazi, na nyaraka za utambulisho." : "We collect information you provide during registration and service use, including: full name, NIDA number, phone number, email, residential address, and identification documents."}</p>
+            <h2 className="text-sm font-black mt-6">
+              {sw ? "1. Taarifa Tunazokusanya" : "1. Information We Collect"}
+            </h2>
+            <p>
+              {sw
+                ? "Tunakusanya taarifa unazotoa wakati wa kusajiliwa na kutumia huduma, ikiwa ni pamoja na: jina kamili, namba ya NIDA, namba ya simu, barua pepe, anwani ya makazi, na nyaraka za utambulisho."
+                : "We collect information you provide during registration and service use, including: full name, NIDA number, phone number, email, residential address, and identification documents."}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "2. Jinsi Tunavyotumia Taarifa" : "2. How We Use Information"}</h2>
-            <p>{sw ? "Taarifa zako zinatumika kwa:\n• Kuthibitisha utambulisho wako\n• Kushughulikia maombi ya huduma\n• Kutoa nyaraka rasmi\n• Kuwasiliana nawe kuhusu maombi yako\n• Kuboresha huduma zetu" : "Your information is used to:\n• Verify your identity\n• Process service applications\n• Issue official documents\n• Communicate about your applications\n• Improve our services"}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "2. Jinsi Tunavyotumia Taarifa" : "2. How We Use Information"}
+            </h2>
+            <p>
+              {sw
+                ? "Taarifa zako zinatumika kwa:\n• Kuthibitisha utambulisho wako\n• Kushughulikia maombi ya huduma\n• Kutoa nyaraka rasmi\n• Kuwasiliana nawe kuhusu maombi yako\n• Kuboresha huduma zetu"
+                : "Your information is used to:\n• Verify your identity\n• Process service applications\n• Issue official documents\n• Communicate about your applications\n• Improve our services"}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "3. Usalama wa Taarifa" : "3. Data Security"}</h2>
-            <p>{sw ? "Taarifa zako zinahifadhiwa kwa usalama kupitia mfumo wa Supabase wenye usimbaji fiche (encryption). Tunachukua hatua za kiufundi na kiutawala kulinda taarifa zako dhidi ya upatikanaji usioidhinishwa." : "Your data is stored securely via Supabase with encryption. We take technical and administrative measures to protect your information against unauthorized access."}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "3. Usalama wa Taarifa" : "3. Data Security"}
+            </h2>
+            <p>
+              {sw
+                ? "Taarifa zako zinahifadhiwa kwa usalama kupitia mfumo wa Supabase wenye usimbaji fiche (encryption). Tunachukua hatua za kiufundi na kiutawala kulinda taarifa zako dhidi ya upatikanaji usioidhinishwa."
+                : "Your data is stored securely via Supabase with encryption. We take technical and administrative measures to protect your information against unauthorized access."}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "4. Kushiriki Taarifa" : "4. Information Sharing"}</h2>
-            <p>{sw ? "Hatushiriki taarifa zako binafsi na wahusika wa nje isipokuwa:\n• Maafisa wa serikali ya mtaa wanaohusika na maombi yako\n• Inapohitajika kisheria\n• Kwa idhini yako" : "We do not share your personal information with third parties except:\n• Local government officers processing your application\n• When required by law\n• With your consent"}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "4. Kushiriki Taarifa" : "4. Information Sharing"}
+            </h2>
+            <p>
+              {sw
+                ? "Hatushiriki taarifa zako binafsi na wahusika wa nje isipokuwa:\n• Maafisa wa serikali ya mtaa wanaohusika na maombi yako\n• Inapohitajika kisheria\n• Kwa idhini yako"
+                : "We do not share your personal information with third parties except:\n• Local government officers processing your application\n• When required by law\n• With your consent"}
+            </p>
 
             <h2 className="text-sm font-black mt-4">{sw ? "5. Haki Zako" : "5. Your Rights"}</h2>
-            <p>{sw ? "Una haki ya:\n• Kufikia taarifa zako\n• Kusahihisha taarifa zisizo sahihi\n• Kuomba kufutwa kwa akaunti yako\n• Kupata nakala ya taarifa zako" : "You have the right to:\n• Access your information\n• Correct inaccurate information\n• Request account deletion\n• Obtain a copy of your data"}</p>
+            <p>
+              {sw
+                ? "Una haki ya:\n• Kufikia taarifa zako\n• Kusahihisha taarifa zisizo sahihi\n• Kuomba kufutwa kwa akaunti yako\n• Kupata nakala ya taarifa zako"
+                : "You have the right to:\n• Access your information\n• Correct inaccurate information\n• Request account deletion\n• Obtain a copy of your data"}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "6. Vidakuzi na Ufuatiliaji" : "6. Cookies & Tracking"}</h2>
-            <p>{sw ? "Tunatumia vidakuzi vya msingi kwa uthibitisho wa akaunti na upendeleo wa lugha pekee. Hatutumii vidakuzi vya utangazaji au ufuatiliaji wa wahusika wa nje." : "We use essential cookies for authentication and language preferences only. We do not use advertising or third-party tracking cookies."}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "6. Vidakuzi na Ufuatiliaji" : "6. Cookies & Tracking"}
+            </h2>
+            <p>
+              {sw
+                ? "Tunatumia vidakuzi vya msingi kwa uthibitisho wa akaunti na upendeleo wa lugha pekee. Hatutumii vidakuzi vya utangazaji au ufuatiliaji wa wahusika wa nje."
+                : "We use essential cookies for authentication and language preferences only. We do not use advertising or third-party tracking cookies."}
+            </p>
 
-            <h2 className="text-sm font-black mt-4">{sw ? "7. Wasiliana Nasi" : "7. Contact Us"}</h2>
-            <p>{sw ? "Kwa maswali kuhusu faragha, tumia mfumo wa msaada ndani ya E-Mtaa au tembelea ofisi ya serikali ya mtaa wako." : "For privacy inquiries, use the support system within E-Mtaa or visit your local government office."}</p>
+            <h2 className="text-sm font-black mt-4">
+              {sw ? "7. Wasiliana Nasi" : "7. Contact Us"}
+            </h2>
+            <p>
+              {sw
+                ? "Kwa maswali kuhusu faragha, tumia mfumo wa msaada ndani ya E-Mtaa au tembelea ofisi ya serikali ya mtaa wako."
+                : "For privacy inquiries, use the support system within E-Mtaa or visit your local government office."}
+            </p>
           </>
         )}
       </div>

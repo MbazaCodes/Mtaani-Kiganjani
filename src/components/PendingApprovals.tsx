@@ -95,7 +95,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = "sw" 
       );
 
       setPendingApprovals(approvalsWithSubmitters);
-    } catch (err) {
+    } catch (_err) {
       console.error("Error fetching pending approvals:", err);
     } finally {
       setLoading(false);
@@ -139,7 +139,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = "sw" 
       // Refresh the list
       fetchPendingApprovals();
       setSelectedApproval(null);
-    } catch (err) {
+    } catch (_err) {
       console.error("Error approving:", err);
     } finally {
       setProcessing(false);
@@ -180,7 +180,7 @@ export const PendingApprovals: React.FC<PendingApprovalsProps> = ({ lang = "sw" 
       setSelectedApproval(null);
       setShowRejectModal(false);
       setRejectionReason("");
-    } catch (err) {
+    } catch (_err) {
       console.error("Error rejecting:", err);
     } finally {
       setProcessing(false);

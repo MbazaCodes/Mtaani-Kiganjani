@@ -24,7 +24,7 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
   // ── Refresh user profile when Apply page opens to ensure latest data ──────
   React.useEffect(() => {
     if (user?.id) fetchUserProfile(user.id).catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
   const { lang } = useLanguage();
   const { setView } = useRouterView();
@@ -82,8 +82,7 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
 
   // ─── Gate: Resident Identity duplicate check ──────────────────────────────
   const isResidentIdentity =
-    selectedService.name === "Utambulisho wa Mkazi" ||
-    selectedService.name === "Resident Identity";
+    selectedService.name === "Utambulisho wa Mkazi" || selectedService.name === "Resident Identity";
 
   const [residentGateLoading, setResidentGateLoading] = useState(isResidentIdentity);
   const [residentGateState, setResidentGateState] = useState<
@@ -97,12 +96,48 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
   const [repeatReason, setRepeatReason] = useState("");
 
   const REPEAT_REASONS = [
-    { value: "MTOTO_MDOGO", label: { sw: "Mtoto Mdogo (Mwanafamilia Mdogo wa miaka chini ya 18)", en: "Minor Child (Family member under 18 years old)" } },
-    { value: "RAFIKI_NDUGU", label: { sw: "Rafiki au Ndugu (Msaada kwa mtu mwingine)", en: "Friend or Relative (Assisting another person)" } },
-    { value: "MGONJWA_MZEE", label: { sw: "Mtu Mgonjwa / Mzee (Hawezi kuja mwenyewe)", en: "Sick Person / Elderly (Unable to come in person)" } },
-    { value: "KUPOTEZA_NYARAKA", label: { sw: "Kupoteza Nyaraka za Awali (Lost original documents)", en: "Lost Original Documents" } },
-    { value: "KUBADILISHA_TAARIFA", label: { sw: "Kubadilisha Taarifa (Jina, Anwani, n.k.)", en: "Update Information (Name, Address, etc.)" } },
-    { value: "MAHITAJI_YA_KAZI", label: { sw: "Mahitaji ya Kazi / Taasisi Nyingine", en: "Work / Different Institution Requirement" } },
+    {
+      value: "MTOTO_MDOGO",
+      label: {
+        sw: "Mtoto Mdogo (Mwanafamilia Mdogo wa miaka chini ya 18)",
+        en: "Minor Child (Family member under 18 years old)",
+      },
+    },
+    {
+      value: "RAFIKI_NDUGU",
+      label: {
+        sw: "Rafiki au Ndugu (Msaada kwa mtu mwingine)",
+        en: "Friend or Relative (Assisting another person)",
+      },
+    },
+    {
+      value: "MGONJWA_MZEE",
+      label: {
+        sw: "Mtu Mgonjwa / Mzee (Hawezi kuja mwenyewe)",
+        en: "Sick Person / Elderly (Unable to come in person)",
+      },
+    },
+    {
+      value: "KUPOTEZA_NYARAKA",
+      label: {
+        sw: "Kupoteza Nyaraka za Awali (Lost original documents)",
+        en: "Lost Original Documents",
+      },
+    },
+    {
+      value: "KUBADILISHA_TAARIFA",
+      label: {
+        sw: "Kubadilisha Taarifa (Jina, Anwani, n.k.)",
+        en: "Update Information (Name, Address, etc.)",
+      },
+    },
+    {
+      value: "MAHITAJI_YA_KAZI",
+      label: {
+        sw: "Mahitaji ya Kazi / Taasisi Nyingine",
+        en: "Work / Different Institution Requirement",
+      },
+    },
     { value: "NYINGINEZO", label: { sw: "Sababu Nyingine (Eleza)", en: "Other Reason (Specify)" } },
   ];
   const [repeatReasonOther, setRepeatReasonOther] = useState("");
@@ -137,7 +172,9 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
         if (!cancelled) setResidentGateLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [user?.id, isResidentIdentity]);
 
   // Pass the FULL user profile to forms so every field (gender, date_of_birth,
@@ -285,14 +322,21 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
           {/* Existing app info */}
           {existingResidentApp && (
             <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 flex items-start gap-3">
-              <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0 text-sm">📄</div>
+              <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0 text-sm">
+                📄
+              </div>
               <div>
                 <p className="text-sm font-bold text-stone-700">
-                  {L("Maombi yaliyopo:", "Existing application:")} {existingResidentApp.application_number}
+                  {L("Maombi yaliyopo:", "Existing application:")}{" "}
+                  {existingResidentApp.application_number}
                 </p>
                 <p className="text-xs text-stone-500 mt-0.5">
-                  {L("Hali:", "Status:")} <span className="font-medium capitalize">{existingResidentApp.status}</span>
-                  {" · "}{new Date(existingResidentApp.created_at).toLocaleDateString(lang === "sw" ? "sw-TZ" : "en-TZ")}
+                  {L("Hali:", "Status:")}{" "}
+                  <span className="font-medium capitalize">{existingResidentApp.status}</span>
+                  {" · "}
+                  {new Date(existingResidentApp.created_at).toLocaleDateString(
+                    lang === "sw" ? "sw-TZ" : "en-TZ",
+                  )}
                 </p>
               </div>
             </div>
@@ -308,7 +352,10 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
                 <button
                   key={r.value}
                   type="button"
-                  onClick={() => { setRepeatReason(r.value); setRepeatReasonOther(""); }}
+                  onClick={() => {
+                    setRepeatReason(r.value);
+                    setRepeatReasonOther("");
+                  }}
                   className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all text-sm font-medium ${
                     repeatReason === r.value
                       ? "border-emerald-500 bg-emerald-50 text-emerald-800"
@@ -316,10 +363,16 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
-                      repeatReason === r.value ? "border-emerald-500 bg-emerald-500" : "border-stone-300"
-                    }`}>
-                      {repeatReason === r.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
+                        repeatReason === r.value
+                          ? "border-emerald-500 bg-emerald-500"
+                          : "border-stone-300"
+                      }`}
+                    >
+                      {repeatReason === r.value && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      )}
                     </div>
                     {lang === "sw" ? r.label.sw : r.label.en}
                   </div>
@@ -332,7 +385,10 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
                 rows={3}
                 value={repeatReasonOther}
                 onChange={(e) => setRepeatReasonOther(e.target.value)}
-                placeholder={L("Eleza sababu yako kwa undani...", "Describe your reason in detail...")}
+                placeholder={L(
+                  "Eleza sababu yako kwa undani...",
+                  "Describe your reason in detail...",
+                )}
                 className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
               />
             )}
@@ -428,14 +484,16 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
             const FormComponent = SERVICE_FORMS[selectedService.name];
             const submitWithReason = (formData: Record<string, unknown>, files?: File[]) => {
               // Inject repeat reason metadata for Resident Identity repeat applications
-              const enriched = isResidentIdentity && repeatReason
-                ? {
-                    ...formData,
-                    repeat_reason: repeatReason,
-                    repeat_reason_detail: repeatReason === "NYINGINEZO" ? repeatReasonOther : undefined,
-                    is_repeat_application: true,
-                  }
-                : formData;
+              const enriched =
+                isResidentIdentity && repeatReason
+                  ? {
+                      ...formData,
+                      repeat_reason: repeatReason,
+                      repeat_reason_detail:
+                        repeatReason === "NYINGINEZO" ? repeatReasonOther : undefined,
+                      is_repeat_application: true,
+                    }
+                  : formData;
               onSubmit(enriched, files);
             };
             return (
@@ -455,9 +513,16 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
                 : selectedService.form_schema
             }
             onSubmit={(formData, files) => {
-              const enriched = isResidentIdentity && repeatReason
-                ? { ...formData, repeat_reason: repeatReason, repeat_reason_detail: repeatReason === "NYINGINEZO" ? repeatReasonOther : undefined, is_repeat_application: true }
-                : formData;
+              const enriched =
+                isResidentIdentity && repeatReason
+                  ? {
+                      ...formData,
+                      repeat_reason: repeatReason,
+                      repeat_reason_detail:
+                        repeatReason === "NYINGINEZO" ? repeatReasonOther : undefined,
+                      is_repeat_application: true,
+                    }
+                  : formData;
               onSubmit(enriched, files);
             }}
             lang={lang}
