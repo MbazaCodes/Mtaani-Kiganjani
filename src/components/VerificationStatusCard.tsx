@@ -192,7 +192,53 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
     );
   }
 
-  // ── Main progress card ────────────────────────────────────────────────────
+  // ── Profile completed — show success card, not CTAs ──────────────────
+  if (tier === "PROFILE_COMPLETED") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl p-5 text-white shadow-lg shadow-orange-200"
+      >
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+              <Shield size={18} className="text-white" />
+            </div>
+            <div>
+              <p className="font-black text-sm">{L("Wasifu Umekamilika", "Profile Completed")}</p>
+              <p className="text-orange-200 text-[11px] font-medium">
+                {L("Ufikiaji wa Kawaida", "Standard Access")}
+              </p>
+            </div>
+          </div>
+          <span className="px-2 py-1 bg-white/20 rounded-lg text-[10px] font-black uppercase tracking-wide">
+            {L("TIER 2", "TIER 2")}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {[...BENEFITS.basic, ...BENEFITS.standard].slice(0, 4).map((b, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-orange-100"
+            >
+              <CheckCircle2 size={10} className="text-orange-300 shrink-0" />
+              {lang === "sw" ? b.sw : b.en}
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={onUploadId}
+          className="w-full h-9 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+        >
+          <ShieldCheck size={13} />{" "}
+          {L("Pandisha Daraja - Thibitisha NIDA", "Upgrade — Verify NIDA")}
+        </button>
+      </motion.div>
+    );
+  }
+
+  // ── Main progress card (UNVERIFIED / PHONE_VERIFIED / EMAIL_VERIFIED) ──
   const tierRankCurrent = tierRank(tier);
 
   return (
@@ -320,31 +366,27 @@ export const VerificationStatusCard: React.FC<VerificationStatusCardProps> = ({
         </div>
       </div>
 
-      {/* CTAs */}
-      {tier !== "NIDA_VERIFIED" && (
-        <div className="px-5 pb-5 flex gap-2">
-          {tier !== "PROFILE_COMPLETED" && (
-            <button
-              onClick={onCompleteProfile}
-              className="flex-1 h-9 bg-stone-900 hover:bg-black text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
-            >
-              <Star size={11} /> {L("Kamilisha Wasifu", "Complete Profile")}
-            </button>
-          )}
-          <button
-            onClick={onUploadId}
-            className="flex-1 h-9 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
-          >
-            <Shield size={11} /> {L("Pakia NIDA", "Upload ID")}
-          </button>
-          <button
-            onClick={onBookVisit}
-            className="flex-1 h-9 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
-          >
-            <ArrowUpRight size={11} /> {L("Tembelea Ofisi", "Book Visit")}
-          </button>
-        </div>
-      )}
+      {/* CTAs — only shown for UNVERIFIED / PHONE_VERIFIED / EMAIL_VERIFIED */}
+      <div className="px-5 pb-5 flex gap-2">
+        <button
+          onClick={onCompleteProfile}
+          className="flex-1 h-9 bg-stone-900 hover:bg-black text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
+        >
+          <Star size={11} /> {L("Kamilisha Wasifu", "Complete Profile")}
+        </button>
+        <button
+          onClick={onUploadId}
+          className="flex-1 h-9 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
+        >
+          <Shield size={11} /> {L("Pakia NIDA", "Upload ID")}
+        </button>
+        <button
+          onClick={onBookVisit}
+          className="flex-1 h-9 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all"
+        >
+          <ArrowUpRight size={11} /> {L("Tembelea Ofisi", "Book Visit")}
+        </button>
+      </div>
     </motion.div>
   );
 };

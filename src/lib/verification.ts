@@ -131,16 +131,18 @@ export function getUserTier(user: Partial<UserProfile> | null | undefined): Veri
   // If NIDA present, always NIDA_VERIFIED regardless of stored level
   if (user.nida_number && user.is_verified) return "NIDA_VERIFIED";
 
-  // Derive from profile completeness (overrides stored PHONE/EMAIL_VERIFIED)
+  // Respect stored verification_level for verified users (e.g. PROFILE_COMPLETED
+  // set by staff or after profile save) — only downgrade if profile completion < 50%
   if (user.is_verified) {
+    if (lvl === "PROFILE_COMPLETED") return "PROFILE_COMPLETED";
+    if (lvl === "EMAIL_VERIFIED") return "EMAIL_VERIFIED";
+    if (lvl === "PHONE_VERIFIED") return lvl;
+
+    // Derive from profile completeness if no stored level
     const pct = getProfileCompletion(user);
     if (pct >= 70) return "PROFILE_COMPLETED";
     return user.is_diaspora ? "EMAIL_VERIFIED" : "PHONE_VERIFIED";
   }
-
-  if (lvl === "PROFILE_COMPLETED") return "PROFILE_COMPLETED";
-  if (lvl === "EMAIL_VERIFIED") return "EMAIL_VERIFIED";
-  if (lvl === "PHONE_VERIFIED") return "PHONE_VERIFIED";
 
   return "UNVERIFIED";
 }

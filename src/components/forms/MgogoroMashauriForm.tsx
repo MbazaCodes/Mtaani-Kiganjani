@@ -195,7 +195,7 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
     }
     const term = "%" + q + "%";
     const { data } = await supabase
-      .from("profiles")
+      .from("users")
       .select("id, first_name, last_name, phone, nida_number")
       .or(
         "first_name.ilike." +
@@ -307,7 +307,7 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
     setRespondentError("");
     setRespondentFound(null);
     try {
-      let query = supabase.from("profiles").select("*");
+      let query = supabase.from("users").select("*");
       if (vals.respondent_search_type === "NIDA") query = query.eq("nida_number", term);
       if (vals.respondent_search_type === "PHONE") query = query.eq("phone", term);
       if (vals.respondent_search_type === "CT_ID") query = query.eq("citizen_id", term);

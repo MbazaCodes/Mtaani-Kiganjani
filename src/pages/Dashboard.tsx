@@ -47,7 +47,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ applications, setView, onRefresh }: DashboardProps) {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { lang } = useLanguage();
   const L = (sw: string, en: string) => (lang === "sw" ? sw : en);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -403,9 +403,10 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
         user={localUser}
         lang={lang}
         onClose={() => setShowProfileModal(false)}
-        onSaved={(updated) => {
+        onSaved={async (updated) => {
           setLocalUser((prev) => ({ ...prev, ...updated }));
           setShowProfileModal(false);
+          await refreshProfile();
         }}
       />
 
