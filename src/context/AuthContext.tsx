@@ -246,6 +246,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     logActivity(user?.id, "logout");
+    // Signal to SessionTimeout that this is a deliberate logout, not an expiry
+    (window as unknown as Record<string, unknown>)["__emtaaSigningOut"] = true;
     // Clear local state immediately so UI responds right away
     setUser(null);
     setSession(null);
@@ -259,6 +261,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ]);
     } catch {
       // Ignore — local state already cleared, user is logged out in the UI
+    } finally {
+      (window as unknown as Record<string, unknown>)["__emtaaSigningOut"] = false;
     }
   };
 
