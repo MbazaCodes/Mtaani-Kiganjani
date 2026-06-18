@@ -24,9 +24,8 @@ import { formatCurrency, getCurrencyForUser } from "../lib/currency";
 import { DocumentRenderer, DocumentPreview } from "../components/DocumentRenderer";
 import { cn } from "@/lib/utils";
 
-// ── PDF ReceiptPDF inline ─────────────────────────────────────────────────────
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { ReceiptPDF } from "../components/ReceiptPDF";
+import { RisitiMalipoPDF } from "@/components/documents/RisitiMalipoPDF";
 
 interface ApplicationsProps {
   applications: Application[];
@@ -333,7 +332,7 @@ export function Applications({ applications, drafts = [], onPay, onRefresh, onRe
                               <DocumentRenderer application={app} lang={lang} />
 
                               {/* Receipt */}
-                              <PDFLink document={<ReceiptPDF application={app} lang={lang} />} fileName={`Risiti_${app.application_number}.pdf`}>
+                              <PDFLink document={<RisitiMalipoPDF application={app} lang={lang} />} fileName={`Risiti_${app.application_number}.pdf`}>
                                 {({ loading }) => (
                                   <button disabled={loading}
                                     className="flex items-center gap-1.5 px-3 py-2 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-xl font-bold text-sm transition-all disabled:opacity-50">

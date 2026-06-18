@@ -30,10 +30,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { ApplicationChat } from "@/components/ApplicationChat";
-import { pdf } from "@react-pdf/renderer";
-import { MakubalianoMauzianoPDF } from "@/components/documents/MakubalianoMauzianoPDF";
-import { MakubalianoPangoPDF } from "@/components/documents/MakubalianoPangoPDF";
-import { generateQRDataUrl } from "@/lib/qr";
+import { downloadAgreementPDF } from "@/lib/pdfDownload";
 import { CitizenProfileViewer } from "@/components/CitizenProfileViewer";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -1508,28 +1505,13 @@ export const BusinessApproval: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={async () => {
-                          try {
-                            const { data: fullApp } = await supabase
-                              .from("applications")
-                              .select("*, users:user_id(first_name, middle_name, last_name, nida_number, phone, region, district, ward, sex, date_of_birth)")
-                              .eq("id", selectedAgreement.id)
-                              .maybeSingle();
-                            if (!fullApp) return;
-                            const qrUrl = await generateQRDataUrl(fullApp, "DOC");
-                            const isSale = (selectedAgreement.service_name || "").includes("Mauzo");
-                            const Comp = isSale ? MakubalianoMauzianoPDF : MakubalianoPangoPDF;
-                            const blob = await pdf(<Comp application={fullApp} lang={lang} qrDataUrl={qrUrl} />).toBlob();
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement("a");
-                            a.href = url;
-                            a.download = `Agreement_${selectedAgreement.application_number || "doc"}.pdf`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(url);
-                          } catch (err) {
-                            console.error("PDF download error:", err);
-                          }
+                          await downloadAgreementPDF(
+                            supabase,
+                            selectedAgreement.id,
+                            selectedAgreement.application_number ?? "",
+                            selectedAgreement.service_name ?? "",
+                            lang,
+                          );
                         }}
                         className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                       >

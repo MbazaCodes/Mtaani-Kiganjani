@@ -1402,7 +1402,7 @@ Timestamp: ${new Date(log.created_at).toLocaleString()}
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
+                <div className="flex gap-3 no-print">
                   <button
                     onClick={() => copyLogToClipboard(selectedLog)}
                     className="flex-1 h-12 bg-stone-100 text-stone-700 rounded-xl font-medium hover:bg-stone-200 transition-all flex items-center justify-center gap-2"

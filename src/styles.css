@@ -20,3 +20,4 @@
 
 /* Re-export the canonical globals stylesheet */
 @import "./styles/globals.css";
+@import "./styles/print.css";

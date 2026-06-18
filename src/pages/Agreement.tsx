@@ -1,11 +1,8 @@
 import { cn } from "@/lib/utils";
 import { SignaturePad } from "@/components/ui/SignaturePad";
-import { pdf } from "@react-pdf/renderer";
 import { CertificatePDFDocument } from "@/components/DocumentRenderer";
-import { generateQRDataUrl } from "@/lib/qr";
+import { downloadAgreementPDF } from "@/lib/pdfDownload";
 import { ApplicationChat } from "@/components/ApplicationChat";
-import { MakubalianoMauzianoPDF } from "@/components/documents/MakubalianoMauzianoPDF";
-import { MakubalianoPangoPDF } from "@/components/documents/MakubalianoPangoPDF";
 /**
  * Agreement / Business Portal
  *
@@ -211,41 +208,8 @@ export function Agreement() {
 
   const handleDownloadAgreement = async (agr: AgreementApp) => {
     setDownloading(true);
-    try {
-      // Fetch full application data
-      const { data: fullApp } = await supabase
-        .from("applications")
-        .select("*, users:user_id(first_name, middle_name, last_name, nida_number, phone, region, district, ward, sex, date_of_birth)")
-        .eq("id", agr.id)
-        .maybeSingle();
-      if (!fullApp) throw new Error("Application not found");
-
-      // Generate QR
-      const qrUrl = await generateQRDataUrl(fullApp, "DOC");
-
-      // Choose the right PDF component
-      const isSale = (agr.service_name || "").includes("Mauzo") || (agr.service_name || "").includes("Sale");
-      const PdfComponent = isSale ? MakubalianoMauzianoPDF : MakubalianoPangoPDF;
-
-      // Render to blob
-      const blob = await pdf(
-        <PdfComponent application={fullApp} lang={lang} qrDataUrl={qrUrl} />
-      ).toBlob();
-
-      // Trigger download
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Agreement_${agr.application_number || "doc"}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("PDF download error:", err);
-    } finally {
-      setDownloading(false);
-    }
+    await downloadAgreementPDF(supabase, agr.id, agr.application_number ?? "", agr.service_name ?? "", lang);
+    setDownloading(false);
   };
   const [buyerSignature, setBuyerSignature] = useState("");
 

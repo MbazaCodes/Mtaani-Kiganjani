@@ -387,15 +387,18 @@ export const commonStyles = StyleSheet.create({
 /** Generate the QR code image URL (external API fallback used by default).
  *  For async pre-generation use generateQRDataUrl from src/lib/qr.ts.
  */
-export const generateQRCodeUrl = (application: Application, serviceCode: string): string => {
-  const payload = JSON.stringify({
-    ref: application.application_number ?? "",
-    id: application.id,
-    svc: serviceCode,
-    dt: new Date().toISOString().split("T")[0],
-  });
-  return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(payload)}`;
-};
+/** 1×1 transparent PNG — safe synchronous placeholder (use useQRCode hook for the real QR). */
+const BLANK_QR_PNG =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+/** @deprecated Use generateQRDataUrl from src/lib/qr.ts (async) via the useQRCode hook.
+ *  This sync version returns a blank placeholder — it exists only so PDF components
+ *  have a safe non-null fallback when qrDataUrl prop is not yet available.
+ */
+export const generateQRCodeUrl = (
+  _application: Application,
+  _serviceCode: string,
+): string => BLANK_QR_PNG;
 
 export const formatFullName = (
   user: Partial<Pick<UserProfile, "first_name" | "middle_name" | "last_name">> | null | undefined,
