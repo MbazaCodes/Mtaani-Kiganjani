@@ -106,6 +106,16 @@ export const DocumentRenderer: React.FC<{
   const qrDataUrl = useQRCode(application, code);
   const filename = `${filenamePrefix}-${application.application_number}.pdf`;
 
+  // Resolve photo: prop chain matches what PDF components expect
+  const fd = (application.form_data || {}) as Record<string, unknown>;
+  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string }[];
+  const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
+  const photoUrl =
+    selfieDoc?.dataUrl ||
+    (application.users as Record<string, unknown> | null)?.photo_url as string | null ||
+    fd.photo_url as string | null ||
+    null;
+
   if (!qrDataUrl) {
     return (
       <span className="inline-flex items-center gap-2 text-sm text-stone-400">
@@ -116,7 +126,7 @@ export const DocumentRenderer: React.FC<{
 
   return (
     <PDFDownloadLink
-      document={<Component application={application} lang={lang} qrDataUrl={qrDataUrl} />}
+      document={<Component application={application} lang={lang} qrDataUrl={qrDataUrl} photoUrl={photoUrl} />}
       fileName={filename}
     >
       {({ loading }) => (
@@ -149,6 +159,16 @@ export const DocumentPreview: React.FC<{
   const qrDataUrl = useQRCode(application, code);
   const filename = `${filenamePrefix}-${application.application_number}.pdf`;
   const [ready, setReady] = React.useState(false);
+
+  // Resolve photo: same chain as DocumentRenderer
+  const fd = (application.form_data || {}) as Record<string, unknown>;
+  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string }[];
+  const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
+  const photoUrl =
+    selfieDoc?.dataUrl ||
+    (application.users as Record<string, unknown> | null)?.photo_url as string | null ||
+    fd.photo_url as string | null ||
+    null;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -204,7 +224,7 @@ export const DocumentPreview: React.FC<{
             </button>
           ) : (
             <PDFDownloadLink
-              document={<Component application={application} lang={lang} qrDataUrl={qrDataUrl} />}
+              document={<Component application={application} lang={lang} qrDataUrl={qrDataUrl} photoUrl={photoUrl} />}
               fileName={filename}
             >
               {({ loading, error }) =>

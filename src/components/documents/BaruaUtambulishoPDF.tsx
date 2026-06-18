@@ -83,6 +83,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
   application,
   lang,
   qrDataUrl,
+  photoUrl,
 }) => {
   const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
@@ -91,6 +92,11 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
   const weoName = fd.weo_name;
   const qr = qrDataUrl || generateQRCodeUrl(application, "IL");
   const sw = lang === "sw";
+
+  // Photo: prop → uploaded selfie → profile photo_url → placeholder
+  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string }[];
+  const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
+  const photo = photoUrl || selfieDoc?.dataUrl || user?.photo_url || fd.photo_url || null;
 
   const institutions = Array.isArray(fd.institutions) ? (fd.institutions as any[]) : [];
   const firstInst = institutions[0] || {};
@@ -123,8 +129,21 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
       <Page size="A4" style={s.page}>
         <Text style={s.watermark}>E-MTAA</Text>
 
+        {/* ── Photo box (top-left, absolute) ── */}
+        <View style={s.photoSection}>
+          <View style={s.photoBox}>
+            {photo ? (
+              <Image src={photo} style={s.photo} />
+            ) : (
+              <Text style={s.photoPlaceholder}>{"PICHA\nPHOTO"}</Text>
+            )}
+          </View>
+          <Text style={s.nidaLabel}>NIDA</Text>
+          <Text style={s.nidaNumber}>{user?.nida_number || fd.applicant_nida || "—"}</Text>
+        </View>
+
         {/* Header */}
-        <View style={[s.header, { paddingLeft: 0 }]}>
+        <View style={s.header}>
           <Image src={TANZANIA_LOGO_BASE64} style={s.logo} />
           <Text style={s.country}>JAMHURI YA MUUNGANO WA TANZANIA</Text>
           <Text style={s.office}>OFISI YA RAIS — TAMISEMI</Text>
