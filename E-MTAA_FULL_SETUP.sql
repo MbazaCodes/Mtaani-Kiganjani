@@ -589,18 +589,22 @@ DROP POLICY IF EXISTS "users_update_own"  ON public.users;
 DROP POLICY IF EXISTS "users_staff_select" ON public.users;
 
 DROP POLICY IF EXISTS "users_select_own" ON public.users;
+DROP POLICY IF EXISTS "users_select_own" ON public.users;
 CREATE POLICY "users_select_own" ON public.users
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "users_insert_own" ON public.users;
 DROP POLICY IF EXISTS "users_insert_own" ON public.users;
 CREATE POLICY "users_insert_own" ON public.users
   FOR INSERT WITH CHECK (auth.uid() = id);
 
 DROP POLICY IF EXISTS "users_update_own" ON public.users;
+DROP POLICY IF EXISTS "users_update_own" ON public.users;
 CREATE POLICY "users_update_own" ON public.users
   FOR UPDATE USING (auth.uid() = id);
 
 -- Staff/admin: can read all citizens
+DROP POLICY IF EXISTS "users_staff_select" ON public.users;
 DROP POLICY IF EXISTS "users_staff_select" ON public.users;
 CREATE POLICY "users_staff_select" ON public.users
   FOR SELECT USING (
@@ -612,6 +616,7 @@ CREATE POLICY "users_staff_select" ON public.users
   );
 
 -- Staff/admin: can update citizens (for verification upgrades)
+DROP POLICY IF EXISTS "users_staff_update" ON public.users;
 DROP POLICY IF EXISTS "users_staff_update" ON public.users;
 CREATE POLICY "users_staff_update" ON public.users
   FOR UPDATE USING (
@@ -630,23 +635,28 @@ DROP POLICY IF EXISTS "applications_staff_select" ON public.applications;
 DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
 
 DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
+DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
 CREATE POLICY "applications_select_own" ON public.applications
   FOR SELECT USING (user_id = auth.uid() OR second_party_user_id = auth.uid());
 
+DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
 DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
 CREATE POLICY "applications_insert_own" ON public.applications
   FOR INSERT WITH CHECK (user_id = auth.uid());
 
 DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
+DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
 CREATE POLICY "applications_update_own" ON public.applications
   FOR UPDATE USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "applications_staff_select" ON public.applications;
 DROP POLICY IF EXISTS "applications_staff_select" ON public.applications;
 CREATE POLICY "applications_staff_select" ON public.applications
   FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role IN ('staff','admin'))
   );
 
+DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
 DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
 CREATE POLICY "applications_staff_update" ON public.applications
   FOR UPDATE USING (
@@ -655,16 +665,27 @@ CREATE POLICY "applications_staff_update" ON public.applications
 
 -- ── 12. INDEXES ───────────────────────────────────────────────────────────────
 
+DROP INDEX IF EXISTS "idx_users_phone";
 CREATE INDEX IF NOT EXISTS idx_users_phone   ON public.users(phone);
+DROP INDEX IF EXISTS "idx_users_email";
 CREATE INDEX IF NOT EXISTS idx_users_email   ON public.users(email);
+DROP INDEX IF EXISTS "idx_users_nida";
 CREATE INDEX IF NOT EXISTS idx_users_nida    ON public.users(nida_number);
+DROP INDEX IF EXISTS "idx_users_role";
 CREATE INDEX IF NOT EXISTS idx_users_role    ON public.users(role);
+DROP INDEX IF EXISTS "idx_users_region";
 CREATE INDEX IF NOT EXISTS idx_users_region  ON public.users(region);
+DROP INDEX IF EXISTS "idx_users_verification";
 CREATE INDEX IF NOT EXISTS idx_users_verification ON public.users(verification_level);
+DROP INDEX IF EXISTS "idx_applications_user";
 CREATE INDEX IF NOT EXISTS idx_applications_user    ON public.applications(user_id);
+DROP INDEX IF EXISTS "idx_applications_status";
 CREATE INDEX IF NOT EXISTS idx_applications_status  ON public.applications(status);
+DROP INDEX IF EXISTS "idx_applications_service";
 CREATE INDEX IF NOT EXISTS idx_applications_service ON public.applications(service_name);
+DROP INDEX IF EXISTS "idx_applications_region";
 CREATE INDEX IF NOT EXISTS idx_applications_region  ON public.applications(region);
+DROP INDEX IF EXISTS "idx_applications_number";
 CREATE INDEX IF NOT EXISTS idx_applications_number  ON public.applications(application_number);
 
 -- ── 13. GRANTS ────────────────────────────────────────────────────────────────
@@ -694,11 +715,14 @@ CREATE TABLE IF NOT EXISTS public.services (
   created_at   timestamptz NOT NULL DEFAULT now()
 );
 
+DROP INDEX IF EXISTS "idx_services_active";
 CREATE INDEX IF NOT EXISTS idx_services_active ON public.services(active);
 
 ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "services_select_all" ON public.services;
+DROP POLICY IF EXISTS "services_select_all" ON public.services;
 CREATE POLICY "services_select_all" ON public.services FOR SELECT USING (true);
+DROP POLICY IF EXISTS "services_staff_write" ON public.services;
 DROP POLICY IF EXISTS "services_staff_write" ON public.services;
 CREATE POLICY "services_staff_write" ON public.services
   FOR ALL USING (
@@ -795,25 +819,30 @@ ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 -- Citizens can read their own profile
 DROP POLICY IF EXISTS "users_select_own" ON public.users;
+DROP POLICY IF EXISTS "users_select_own" ON public.users;
 CREATE POLICY "users_select_own" ON public.users
   FOR SELECT USING (auth.uid() = id);
 
 -- Citizens can update their own profile
+DROP POLICY IF EXISTS "users_update_own" ON public.users;
 DROP POLICY IF EXISTS "users_update_own" ON public.users;
 CREATE POLICY "users_update_own" ON public.users
   FOR UPDATE USING (auth.uid() = id);
 
 -- Staff can read all citizens (needed for verification, support, review)
 DROP POLICY IF EXISTS "users_select_staff" ON public.users;
+DROP POLICY IF EXISTS "users_select_staff" ON public.users;
 CREATE POLICY "users_select_staff" ON public.users
   FOR SELECT USING (public.is_staff_or_admin());
 
 -- Admin can update any user (role changes, verification, etc.)
 DROP POLICY IF EXISTS "users_update_admin" ON public.users;
+DROP POLICY IF EXISTS "users_update_admin" ON public.users;
 CREATE POLICY "users_update_admin" ON public.users
   FOR UPDATE USING (public.is_admin());
 
 -- Service creation (signup) — allow insert for authenticated users
+DROP POLICY IF EXISTS "users_insert_self" ON public.users;
 DROP POLICY IF EXISTS "users_insert_self" ON public.users;
 CREATE POLICY "users_insert_self" ON public.users
   FOR INSERT WITH CHECK (auth.uid() = id);
@@ -827,27 +856,32 @@ DO $$ BEGIN
     
     -- Citizen reads own profile
 DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
+    DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
     CREATE POLICY "profiles_select_own" ON public.profiles
       FOR SELECT USING (auth.uid() = id);
     
     -- Citizen updates own profile
 DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+    DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
     CREATE POLICY "profiles_update_own" ON public.profiles
       FOR UPDATE USING (auth.uid() = id);
     
     -- Staff/admin can read all profiles (for buyer/tenant lookup in Sales/Rental)
 DROP POLICY IF EXISTS "profiles_select_staff" ON public.profiles;
+    DROP POLICY IF EXISTS "profiles_select_staff" ON public.profiles;
     CREATE POLICY "profiles_select_staff" ON public.profiles
       FOR SELECT USING (public.is_staff_or_admin());
 
     -- Insert own profile
 DROP POLICY IF EXISTS "profiles_insert_self" ON public.profiles;
+    DROP POLICY IF EXISTS "profiles_insert_self" ON public.profiles;
     CREATE POLICY "profiles_insert_self" ON public.profiles
       FOR INSERT WITH CHECK (auth.uid() = id);
 
     -- Allow authenticated users to search by NIDA/phone (for agreement counterparty lookup)
     -- This is safe because the search only returns basic public fields
 DROP POLICY IF EXISTS "profiles_select_authenticated" ON public.profiles;
+    DROP POLICY IF EXISTS "profiles_select_authenticated" ON public.profiles;
     CREATE POLICY "profiles_select_authenticated" ON public.profiles
       FOR SELECT USING (auth.uid() IS NOT NULL);
   END IF;
@@ -860,30 +894,36 @@ ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 
 -- Citizen can read their own applications
 DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
+DROP POLICY IF EXISTS "applications_select_own" ON public.applications;
 CREATE POLICY "applications_select_own" ON public.applications
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Citizen can insert their own applications
+DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
 DROP POLICY IF EXISTS "applications_insert_own" ON public.applications;
 CREATE POLICY "applications_insert_own" ON public.applications
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Staff/admin can read all applications
 DROP POLICY IF EXISTS "applications_select_staff" ON public.applications;
+DROP POLICY IF EXISTS "applications_select_staff" ON public.applications;
 CREATE POLICY "applications_select_staff" ON public.applications
   FOR SELECT USING (public.is_staff_or_admin());
 
 -- Staff/admin can update applications (approve, reject, etc.)
+DROP POLICY IF EXISTS "applications_update_staff" ON public.applications;
 DROP POLICY IF EXISTS "applications_update_staff" ON public.applications;
 CREATE POLICY "applications_update_staff" ON public.applications
   FOR UPDATE USING (public.is_staff_or_admin());
 
 -- Citizen can update own application (for buyer_accepted / tenant_accepted)
 DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
+DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
 CREATE POLICY "applications_update_own" ON public.applications
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Also allow target_user to update (counterparty acceptance)
+DROP POLICY IF EXISTS "applications_update_target" ON public.applications;
 DROP POLICY IF EXISTS "applications_update_target" ON public.applications;
 CREATE POLICY "applications_update_target" ON public.applications
   FOR UPDATE USING (auth.uid() = target_user_id);
@@ -895,20 +935,24 @@ ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- User can only see their own notifications
 DROP POLICY IF EXISTS "notifications_select_own" ON public.notifications;
+DROP POLICY IF EXISTS "notifications_select_own" ON public.notifications;
 CREATE POLICY "notifications_select_own" ON public.notifications
   FOR SELECT USING (auth.uid() = user_id);
 
 -- User can update their own notifications (mark as read)
+DROP POLICY IF EXISTS "notifications_update_own" ON public.notifications;
 DROP POLICY IF EXISTS "notifications_update_own" ON public.notifications;
 CREATE POLICY "notifications_update_own" ON public.notifications
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Any authenticated user can insert notifications (forms create notifications for others)
 DROP POLICY IF EXISTS "notifications_insert_auth" ON public.notifications;
+DROP POLICY IF EXISTS "notifications_insert_auth" ON public.notifications;
 CREATE POLICY "notifications_insert_auth" ON public.notifications
   FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Staff/admin can read all notifications (for support)
+DROP POLICY IF EXISTS "notifications_select_staff" ON public.notifications;
 DROP POLICY IF EXISTS "notifications_select_staff" ON public.notifications;
 CREATE POLICY "notifications_select_staff" ON public.notifications
   FOR SELECT USING (public.is_staff_or_admin());
@@ -920,25 +964,30 @@ ALTER TABLE public.agreement_notifications ENABLE ROW LEVEL SECURITY;
 
 -- Recipient can see their agreement notifications
 DROP POLICY IF EXISTS "agreement_notifs_select_recipient" ON public.agreement_notifications;
+DROP POLICY IF EXISTS "agreement_notifs_select_recipient" ON public.agreement_notifications;
 CREATE POLICY "agreement_notifs_select_recipient" ON public.agreement_notifications
   FOR SELECT USING (auth.uid() = recipient_id);
 
 -- Sender can see what they sent
+DROP POLICY IF EXISTS "agreement_notifs_select_sender" ON public.agreement_notifications;
 DROP POLICY IF EXISTS "agreement_notifs_select_sender" ON public.agreement_notifications;
 CREATE POLICY "agreement_notifs_select_sender" ON public.agreement_notifications
   FOR SELECT USING (auth.uid() = sender_id);
 
 -- Recipient can update (accept/reject)
 DROP POLICY IF EXISTS "agreement_notifs_update_recipient" ON public.agreement_notifications;
+DROP POLICY IF EXISTS "agreement_notifs_update_recipient" ON public.agreement_notifications;
 CREATE POLICY "agreement_notifs_update_recipient" ON public.agreement_notifications
   FOR UPDATE USING (auth.uid() = recipient_id);
 
 -- Any authenticated user can insert (seller/landlord creates for buyer/tenant)
 DROP POLICY IF EXISTS "agreement_notifs_insert_auth" ON public.agreement_notifications;
+DROP POLICY IF EXISTS "agreement_notifs_insert_auth" ON public.agreement_notifications;
 CREATE POLICY "agreement_notifs_insert_auth" ON public.agreement_notifications
   FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Staff/admin can read all
+DROP POLICY IF EXISTS "agreement_notifs_select_staff" ON public.agreement_notifications;
 DROP POLICY IF EXISTS "agreement_notifs_select_staff" ON public.agreement_notifications;
 CREATE POLICY "agreement_notifs_select_staff" ON public.agreement_notifications
   FOR SELECT USING (public.is_staff_or_admin());
@@ -950,20 +999,24 @@ ALTER TABLE public.business_registrations ENABLE ROW LEVEL SECURITY;
 
 -- Citizen can read their own registrations
 DROP POLICY IF EXISTS "bizreg_select_own" ON public.business_registrations;
+DROP POLICY IF EXISTS "bizreg_select_own" ON public.business_registrations;
 CREATE POLICY "bizreg_select_own" ON public.business_registrations
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Citizen can insert their own registrations
+DROP POLICY IF EXISTS "bizreg_insert_own" ON public.business_registrations;
 DROP POLICY IF EXISTS "bizreg_insert_own" ON public.business_registrations;
 CREATE POLICY "bizreg_insert_own" ON public.business_registrations
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Staff/admin can read all registrations
 DROP POLICY IF EXISTS "bizreg_select_staff" ON public.business_registrations;
+DROP POLICY IF EXISTS "bizreg_select_staff" ON public.business_registrations;
 CREATE POLICY "bizreg_select_staff" ON public.business_registrations
   FOR SELECT USING (public.is_staff_or_admin());
 
 -- Staff/admin can update registrations (approve/reject)
+DROP POLICY IF EXISTS "bizreg_update_staff" ON public.business_registrations;
 DROP POLICY IF EXISTS "bizreg_update_staff" ON public.business_registrations;
 CREATE POLICY "bizreg_update_staff" ON public.business_registrations
   FOR UPDATE USING (public.is_staff_or_admin());
@@ -977,11 +1030,13 @@ DO $$ BEGIN
     
     -- Everyone can read services
 DROP POLICY IF EXISTS "services_select_all" ON public.services;
+    DROP POLICY IF EXISTS "services_select_all" ON public.services;
     CREATE POLICY "services_select_all" ON public.services
       FOR SELECT USING (true);
     
     -- Only admin can modify services
 DROP POLICY IF EXISTS "services_modify_admin" ON public.services;
+    DROP POLICY IF EXISTS "services_modify_admin" ON public.services;
     CREATE POLICY "services_modify_admin" ON public.services
       FOR ALL USING (public.is_admin());
   END IF;
@@ -996,11 +1051,13 @@ DO $$ BEGIN
     
     -- Only admin can read logs
 DROP POLICY IF EXISTS "logs_select_admin" ON public.activity_logs;
+    DROP POLICY IF EXISTS "logs_select_admin" ON public.activity_logs;
     CREATE POLICY "logs_select_admin" ON public.activity_logs
       FOR SELECT USING (public.is_admin());
     
     -- Any authenticated user can insert logs
 DROP POLICY IF EXISTS "logs_insert_auth" ON public.activity_logs;
+    DROP POLICY IF EXISTS "logs_insert_auth" ON public.activity_logs;
     CREATE POLICY "logs_insert_auth" ON public.activity_logs
       FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
   END IF;
@@ -1015,6 +1072,7 @@ DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'documents') THEN
     -- Upload policy: citizen can upload to business-docs/{their_id}/
 DROP POLICY IF EXISTS "storage_upload_own" ON storage.objects;
+    DROP POLICY IF EXISTS "storage_upload_own" ON storage.objects;
     CREATE POLICY "storage_upload_own" ON storage.objects
       FOR INSERT WITH CHECK (
         bucket_id = 'documents' AND
@@ -1025,6 +1083,7 @@ DROP POLICY IF EXISTS "storage_upload_own" ON storage.objects;
     
     -- Read policy: owner can read their own files
 DROP POLICY IF EXISTS "storage_select_own" ON storage.objects;
+    DROP POLICY IF EXISTS "storage_select_own" ON storage.objects;
     CREATE POLICY "storage_select_own" ON storage.objects
       FOR SELECT USING (
         bucket_id = 'documents' AND
@@ -1034,6 +1093,7 @@ DROP POLICY IF EXISTS "storage_select_own" ON storage.objects;
     
     -- Staff/admin can read all documents
 DROP POLICY IF EXISTS "storage_select_staff" ON storage.objects;
+    DROP POLICY IF EXISTS "storage_select_staff" ON storage.objects;
     CREATE POLICY "storage_select_staff" ON storage.objects
       FOR SELECT USING (
         bucket_id = 'documents' AND
@@ -1052,10 +1112,12 @@ DO $$ BEGIN
     ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
     
 DROP POLICY IF EXISTS "locations_select_all" ON public.locations;
+    DROP POLICY IF EXISTS "locations_select_all" ON public.locations;
     CREATE POLICY "locations_select_all" ON public.locations
       FOR SELECT USING (true);
     
 DROP POLICY IF EXISTS "locations_modify_admin" ON public.locations;
+    DROP POLICY IF EXISTS "locations_modify_admin" ON public.locations;
     CREATE POLICY "locations_modify_admin" ON public.locations
       FOR ALL USING (public.is_admin());
   END IF;
@@ -1104,10 +1166,15 @@ CREATE TABLE IF NOT EXISTS public.office_registry (
   created_by      UUID REFERENCES public.users(id) ON DELETE SET NULL
 );
 
+DROP INDEX IF EXISTS "idx_office_registry_type";
 CREATE INDEX IF NOT EXISTS idx_office_registry_type   ON public.office_registry(office_type);
+DROP INDEX IF EXISTS "idx_office_registry_parent";
 CREATE INDEX IF NOT EXISTS idx_office_registry_parent ON public.office_registry(parent_id);
+DROP INDEX IF EXISTS "idx_office_registry_region";
 CREATE INDEX IF NOT EXISTS idx_office_registry_region ON public.office_registry(region);
+DROP INDEX IF EXISTS "idx_office_registry_active";
 CREATE INDEX IF NOT EXISTS idx_office_registry_active ON public.office_registry(active);
+DROP INDEX IF EXISTS "idx_office_registry_streets";
 CREATE INDEX IF NOT EXISTS idx_office_registry_streets ON public.office_registry USING GIN(served_streets);
 
 -- ── 2. Citizen / application office assignment columns ───────────────────────
@@ -1120,6 +1187,7 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+DROP INDEX IF EXISTS "idx_users_assigned_office";
 CREATE INDEX IF NOT EXISTS idx_users_assigned_office ON public.users(assigned_office_id);
 
 -- ── 3. Server-side office code generation ────────────────────────────────────
@@ -1242,10 +1310,12 @@ $$;
 ALTER TABLE public.office_registry ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS office_registry_select ON public.office_registry;
+DROP POLICY IF EXISTS "office_registry_select" ON public.office_registry;
 CREATE POLICY office_registry_select ON public.office_registry
   FOR SELECT USING (true);  -- everyone can read offices (needed for assignment lookup)
 
 DROP POLICY IF EXISTS office_registry_admin_all ON public.office_registry;
+DROP POLICY IF EXISTS "office_registry_admin_all" ON public.office_registry;
 CREATE POLICY office_registry_admin_all ON public.office_registry
   FOR ALL USING (
     EXISTS (SELECT 1 FROM public.users u WHERE u.id=auth.uid() AND u.role='admin')
@@ -1547,13 +1617,16 @@ BEGIN
 END; $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trigger_set_citizen_id ON public.users;
+DROP TRIGGER IF EXISTS "trigger_set_citizen_id" ON public;
 CREATE TRIGGER trigger_set_citizen_id BEFORE INSERT ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.set_citizen_id();
 
 DROP TRIGGER IF EXISTS trigger_users_updated_at ON public.users;
+DROP TRIGGER IF EXISTS "trigger_users_updated_at" ON public;
 CREATE TRIGGER trigger_users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.trigger_set_updated_at();
 
 DROP TRIGGER IF EXISTS trigger_applications_updated_at ON public.applications;
+DROP TRIGGER IF EXISTS "trigger_applications_updated_at" ON public;
 CREATE TRIGGER trigger_applications_updated_at BEFORE UPDATE ON public.applications FOR EACH ROW EXECUTE FUNCTION public.trigger_set_updated_at();
 
 -- Auto-create profile row on signup
@@ -1574,6 +1647,7 @@ BEGIN
 END; $$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP TRIGGER IF EXISTS "on_auth_user_created" ON auth;
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
@@ -1622,136 +1696,196 @@ ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
+DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 CREATE POLICY "Users can view own profile" ON public.users FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
 CREATE POLICY "Users can insert own profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
 DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
 CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Staff can view all users" ON public.users;
 DROP POLICY IF EXISTS "Staff can view all users" ON public.users;
 CREATE POLICY "Staff can view all users" ON public.users FOR SELECT USING (public.is_admin_or_staff());
 DROP POLICY IF EXISTS "Staff can update users" ON public.users;
+DROP POLICY IF EXISTS "Staff can update users" ON public.users;
 CREATE POLICY "Staff can update users" ON public.users FOR UPDATE USING (public.is_admin_or_staff());
+DROP POLICY IF EXISTS "Admin can delete users" ON public.users;
 DROP POLICY IF EXISTS "Admin can delete users" ON public.users;
 CREATE POLICY "Admin can delete users" ON public.users FOR DELETE USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Anyone can view active services" ON public.services;
+DROP POLICY IF EXISTS "Anyone can view active services" ON public.services;
 CREATE POLICY "Anyone can view active services" ON public.services FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "Staff can manage services" ON public.services;
 DROP POLICY IF EXISTS "Staff can manage services" ON public.services;
 CREATE POLICY "Staff can manage services" ON public.services FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Citizens can view own applications" ON public.applications;
+DROP POLICY IF EXISTS "Citizens can view own applications" ON public.applications;
 CREATE POLICY "Citizens can view own applications" ON public.applications FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Citizens can insert own applications" ON public.applications;
 DROP POLICY IF EXISTS "Citizens can insert own applications" ON public.applications;
 CREATE POLICY "Citizens can insert own applications" ON public.applications FOR INSERT WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Citizens can update own applications" ON public.applications;
+DROP POLICY IF EXISTS "Citizens can update own applications" ON public.applications;
 CREATE POLICY "Citizens can update own applications" ON public.applications FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Second party can view applications" ON public.applications;
 DROP POLICY IF EXISTS "Second party can view applications" ON public.applications;
 CREATE POLICY "Second party can view applications" ON public.applications FOR SELECT USING (second_party_user_id = auth.uid() OR target_user_id = auth.uid());
 DROP POLICY IF EXISTS "Staff can view all applications" ON public.applications;
+DROP POLICY IF EXISTS "Staff can view all applications" ON public.applications;
 CREATE POLICY "Staff can view all applications" ON public.applications FOR SELECT USING (public.is_admin_or_staff());
+DROP POLICY IF EXISTS "Staff can update applications" ON public.applications;
 DROP POLICY IF EXISTS "Staff can update applications" ON public.applications;
 CREATE POLICY "Staff can update applications" ON public.applications FOR UPDATE USING (public.is_admin_or_staff());
 DROP POLICY IF EXISTS "Public can verify issued applications" ON public.applications;
+DROP POLICY IF EXISTS "Public can verify issued applications" ON public.applications;
 CREATE POLICY "Public can verify issued applications" ON public.applications FOR SELECT USING (status = 'issued');
 
+DROP POLICY IF EXISTS "Users can view own payments" ON public.payments;
 DROP POLICY IF EXISTS "Users can view own payments" ON public.payments;
 CREATE POLICY "Users can view own payments" ON public.payments FOR SELECT USING (
   EXISTS (SELECT 1 FROM public.applications WHERE id = payments.application_id AND user_id = auth.uid())
 );
 DROP POLICY IF EXISTS "Users can insert own payments" ON public.payments;
+DROP POLICY IF EXISTS "Users can insert own payments" ON public.payments;
 CREATE POLICY "Users can insert own payments" ON public.payments FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM public.applications WHERE id = payments.application_id AND user_id = auth.uid())
 );
 DROP POLICY IF EXISTS "Staff can view all payments" ON public.payments;
+DROP POLICY IF EXISTS "Staff can view all payments" ON public.payments;
 CREATE POLICY "Staff can view all payments" ON public.payments FOR SELECT USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Anyone can view generated documents" ON public.generated_documents;
+DROP POLICY IF EXISTS "Anyone can view generated documents" ON public.generated_documents;
 CREATE POLICY "Anyone can view generated documents" ON public.generated_documents FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Staff can manage generated documents" ON public.generated_documents;
 DROP POLICY IF EXISTS "Staff can manage generated documents" ON public.generated_documents;
 CREATE POLICY "Staff can manage generated documents" ON public.generated_documents FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Users can view own registrations" ON public.business_registrations;
+DROP POLICY IF EXISTS "Users can view own registrations" ON public.business_registrations;
 CREATE POLICY "Users can view own registrations" ON public.business_registrations FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can insert own registrations" ON public.business_registrations;
+DROP POLICY IF EXISTS "Users can insert own registrations" ON public.business_registrations;
 CREATE POLICY "Users can insert own registrations" ON public.business_registrations FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Staff can manage registrations" ON public.business_registrations;
 DROP POLICY IF EXISTS "Staff can manage registrations" ON public.business_registrations;
 CREATE POLICY "Staff can manage registrations" ON public.business_registrations FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Owners can view own relationships" ON public.client_relationships;
+DROP POLICY IF EXISTS "Owners can view own relationships" ON public.client_relationships;
 CREATE POLICY "Owners can view own relationships" ON public.client_relationships FOR SELECT USING (auth.uid() = owner_id);
+DROP POLICY IF EXISTS "Clients can view own relationships" ON public.client_relationships;
 DROP POLICY IF EXISTS "Clients can view own relationships" ON public.client_relationships;
 CREATE POLICY "Clients can view own relationships" ON public.client_relationships FOR SELECT USING (auth.uid() = client_id);
 DROP POLICY IF EXISTS "Owners can insert relationships" ON public.client_relationships;
+DROP POLICY IF EXISTS "Owners can insert relationships" ON public.client_relationships;
 CREATE POLICY "Owners can insert relationships" ON public.client_relationships FOR INSERT WITH CHECK (auth.uid() = owner_id);
+DROP POLICY IF EXISTS "Owners can update relationships" ON public.client_relationships;
 DROP POLICY IF EXISTS "Owners can update relationships" ON public.client_relationships;
 CREATE POLICY "Owners can update relationships" ON public.client_relationships FOR UPDATE USING (auth.uid() = owner_id);
 
 DROP POLICY IF EXISTS "Users can view own change requests" ON public.profile_change_requests;
+DROP POLICY IF EXISTS "Users can view own change requests" ON public.profile_change_requests;
 CREATE POLICY "Users can view own change requests" ON public.profile_change_requests FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can insert change requests" ON public.profile_change_requests;
+DROP POLICY IF EXISTS "Users can insert change requests" ON public.profile_change_requests;
 CREATE POLICY "Users can insert change requests" ON public.profile_change_requests FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Staff can manage profile change requests" ON public.profile_change_requests;
 DROP POLICY IF EXISTS "Staff can manage profile change requests" ON public.profile_change_requests;
 CREATE POLICY "Staff can manage profile change requests" ON public.profile_change_requests FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Users can view own notifications" ON public.notifications;
+DROP POLICY IF EXISTS "Users can view own notifications" ON public.notifications;
 CREATE POLICY "Users can view own notifications" ON public.notifications FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can update own notifications" ON public.notifications;
+DROP POLICY IF EXISTS "Users can update own notifications" ON public.notifications;
 CREATE POLICY "Users can update own notifications" ON public.notifications FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "System can insert notifications" ON public.notifications;
 DROP POLICY IF EXISTS "System can insert notifications" ON public.notifications;
 CREATE POLICY "System can insert notifications" ON public.notifications FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Users can view own agreement notifications" ON public.agreement_notifications;
+DROP POLICY IF EXISTS "Users can view own agreement notifications" ON public.agreement_notifications;
 CREATE POLICY "Users can view own agreement notifications" ON public.agreement_notifications FOR SELECT USING (recipient_id = auth.uid() OR sender_id = auth.uid());
 DROP POLICY IF EXISTS "Users can insert agreement notifications" ON public.agreement_notifications;
+DROP POLICY IF EXISTS "Users can insert agreement notifications" ON public.agreement_notifications;
 CREATE POLICY "Users can insert agreement notifications" ON public.agreement_notifications FOR INSERT WITH CHECK (sender_id = auth.uid());
+DROP POLICY IF EXISTS "Recipients can update agreement notifications" ON public.agreement_notifications;
 DROP POLICY IF EXISTS "Recipients can update agreement notifications" ON public.agreement_notifications;
 CREATE POLICY "Recipients can update agreement notifications" ON public.agreement_notifications FOR UPDATE USING (recipient_id = auth.uid());
 
 DROP POLICY IF EXISTS "Users can view own documents" ON public.user_documents;
+DROP POLICY IF EXISTS "Users can view own documents" ON public.user_documents;
 CREATE POLICY "Users can view own documents" ON public.user_documents FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can upload own documents" ON public.user_documents;
 DROP POLICY IF EXISTS "Users can upload own documents" ON public.user_documents;
 CREATE POLICY "Users can upload own documents" ON public.user_documents FOR INSERT WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can update own documents" ON public.user_documents;
+DROP POLICY IF EXISTS "Users can update own documents" ON public.user_documents;
 CREATE POLICY "Users can update own documents" ON public.user_documents FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Staff can view all documents" ON public.user_documents;
 DROP POLICY IF EXISTS "Staff can view all documents" ON public.user_documents;
 CREATE POLICY "Staff can view all documents" ON public.user_documents FOR SELECT USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Users can view own sessions" ON public.sessions;
+DROP POLICY IF EXISTS "Users can view own sessions" ON public.sessions;
 CREATE POLICY "Users can view own sessions" ON public.sessions FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can insert own sessions" ON public.sessions;
 DROP POLICY IF EXISTS "Users can insert own sessions" ON public.sessions;
 CREATE POLICY "Users can insert own sessions" ON public.sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can view own activity" ON public.activity_logs;
+DROP POLICY IF EXISTS "Users can view own activity" ON public.activity_logs;
 CREATE POLICY "Users can view own activity" ON public.activity_logs FOR SELECT USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Staff can view all activity" ON public.activity_logs;
+DROP POLICY IF EXISTS "Staff can view all activity" ON public.activity_logs;
 CREATE POLICY "Staff can view all activity" ON public.activity_logs FOR SELECT USING (public.is_admin_or_staff());
+DROP POLICY IF EXISTS "System can insert activity" ON public.activity_logs;
 DROP POLICY IF EXISTS "System can insert activity" ON public.activity_logs;
 CREATE POLICY "System can insert activity" ON public.activity_logs FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Anyone can view locations" ON public.locations;
+DROP POLICY IF EXISTS "Anyone can view locations" ON public.locations;
 CREATE POLICY "Anyone can view locations" ON public.locations FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Staff can manage locations" ON public.locations;
 DROP POLICY IF EXISTS "Staff can manage locations" ON public.locations;
 CREATE POLICY "Staff can manage locations" ON public.locations FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Anyone can view offices" ON public.offices;
+DROP POLICY IF EXISTS "Anyone can view offices" ON public.offices;
 CREATE POLICY "Anyone can view offices" ON public.offices FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Staff can manage offices" ON public.offices;
 DROP POLICY IF EXISTS "Staff can manage offices" ON public.offices;
 CREATE POLICY "Staff can manage offices" ON public.offices FOR ALL USING (public.is_admin_or_staff());
 
 DROP POLICY IF EXISTS "Anyone can view service categories" ON public.service_categories;
+DROP POLICY IF EXISTS "Anyone can view service categories" ON public.service_categories;
 CREATE POLICY "Anyone can view service categories" ON public.service_categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Staff can manage service categories" ON public.service_categories;
 DROP POLICY IF EXISTS "Staff can manage service categories" ON public.service_categories;
 CREATE POLICY "Staff can manage service categories" ON public.service_categories FOR ALL USING (public.is_admin_or_staff());
 
 -- Indexes
+DROP INDEX IF EXISTS "idx_users_nida";
 CREATE INDEX IF NOT EXISTS idx_users_nida ON public.users(nida_number) WHERE nida_number IS NOT NULL;
+DROP INDEX IF EXISTS "idx_users_phone";
 CREATE INDEX IF NOT EXISTS idx_users_phone ON public.users(phone) WHERE phone IS NOT NULL;
+DROP INDEX IF EXISTS "idx_users_email";
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+DROP INDEX IF EXISTS "idx_users_role";
 CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
+DROP INDEX IF EXISTS "idx_applications_user_id";
 CREATE INDEX IF NOT EXISTS idx_applications_user_id ON public.applications(user_id);
+DROP INDEX IF EXISTS "idx_applications_status";
 CREATE INDEX IF NOT EXISTS idx_applications_status ON public.applications(status);
+DROP INDEX IF EXISTS "idx_applications_application_number";
 CREATE INDEX IF NOT EXISTS idx_applications_application_number ON public.applications(application_number);
+DROP INDEX IF EXISTS "idx_payments_application_id";
 CREATE INDEX IF NOT EXISTS idx_payments_application_id ON public.payments(application_id);
+DROP INDEX IF EXISTS "idx_notifications_user_id";
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
 
 -- ═══ PART 5: Fix Profile Creation RPC ═══
@@ -1950,6 +2084,7 @@ END $$;
 
 -- Fix applications RLS: allow staff/admin to update any application
 DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
+DROP POLICY IF EXISTS "applications_staff_update" ON public.applications;
 CREATE POLICY "applications_staff_update"
   ON public.applications FOR UPDATE
   USING (
@@ -1960,6 +2095,7 @@ CREATE POLICY "applications_staff_update"
   );
 
 -- Fix applications RLS: allow citizens to update their own (second_party acceptance etc)
+DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
 DROP POLICY IF EXISTS "applications_update_own" ON public.applications;
 CREATE POLICY "applications_update_own"
   ON public.applications FOR UPDATE
@@ -2027,6 +2163,7 @@ DROP POLICY IF EXISTS "Allow users to update own profile" ON public.users;
 DROP POLICY IF EXISTS "users can update own row" ON public.users;
 
 -- Create correct update policy
+DROP POLICY IF EXISTS "users_update_own" ON public.users;
 CREATE POLICY "users_update_own"
   ON public.users
   FOR UPDATE
@@ -2035,6 +2172,7 @@ CREATE POLICY "users_update_own"
 
 -- Also ensure SELECT works (needed by the update to verify)
 DROP POLICY IF EXISTS "users_select_own" ON public.users;
+DROP POLICY IF EXISTS "users_select_own" ON public.users;
 CREATE POLICY "users_select_own"
   ON public.users
   FOR SELECT
@@ -2042,12 +2180,14 @@ CREATE POLICY "users_select_own"
 
 -- Ensure INSERT works for new signups
 DROP POLICY IF EXISTS "users_insert_own" ON public.users;
+DROP POLICY IF EXISTS "users_insert_own" ON public.users;
 CREATE POLICY "users_insert_own"
   ON public.users
   FOR INSERT
   WITH CHECK (auth.uid() = id);
 
 -- Staff/admin can read all users
+DROP POLICY IF EXISTS "users_staff_select" ON public.users;
 DROP POLICY IF EXISTS "users_staff_select" ON public.users;
 CREATE POLICY "users_staff_select"
   ON public.users
@@ -2061,6 +2201,7 @@ CREATE POLICY "users_staff_select"
   );
 
 -- Staff/admin can update citizens (for verification upgrades)
+DROP POLICY IF EXISTS "users_staff_update" ON public.users;
 DROP POLICY IF EXISTS "users_staff_update" ON public.users;
 CREATE POLICY "users_staff_update"
   ON public.users
