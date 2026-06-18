@@ -276,3 +276,74 @@
   );
   background-size: 1000px 100%;
 }
+
+/* ── Mobile responsiveness utilities ─────────────────────────────────── */
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent horizontal overflow on small screens */
+@media (max-width: 640px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure modal dialogs don't overflow viewport */
+  .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* Dark Mode */
+.dark {
+  --bg-primary: #0c0a09;
+  --bg-secondary: #1c1917;
+  --bg-card: #292524;
+  --text-primary: #fafaf9;
+  --text-secondary: #a8a29e;
+  --border: #44403c;
+}
+
+.dark body { background: var(--bg-primary); color: var(--text-primary); }
+.dark .bg-white { background: var(--bg-card) !important; }
+.dark .bg-stone-50 { background: var(--bg-secondary) !important; }
+.dark .bg-stone-100 { background: #292524 !important; }
+.dark .text-stone-900 { color: var(--text-primary) !important; }
+.dark .text-stone-800 { color: #e7e5e4 !important; }
+.dark .text-stone-700 { color: #d6d3d1 !important; }
+.dark .text-stone-600 { color: #a8a29e !important; }
+.dark .text-stone-500 { color: #78716c !important; }
+.dark .border-stone-200 { border-color: var(--border) !important; }
+.dark .border-stone-100 { border-color: #292524 !important; }
+.dark input, .dark textarea, .dark select {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+/* Dark Mode — colored boxes */
+.dark .bg-emerald-50 { background: #064e3b !important; }
+.dark .bg-blue-50 { background: #1e3a5f !important; }
+.dark .bg-amber-50 { background: #451a03 !important; }
+.dark .bg-red-50 { background: #450a0a !important; }
+.dark .bg-purple-50 { background: #3b0764 !important; }
+.dark .bg-rose-50 { background: #4c0519 !important; }
+.dark .text-emerald-700 { color: #6ee7b7 !important; }
+.dark .text-blue-700 { color: #93c5fd !important; }
+.dark .text-amber-700 { color: #fcd34d !important; }
+.dark .text-red-700 { color: #fca5a5 !important; }
+.dark .text-emerald-600 { color: #34d399 !important; }
+.dark .text-blue-600 { color: #60a5fa !important; }
+.dark .text-amber-600 { color: #fbbf24 !important; }
+.dark .border-emerald-100, .dark .border-emerald-200 { border-color: #065f46 !important; }
+.dark .border-blue-100, .dark .border-blue-200 { border-color: #1e40af !important; }
+.dark .border-amber-100, .dark .border-amber-200 { border-color: #78350f !important; }
