@@ -194,7 +194,7 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
 
               <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tight text-stone-900 leading-[1] sm:leading-[0.95]">
                 {lang === "sw" ? "Huduma za Mtaa" : "Local Services"}
-                <span className="block text-emerald-600 italic font-serif font-normal">
+                <span className="block text-emerald-600 italic font-heading font-normal">
                   Kiganjani Mwako.
                 </span>
               </h1>

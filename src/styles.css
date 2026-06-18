@@ -16,6 +16,11 @@
   --color-tz-green: hsl(152 60% 28%);
   --color-tz-blue: hsl(210 65% 42%);
   --color-tz-gold: hsl(42 90% 55%);
+
+  /* Font families — generates font-sans, font-heading, font-serif utilities */
+  --font-family-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-family-heading: "Outfit", sans-serif;
+  --font-family-serif: "Outfit", sans-serif;
 }
 
 /* Re-export the canonical globals stylesheet */
