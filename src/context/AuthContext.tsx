@@ -22,7 +22,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const PROFILE_LOAD_TIMEOUT_MS = 5000;
+const PROFILE_LOAD_TIMEOUT_MS = 3000;
 
 const withProfileTimeout = async <T,>(promise: Promise<T>): Promise<T | null> => {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -101,14 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = await fetchUserProfile(session.user.id);
       // Department membership detection
       if (profile) {
-        console.log("[AUTH] Profile loaded:", {
-          id: profile.id,
-          role: profile.role,
-          department_id: profile.department_id,
-        });
+
         if (profile.department_id) {
           profile.is_department_member = true;
-          console.log("[AUTH] Dept member via department_id column");
+
         } else if (profile.role === "staff" || profile.role === "admin") {
           // PERF: Non-blocking dept check
           setTimeout(async () => {
@@ -119,21 +115,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .eq("user_id", profile.id)
                 .limit(1)
                 .maybeSingle();
-              console.log("[AUTH] department_users query:", { deptRow, deptErr });
+
               if (deptRow) {
                 profile.is_department_member = true;
                 profile.department_id = deptRow.department_id;
-                console.log("[AUTH] Dept member via department_users query");
+
                 setUser({ ...profile });
               } else {
-                console.log("[AUTH] NOT a dept member (no department_users row found)");
+
               }
             } catch (e) {
               console.warn("[AUTH] Dept check exception:", e);
             }
           }, 0);
         }
-        console.log("[AUTH] Final is_department_member:", profile.is_department_member);
+
       }
       setUser(profile);
     }
@@ -153,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       try {
         const timeoutPromise = new Promise<{ data: { session: Session | null } }>((resolve) => {
-          setTimeout(() => resolve({ data: { session: null } }), 15000);
+          setTimeout(() => resolve({ data: { session: null } }), 8000);
         });
 
         const sessionPromise = supabase.auth.getSession();
