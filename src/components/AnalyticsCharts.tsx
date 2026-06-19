@@ -98,7 +98,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
 
         // By status
         if (statusRows) {
-          setByStatus(statusRows.map((r) => ({ name: r.status || "pending", value: Number(r.count) })));
+          setByStatus(statusRows.map((r) => ({ name: r.status || "submitted", value: Number(r.count) })));
         }
 
         // Monthly trend

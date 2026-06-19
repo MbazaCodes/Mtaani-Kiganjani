@@ -49,7 +49,7 @@ CREATE OR REPLACE FUNCTION public.analytics_by_status()
 RETURNS TABLE(status text, count bigint)
 LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT
-    COALESCE(status, 'pending') AS status,
+    COALESCE(status::text, 'submitted') AS status,
     COUNT(*) AS count
   FROM public.applications
   GROUP BY status
@@ -90,7 +90,7 @@ LANGUAGE sql STABLE SECURITY DEFINER AS $$
     COALESCE(SUM((payment_data->>'amount')::numeric), 0) AS total_revenue,
     COUNT(*) AS paid_count
   FROM public.applications
-  WHERE status IN ('paid', 'approved', 'issued')
+  WHERE status IN ('paid', 'approved', 'issued', 'verified')
     AND payment_data->>'amount' IS NOT NULL;
 $$;
 
