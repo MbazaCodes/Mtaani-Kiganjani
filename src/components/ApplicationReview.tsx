@@ -1024,7 +1024,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                       showDot
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5 mt-3 text-xs">
                     {selected.user?.nida_number && (
                       <div>
                         <span className="text-stone-400">NIDA:</span>{" "}
@@ -1099,7 +1099,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                           </span>
                         </div>
                         {buyerName && <p className="font-black text-stone-900">{buyerName}</p>}
-                        <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 text-xs">
                           {buyerPhone && (
                             <div>
                               <span className="text-stone-400">{L("Simu:", "Phone:")}</span>{" "}
@@ -1405,7 +1405,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
               {/* Action footer */}
               {!["approved", "issued", "rejected", "refunded"].includes(selected.status) && (
                 <div className="border-t border-stone-200 bg-stone-50 px-4 py-3 sm:px-6 sm:py-4 shrink-0">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {/* Reject button — always available unless terminal */}
                     <button
                       onClick={() => setShowRejectModal(true)}

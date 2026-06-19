@@ -638,7 +638,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
                 {lang === "sw" ? "Uhusiano na Mtoto" : "Relationship to Child"}{" "}
                 <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setMinorRelationType("own_child")}
@@ -682,7 +682,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
                 {lang === "sw" ? "Aina ya Utambulisho wa Mtoto" : "Child ID Type"}{" "}
                 <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setMinorIdType("birth_certificate")}

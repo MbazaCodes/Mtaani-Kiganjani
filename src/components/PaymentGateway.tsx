@@ -208,7 +208,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
 
                 {method === "mobile" ? (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {[
                         { id: "mpesa", name: "M-Pesa", color: "bg-red-500" },
                         { id: "tigopesa", name: "Tigo Pesa", color: "bg-blue-600" },
@@ -322,7 +322,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                         </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-bold text-stone-700">
                           {lang === "sw" ? "Muda wa Kuisha" : "Expiry Date"}
@@ -506,7 +506,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-4 bg-stone-50 border-t border-stone-100 flex items-center justify-center gap-2 text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+        <div className="px-4 sm:px-8 py-4 bg-stone-50 border-t border-stone-100 flex items-center justify-center gap-2 text-[10px] text-stone-400 font-bold uppercase tracking-widest flex-wrap text-center">
           <ShieldCheck className="h-3 w-3" /> Secured by Government Payment Gateway (GePG)
         </div>
       </motion.div>

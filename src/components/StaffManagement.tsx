@@ -857,7 +857,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
               <form onSubmit={handleCreateStaff} className="p-8 space-y-6">
                 <div className="space-y-6">
                   {/* Name Fields */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-xs font-bold text-stone-500 uppercase tracking-wider">
                         {lang === "sw" ? "Jina la Kwanza" : "First Name"} *
@@ -885,7 +885,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
                   </div>
 
                   {/* Email + Phone */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
                         <Mail size={14} /> {lang === "sw" ? "Barua Pepe" : "Email"} *
@@ -1281,7 +1281,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
               {/* Content */}
               <div className="p-8 space-y-6">
                 {/* Staff Info Grid */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Phone */}
                   <div className="p-4 bg-stone-50 rounded-2xl">
                     <div className="flex items-center gap-2 text-stone-400 mb-1">

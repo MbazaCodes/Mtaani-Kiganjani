@@ -1387,7 +1387,7 @@ export function VerifyDocuments({
                     <p className="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider mb-3">
                       {L("Data ya Fomu (Staff Only)", "Form Data (Staff Only)")}
                     </p>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                       {Object.entries(verifiedDocument.formData)
                         .filter(([key]) => !key.includes("payment_data"))
                         .slice(0, 8)

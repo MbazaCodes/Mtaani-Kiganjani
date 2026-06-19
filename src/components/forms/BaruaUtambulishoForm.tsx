@@ -541,7 +541,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
           <Edit2 size={11} /> {L("Hariri", "Edit")}
         </button>
       </div>
-      <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-2">{ch}</div>
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">{ch}</div>
     </div>
   );
 
@@ -660,7 +660,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
 
             {/* ── Application type selector ── */}
             <Field name="application_type" label={L("Aina ya Maombi", "Application Type")} required>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[
                   {
                     value: "SELF",
@@ -727,7 +727,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                         {L("Taarifa za Wasifu (Hazibadilishwi)", "Profile Details (Read-only)")}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {[
                         [
                           L("Jina Kamili", "Full Name"),
@@ -802,7 +802,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                     />
                   </Field>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Field
                       name="minor_dob"
                       label={L("Tarehe ya Kuzaliwa", "Date of Birth")}
@@ -906,7 +906,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                     />
                   </Field>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Field
                       name="behalf_nida"
                       label={L("NIDA yake (Hiari)", "Their NIDA (Optional)")}
@@ -1147,7 +1147,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
             )}
 
             <Field name="urgency" label={L("Kiwango cha Haraka", "Urgency Level")}>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   {
                     value: "NORMAL",
@@ -1356,7 +1356,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                       className={inputCls(`inst_name_${i}`)}
                     />
                   </Field>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Field
                       name={`inst_dept_${i}`}
                       label={L("Idara / Kitengo", "Department (Optional)")}

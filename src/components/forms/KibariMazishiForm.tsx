@@ -496,7 +496,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
           <Edit2 size={11} /> {L("Hariri", "Edit")}
         </button>
       </div>
-      <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-2">{ch}</div>
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">{ch}</div>
     </div>
   );
 
@@ -628,7 +628,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field name="fathers_name" label={L("Jina la Baba", "Father's Name")}>
                 <TI
                   name="fathers_name"
@@ -647,7 +647,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field
                 name="date_of_birth"
                 label={L("Tarehe ya Kuzaliwa", "Date of Birth")}
@@ -807,7 +807,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
                 </p>
               </div>
               <div className="p-4 space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field name="funeral_date" label={L("Tarehe ya Huduma", "Service Date")}>
                     <TI
                       name="funeral_date"
@@ -854,7 +854,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
                 </p>
               </div>
               <div className="p-4 space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field name="burial_date" label={L("Tarehe ya Kuzikwa", "Burial Date")} required>
                     <TI
                       name="burial_date"
@@ -958,7 +958,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
                     placeholder={L("Jina kamili", "Full name")}
                   />
                 </Field>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field
                     name="representative_phone"
                     label={L("Simu ya Mwakilishi", "Phone Number")}
@@ -1012,7 +1012,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
                 </p>
               </div>
               <div className="p-4 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field name="second_contact_name" label={L("Jina", "Name")}>
                     <TI
                       name="second_contact_name"

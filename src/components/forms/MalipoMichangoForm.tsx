@@ -510,7 +510,7 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
           <Edit2 size={11} /> {L("Hariri", "Edit")}
         </button>
       </div>
-      <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-2">{ch}</div>
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">{ch}</div>
     </div>
   );
   const PRow = ({ label, value }: { label: string; value: string | undefined }) => (

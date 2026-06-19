@@ -416,7 +416,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                   <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                     <User size={11} /> {L("Taarifa Binafsi", "Personal Information")}
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label required>{L("Jina la Kwanza", "First Name")}</Label>
                       <Input
@@ -467,7 +467,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <Err msg={errs.lastName} />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                     <div>
                       <Label>{L("Jinsia", "Gender")}</Label>
                       <Select
@@ -565,7 +565,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                       <MapPin size={11} /> {L("Anwani ya Makazi", "Residential Address")}
                     </p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <Label required>{L("Mkoa", "Region")}</Label>
                         <Select
@@ -657,7 +657,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
                     <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                       <Globe2 size={11} /> {L("Makazi ya Nje", "Residence Abroad")}
                     </p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <Label required>{L("Nchi ya Makazi", "Country of Residence")}</Label>
                         <Input

@@ -772,3 +772,39 @@
 .dark .text-cyan-600 { color: #22d3ee !important; }
 .dark .text-cyan-700 { color: #06b6d4 !important; }
 
+
+/* ── Mobile safe area support (iOS notch / home indicator) ─────────────────── */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.h-safe-bottom {
+  height: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Prevent horizontal overflow on mobile ────────────────────────────────── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* ── Touch target minimum size (44px per Apple/Google guidelines) ─────────── */
+button, [role="button"], a {
+  min-height: 44px;
+  min-width: 44px;
+}
+/* Exception: inline text links and icon-only small buttons */
+button.no-min-h, a.no-min-h {
+  min-height: unset;
+  min-width: unset;
+}
+
+/* ── Smooth scrolling on iOS ──────────────────────────────────────────────── */
+.overflow-y-auto, .overflow-y-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Prevent text size adjustment on orientation change (iOS) ─────────────── */
+body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}

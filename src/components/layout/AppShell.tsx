@@ -4,6 +4,7 @@ import { AlertCircle } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAppContext } from "@/context/AppContext";
@@ -112,7 +113,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar currentView={currentView} setView={setView} />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 pb-24 sm:pb-6">
           <React.Suspense fallback={<div className="p-8 text-center text-stone-400">Loading...</div>}>
           {currentView === "help_faq" ? (
             <HelpPage lang={lang} />
@@ -157,6 +158,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           />
         </React.Suspense>
       )}
+
+      {/* Persistent bottom nav for mobile */}
+      <BottomNav />
     </div>
   );
 };
