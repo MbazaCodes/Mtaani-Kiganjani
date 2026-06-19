@@ -4,6 +4,7 @@ import { logActivity } from "@/lib/activity-log";
 import type { AnyFormData, PaymentResult, ApplicationDraft } from "@/types";
 import { HARDCODED_SERVICES } from "@/constants/services";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { getApplicationAmount } from "@/lib/serviceFees";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useApplications } from "@/hooks/useApplications";
@@ -49,7 +50,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const parsed = parseFloat(formServiceFee);
       if (!isNaN(parsed) && parsed > 0) return parsed;
     }
-    return 0;
+    // Fall back to the canonical service fee lookup (covers all named services)
+    return getApplicationAmount(app);
   }, []);
 
   const submitApplication = useCallback(

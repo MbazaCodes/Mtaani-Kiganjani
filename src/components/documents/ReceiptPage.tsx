@@ -8,6 +8,7 @@ import { Application } from "@/lib/supabase";
 import { formatDate, formatCurrency, generateQRCodeUrl } from "./types";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 import { distributeFee } from "@/lib/feeDistribution";
+import { getApplicationAmount } from "@/lib/serviceFees";
 
 const rs = StyleSheet.create({
   page: {
@@ -153,7 +154,7 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
   const sw = lang === "sw";
   const qr = qrDataUrl || generateQRCodeUrl(application, "RCP");
 
-  const amount = pd.amount || fd.service_fee || fd.amount || 0;
+  const amount = pd.amount || fd.service_fee || fd.amount || getApplicationAmount(application);
   const receiptNo = pd.receipt_number || `RCP-${application.application_number}`;
 
   const TableRow = ({ label, value, alt }: { label: string; value: string; alt?: boolean }) => (
