@@ -69,6 +69,29 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
 
   useEffect(() => {
     fetchData();
+
+    // Poll every 30 seconds so staff see new applications without manual refresh
+    const pollInterval = setInterval(() => fetchData(), 30_000);
+
+    // Supabase realtime: instant notification when a new application is inserted
+    const channel = supabase
+      .channel("staff_applications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "applications" },
+        () => fetchData(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "applications" },
+        () => fetchData(),
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(pollInterval);
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -247,7 +270,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         console.error("Error fetching applications:", error);
       }
     } catch (_error) {
-      console.error("Error fetching staff dashboard data:", error);
+      console.error("Error fetching staff dashboard data:", _error);
     } finally {
       setLoading(false);
     }

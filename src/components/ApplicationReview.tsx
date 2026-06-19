@@ -250,6 +250,29 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
 
   useEffect(() => {
     fetchApps();
+
+    // Poll every 30s so new submissions appear without manual refresh
+    const pollInterval = setInterval(() => fetchApps(), 30_000);
+
+    // Realtime: re-fetch on any INSERT or UPDATE to applications
+    const channel = supabase
+      .channel("review_applications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "applications" },
+        () => fetchApps(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "applications" },
+        () => fetchApps(),
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(pollInterval);
+      supabase.removeChannel(channel);
+    };
   }, [fetchApps]);
 
   // ─── Filtered list ──────────────────────────────────────────────────────
