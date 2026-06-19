@@ -126,250 +126,234 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
     beneficiaryName ||
     (formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A");
 
+
   return (
     <Document>
-      <Page size="A4" style={s.page}>
-        <Text style={s.watermark}>E-MTAA</Text>
+      {/* ── One letter page per institution ── */}
+      {(institutions.length > 0 ? institutions : [{}]).map((inst: any, idx: number) => {
+        const thisPurposeKey = String(inst.purpose || globalPurpose || "");
+        const thisPurposeDetails = String(inst.purpose_details || fd.purpose_details || "");
+        const thisPurposeLabel = PURPOSE_LABELS[thisPurposeKey]
+          ? PURPOSE_LABELS[thisPurposeKey][sw ? "sw" : "en"]
+          : thisPurposeDetails || (sw ? "madhumuni rasmi" : "official purposes");
+        const isBail = thisPurposeKey === "DHAMANA_POLISI" || thisPurposeKey === "UDHAMINI";
 
-        {/* ── Photo box (top-left, absolute) ── */}
-        <View style={s.photoSection}>
-          <View style={s.photoBox}>
-            {photo ? (
-              <Image src={photo} style={s.photo} />
-            ) : (
-              <Text style={s.photoPlaceholder}>{"PICHA\nPHOTO"}</Text>
-            )}
-          </View>
-          <Text style={s.nidaLabel}>NIDA</Text>
-          <Text style={s.nidaNumber}>{user?.nida_number || fd.applicant_nida || "—"}</Text>
-        </View>
+        return (
+          <Page key={idx} size="A4" style={s.page}>
+            <Text style={s.watermark}>E-MTAA</Text>
 
-        {/* Header */}
-        <View style={s.header}>
-          <Image src={TANZANIA_LOGO_BASE64} style={s.logo} />
-          <Text style={s.country}>JAMHURI YA MUUNGANO WA TANZANIA</Text>
-          <Text style={s.office}>OFISI YA RAIS — TAMISEMI</Text>
-          <Text style={s.council}>
-            {user?.ward || fd.applicant_ward
-              ? `OFISI YA SERIKALI YA MTAA — KATA YA ${String(user?.ward || fd.applicant_ward).toUpperCase()}`
-              : "OFISI YA SERIKALI YA MTAA"}
-          </Text>
-          <View style={s.divider} />
-        </View>
-
-        {/* Title */}
-        <View style={s.titleBlock}>
-          <Text style={s.title}>{sw ? "BARUA YA UTAMBULISHO" : "LETTER OF INTRODUCTION"}</Text>
-          <View style={s.appNumberBadge}>
-            <Text style={s.appNumberText}>{application.application_number}</Text>
-          </View>
-        </View>
-
-        {/* Letter metadata */}
-        <View style={ls.letterMeta}>
-          <View style={ls.metaRow}>
-            <Text style={ls.metaLabel}>{sw ? "Kumb. Na.:" : "Ref. No.:"}</Text>
-            <Text style={ls.metaValue}>{application.application_number}</Text>
-          </View>
-          <View style={ls.metaRow}>
-            <Text style={ls.metaLabel}>{sw ? "Tarehe:" : "Date:"}</Text>
-            <Text style={ls.metaValue}>
-              {formatDate(application.approved_at || application.created_at)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Recipient */}
-        <View style={ls.recipientBlock}>
-          <Text style={ls.recipientLine}>{sw ? "Kwa:" : "To:"}</Text>
-          <Text style={[ls.recipientLine, { fontWeight: "bold" }]}>
-            {firstInst.name || (sw ? "TAASISI HUSIKA" : "CONCERNED INSTITUTION")}
-          </Text>
-          {firstInst.department && !firstInst.department.includes("-") ? (
-            <Text style={ls.recipientLine}>{String(firstInst.department)}</Text>
-          ) : (
-            <View />
-          )}
-          {firstInst.address ? (
-            <Text style={ls.recipientLine}>{String(firstInst.address ?? "")}</Text>
-          ) : (
-            <View />
-          )}
-        </View>
-
-        {/* Subject */}
-        <Text style={s.subject}>
-          {sw
-            ? `YAH: UTAMBULISHO WA ${subjectName.toUpperCase()}`
-            : `RE: INTRODUCTION OF ${subjectName.toUpperCase()}`}
-        </Text>
-
-        <Text style={ls.salutation}>{sw ? "Mpendwa Mhusika," : "Dear Sir/Madam,"}</Text>
-
-        {/* Body */}
-        <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
-          {sw
-            ? `Ofisi ya Serikali ya Mtaa, Kata ya ${user?.ward || fd.applicant_ward || "_______"}, Wilaya ya ${user?.district || fd.applicant_district || "_______"}, inathibitisha kuwa ndugu ${subjectName} ni mkazi halali wa mtaa huu, na ametambuliwa rasmi katika kumbukumbu za Ofisi hii.`
-            : `The Local Government Office of ${user?.ward || fd.applicant_ward || "_______"} Ward, ${user?.district || fd.applicant_district || "_______"} District, hereby confirms that ${subjectName} is a legitimate resident of this locality and is officially registered in our records.`}
-        </Text>
-
-        <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
-          {sw
-            ? `Barua hii imetolewa kwa ajili ya ${purposeLabel}${firstInst.name ? ` katika taasisi ya ${firstInst.name}` : ""}. ${
-                !isSelf
-                  ? `Muombaji wa barua hii ni ${formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A"}${appType === "MINOR" ? ", mlezi wa mtoto." : ", anayemsaidia ndugu yake."}`
-                  : ""
-              }`
-            : `This letter has been issued for the purpose of ${purposeLabel}${firstInst.name ? ` at ${firstInst.name}` : ""}. ${
-                !isSelf
-                  ? `The applicant of this letter is ${formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A"}${appType === "MINOR" ? ", the guardian of the child." : ", representing on their behalf."}`
-                  : ""
-              }`}
-        </Text>
-
-        <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
-          {sw
-            ? "Tafadhali toa msaada wowote wa kisheria na kiutendaji unaohitajika kwa ndugu huyu. Ofisi yetu iko tayari kwa uthibitisho zaidi inapohitajika."
-            : "Kindly extend any lawful and procedural assistance required to the bearer. Our office remains available for further verification if needed."}
-        </Text>
-
-        {/* Special paragraph for bail / surety purposes */}
-        {(instPurpose === "DHAMANA_POLISI" || instPurpose === "UDHAMINI") && (
-          <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5, fontStyle: "italic" }]}>
-            {instPurpose === "DHAMANA_POLISI"
-              ? sw
-                ? `Ofisi hii inathibitisha kuwa ndugu ${subjectName} anajulikana vizuri katika mtaa huu na ana tabia nzuri ya kuaminika. Ombi la dhamana (bail) linatolewa kwa heshima kwa mamlaka husika, kwa kuzingatia haki za kisheria za mtuhumiwa.`
-                : `This office confirms that ${subjectName} is well known in this community and is of good character. This letter respectfully supports a bail application to the relevant authority, in recognition of the accused's legal rights.`
-              : sw
-                ? `Ofisi hii inathibitisha kuwa ndugu ${subjectName} ni mkazi wa mtaa huu anayeaminika, na anaweza kuhudumia kama mdhamini (surety) kwa mtu mwingine kwa mujibu wa sheria.`
-                : `This office confirms that ${subjectName} is a trusted resident of this locality and is eligible to act as a surety/guarantor for another person in accordance with the law.`}
-          </Text>
-        )}
-
-        {/* Applicant details panel */}
-        <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>{sw ? "TAARIFA ZA MUOMBAJI" : "APPLICANT DETAILS"}</Text>
-        </View>
-        <View style={s.twoCol}>
-          <View style={s.colLeft}>
-            <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{sw ? "Jina Kamili:" : "Full Name:"}</Text>
-              <Text style={s.infoValue}>{subjectName}</Text>
-            </View>
-            {isSelf ? (
-              <View style={s.infoRow}>
-                <Text style={s.infoLabel}>NIDA:</Text>
-                <Text style={s.infoValue}>{user?.nida_number || fd.applicant_nida || "N/A"}</Text>
+            {/* Photo box */}
+            <View style={s.photoSection}>
+              <View style={s.photoBox}>
+                {photo ? (
+                  <Image src={photo} style={s.photo} />
+                ) : (
+                  <Text style={s.photoPlaceholder}>{"PICHA\nPHOTO"}</Text>
+                )}
               </View>
-            ) : (
-              <View />
-            )}
-            {isSelf ? (
-              <View style={s.infoRow}>
-                <Text style={s.infoLabel}>{sw ? "Simu:" : "Phone:"}</Text>
-                <Text style={s.infoValue}>{user?.phone || fd.applicant_phone || "N/A"}</Text>
+              <Text style={s.nidaLabel}>NIDA</Text>
+              <Text style={s.nidaNumber}>{user?.nida_number || fd.applicant_nida || "—"}</Text>
+            </View>
+
+            {/* Government header */}
+            <View style={s.header}>
+              <Image src={TANZANIA_LOGO_BASE64} style={s.logo} />
+              <Text style={s.country}>JAMHURI YA MUUNGANO WA TANZANIA</Text>
+              <Text style={s.office}>OFISI YA RAIS — TAMISEMI</Text>
+              <Text style={s.council}>
+                {user?.ward || fd.applicant_ward
+                  ? `OFISI YA SERIKALI YA MTAA — KATA YA ${String(user?.ward || fd.applicant_ward).toUpperCase()}`
+                  : "OFISI YA SERIKALI YA MTAA"}
+              </Text>
+              <View style={s.divider} />
+            </View>
+
+            {/* Title */}
+            <View style={s.titleBlock}>
+              <Text style={s.title}>{sw ? "BARUA YA UTAMBULISHO" : "LETTER OF INTRODUCTION"}</Text>
+              <View style={s.appNumberBadge}>
+                <Text style={s.appNumberText}>
+                  {application.application_number}
+                  {institutions.length > 1 ? ` (${idx + 1}/${institutions.length})` : ""}
+                </Text>
               </View>
-            ) : (
-              <View />
+            </View>
+
+            {/* Letter metadata */}
+            <View style={ls.letterMeta}>
+              <View style={ls.metaRow}>
+                <Text style={ls.metaLabel}>{sw ? "Kumb. Na.:" : "Ref. No.:"}</Text>
+                <Text style={ls.metaValue}>{application.application_number}</Text>
+              </View>
+              <View style={ls.metaRow}>
+                <Text style={ls.metaLabel}>{sw ? "Tarehe:" : "Date:"}</Text>
+                <Text style={ls.metaValue}>
+                  {formatDate(application.approved_at || application.created_at)}
+                </Text>
+              </View>
+              {institutions.length > 1 && (
+                <View style={ls.metaRow}>
+                  <Text style={ls.metaLabel}>{sw ? "Ukurasa:" : "Page:"}</Text>
+                  <Text style={ls.metaValue}>
+                    {sw
+                      ? `Barua ${idx + 1} kati ya ${institutions.length}`
+                      : `Letter ${idx + 1} of ${institutions.length}`}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Recipient */}
+            <View style={ls.recipientBlock}>
+              <Text style={ls.recipientLine}>{sw ? "Kwa:" : "To:"}</Text>
+              <Text style={[ls.recipientLine, { fontWeight: "bold" }]}>
+                {inst.name || (sw ? "TAASISI HUSIKA" : "CONCERNED INSTITUTION")}
+              </Text>
+              {inst.department && !String(inst.department).includes("-") ? (
+                <Text style={ls.recipientLine}>{String(inst.department)}</Text>
+              ) : <View />}
+              {inst.contact_person ? (
+                <Text style={ls.recipientLine}>{sw ? "Kwa: " : "Attn: "}{String(inst.contact_person)}</Text>
+              ) : <View />}
+              {inst.address ? (
+                <Text style={ls.recipientLine}>{String(inst.address)}</Text>
+              ) : <View />}
+            </View>
+
+            {/* Subject */}
+            <Text style={s.subject}>
+              {sw
+                ? `YAH: UTAMBULISHO WA ${subjectName.toUpperCase()}`
+                : `RE: INTRODUCTION OF ${subjectName.toUpperCase()}`}
+            </Text>
+
+            <Text style={ls.salutation}>{sw ? "Mpendwa Mhusika," : "Dear Sir/Madam,"}</Text>
+
+            {/* Body para 1 — residency confirmation */}
+            <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
+              {sw
+                ? `Ofisi ya Serikali ya Mtaa, Kata ya ${user?.ward || fd.applicant_ward || "_______"}, Wilaya ya ${user?.district || fd.applicant_district || "_______"}, inathibitisha kuwa ndugu ${subjectName} ni mkazi halali wa mtaa huu, na ametambuliwa rasmi katika kumbukumbu za Ofisi hii.`
+                : `The Local Government Office of ${user?.ward || fd.applicant_ward || "_______"} Ward, ${user?.district || fd.applicant_district || "_______"} District, hereby confirms that ${subjectName} is a legitimate resident of this locality and is officially registered in our records.`}
+            </Text>
+
+            {/* Body para 2 — purpose */}
+            <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
+              {sw
+                ? `Barua hii imetolewa kwa ajili ya ${thisPurposeLabel}${inst.name ? ` katika taasisi ya ${inst.name}` : ""}. ${!isSelf ? `Muombaji wa barua hii ni ${formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A"}${appType === "MINOR" ? ", mlezi wa mtoto." : ", anayemsaidia ndugu yake."}` : ""}`
+                : `This letter has been issued for the purpose of ${thisPurposeLabel}${inst.name ? ` at ${inst.name}` : ""}. ${!isSelf ? `The applicant of this letter is ${formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A"}${appType === "MINOR" ? ", the guardian of the child." : ", representing on their behalf."}` : ""}`}
+            </Text>
+
+            {/* Body para 3 — assistance */}
+            <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5 }]}>
+              {sw
+                ? "Tafadhali toa msaada wowote wa kisheria na kiutendaji unaohitajika kwa ndugu huyu. Ofisi yetu iko tayari kwa uthibitisho zaidi inapohitajika."
+                : "Kindly extend any lawful and procedural assistance required to the bearer. Our office remains available for further verification if needed."}
+            </Text>
+
+            {/* Bail / surety special paragraph */}
+            {isBail && (
+              <Text style={[s.body, { marginBottom: 8, lineHeight: 1.5, fontStyle: "italic" }]}>
+                {thisPurposeKey === "DHAMANA_POLISI"
+                  ? sw
+                    ? `Ofisi hii inathibitisha kuwa ndugu ${subjectName} anajulikana vizuri katika mtaa huu na ana tabia nzuri ya kuaminika. Ombi la dhamana (bail) linatolewa kwa heshima kwa mamlaka husika, kwa kuzingatia haki za kisheria za mtuhumiwa.`
+                    : `This office confirms that ${subjectName} is well known in this community and is of good character. This letter respectfully supports a bail application to the relevant authority, in recognition of the accused's legal rights.`
+                  : sw
+                    ? `Ofisi hii inathibitisha kuwa ndugu ${subjectName} ni mkazi wa mtaa huu anayeaminika, na anaweza kuhudumia kama mdhamini (surety) kwa mtu mwingine kwa mujibu wa sheria.`
+                    : `This office confirms that ${subjectName} is a trusted resident of this locality and is eligible to act as a surety/guarantor for another person in accordance with the law.`}
+              </Text>
             )}
-          </View>
-          <View style={s.colRight}>
-            <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{sw ? "Mkoa:" : "Region:"}</Text>
-              <Text style={s.infoValue}>{user?.region || fd.applicant_region || "N/A"}</Text>
-            </View>
-            <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{sw ? "Wilaya:" : "District:"}</Text>
-              <Text style={s.infoValue}>{user?.district || fd.applicant_district || "N/A"}</Text>
-            </View>
-            <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{sw ? "Kata:" : "Ward:"}</Text>
-              <Text style={s.infoValue}>{user?.ward || fd.applicant_ward || "N/A"}</Text>
-            </View>
-          </View>
-        </View>
 
-        {/* Multi-institution notice */}
-        {institutions.length > 1 ? (
-          <View style={ls.multiNotice}>
-            <Text style={ls.multiText}>
-              {sw
-                ? `Kumbuka: Maombi haya yalihusu taasisi ${institutions.length}. Barua tofauti zinapatikana kwa kila taasisi: ${institutions.map((i: any) => i.name).join(", ")}.`
-                : `Note: This request covered ${institutions.length} institutions. A separate letter is available for each: ${institutions.map((i: any) => i.name).join(", ")}.`}
-            </Text>
-          </View>
-        ) : (
-          <View />
-        )}
-
-        {/* Signature + QR side by side */}
-        <Text style={ls.signoff}>{sw ? "Wenu Mwaminifu," : "Yours faithfully,"}</Text>
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginTop: 10,
-          }}
-        >
-          <View style={{ width: "55%" }}>
-            <OfficerSignatureBox
-              signature={weoSig}
-              stamp={weoStamp}
-              name={weoName}
-              title={sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
-            />
-          </View>
-          <View style={{ width: "35%", alignItems: "center", paddingTop: 8 }}>
-            <View style={s.qrBorder}>
-              <Image src={qr} style={s.qrCode} />
+            {/* Applicant details panel */}
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>{sw ? "TAARIFA ZA MUOMBAJI" : "APPLICANT DETAILS"}</Text>
             </View>
-            <Text style={s.qrLabel}>{sw ? "Changanua kuthibitisha" : "Scan to verify"}</Text>
-            <Text style={s.qrRef}>{application.application_number}</Text>
-          </View>
-        </View>
+            <View style={s.twoCol}>
+              <View style={s.colLeft}>
+                <View style={s.infoRow}>
+                  <Text style={s.infoLabel}>{sw ? "Jina Kamili:" : "Full Name:"}</Text>
+                  <Text style={s.infoValue}>{subjectName}</Text>
+                </View>
+                {isSelf ? (
+                  <View style={s.infoRow}>
+                    <Text style={s.infoLabel}>NIDA:</Text>
+                    <Text style={s.infoValue}>{user?.nida_number || fd.applicant_nida || "N/A"}</Text>
+                  </View>
+                ) : <View />}
+                {isSelf ? (
+                  <View style={s.infoRow}>
+                    <Text style={s.infoLabel}>{sw ? "Simu:" : "Phone:"}</Text>
+                    <Text style={s.infoValue}>{user?.phone || fd.applicant_phone || "N/A"}</Text>
+                  </View>
+                ) : <View />}
+              </View>
+              <View style={s.colRight}>
+                <View style={s.infoRow}>
+                  <Text style={s.infoLabel}>{sw ? "Mkoa:" : "Region:"}</Text>
+                  <Text style={s.infoValue}>{user?.region || fd.applicant_region || "N/A"}</Text>
+                </View>
+                <View style={s.infoRow}>
+                  <Text style={s.infoLabel}>{sw ? "Wilaya:" : "District:"}</Text>
+                  <Text style={s.infoValue}>{user?.district || fd.applicant_district || "N/A"}</Text>
+                </View>
+                <View style={s.infoRow}>
+                  <Text style={s.infoLabel}>{sw ? "Kata:" : "Ward:"}</Text>
+                  <Text style={s.infoValue}>{user?.ward || fd.applicant_ward || "N/A"}</Text>
+                </View>
+              </View>
+            </View>
 
-        {/* Footer — inline (not absolute) to avoid forcing overflow page */}
-        <View
-          style={{ marginTop: 14, borderTopWidth: 0.5, borderTopColor: "#c0c0c0", paddingTop: 5 }}
-        >
-          <Text
-            style={{
-              fontSize: 6,
-              color: "#999999",
-              fontWeight: "bold",
-              textAlign: "center",
-              textTransform: "uppercase",
-              letterSpacing: 0.3,
-              marginBottom: 3,
-            }}
-          >
-            {sw
-              ? "MAONYESHO PEKEE — Si mfumo rasmi wa serikali, haujaidhinishwa kwa matumizi rasmi"
-              : "DEMONSTRATION ONLY — Not an official, approved government system"}
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 7, color: "#6b6b6b", fontStyle: "italic", flex: 1 }}>
-              {sw
-                ? "Barua hii ni rasmi. Inafaa kwa taasisi iliyoainishwa pekee."
-                : "This letter is official. It is valid only for the institution stated above."}
-            </Text>
-            <Text
-              style={{ fontSize: 5.5, color: "#c0c0c0", fontFamily: "Courier", textAlign: "right" }}
-            >
-              {`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}
-            </Text>
-          </View>
-        </View>
-      </Page>
-      {/* Page 2: Payment Receipt */}
+            {/* Bundle notice on every page */}
+            {institutions.length > 1 && (
+              <View style={ls.multiNotice}>
+                <Text style={ls.multiText}>
+                  {sw
+                    ? `Barua hii ni sehemu ya kifurushi cha taasisi ${institutions.length}. Ukurasa ${idx + 1} kati ya ${institutions.length} + risiti. Taasisi zote: ${institutions.map((i: any) => i.name || "?").join(" · ")}.`
+                    : `This letter is part of a ${institutions.length}-institution bundle. Page ${idx + 1} of ${institutions.length} + receipt. All institutions: ${institutions.map((i: any) => i.name || "?").join(" · ")}.`}
+                </Text>
+              </View>
+            )}
+
+            {/* Signature + QR */}
+            <Text style={ls.signoff}>{sw ? "Wenu Mwaminifu," : "Yours faithfully,"}</Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 10 }}>
+              <View style={{ width: "55%" }}>
+                <OfficerSignatureBox
+                  signature={weoSig}
+                  stamp={weoStamp}
+                  name={weoName}
+                  title={sw ? "AFISA MTENDAJI WA KATA" : "WARD EXECUTIVE OFFICER"}
+                />
+              </View>
+              <View style={{ width: "35%", alignItems: "center", paddingTop: 8 }}>
+                <View style={s.qrBorder}>
+                  <Image src={qr} style={s.qrCode} />
+                </View>
+                <Text style={s.qrLabel}>{sw ? "Changanua kuthibitisha" : "Scan to verify"}</Text>
+                <Text style={s.qrRef}>{application.application_number}</Text>
+              </View>
+            </View>
+
+            {/* Footer */}
+            <View style={{ marginTop: 14, borderTopWidth: 0.5, borderTopColor: "#c0c0c0", paddingTop: 5 }}>
+              <Text style={{ fontSize: 6, color: "#999999", fontWeight: "bold", textAlign: "center", textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 3 }}>
+                {sw ? "MAONYESHO PEKEE — Si mfumo rasmi wa serikali, haujaidhinishwa kwa matumizi rasmi" : "DEMONSTRATION ONLY — Not an official, approved government system"}
+              </Text>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <Text style={{ fontSize: 7, color: "#6b6b6b", fontStyle: "italic", flex: 1 }}>
+                  {sw
+                    ? `Barua hii ni rasmi. Inafaa kwa ${inst.name || "taasisi iliyoainishwa"} pekee.`
+                    : `This letter is valid only for ${inst.name || "the institution stated"}.`}
+                </Text>
+                <Text style={{ fontSize: 5.5, color: "#c0c0c0", fontFamily: "Courier", textAlign: "right" }}>
+                  {`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}
+                </Text>
+              </View>
+            </View>
+          </Page>
+        );
+      })}
+
+      {/* ── Final page: Payment Receipt ── */}
       <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl} />
     </Document>
   );
