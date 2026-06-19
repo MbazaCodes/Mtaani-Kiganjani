@@ -1,11 +1,10 @@
-/* Google Fonts are loaded via a <link> in the HTML head to avoid bundler resolution issues */
+/* Google Fonts loaded in index.html <head> to avoid bundler issues */
+
+/* Tailwind CSS v4 — single import with source scanning */
 @import "tailwindcss" source(none);
 @source "../src";
 
-/* Tailwind CSS v4 */
-@import "tailwindcss";
-
-/* Register custom colors as Tailwind utilities (v4 @theme) */
+/* Register custom Tailwind utilities and colors */
 @theme {
   --color-primary: hsl(152 60% 28%);
   --color-primary-foreground: hsl(0 0% 100%);
@@ -23,6 +22,5 @@
   --font-family-serif: "Outfit", sans-serif;
 }
 
-/* Re-export the canonical globals stylesheet */
 @import "./styles/globals.css";
 @import "./styles/print.css";
