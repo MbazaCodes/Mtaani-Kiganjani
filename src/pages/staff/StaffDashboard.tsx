@@ -70,9 +70,6 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
   useEffect(() => {
     fetchData();
 
-    // Poll every 30 seconds so staff see new applications without manual refresh
-    const pollInterval = setInterval(() => fetchData(), 30_000);
-
     // Supabase realtime: instant notification when a new application is inserted
     const channel = supabase
       .channel("staff_applications")
@@ -89,7 +86,6 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       .subscribe();
 
     return () => {
-      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -246,7 +242,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       // Fetch recent applications (without service join to avoid empty results)
       let query = supabase
         .from("applications")
-        .select("*")
+        .select("id, application_number, service_name, status, created_at, ward, district, region, form_data, payment_data")
         .order("created_at", { ascending: false });
 
       // Only filter by location if assigned - otherwise, staff can see all (small mtaa)

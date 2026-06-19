@@ -67,9 +67,10 @@ export function useApplications(user: UserProfile | null) {
 
     const { data, error: fetchError } = await supabase
       .from("applications")
-      .select("*")
+      .select("id, application_number, service_id, service_name, status, created_at, updated_at, region, district, ward, street, office_registry_id, target_user_id, second_party_user_id, target_user_role, agreement_status, approved_at, payment_data, form_data")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(100);
 
     if (fetchError) {
       console.error("Error fetching applications:", fetchError);

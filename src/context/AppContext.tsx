@@ -5,6 +5,7 @@ import type { AnyFormData, PaymentResult, ApplicationDraft } from "@/types";
 import { HARDCODED_SERVICES } from "@/constants/services";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { getApplicationAmount } from "@/lib/serviceFees";
+import { uploadFiles } from "@/lib/fileStorage";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useApplications } from "@/hooks/useApplications";
@@ -83,36 +84,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
       };
 
-      // Convert uploaded files to base64 data URLs and attach to form_data so
-      // staff can review them. Matches the app's existing base64-in-DB pattern
-      // (profile photos / user_documents use the same approach).
-      const fileToDataUrl = (file: File): Promise<string> =>
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-
+      // Upload files to Supabase Storage (URL stored in form_data, not base64).
+      // Falls back to base64 for small files if storage bucket isn't configured.
       if (files && files.length > 0) {
         const docTypes = (formData.document_types as string[] | undefined) ?? [];
-        const uploaded: { type: string; name: string; dataUrl: string; size: number }[] = [];
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          if (file.size > 4_000_000) continue; // skip files >4MB to avoid bloating the row
-          try {
-            const dataUrl = await fileToDataUrl(file);
-            uploaded.push({
-              type: docTypes[i] ?? "support",
-              name: file.name,
-              dataUrl,
-              size: file.size,
-            });
-          } catch {
-            // skip unreadable file
-          }
+        const tempAppId = "app-" + Math.random().toString(36).substring(7);
+        const uploaded = await uploadFiles(files, user.id, tempAppId, docTypes);
+        if (uploaded.length > 0) {
+          (formData as Record<string, unknown>).uploaded_documents = uploaded;
         }
-        (formData as Record<string, unknown>).uploaded_documents = uploaded;
       }
 
       // Embed the citizen's profile photo into form_data so the certificate can

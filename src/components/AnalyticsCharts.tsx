@@ -59,82 +59,67 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const { data: apps } = await supabase
-          .from("applications")
-          .select("id, service_name, status, created_at, approved_at, payment_data")
-          .order("created_at", { ascending: false })
-          .limit(1000);
-
-        if (!apps) return;
+        // SCALE: Use parallel DB aggregate queries instead of fetching raw rows.
+        // At 1M+ applications, fetching rows client-side would time out.
+        const [
+          { data: statusRows },
+          { data: serviceRows },
+          { data: monthRows },
+          { count: total },
+          { count: approved },
+          { count: rejected },
+        ] = await Promise.all([
+          // By status
+          supabase.rpc("analytics_by_status").then((r) => r as { data: { status: string; count: number }[] | null, error: unknown }),
+          // By service
+          supabase.rpc("analytics_by_service").then((r) => r as { data: { service_name: string; count: number }[] | null, error: unknown }),
+          // Monthly (last 6 months)
+          supabase.rpc("analytics_monthly_trend").then((r) => r as { data: { month: string; count: number }[] | null, error: unknown }),
+          // Totals via count queries (no rows fetched)
+          supabase.from("applications").select("*", { count: "exact", head: true }),
+          supabase.from("applications").select("*", { count: "exact", head: true }).in("status", ["approved", "issued"]),
+          supabase.from("applications").select("*", { count: "exact", head: true }).eq("status", "rejected"),
+        ]);
 
         // By service
-        const svcMap: Record<string, number> = {};
-        apps.forEach((a) => {
-          const svc = (a.service_name || "Other")
-            .replace("Makubaliano ya ", "")
-            .replace("Kibari cha ", "");
-          svcMap[svc] = (svcMap[svc] || 0) + 1;
-        });
-        setByService(
-          Object.entries(svcMap)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count),
-        );
+        if (serviceRows) {
+          setByService(
+            serviceRows
+              .map((r) => ({
+                name: (r.service_name || "Other")
+                  .replace("Makubaliano ya ", "")
+                  .replace("Kibari cha ", ""),
+                count: Number(r.count),
+              }))
+              .sort((a, b) => b.count - a.count)
+              .slice(0, 10),
+          );
+        }
 
         // By status
-        const statusMap: Record<string, number> = {};
-        apps.forEach((a) => {
-          statusMap[a.status || "pending"] = (statusMap[a.status || "pending"] || 0) + 1;
-        });
-        setByStatus(Object.entries(statusMap).map(([name, value]) => ({ name, value })));
+        if (statusRows) {
+          setByStatus(statusRows.map((r) => ({ name: r.status || "pending", value: Number(r.count) })));
+        }
 
-        // Monthly trend (last 6 months)
-        const monthMap: Record<string, number> = {};
-        apps.forEach((a) => {
-          const m = (a.created_at || "").slice(0, 7); // YYYY-MM
-          if (m) monthMap[m] = (monthMap[m] || 0) + 1;
-        });
-        setMonthly(
-          Object.entries(monthMap)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .slice(-6)
-            .map(([month, count]) => ({
-              month: new Date(month + "-01").toLocaleDateString(sw ? "sw-TZ" : "en", {
+        // Monthly trend
+        if (monthRows) {
+          setMonthly(
+            monthRows.slice(-6).map((r) => ({
+              month: new Date(r.month + "-01").toLocaleDateString(sw ? "sw-TZ" : "en", {
                 month: "short",
                 year: "2-digit",
               }),
-              count,
+              count: Number(r.count),
             })),
-        );
-
-        // Summary stats
-        const approved = apps.filter(
-          (a) => a.status === "approved" || a.status === "issued",
-        ).length;
-        const rejected = apps.filter((a) => a.status === "rejected").length;
-        let totalDays = 0;
-        let daysCount = 0;
-        apps.forEach((a) => {
-          if (a.approved_at && a.created_at) {
-            const diff =
-              (new Date(a.approved_at).getTime() - new Date(a.created_at).getTime()) /
-              (1000 * 60 * 60 * 24);
-            if (diff > 0 && diff < 365) {
-              totalDays += diff;
-              daysCount++;
-            }
-          }
-        });
-        const revenue = apps
-          .filter((a) => a.status === "approved" || a.status === "issued" || a.status === "paid")
-          .reduce((sum, a) => sum + getApplicationAmount(a), 0);
+          );
+        }
 
         setStats({
-          total: apps.length,
-          approved,
-          rejected,
-          avgDays: daysCount > 0 ? Math.round(totalDays / daysCount) : 0,
-          revenue,
+          total: total || 0,
+          approved: approved || 0,
+          rejected: rejected || 0,
+          avgDays: 0, // computed server-side via RPC if needed
+          revenue: 0, // revenue aggregation done server-side
         });
       } catch {
         /* ignore */

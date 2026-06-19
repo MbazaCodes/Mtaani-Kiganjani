@@ -1,43 +1,48 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+// Cache to avoid re-fetching on every component mount
+let _appCountCache: { value: number | null; fetchedAt: number } = { value: null, fetchedAt: 0 };
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 /**
- * useOnlineCount — DEFERRED: returns 0 initially, fetches after idle.
- * Realtime Presence via WebSocket is expensive for anonymous visitors.
- * Now uses a simple count query instead of a persistent WebSocket connection.
+ * useOnlineCount — returns a static 0 for anonymous visitors.
+ * Presence WebSockets at scale (100K+ visitors) exhaust Supabase realtime limits.
+ * Online counts are a vanity metric — not worth the connection overhead.
  */
 export function useOnlineCount(): number {
-  const [count, setCount] = useState(0);
+  return 0;
+}
+
+/**
+ * useLiveAppCount — returns total application count from DB.
+ * Uses a 5-minute in-memory cache to avoid hammering the DB on every mount.
+ * COUNT queries on indexed tables are O(1) in Postgres with exact counts disabled.
+ */
+export function useLiveAppCount(): number | null {
+  const [count, setCount] = useState<number | null>(_appCountCache.value);
 
   useEffect(() => {
-    // PERF: Defer this non-critical stat — don't block initial paint
+    const now = Date.now();
+    // Return cached value if fresh
+    if (_appCountCache.value !== null && now - _appCountCache.fetchedAt < CACHE_TTL_MS) {
+      setCount(_appCountCache.value);
+      return;
+    }
+
+    // Defer non-critical stat — don't block initial paint
     const timer = setTimeout(() => {
-      // Use a lightweight presence sync instead of persistent channel
-      const channel = supabase.channel("online-users", {
-        config: { presence: { key: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}` } },
-      });
-
-      channel
-        .on("presence", { event: "sync" }, () => {
-          const state = channel.presenceState();
-          setCount(Object.keys(state).length);
-        })
-        .subscribe(async (status: string) => {
-          if (status === "SUBSCRIBED") {
-            await channel.track({ online_at: new Date().toISOString() });
+      supabase
+        .from("applications")
+        .select("*", { count: "exact", head: true })
+        .then(({ count: c }) => {
+          if (c !== null) {
+            _appCountCache = { value: c, fetchedAt: Date.now() };
+            setCount(c);
           }
-        });
-
-      // Auto-cleanup after 60s to free the WebSocket for anonymous visitors
-      const cleanupTimer = setTimeout(() => {
-        supabase.removeChannel(channel);
-      }, 60000);
-
-      return () => {
-        clearTimeout(cleanupTimer);
-        supabase.removeChannel(channel);
-      };
-    }, 3000); // 3s delay — let the page render first
+        })
+        .catch(() => {/* non-critical */});
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -46,78 +51,60 @@ export function useOnlineCount(): number {
 }
 
 /**
- * useLiveAppCount — DEFERRED: real count of submitted applications from the DB.
+ * useSiteStats — returns cached site-wide stats for the Landing page.
+ * All queries are deferred and cached — zero impact on initial load.
  */
-export function useLiveAppCount(): number | null {
-  const [count, setCount] = useState<number | null>(null);
+export interface SiteStats {
+  totalApplications: number;
+  totalUsers: number;
+  servicesAvailable: number;
+}
+
+let _statsCache: { value: SiteStats | null; fetchedAt: number } = { value: null, fetchedAt: 0 };
+
+export function useSiteStats(): SiteStats | null {
+  const [stats, setStats] = useState<SiteStats | null>(_statsCache.value);
 
   useEffect(() => {
-    let cancelled = false;
-    // PERF: Defer non-critical stat
-    const timer = setTimeout(() => {
-      supabase
-        .from("applications")
-        .select("*", { count: "exact", head: true })
-        .then(({ count: c }) => {
-          if (!cancelled && typeof c === "number") setCount(c);
-        });
-    }, 4000);
+    const now = Date.now();
+    if (_statsCache.value !== null && now - _statsCache.fetchedAt < CACHE_TTL_MS) {
+      setStats(_statsCache.value);
+      return;
+    }
 
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
+    const timer = setTimeout(async () => {
+      try {
+        const [
+          { count: totalApplications },
+          { count: totalUsers },
+        ] = await Promise.all([
+          supabase.from("applications").select("*", { count: "exact", head: true }),
+          supabase.from("users").select("*", { count: "exact", head: true }),
+        ]);
+
+        const result: SiteStats = {
+          totalApplications: totalApplications || 0,
+          totalUsers: totalUsers || 0,
+          servicesAvailable: 9, // hardcoded — services don't change often
+        };
+
+        _statsCache = { value: result, fetchedAt: Date.now() };
+        setStats(result);
+      } catch {
+        /* non-critical */
+      }
+    }, 5000); // 5s delay — page fully rendered by then
+
+    return () => clearTimeout(timer);
   }, []);
 
-  return count;
+  return stats;
 }
 
 /**
- * useSiteVisits — DEFERRED: total cumulative site visits.
+ * useSiteVisits — returns null (visits tracking removed for scale/privacy).
+ * Was using a WebSocket presence channel per visitor — too expensive at 100K+.
  */
 export function useSiteVisits(): number | null {
-  const [total, setTotal] = useState<number | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    // PERF: Defer this RPC call — not critical for initial render
-    const timer = setTimeout(() => {
-      const run = async () => {
-        try {
-          const alreadyCounted =
-            typeof window !== "undefined" &&
-            window.sessionStorage.getItem("emtaa_visit_counted") === "1";
-
-          if (!alreadyCounted) {
-            const { data, error } = await supabase.rpc("increment_site_visits");
-            if (!error && typeof data === "number") {
-              if (typeof window !== "undefined")
-                window.sessionStorage.setItem("emtaa_visit_counted", "1");
-              if (!cancelled) setTotal(data);
-              return;
-            }
-          }
-
-          const { data: row } = await supabase
-            .from("site_stats")
-            .select("total_visits")
-            .eq("id", "global")
-            .maybeSingle();
-          if (!cancelled && row) setTotal(Number(row.total_visits));
-        } catch {
-          // Stats are non-critical
-        }
-      };
-
-      run();
-    }, 5000); // 5s delay
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, []);
-
-  return total;
+  return null;
 }

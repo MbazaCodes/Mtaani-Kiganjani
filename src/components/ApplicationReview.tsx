@@ -251,9 +251,6 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
   useEffect(() => {
     fetchApps();
 
-    // Poll every 30s so new submissions appear without manual refresh
-    const pollInterval = setInterval(() => fetchApps(), 30_000);
-
     // Realtime: re-fetch on any INSERT or UPDATE to applications
     const channel = supabase
       .channel("review_applications")
@@ -270,7 +267,6 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
       .subscribe();
 
     return () => {
-      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
   }, [fetchApps]);
