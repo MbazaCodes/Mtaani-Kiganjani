@@ -21,6 +21,9 @@ import {
   UserCheck,
   Activity,
   Bell,
+  ChevronDown,
+  ChevronRight,
+  MessageCircle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -81,7 +84,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
           setActualRole(user?.role || null);
         }
       } catch (_err) {
-        console.error("Error fetching role from DB:", err);
+        console.error("Error fetching role from DB:", _err);
         setActualRole(user?.role || null);
       } finally {
         setLoading(false);
@@ -95,6 +98,19 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
 
   // Use database role if available, otherwise fall back to context
   const displayRole = actualRole || user?.role;
+
+  // Communication folder — auto-open when any child view is active
+  const commViews = [
+    "notifications", "announcements", "community_reports", "messages",
+    "citizen_support", "staff_tickets", "staff_announcements", "staff_reports",
+  ];
+  const [commOpen, setCommOpen] = useState(() => commViews.includes(currentView));
+
+  // Keep open when navigating to a comm view
+  useEffect(() => {
+    if (commViews.includes(currentView)) setCommOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentView]);
 
   if (loading) {
     return (
@@ -264,7 +280,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         </>
       )}
 
-      {/* My Payments — shown for citizens */}
+      {/* My Payments — citizens */}
       {displayRole === "citizen" && (
         <SidebarItem
           icon={<Wallet size={20} />}
@@ -273,41 +289,138 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
           onClick={() => setView("my_payments")}
         />
       )}
-      {/* Announcements — shown for citizens */}
-      {displayRole === "citizen" && (
-        <SidebarItem
-          icon={<Megaphone size={20} />}
-          label={lang === "sw" ? "Matangazo" : "Announcements"}
-          active={currentView === "announcements"}
-          onClick={() => setView("announcements")}
-        />
-      )}
-      {/* Community Reports — shown for citizens */}
-      {displayRole === "citizen" && (
-        <SidebarItem
-          icon={<AlertTriangle size={20} />}
-          label={lang === "sw" ? "Taarifa za Jamii" : "Community Reports"}
-          active={currentView === "community_reports"}
-          onClick={() => setView("community_reports")}
-        />
-      )}
-      {/* Communications — shown for all */}
-      <SidebarItem
-        icon={<Mail size={20} />}
-        label={lang === "sw" ? "Mawasiliano" : "Messages"}
-        active={currentView === "messages"}
-        onClick={() => setView("messages")}
-      />
-      {/* Citizen Support — shown for citizens and ward staff */}
-      {(displayRole === "citizen" ||
-        (displayRole === "staff" && !(user?.is_department_member || localDeptCheck))) && (
-        <SidebarItem
-          icon={<MessageSquare size={20} />}
-          label={lang === "sw" ? "Msaada" : "Support"}
-          active={currentView === "citizen_support" || currentView === "staff_tickets"}
-          onClick={() => setView(displayRole === "citizen" ? "citizen_support" : "staff_tickets")}
-        />
-      )}
+
+      {/* ── Communication (collapsible folder) ── */}
+      {(() => {
+        // Build the child items visible to this role
+        const commItems: { icon: React.ReactNode; label: string; view: ViewName; active: boolean }[] = [];
+
+        // Notifications — citizen
+        if (displayRole === "citizen") {
+          commItems.push({
+            icon: <Bell size={16} />,
+            label: lang === "sw" ? "Arifa" : "Notifications",
+            view: "notifications",
+            active: currentView === "notifications",
+          });
+        }
+
+        // Announcements
+        if (displayRole === "citizen") {
+          commItems.push({
+            icon: <Megaphone size={16} />,
+            label: lang === "sw" ? "Matangazo" : "Announcements",
+            view: "announcements",
+            active: currentView === "announcements",
+          });
+        }
+        if (displayRole === "admin" || displayRole === "staff") {
+          commItems.push({
+            icon: <Megaphone size={16} />,
+            label: lang === "sw" ? "Matangazo" : "Announcements",
+            view: "staff_announcements",
+            active: currentView === "staff_announcements",
+          });
+        }
+
+        // Community Reports
+        if (displayRole === "citizen") {
+          commItems.push({
+            icon: <AlertTriangle size={16} />,
+            label: lang === "sw" ? "Taarifa za Jamii" : "Community Reports",
+            view: "community_reports",
+            active: currentView === "community_reports",
+          });
+        }
+        if (displayRole === "staff" && !(user?.is_department_member || localDeptCheck)) {
+          commItems.push({
+            icon: <AlertTriangle size={16} />,
+            label: lang === "sw" ? "Taarifa za Jamii" : "Community Reports",
+            view: "staff_reports",
+            active: currentView === "staff_reports",
+          });
+        }
+
+        // Messages — all roles
+        commItems.push({
+          icon: <Mail size={16} />,
+          label: lang === "sw" ? "Ujumbe" : "Messages",
+          view: "messages",
+          active: currentView === "messages",
+        });
+
+        // Support
+        if (
+          displayRole === "citizen" ||
+          (displayRole === "staff" && !(user?.is_department_member || localDeptCheck))
+        ) {
+          commItems.push({
+            icon: <MessageSquare size={16} />,
+            label: lang === "sw" ? "Msaada" : "Support",
+            view: displayRole === "citizen" ? "citizen_support" : "staff_tickets",
+            active: currentView === "citizen_support" || currentView === "staff_tickets",
+          });
+        }
+
+        const anyChildActive = commItems.some((i) => i.active);
+
+        return (
+          <div>
+            {/* Folder header button */}
+            <button
+              type="button"
+              onClick={() => setCommOpen((v) => !v)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                anyChildActive
+                  ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300"
+                  : "text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                anyChildActive
+                  ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
+                  : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400"
+              }`}>
+                <MessageCircle size={18} />
+              </div>
+              <span className="flex-1 text-left">
+                {lang === "sw" ? "Mawasiliano" : "Communication"}
+              </span>
+              {commOpen
+                ? <ChevronDown size={14} className="shrink-0 opacity-60" />
+                : <ChevronRight size={14} className="shrink-0 opacity-60" />
+              }
+            </button>
+
+            {/* Child items */}
+            {commOpen && (
+              <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-stone-100 dark:border-stone-800 pl-3">
+                {commItems.map((item) => (
+                  <button
+                    key={item.view}
+                    type="button"
+                    onClick={() => setView(item.view)}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      item.active
+                        ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
+                        : "text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-800 dark:hover:text-stone-200"
+                    }`}
+                  >
+                    <span className={item.active ? "text-emerald-600 dark:text-emerald-400" : ""}>
+                      {item.icon}
+                    </span>
+                    {item.label}
+                    {item.active && (
+                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Help & Legal — all roles */}
       <SidebarItem
         icon={<HelpCircle size={20} />}
@@ -316,24 +429,6 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         onClick={() => setView("help_faq")}
       />
 
-      {/* Staff/Admin Announcements — create & manage (all staff + admin) */}
-      {(displayRole === "admin" || displayRole === "staff") && (
-        <SidebarItem
-          icon={<Megaphone size={20} />}
-          label={lang === "sw" ? "Matangazo" : "Announcements"}
-          active={currentView === "staff_announcements"}
-          onClick={() => setView("staff_announcements")}
-        />
-      )}
-      {/* Staff Community Reports inbox */}
-      {displayRole === "staff" && !(user?.is_department_member || localDeptCheck) && (
-        <SidebarItem
-          icon={<AlertTriangle size={20} />}
-          label={lang === "sw" ? "Taarifa za Jamii" : "Community Reports"}
-          active={currentView === "staff_reports"}
-          onClick={() => setView("staff_reports")}
-        />
-      )}
       <SidebarItem
         icon={<Search size={20} />}
         label={lang === "sw" ? "Hakiki Hati" : "Verify Document"}
