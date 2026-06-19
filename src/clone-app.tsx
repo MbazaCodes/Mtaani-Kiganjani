@@ -13,50 +13,50 @@ import { SessionTimeout } from "./components/SessionTimeout";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 
 // Public pages
-import { Landing } from "./pages/Landing";
-import { NotFound } from "./pages/NotFound";
-import { HelpPage } from "./pages/HelpPage";
-import { LegalPage } from "./pages/LegalPage";
-import { EmailConfirm } from "./pages/EmailConfirm";
+const Landing = React.lazy(() => import("./pages/Landing").then(m => ({ default: m.Landing })));
+const NotFound = React.lazy(() => import("./pages/NotFound").then(m => ({ default: m.NotFound })));
+const HelpPage = React.lazy(() => import("./pages/HelpPage").then(m => ({ default: m.HelpPage })));
+const LegalPage = React.lazy(() => import("./pages/LegalPage").then(m => ({ default: m.LegalPage })));
+const EmailConfirm = React.lazy(() => import("./pages/EmailConfirm").then(m => ({ default: m.EmailConfirm })));
 
 // Citizen pages
-import { Dashboard } from "./pages/Dashboard";
-import { Services } from "./pages/Services";
-import { Apply } from "./pages/Apply";
-import { Applications } from "./pages/Applications";
-import { Agreement } from "./pages/Agreement";
-import { Notifications } from "./pages/Notifications";
-import { Profile } from "./pages/Profile";
-import { Auth } from "./pages/Auth";
-import { VerifyDocuments } from "./components/VerifyDocuments";
+const Dashboard = React.lazy(() => import("./pages/Dashboard").then(m => ({ default: m.Dashboard })));
+const Services = React.lazy(() => import("./pages/Services").then(m => ({ default: m.Services })));
+const Apply = React.lazy(() => import("./pages/Apply").then(m => ({ default: m.Apply })));
+const Applications = React.lazy(() => import("./pages/Applications").then(m => ({ default: m.Applications })));
+const Agreement = React.lazy(() => import("./pages/Agreement").then(m => ({ default: m.Agreement })));
+const Notifications = React.lazy(() => import("./pages/Notifications").then(m => ({ default: m.Notifications })));
+const Profile = React.lazy(() => import("./pages/Profile").then(m => ({ default: m.Profile })));
+const Auth = React.lazy(() => import("./pages/Auth").then(m => ({ default: m.Auth })));
+const VerifyDocuments = React.lazy(() => import("./components/VerifyDocuments").then(m => ({ default: m.VerifyDocuments })));
 
 // Admin pages
-import { AdminDashboard } from "./pages/admin/AdminDashboard";
-import { OfficeManagement } from "./pages/admin/OfficeManagement";
-import { LocationManagement } from "./pages/admin/LocationManagement";
-import { ServiceManagement } from "./pages/admin/ServiceManagement";
-import { AdminLogs } from "./pages/admin/AdminLogs";
-import { DepartmentManagement } from "./pages/admin/DepartmentManagement";
-import { DepartmentPortal } from "./pages/department/DepartmentPortal";
-import { CitizenSupport } from "./pages/CitizenSupport";
-import { StaffTicketInbox } from "./pages/staff/StaffTicketInbox";
-import { CommunityReporting } from "./pages/CommunityReporting";
-import { StaffReportsInbox } from "./pages/staff/StaffReportsInbox";
-import { Announcements } from "./pages/Announcements";
-import { MyPayments } from "./pages/MyPayments";
-import { CommunicationsCenter } from "./pages/CommunicationsCenter";
-import { CitizenManagement } from "./pages/admin/CitizenManagement";
+const AdminDashboard = React.lazy(() => import("./pages/admin/AdminDashboard").then(m => ({ default: m.AdminDashboard })));
+const OfficeManagement = React.lazy(() => import("./pages/admin/OfficeManagement").then(m => ({ default: m.OfficeManagement })));
+const LocationManagement = React.lazy(() => import("./pages/admin/LocationManagement").then(m => ({ default: m.LocationManagement })));
+const ServiceManagement = React.lazy(() => import("./pages/admin/ServiceManagement").then(m => ({ default: m.ServiceManagement })));
+const AdminLogs = React.lazy(() => import("./pages/admin/AdminLogs").then(m => ({ default: m.AdminLogs })));
+const DepartmentManagement = React.lazy(() => import("./pages/admin/DepartmentManagement").then(m => ({ default: m.DepartmentManagement })));
+const DepartmentPortal = React.lazy(() => import("./pages/department/DepartmentPortal").then(m => ({ default: m.DepartmentPortal })));
+const CitizenSupport = React.lazy(() => import("./pages/CitizenSupport").then(m => ({ default: m.CitizenSupport })));
+const StaffTicketInbox = React.lazy(() => import("./pages/staff/StaffTicketInbox").then(m => ({ default: m.StaffTicketInbox })));
+const CommunityReporting = React.lazy(() => import("./pages/CommunityReporting").then(m => ({ default: m.CommunityReporting })));
+const StaffReportsInbox = React.lazy(() => import("./pages/staff/StaffReportsInbox").then(m => ({ default: m.StaffReportsInbox })));
+const Announcements = React.lazy(() => import("./pages/Announcements").then(m => ({ default: m.Announcements })));
+const MyPayments = React.lazy(() => import("./pages/MyPayments").then(m => ({ default: m.MyPayments })));
+const CommunicationsCenter = React.lazy(() => import("./pages/CommunicationsCenter").then(m => ({ default: m.CommunicationsCenter })));
+const CitizenManagement = React.lazy(() => import("./pages/admin/CitizenManagement").then(m => ({ default: m.CitizenManagement })));
 
 // Staff pages
-import { StaffDashboard } from "./pages/staff/StaffDashboard";
-import { CustomerSupport } from "./pages/staff/CustomerSupport";
-import { ManualVerification } from "./pages/staff/ManualVerification";
-import { StaffCitizenManagement } from "./pages/staff/CitizenManagement";
-import { BusinessApproval } from "./pages/staff/BusinessApproval";
+const StaffDashboard = React.lazy(() => import("./pages/staff/StaffDashboard").then(m => ({ default: m.StaffDashboard })));
+const CustomerSupport = React.lazy(() => import("./pages/staff/CustomerSupport").then(m => ({ default: m.CustomerSupport })));
+const ManualVerification = React.lazy(() => import("./pages/staff/ManualVerification").then(m => ({ default: m.ManualVerification })));
+const StaffCitizenManagement = React.lazy(() => import("./pages/staff/CitizenManagement").then(m => ({ default: m.StaffCitizenManagement })));
+const BusinessApproval = React.lazy(() => import("./pages/staff/BusinessApproval").then(m => ({ default: m.BusinessApproval })));
 
 // Shared staff+admin
-import { StaffManagement } from "./components/StaffManagement";
-import { ApplicationReview } from "./components/ApplicationReview";
+const StaffManagement = React.lazy(() => import("./components/StaffManagement").then(m => ({ default: m.StaffManagement })));
+const ApplicationReview = React.lazy(() => import("./components/ApplicationReview").then(m => ({ default: m.ApplicationReview })));
 
 // Apply page needs AppContext
 import { useAppContext } from "./context/AppContext";
@@ -480,6 +480,7 @@ export default function App() {
     <ErrorBoundary lang={lang}>
       <BrowserRouter>
         <AppProvider>
+          <React.Suspense fallback={<AppSplashSkeleton />}>
           <Routes>
             {/* Public */}
             <Route path="/" element={<PublicHome />} />
@@ -890,6 +891,7 @@ export default function App() {
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </React.Suspense>
         </AppProvider>
       </BrowserRouter>
       <SessionTimeout lang={lang} />
