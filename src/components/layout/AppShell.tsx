@@ -136,6 +136,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             applicationNumber={payingApplication.application_number}
             onSuccess={handlePaymentSuccess}
             onCancel={handleCancelPayment}
+            onGoToApplications={() => setView("applications")}
             lang={lang}
             currency={currency}
           />

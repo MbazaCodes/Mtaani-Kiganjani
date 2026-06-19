@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Download,
   Share2,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Language, useTranslation } from "@/lib/i18n";
@@ -26,6 +27,7 @@ interface PaymentGatewayProps {
   applicationNumber?: string;
   onSuccess: (paymentData: PaymentResult) => void;
   onCancel: () => void;
+  onGoToApplications?: () => void;
   lang: Language;
   currency: CurrencyCode;
 }
@@ -41,6 +43,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   applicationNumber,
   onSuccess,
   onCancel,
+  onGoToApplications,
   lang,
   currency,
 }) => {
@@ -440,7 +443,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                   </div>
                 )}
 
-                {/* Download + Share actions */}
+                {/* Download + Share + Go to Applications actions */}
                 <div className="space-y-3 w-full">
                   <button
                     onClick={() =>
@@ -451,6 +454,19 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                     <Download className="h-4 w-4" />
                     {lang === "sw" ? "Pakua Cheti" : "Download Certificate"}
                   </button>
+
+                  {/* Go to My Applications — primary nav action */}
+                  <button
+                    onClick={() => {
+                      onCancel(); // close the gateway modal
+                      onGoToApplications?.(); // navigate to applications page
+                    }}
+                    className="w-full py-3.5 bg-stone-900 dark:bg-stone-100 hover:bg-black dark:hover:bg-white text-white dark:text-stone-900 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <FolderOpen className="h-4 w-4" />
+                    {lang === "sw" ? "Nenda Maombi Yangu" : "Go to My Applications"}
+                  </button>
+
                   <button
                     onClick={async () => {
                       const shareData = {
@@ -473,7 +489,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                         alert(lang === "sw" ? "Kiungo kimekopwa!" : "Link copied!");
                       }
                     }}
-                    className="w-full py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
                   >
                     <Share2 className="h-4 w-4" />
                     {lang === "sw" ? "Shiriki Cheti" : "Share Certificate"}
