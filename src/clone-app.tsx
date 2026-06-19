@@ -62,6 +62,14 @@ import { ApplicationReview } from "./components/ApplicationReview";
 import { useAppContext } from "./context/AppContext";
 import { HARDCODED_SERVICES } from "./constants/services";
 import { useRouterView } from "./components/layout/AppShell";
+import {
+  AppSplashSkeleton,
+  DashboardSkeleton,
+  ServicesSkeleton,
+  ApplicationsSkeleton,
+  StaffDashboardSkeleton,
+  AdminDashboardSkeleton,
+} from "./components/ui/SkeletonScreens";
 
 // Authenticated root: redirects to role-based home
 function AuthenticatedRoot() {
@@ -75,12 +83,7 @@ function AuthenticatedRoot() {
 // Loading screen
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-stone-500 font-bold animate-pulse">E-MTAA PORTAL...</p>
-      </div>
-    </div>
+    <AppSplashSkeleton />
   );
 }
 
@@ -177,7 +180,9 @@ function ApplicationsRoute() {
     handleInitiatePayment,
     setSelectedDraft,
     setSelectedService,
+    isLoading,
   } = useAppContext();
+  if (isLoading) return <ApplicationsSkeleton />;
   const navigate = useNavigate();
 
   return (
@@ -209,15 +214,17 @@ function ApplicationsRoute() {
 
 // Dashboard wrapper
 function DashboardRoute() {
-  const { applications, fetchApplications } = useAppContext();
+  const { applications, fetchApplications, isLoading } = useAppContext();
   const { setView } = useRouterView();
+  if (isLoading) return <DashboardSkeleton />;
   return <Dashboard applications={applications} setView={setView} onRefresh={fetchApplications} />;
 }
 
 // Services wrapper
 function ServicesRoute() {
-  const { setSelectedService, fetchApplications } = useAppContext();
+  const { setSelectedService, fetchApplications, isLoading } = useAppContext();
   const navigate = useNavigate();
+  if (isLoading) return <ServicesSkeleton />;
   return (
     <Services
       onSelectService={(service) => {
@@ -232,11 +239,15 @@ function ServicesRoute() {
 // Admin routes with setView shim
 function AdminDashboardRoute() {
   const { setView } = useRouterView();
+  const { isLoading } = useAppContext();
+  if (isLoading) return <AdminDashboardSkeleton />;
   return <AdminDashboard setView={setView as (v: string) => void} />;
 }
 
 function StaffDashboardRoute() {
   const { setView } = useRouterView();
+  const { isLoading } = useAppContext();
+  if (isLoading) return <StaffDashboardSkeleton />;
   return <StaffDashboard setView={setView as (v: string) => void} />;
 }
 

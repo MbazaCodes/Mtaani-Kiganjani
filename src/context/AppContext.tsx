@@ -15,6 +15,7 @@ interface AppContextType {
   applications: Application[];
   drafts: ApplicationDraft[];
   fetchApplications: () => void;
+  isLoading: boolean;
   // Apply flow
   selectedService: Service | null;
   setSelectedService: (s: Service | null) => void;
@@ -35,7 +36,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { user } = useAuth();
   const { lang } = useLanguage();
   const { showToast } = useToast();
-  const { applications, drafts, fetchApplications } = useApplications(user);
+  const { applications, drafts, fetchApplications, loading: isLoading } = useApplications(user);
 
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDraft, setSelectedDraft] = useState<ApplicationDraft | null>(null);
@@ -409,6 +410,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         handlePaymentSuccess,
         handleCancelPayment,
         getPaymentAmount,
+        isLoading,
       }}
     >
       {children}

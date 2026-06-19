@@ -1,4 +1,5 @@
 import { useEffect, useState, type ComponentType } from "react";
+import { AppSplashSkeleton } from "@/components/ui/SkeletonScreens";
 
 // Client-only polyfills required by some browser libs (e.g. @react-pdf/renderer)
 async function installBrowserPolyfills() {
@@ -57,9 +58,7 @@ export function ClonedApp() {
 
   if (!mods) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
-        <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <AppSplashSkeleton />
     );
   }
 

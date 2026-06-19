@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import type { UserRole } from "@/lib/supabase";
+import { PageLayoutSkeleton, DashboardSkeleton } from "@/components/ui/SkeletonScreens";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -20,14 +21,19 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
       return;
     }
     if (allowedRoles && !allowedRoles.includes(user.role)) {
-      // Redirect to the role's default home
       if (user.role === "admin") navigate("/admin");
       else if (user.role === "staff") navigate("/staff");
       else navigate("/dashboard");
     }
   }, [user, isLoading, allowedRoles, navigate]);
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <PageLayoutSkeleton>
+        <DashboardSkeleton />
+      </PageLayoutSkeleton>
+    );
+  }
   if (!user) return null;
   if (allowedRoles && !allowedRoles.includes(user.role)) return null;
   return <>{children}</>;

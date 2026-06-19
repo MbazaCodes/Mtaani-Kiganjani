@@ -18,8 +18,8 @@ const SERVICE_FEES: Record<string, number> = {
 
 interface FeeSource {
   service_name?: string | null;
-  form_data?: Record<string, unknown> | null;
-  payment_data?: Record<string, unknown> | null;
+  form_data?: unknown;
+  payment_data?: unknown;
 }
 
 /**
