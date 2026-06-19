@@ -15,6 +15,9 @@ export type ViewName =
   | "profile"
   | "help_faq"
   | "legal"
+  | "about"
+  | "service_charter"
+  | "security_policy"
   | "verify_documents"
   // Staff
   | "staff_dashboard"

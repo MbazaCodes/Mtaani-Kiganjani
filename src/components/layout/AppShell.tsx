@@ -9,6 +9,9 @@ import { PaymentGateway } from "@/components/PaymentGateway";
 import { useAuth } from "@/context/AuthContext";
 import { HelpPage } from "@/pages/HelpPage";
 import { LegalPage } from "@/pages/LegalPage";
+import { AboutPage } from "@/pages/AboutPage";
+import { ServiceCharterPage } from "@/pages/ServiceCharterPage";
+import { SecurityPolicyPage } from "@/pages/SecurityPolicyPage";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAppContext } from "@/context/AppContext";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
@@ -49,6 +52,9 @@ export const VIEW_PATHS: Record<ViewName, string> = {
   citizen_management: "/citizens",
   help_faq: "/help",
   legal: "/legal",
+  about: "/about",
+  service_charter: "/charter",
+  security_policy: "/security",
 };
 
 /** Maps URL path → ViewName (reverse of VIEW_PATHS) */
@@ -110,6 +116,12 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             <HelpPage lang={lang} />
           ) : currentView === "legal" ? (
             <LegalPage lang={lang} />
+          ) : currentView === "about" ? (
+            <AboutPage lang={lang} />
+          ) : currentView === "service_charter" ? (
+            <ServiceCharterPage lang={lang} />
+          ) : currentView === "security_policy" ? (
+            <SecurityPolicyPage lang={lang} />
           ) : (
             children
           )}

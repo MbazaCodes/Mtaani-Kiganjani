@@ -7,6 +7,7 @@ import {
   Search,
   Eye,
   Shield,
+  FileCheck,
   Users,
   User,
   Building2,
@@ -427,6 +428,31 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         label={lang === "sw" ? "Hakiki Hati" : "Verify Document"}
         active={currentView === "verify_documents"}
         onClick={() => setView("verify_documents")}
+      />
+
+      {/* ── Taarifa za Taasisi ── */}
+      <div className="pt-2 pb-1">
+        <p className="text-[9px] font-black text-stone-400 dark:text-stone-600 uppercase tracking-widest px-3">
+          {lang === "sw" ? "Taasisi" : "Institution"}
+        </p>
+      </div>
+      <SidebarItem
+        icon={<Building2 size={20} />}
+        label={lang === "sw" ? "Kuhusu Sisi" : "About Us"}
+        active={currentView === "about"}
+        onClick={() => setView("about")}
+      />
+      <SidebarItem
+        icon={<FileCheck size={20} />}
+        label={lang === "sw" ? "Mkataba wa Huduma" : "Service Charter"}
+        active={currentView === "service_charter"}
+        onClick={() => setView("service_charter")}
+      />
+      <SidebarItem
+        icon={<Shield size={20} />}
+        label={lang === "sw" ? "Sera ya Usalama" : "Security Policy"}
+        active={currentView === "security_policy"}
+        onClick={() => setView("security_policy")}
       />
       <SidebarItem
         icon={<User size={20} />}
