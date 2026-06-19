@@ -103,6 +103,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
   const commViews = [
     "notifications", "announcements", "community_reports", "messages",
     "citizen_support", "staff_tickets", "staff_announcements", "staff_reports",
+    "help_faq",
   ];
   const [commOpen, setCommOpen] = useState(() => commViews.includes(currentView));
 
@@ -159,12 +160,6 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
             label={t("nav.myApplications")}
             active={currentView === "applications"}
             onClick={() => setView("applications")}
-          />
-          <SidebarItem
-            icon={<Bell size={20} />}
-            label={lang === "sw" ? "Arifa" : "Notifications"}
-            active={currentView === "notifications"}
-            onClick={() => setView("notifications")}
           />
         </>
       )}
@@ -295,15 +290,13 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
         // Build the child items visible to this role
         const commItems: { icon: React.ReactNode; label: string; view: ViewName; active: boolean }[] = [];
 
-        // Notifications — citizen
-        if (displayRole === "citizen") {
-          commItems.push({
-            icon: <Bell size={16} />,
-            label: lang === "sw" ? "Arifa" : "Notifications",
-            view: "notifications",
-            active: currentView === "notifications",
-          });
-        }
+        // Notifications — all roles
+        commItems.push({
+          icon: <Bell size={16} />,
+          label: lang === "sw" ? "Arifa" : "Notifications",
+          view: "notifications",
+          active: currentView === "notifications",
+        });
 
         // Announcements
         if (displayRole === "citizen") {
@@ -361,6 +354,14 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
             active: currentView === "citizen_support" || currentView === "staff_tickets",
           });
         }
+
+        // Help & FAQ — all roles (inside Communication folder)
+        commItems.push({
+          icon: <HelpCircle size={16} />,
+          label: lang === "sw" ? "Msaada & Maswali" : "Help & FAQ",
+          view: "help_faq",
+          active: currentView === "help_faq",
+        });
 
         const anyChildActive = commItems.some((i) => i.active);
 
@@ -420,14 +421,6 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
           </div>
         );
       })()}
-
-      {/* Help & Legal — all roles */}
-      <SidebarItem
-        icon={<HelpCircle size={20} />}
-        label={lang === "sw" ? "Msaada" : "Help & FAQ"}
-        active={currentView === "help_faq"}
-        onClick={() => setView("help_faq")}
-      />
 
       <SidebarItem
         icon={<Search size={20} />}
