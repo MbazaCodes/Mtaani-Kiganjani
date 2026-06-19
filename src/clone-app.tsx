@@ -862,6 +862,17 @@ export default function App() {
             />
 
             {/* Email confirmation redirect */}
+            {/* Public info pages */}
+            <Route path="/machapisho" element={
+              <React.Suspense fallback={<AppSplashSkeleton />}>
+                <MachapishoPage lang={lang} />
+              </React.Suspense>
+            } />
+            <Route path="/habari" element={
+              <React.Suspense fallback={<AppSplashSkeleton />}>
+                <KituoChaHabariPage lang={lang} />
+              </React.Suspense>
+            } />
             <Route path="/confirm" element={<EmailConfirm />} />
 
             {/* Fallback */}

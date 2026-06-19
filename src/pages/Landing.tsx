@@ -93,18 +93,14 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
             </a>
             {/* Machapisho */}
             <a
-              href="https://www.ega.go.tz/documents"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/machapisho"
               className="text-sm font-bold text-stone-600 hover:text-stone-900 px-3 py-2 rounded-xl hover:bg-stone-50 transition-colors"
             >
               {lang === "sw" ? "Machapisho" : "Publications"}
             </a>
             {/* Kituo cha Habari */}
             <a
-              href="https://www.ega.go.tz/standard/3#"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/habari"
               className="text-sm font-bold text-stone-600 hover:text-stone-900 px-3 py-2 rounded-xl hover:bg-stone-50 transition-colors"
             >
               {lang === "sw" ? "Kituo cha Habari" : "News Centre"}
@@ -178,18 +174,14 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               {lang === "sw" ? "Kuhusu Sisi" : "About Us"}
             </a>
             <a
-              href="https://www.ega.go.tz/documents"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/machapisho"
               onClick={() => setMobileMenuOpen(false)}
               className="w-full text-left text-sm font-bold text-stone-700 flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-stone-50"
             >
               {lang === "sw" ? "Machapisho" : "Publications"}
             </a>
             <a
-              href="https://www.ega.go.tz/standard/3#"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/habari"
               onClick={() => setMobileMenuOpen(false)}
               className="w-full text-left text-sm font-bold text-stone-700 flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-stone-50"
             >
@@ -883,7 +875,7 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               </div>
               <div className="flex flex-wrap items-center gap-2 justify-center">
                 <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">ISO 9001:2015</span>
-                <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">eGA/APA/009</span>
+                <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">eGA&#x2F;APA&#x2F;009</span>
                 <span className="text-[9px] font-black bg-emerald-900 text-emerald-400 px-2 py-1 rounded uppercase tracking-widest">Tanzania Digital</span>
               </div>
             </div>
