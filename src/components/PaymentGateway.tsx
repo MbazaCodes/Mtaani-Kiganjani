@@ -408,7 +408,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
               >
                 <motion.div className="h-20 w-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto" animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
                   <CheckCircle2 className="h-12 w-12" />
-                </div>
+                </motion.div>
                 <div>
                   <h4 className="text-2xl font-heading font-extrabold text-stone-900">
                     {lang === "sw" ? "Malipo Yamekamilika!" : "Payment Completed!"}
