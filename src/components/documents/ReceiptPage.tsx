@@ -7,6 +7,7 @@ import { Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 import { Application } from "@/lib/supabase";
 import { formatDate, formatCurrency, generateQRCodeUrl } from "./types";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
+import { distributeFee } from "@/lib/feeDistribution";
 
 const rs = StyleSheet.create({
   page: {
@@ -83,6 +84,40 @@ const rs = StyleSheet.create({
   qrBorder: { borderWidth: 0.5, borderColor: "#c0c0c0", padding: 2, marginBottom: 2 },
   qrCode: { width: 56, height: 56 },
   qrLabel: { fontSize: 5, color: "#6b6b6b", textAlign: "center" },
+
+  // Fee distribution
+  distHeader: {
+    flexDirection: "row",
+    backgroundColor: "#f3f4f6",
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#d1d5db",
+    marginTop: 12,
+    marginBottom: 0,
+  },
+  distHeaderText: { fontSize: 8, fontWeight: "bold", color: "#374151", textTransform: "uppercase", letterSpacing: 0.5 },
+  distSectionTitle: { fontSize: 8.5, fontWeight: "bold", color: "#1c1917", marginBottom: 2 },
+  distRow: {
+    flexDirection: "row",
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    borderBottomWidth: 0.3,
+    borderBottomColor: "#e5e7eb",
+  },
+  distAlt: { backgroundColor: "#f9fafb" },
+  distLabel: { flex: 1, fontSize: 8, color: "#374151" },
+  distPct: { width: 36, fontSize: 8, color: "#6b7280", textAlign: "right" },
+  distAmt: { width: 72, fontSize: 8, fontWeight: "bold", color: "#1c1917", textAlign: "right" },
+  distTotal: {
+    flexDirection: "row",
+    paddingVertical: 5,
+    paddingHorizontal: 6,
+    backgroundColor: "#1a5632",
+  },
+  distTotalLabel: { flex: 1, fontSize: 8.5, fontWeight: "bold", color: "#ffffff" },
+  distTotalPct: { width: 36, fontSize: 8.5, color: "#d1fae5", textAlign: "right" },
+  distTotalAmt: { width: 72, fontSize: 8.5, fontWeight: "bold", color: "#ffffff", textAlign: "right" },
 
   footer: {
     position: "absolute",
@@ -194,6 +229,34 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
         <TableRow label={sw ? "Sarafu" : "Currency"} value="TZS (Shilingi ya Tanzania)" alt />
         <TableRow label={sw ? "Hali" : "Status"} value={sw ? "Imelipwa" : "Completed"} />
       </View>
+
+      {/* Fee distribution breakdown */}
+      {amount > 0 && (
+        <View style={{ marginBottom: 10 }}>
+          <View style={rs.distHeader}>
+            <Text style={rs.distHeaderText}>{sw ? "MGAWANYO WA ADA" : "FEE DISTRIBUTION"}</Text>
+          </View>
+          {distributeFee(amount).map((share, i) => (
+            <View key={share.key} style={[rs.distRow, i % 2 === 1 ? rs.distAlt : {}]}>
+              <Text style={rs.distLabel}>{sw ? share.label.sw : share.label.en}</Text>
+              <Text style={rs.distPct}>{share.percent}%</Text>
+              <Text style={rs.distAmt}>{formatCurrency(share.amount)}</Text>
+            </View>
+          ))}
+          <View style={rs.distTotal}>
+            <Text style={rs.distTotalLabel}>{sw ? "JUMLA" : "TOTAL"}</Text>
+            <Text style={rs.distTotalPct}>100%</Text>
+            <Text style={rs.distTotalAmt}>{formatCurrency(amount)}</Text>
+          </View>
+        </View>
+      )}
+      {amount === 0 && (
+        <View style={{ paddingHorizontal: 6, paddingVertical: 8, backgroundColor: "#f3f4f6", marginBottom: 10 }}>
+          <Text style={{ fontSize: 8, color: "#6b7280", fontStyle: "italic", textAlign: "center" }}>
+            {sw ? "Huduma hii haina ada (bure)." : "This service has no fee (free of charge)."}
+          </Text>
+        </View>
+      )}
 
       {/* QR */}
       <View style={rs.qrSection}>

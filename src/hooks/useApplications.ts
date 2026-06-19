@@ -56,7 +56,7 @@ export function useApplications(user: UserProfile | null) {
               users: user,
             });
           } catch (_err) {
-            console.error("Error parsing draft:", err);
+            console.error("Error parsing draft:", _err);
           }
         }
       }
@@ -77,11 +77,19 @@ export function useApplications(user: UserProfile | null) {
     }
 
     if (data) {
-      const appsWithServices = data.map((app: Application) => ({
-        ...app,
-        services: getServiceById(app.service_id) || { name: "Service", fee: 0 },
-        users: user,
-      }));
+      const appsWithServices = data.map((app: Application) => {
+        // Inject user's photo_url into form_data so PDF components can find it
+        const formData = (app.form_data || {}) as Record<string, unknown>;
+        if (user.photo_url && !formData.photo_url) {
+          formData.photo_url = user.photo_url;
+        }
+        return {
+          ...app,
+          form_data: formData,
+          services: getServiceById(app.service_id) || { name: "Service", fee: 0 },
+          users: user,
+        };
+      });
       setApplications(appsWithServices);
     }
 
