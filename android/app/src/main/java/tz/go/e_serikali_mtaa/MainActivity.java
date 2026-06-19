@@ -6,10 +6,7 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        registerPlugin(com.getcapacitor.splashscreen.SplashScreenPlugin.class);
-        registerPlugin(com.getcapacitor.statusbar.StatusBarPlugin.class);
-        registerPlugin(com.getcapacitor.app.AppPlugin.class);
-        registerPlugin(com.getcapacitor.haptics.HapticsPlugin.class);
+        // Capacitor 8 plugins auto-register via service loader
         super.onCreate(savedInstanceState);
     }
 }
