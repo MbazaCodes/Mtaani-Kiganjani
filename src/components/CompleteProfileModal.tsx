@@ -298,6 +298,16 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
         (ward || user?.ward) &&
         (phone || user?.phone || user?.is_diaspora)
       );
+
+      // Persist profile_completion_pct so page refreshes read it from DB
+      // (avoids the banner re-appearing after refresh)
+      const { getProfileCompletion } = await import("@/lib/verification");
+      const mergedForPct = { ...user, ...updates } as Parameters<typeof getProfileCompletion>[0];
+      const pct = getProfileCompletion(mergedForPct);
+      if (pct !== (user?.profile_completion_pct ?? 0)) {
+        updates.profile_completion_pct = pct;
+      }
+
       if (isComplete) {
         const currentLevel = (user as Record<string, unknown>)?.verification_level as string;
         if (
@@ -332,7 +342,7 @@ export const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
       onSaved({ ...user, ...updates } as Partial<UserProfile>);
       onClose();
     } catch (_err) {
-      showToast((err as Error).message || L("Hitilafu imetokea", "An error occurred"), "error");
+      showToast((_err as Error).message || L("Hitilafu imetokea", "An error occurred"), "error");
     } finally {
       clearTimeout(safetyTimer);
       setSaving(false);

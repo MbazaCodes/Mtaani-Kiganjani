@@ -55,6 +55,9 @@ export interface UserProfile {
   ward?: string;
   street?: string;
 
+  // Profile completion
+  profile_completion_pct?: number;
+
   // Personal info
   birth_date?: string;
   date_of_birth?: string;

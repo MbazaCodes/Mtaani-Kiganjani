@@ -57,6 +57,12 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const [pendingAgreements, setPendingAgreements] = useState(0);
   const [selectedDashApp, setSelectedDashApp] = useState<Application | null>(null);
 
+  // Keep localUser in sync with auth context user (important on page refresh —
+  // the auth user re-fetches from DB asynchronously after mount)
+  useEffect(() => {
+    if (user) setLocalUser(user);
+  }, [user]);
+
   useEffect(() => {
     if (!user?.id) return;
     countUnreadNotifications(user.id).then(setUnreadCount);
@@ -156,9 +162,19 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
 
   const hasBizRole = !!(user?.seller_id || user?.landlord_id || user?.broker_id);
 
-  const profileCompletion = getProfileCompletion(localUser);
+  // Profile completion — prefer DB-stored value (updated by CompleteProfileModal),
+  // fall back to client-side calculation. Both must agree before hiding the banner.
+  const profileCompletion = Math.max(
+    localUser?.profile_completion_pct ?? 0,
+    getProfileCompletion(localUser),
+  );
   const currentTier = getUserTier(localUser);
-  const profileDone = currentTier === "PROFILE_COMPLETED" || currentTier === "NIDA_VERIFIED";
+  // Hide the banner if: tier says done, OR DB says ≥ 100%, OR user is verified
+  const profileDone =
+    currentTier === "PROFILE_COMPLETED" ||
+    currentTier === "NIDA_VERIFIED" ||
+    (localUser?.profile_completion_pct ?? 0) >= 100 ||
+    localUser?.is_verified === true;
 
   return (
     <motion.div

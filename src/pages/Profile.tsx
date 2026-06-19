@@ -1196,6 +1196,14 @@ export function Profile() {
 
       // Direct updates for non-sensitive fields
       if (Object.keys(directUpdates).length > 0) {
+        // Recalculate and persist profile_completion_pct so refreshes use the DB value
+        const { getProfileCompletion } = await import("@/lib/verification");
+        const merged = { ...currentUser, ...directUpdates } as Parameters<typeof getProfileCompletion>[0];
+        const pct = getProfileCompletion(merged);
+        if (pct !== (currentUser?.profile_completion_pct ?? 0)) {
+          directUpdates.profile_completion_pct = pct;
+        }
+
         const { error } = await supabase.from("users").update(directUpdates).eq("id", user?.id);
 
         if (error) throw error;
