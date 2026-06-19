@@ -411,7 +411,7 @@ export function LocationManagement() {
       </div>
 
       {/* Search and Filter */}
-      <div className="bg-white rounded-4xl border border-stone-100 shadow-xl overflow-hidden">
+      <div className="bg-white rounded-3xl border border-stone-100 shadow-xl overflow-hidden">
         <div className="p-6 border-b border-stone-100 bg-stone-50/50">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={20} />
@@ -661,7 +661,7 @@ export function LocationManagement() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-4xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
             >
               <div className="px-8 py-6 border-b border-stone-100 flex items-center justify-between">
                 <h2 className="text-xl font-black text-stone-900 tracking-tight">

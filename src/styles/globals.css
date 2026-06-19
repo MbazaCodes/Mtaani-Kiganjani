@@ -4,7 +4,7 @@
 /* Theme configuration */
 :root {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "Outfit", sans-serif;
+  --font-family-heading: "Outfit", sans-serif;
   --font-serif: "Outfit", sans-serif;
 
   --color-background: hsl(150 10% 97%);
@@ -110,13 +110,7 @@
   padding-right: 1rem;
   }
 
-  .hide-scrollbar {
-  -ms-overflow-style: none;
-  }
-
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+  /* .hide-scrollbar removed — use .scrollbar-none instead */
 }
 
 /* Base styles */
@@ -134,7 +128,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
+    font-family: var(--font-family-heading);
   }
   
   button {
@@ -220,7 +214,7 @@
   align-items: center;
   margin-right: 0.5rem;
   padding-right: 0.5rem;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--color-border, #e5e7eb);
 }
 
 .PhoneInputCountrySelect {
@@ -457,6 +451,51 @@
 .dark .text-sky-700 { color: #7dd3fc !important; }
 .dark .text-sky-600 { color: #38bdf8 !important; }
 
+/* ── Teal colors ── */
+.dark .bg-teal-50 { background-color: #042f2e !important; }
+.dark .bg-teal-100 { background-color: #134e4a !important; }
+.dark .bg-teal-500 { background-color: #0d9488 !important; }
+.dark .text-teal-600 { color: #2dd4bf !important; }
+.dark .text-teal-700 { color: #14b8a6 !important; }
+.dark .border-teal-200 { border-color: #115e59 !important; }
+.dark .border-teal-500 { border-color: #14b8a6 !important; }
+
+/* ── Indigo colors ── */
+.dark .bg-indigo-50 { background-color: #1e1b4b !important; }
+.dark .bg-indigo-100 { background-color: #312e81 !important; }
+.dark .bg-indigo-500 { background-color: #6366f1 !important; }
+.dark .bg-indigo-600 { background-color: #818cf8 !important; }
+.dark .text-indigo-600 { color: #818cf8 !important; }
+.dark .text-indigo-700 { color: #6366f1 !important; }
+.dark .border-indigo-200 { border-color: #4338ca !important; }
+.dark .border-indigo-500 { border-color: #6366f1 !important; }
+
+/* ── Green colors ── */
+.dark .bg-green-50 { background-color: #022c22 !important; }
+.dark .bg-green-100 { background-color: #064e3b !important; }
+.dark .bg-green-500 { background-color: #16a34a !important; }
+.dark .text-green-600 { color: #4ade80 !important; }
+.dark .text-green-700 { color: #22c55e !important; }
+
+/* ── Yellow/amber colors (not already covered) ── */
+.dark .bg-yellow-50 { background-color: #422006 !important; }
+.dark .bg-yellow-100 { background-color: #713f12 !important; }
+.dark .text-yellow-600 { color: #facc15 !important; }
+.dark .text-yellow-700 { color: #eab308 !important; }
+
+/* ── Additional gray overrides ── */
+.dark .bg-gray-200 { background-color: #292524 !important; }
+.dark .bg-gray-300 { background-color: #44403c !important; }
+.dark .text-gray-500 { color: #a8a29e !important; }
+.dark .text-gray-700 { color: #d6d3d1 !important; }
+.dark .text-gray-800 { color: #e7e5e4 !important; }
+
+/* ── Opacity variants that need dark overrides ── */
+.dark .bg-stone-50\/50 { background-color: rgb(28 25 23 / 0.5) !important; }
+.dark .bg-white\/90 { background-color: rgb(28 25 23 / 0.9) !important; }
+.dark .bg-white\/10 { background-color: rgb(28 25 23 / 0.1) !important; }
+.dark .bg-white\/20 { background-color: rgb(28 25 23 / 0.2) !important; }
+
 /* ── Form elements ── */
 .dark input,
 .dark textarea,
@@ -570,10 +609,7 @@
   background: linear-gradient(135deg, #064e3b, #1e3a5f) !important;
 }
 
-/* Stats / metric cards */
-.dark .bg-gradient-to-br {
-  filter: brightness(0.7) !important;
-}
+/* Stats / metric cards — brightness filter removed: gradients designed for dark bg already */
 
 /* Progress bars — keep brand colors, just dim track */
 .dark .bg-stone-200.h-1,

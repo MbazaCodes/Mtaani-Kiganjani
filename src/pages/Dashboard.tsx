@@ -362,17 +362,40 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
           },
         ].map((action) => {
           const Icon = action.icon;
+          const colorClasses: Record<string, { bg: string; icon: string; label: string }> = {
+            emerald: {
+              bg: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
+              icon: 'text-emerald-600',
+              label: 'text-emerald-800',
+            },
+            blue: {
+              bg: 'bg-blue-50 hover:bg-blue-100 border-blue-200',
+              icon: 'text-blue-600',
+              label: 'text-blue-800',
+            },
+            stone: {
+              bg: 'bg-stone-50 hover:bg-stone-100 border-stone-200',
+              icon: 'text-stone-600',
+              label: 'text-stone-800',
+            },
+            rose: {
+              bg: 'bg-rose-50 hover:bg-rose-100 border-rose-200',
+              icon: 'text-rose-600',
+              label: 'text-rose-800',
+            },
+          };
+          const c = colorClasses[action.color] ?? colorClasses.stone;
           return (
             <button
               key={action.view}
               onClick={() => setView(action.view)}
-              className={`p-4 bg-${action.color}-50 hover:bg-${action.color}-100 border border-${action.color}-200 rounded-2xl transition-all text-left group`}
+              className={`p-4 ${c.bg} border rounded-2xl transition-all text-left group`}
             >
               <Icon
                 size={22}
-                className={`text-${action.color}-600 mb-2 group-hover:scale-110 transition-transform`}
+                className={`${c.icon} mb-2 group-hover:scale-110 transition-transform`}
               />
-              <p className={`text-sm font-bold text-${action.color}-800`}>
+              <p className={`text-sm font-bold ${c.label}`}>
                 {lang === "sw" ? action.sw : action.en}
               </p>
             </button>
@@ -502,7 +525,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
         </div>
         {recent.length === 0 ? (
           <div className="p-8 text-center">
-            <FileText size={32} className="mx-auto text-stone-300 mb-3" />
+            <FileText size={40} className="mx-auto text-stone-300 mb-3" />
             <p className="font-bold text-stone-600 text-sm">
               {L("Bado huna maombi yoyote", "No applications yet")}
             </p>

@@ -15,7 +15,7 @@ export function StatCard({ icon, label, value, trend, description, className }: 
   return (
     <motion.div
       whileHover={{ y: -2 }}
-      className={cn("bg-white rounded-4xl p-6 border border-stone-100 shadow-xl", className)}
+      className={cn("bg-white rounded-3xl p-6 border border-stone-100 shadow-xl", className)}
     >
       <div className="flex items-center justify-between mb-4">
         <div className="p-3 rounded-2xl bg-stone-50">{icon}</div>

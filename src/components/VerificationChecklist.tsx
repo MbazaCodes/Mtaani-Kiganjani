@@ -419,7 +419,7 @@ export const VerificationChecklist: React.FC<VerificationChecklistProps> = ({
                                         return updated;
                                       })
                                     }
-                                    className="h-8 px-2.5 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium outline-none focus:ring-1 focus:ring-emerald-500"
+                                    className="h-8 px-2.5 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                   />
                                 ))}
                               </div>

@@ -840,7 +840,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
 
           {/* Second Row Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white rounded-4xl p-6 border border-stone-100 shadow-xl">
+            <div className="bg-white rounded-3xl p-6 border border-stone-100 shadow-xl">
               <h3 className="text-sm font-bold text-stone-500 uppercase tracking-widest mb-4">
                 {lang === "sw" ? "Hali ya Maombi" : "Application Status"}
               </h3>
@@ -892,7 +892,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
               </div>
             </div>
 
-            <div className="bg-white rounded-4xl p-6 border border-stone-100 shadow-xl">
+            <div className="bg-white rounded-3xl p-6 border border-stone-100 shadow-xl">
               <h3 className="text-sm font-bold text-stone-500 uppercase tracking-widest mb-4">
                 {lang === "sw" ? "Takwimu za Watumiaji" : "User Statistics"}
               </h3>
@@ -935,7 +935,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
               </div>
             </div>
 
-            <div className="bg-white rounded-4xl p-6 border border-stone-100 shadow-xl">
+            <div className="bg-white rounded-3xl p-6 border border-stone-100 shadow-xl">
               <h3 className="text-sm font-bold text-stone-500 uppercase tracking-widest mb-4">
                 {lang === "sw" ? "Huduma na Maeneo" : "Services & Locations"}
               </h3>
@@ -974,7 +974,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           {/* System Health and Recent Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* System Health */}
-            <div className="lg:col-span-1 bg-white rounded-4xl p-6 border border-stone-100 shadow-xl">
+            <div className="lg:col-span-1 bg-white rounded-3xl p-6 border border-stone-100 shadow-xl">
               <h3 className="text-sm font-bold text-stone-500 uppercase tracking-widest mb-4">
                 {lang === "sw" ? "Afya ya Mfumo" : "System Health"}
               </h3>
@@ -1023,7 +1023,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
             </div>
 
             {/* Recent Activity */}
-            <div className="lg:col-span-2 bg-white rounded-4xl p-6 border border-stone-100 shadow-xl">
+            <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-stone-100 shadow-xl">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-stone-500 uppercase tracking-widest">
                   {lang === "sw" ? "Shughuli za Karibuni" : "Recent Activity"}
@@ -1083,7 +1083,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           </div>
 
           {/* Department Network Overview */}
-          <div className="bg-white rounded-4xl p-6 border border-stone-100 shadow-xl">
+          <div className="bg-white rounded-3xl p-6 border border-stone-100 shadow-xl">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <Building2 size={18} className="text-emerald-600" />
@@ -1214,7 +1214,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-stone-900 rounded-4xl p-8 text-white relative overflow-hidden shadow-2xl">
+          <div className="bg-stone-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10">
               <h3 className="text-xl font-bold flex items-center gap-2 mb-6">
                 <Zap size={20} className="text-emerald-400" />
@@ -1386,7 +1386,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           </div>
 
           {/* Service Breakdown — Real Application Data */}
-          <div className="bg-white rounded-4xl p-8 border border-stone-100 shadow-xl">
+          <div className="bg-white rounded-3xl p-8 border border-stone-100 shadow-xl">
             <h3 className="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
               <PieChart size={20} className="text-emerald-600" />
               {lang === "sw"
@@ -1468,7 +1468,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
 
           {/* Business Registrations + Revenue by Service */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-4xl p-8 border border-stone-100 shadow-xl">
+            <div className="bg-white rounded-3xl p-8 border border-stone-100 shadow-xl">
               <h3 className="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
                 <Building2 size={20} className="text-emerald-600" />
                 {lang === "sw" ? "Usajili wa Biashara" : "Business Registrations"}
@@ -1522,7 +1522,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
 
           {/* Location Distribution */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-4xl p-8 border border-stone-100 shadow-xl">
+            <div className="bg-white rounded-3xl p-8 border border-stone-100 shadow-xl">
               <h3 className="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
                 <Globe size={20} className="text-emerald-600" />
                 {lang === "sw" ? "Muhtasari wa Maeneo" : "Location Summary"}
@@ -1555,7 +1555,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
               </div>
             </div>
 
-            <div className="bg-white rounded-4xl p-8 border border-stone-100 shadow-xl">
+            <div className="bg-white rounded-3xl p-8 border border-stone-100 shadow-xl">
               <h3 className="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
                 <Activity size={20} className="text-emerald-600" />
                 {lang === "sw" ? "Hali ya Mfumo" : "System Health"}
@@ -1590,7 +1590,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
         <div className="space-y-6">
           {/* Report Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-4xl p-8 text-white shadow-xl">
+            <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-3xl p-8 text-white shadow-xl">
               <DollarSign size={32} className="mb-4 opacity-80" />
               <p className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-1">
                 {lang === "sw" ? "Mapato ya Mwezi" : "Monthly Revenue"}
@@ -1604,7 +1604,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
               </p>
             </div>
 
-            <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-4xl p-8 text-white shadow-xl">
+            <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-3xl p-8 text-white shadow-xl">
               <FileText size={32} className="mb-4 opacity-80" />
               <p className="text-blue-100 text-sm font-bold uppercase tracking-widest mb-1">
                 {lang === "sw" ? "Maombi ya Mwezi" : "Monthly Applications"}
@@ -1616,7 +1616,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
               </p>
             </div>
 
-            <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-4xl p-8 text-white shadow-xl">
+            <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-3xl p-8 text-white shadow-xl">
               <Users size={32} className="mb-4 opacity-80" />
               <p className="text-purple-100 text-sm font-bold uppercase tracking-widest mb-1">
                 {lang === "sw" ? "Watumiaji Wapya" : "New Users"}
@@ -1630,7 +1630,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           </div>
 
           {/* Detailed Reports — Service-Level Table */}
-          <div className="bg-white rounded-4xl p-8 border border-stone-100 shadow-xl">
+          <div className="bg-white rounded-3xl p-8 border border-stone-100 shadow-xl">
             <h3 className="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
               <FileText size={20} className="text-emerald-600" />
               {lang === "sw" ? "Ripoti ya Kina ya Huduma" : "Detailed Service Report"}
@@ -1745,7 +1745,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           </div>
 
           {/* Quick Links */}
-          <div className="bg-white rounded-4xl p-8 border border-stone-100 shadow-xl">
+          <div className="bg-white rounded-3xl p-8 border border-stone-100 shadow-xl">
             <h3 className="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
               <FileText size={20} className="text-emerald-600" />
               {lang === "sw" ? "Ripoti za Maeneo" : "Area Reports"}
@@ -1846,7 +1846,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
           </div>
 
           {/* Financial Summary */}
-          <div className="bg-white rounded-4xl p-8 border border-stone-100 shadow-xl">
+          <div className="bg-white rounded-3xl p-8 border border-stone-100 shadow-xl">
             <h3 className="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
               <DollarSign size={20} className="text-emerald-600" />
               {lang === "sw" ? "Muhtasari wa Fedha" : "Financial Summary"}

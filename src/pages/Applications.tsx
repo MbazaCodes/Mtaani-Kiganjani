@@ -335,7 +335,7 @@ export function Applications({
         <div className="space-y-3">
           {list.length === 0 && (
             <div className="bg-white border border-stone-200 rounded-2xl p-12 text-center">
-              <FileText size={32} className="text-stone-300 mx-auto mb-3" />
+              <FileText size={40} className="text-stone-300 mx-auto mb-3" />
               <p className="font-bold text-stone-500">
                 {L("Hakuna maombi", "No applications found")}
               </p>

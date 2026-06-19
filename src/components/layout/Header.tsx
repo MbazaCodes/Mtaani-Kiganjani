@@ -66,7 +66,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             className="w-8 h-8 sm:w-12 sm:h-12 object-contain"
             referrerPolicy="no-referrer"
           />
-          <div className="h-8 sm:h-10 w-px bg-stone-200 dark:bg-stone-700 hidden xs:block" aria-hidden="true"></div>
+          <div className="h-8 sm:h-10 w-px bg-stone-200 dark:bg-stone-700 hidden sm:block" aria-hidden="true"></div>
           <div className="flex flex-col leading-none">
             <span className="text-base sm:text-lg font-black tracking-tighter text-stone-900 dark:text-stone-100 flex items-center gap-1">
               E-MTAA
@@ -157,7 +157,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           >
             <Bell size={20} aria-hidden="true" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow ring-2 ring-white">
+              <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow ring-2 ring-white dark:ring-stone-700">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}

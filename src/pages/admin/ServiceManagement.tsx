@@ -704,7 +704,7 @@ export function ServiceManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-4xl border border-stone-100 shadow-xl">
+        <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
               <FileText size={24} />
@@ -717,7 +717,7 @@ export function ServiceManagement() {
           <p className="text-3xl font-black text-stone-900 mt-1">{services.length}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-4xl border border-stone-100 shadow-xl">
+        <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
               <CheckCircle2 size={24} />
@@ -732,7 +732,7 @@ export function ServiceManagement() {
           <p className="text-3xl font-black text-stone-900 mt-1">{activeServices.length}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-4xl border border-stone-100 shadow-xl">
+        <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
               <Clock size={24} />
@@ -756,7 +756,7 @@ export function ServiceManagement() {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-4xl border border-stone-100 shadow-xl overflow-hidden">
+      <div className="bg-white rounded-3xl border border-stone-100 shadow-xl overflow-hidden">
         <div className="p-6 border-b border-stone-100 bg-stone-50/50">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={20} />
@@ -1057,7 +1057,7 @@ export function ServiceManagement() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-4xl bg-white rounded-4xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+              className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
             >
               <div className="px-8 py-6 border-b border-stone-100 flex items-center justify-between">
                 <h2 className="text-xl font-black text-stone-900 tracking-tight">

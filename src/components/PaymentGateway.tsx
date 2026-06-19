@@ -84,7 +84,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -237,7 +237,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                       <input
                         type="tel"
                         placeholder="07XX XXX XXX"
-                        className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                        className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                       />
@@ -272,7 +272,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                       <input
                         type="text"
                         placeholder="XXXX XXXX XXXX XXXX"
-                        className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                        className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all"
                         value={accountNumber}
                         onChange={(e) => setAccountNumber(e.target.value)}
                       />
@@ -287,7 +287,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                       <input
                         type="text"
                         placeholder="JOHN DOE"
-                        className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all uppercase"
+                        className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all uppercase"
                         value={cardDetails.name}
                         onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
                       />
@@ -301,7 +301,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                           type="text"
                           placeholder="0000 0000 0000 0000"
                           maxLength={19}
-                          className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                          className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all"
                           value={cardDetails.number}
                           onChange={(e) =>
                             setCardDetails({ ...cardDetails, number: e.target.value })
@@ -332,7 +332,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                           type="text"
                           placeholder="MM/YY"
                           maxLength={5}
-                          className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                          className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all"
                           value={cardDetails.expiry}
                           onChange={(e) =>
                             setCardDetails({ ...cardDetails, expiry: e.target.value })
@@ -345,7 +345,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                           type="password"
                           placeholder="***"
                           maxLength={3}
-                          className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                          className="w-full h-14 px-5 rounded-2xl border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all"
                           value={cardDetails.cvv}
                           onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
                         />
@@ -406,7 +406,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 className="py-12 text-center space-y-6"
               >
-                <div className="h-20 w-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
+                <motion.div className="h-20 w-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto" animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
                   <CheckCircle2 className="h-12 w-12" />
                 </div>
                 <div>

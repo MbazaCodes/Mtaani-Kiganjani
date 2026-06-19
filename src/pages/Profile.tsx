@@ -1385,7 +1385,7 @@ export function Profile() {
       </div>
 
       {/* Main profile card */}
-      <div className="bg-white rounded-4xl border border-stone-100 shadow-xl overflow-hidden">
+      <div className="bg-white rounded-3xl border border-stone-100 shadow-xl overflow-hidden">
         {/* Profile header */}
         <div className="bg-linear-to-br from-emerald-600 to-emerald-700 p-5 sm:p-8 md:p-12 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-black/10" />

@@ -294,7 +294,7 @@ export function CustomerSupport() {
         </div>
       </div>
 
-      <div className="bg-white rounded-4xl p-8 border border-stone-100 shadow-xl space-y-8">
+      <div className="bg-white rounded-3xl p-8 border border-stone-100 shadow-xl space-y-8">
         <form onSubmit={handleSearch} className="relative">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-stone-400" size={24} />
           <input
@@ -306,7 +306,7 @@ export function CustomerSupport() {
             }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-16 pl-16 pr-40 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-mono text-lg uppercase tracking-widest"
+            className="w-full h-16 pl-16 pr-40 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all font-mono text-lg uppercase tracking-widest"
           />
           <button
             type="submit"

@@ -586,7 +586,7 @@ export function CitizenManagement() {
       </div>
 
       {activeTab === "profile-changes" ? (
-        <div className="bg-white rounded-4xl border border-stone-100 shadow-xl overflow-hidden">
+        <div className="bg-white rounded-3xl border border-stone-100 shadow-xl overflow-hidden">
           {loadingChanges ? (
             <div className="p-20 flex flex-col items-center justify-center gap-4">
               <Loader2 className="animate-spin text-emerald-600" size={40} />
@@ -664,7 +664,7 @@ export function CitizenManagement() {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-4xl border border-stone-100 shadow-xl overflow-hidden">
+        <div className="bg-white rounded-3xl border border-stone-100 shadow-xl overflow-hidden">
           {loading ? (
             <div className="p-20 flex flex-col items-center justify-center gap-4">
               <Loader2 className="animate-spin text-emerald-600" size={40} />

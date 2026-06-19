@@ -707,7 +707,7 @@ Timestamp: ${new Date(log.created_at).toLocaleString()}
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="bg-white rounded-4xl p-6 border border-stone-100 shadow-xl space-y-6">
+            <div className="bg-white rounded-3xl p-6 border border-stone-100 shadow-xl space-y-6">
               {/* Search */}
               <div className="relative">
                 <Search
@@ -904,7 +904,7 @@ Timestamp: ${new Date(log.created_at).toLocaleString()}
       )}
 
       {/* Logs Table */}
-      <div className="bg-white rounded-4xl border border-stone-100 shadow-xl overflow-hidden">
+      <div className="bg-white rounded-3xl border border-stone-100 shadow-xl overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
             <Loader2 className="animate-spin mx-auto text-emerald-600 mb-2" size={32} />
@@ -1229,7 +1229,7 @@ Timestamp: ${new Date(log.created_at).toLocaleString()}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-4xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden"
             >
               <div className="px-8 py-6 border-b border-stone-100 flex items-center justify-between">
                 <h2 className="text-xl font-black text-stone-900 tracking-tight">

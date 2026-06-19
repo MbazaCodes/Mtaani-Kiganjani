@@ -274,7 +274,7 @@ export function Notifications() {
     );
 
   return (
-    <div className="max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4">
+    <div className="max-w-3xl mx-auto py-4 sm:py-6 space-y-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -315,7 +315,7 @@ export function Notifications() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
         {[
           { v: "all", sw: "Zote", en: "All", count: combinedItems.length },
           { v: "unread", sw: "Hazijasomwa", en: "Unread", count: unreadCount + pendingActionCount },

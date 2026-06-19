@@ -291,7 +291,7 @@ export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavPr
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-100 lg:hidden">
+        <div className="fixed inset-0 z-[100] lg:hidden">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}

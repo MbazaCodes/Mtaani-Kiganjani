@@ -844,7 +844,7 @@ export function VerifyDocuments({
                 <button
                   type="button"
                   onClick={() => setShowDocTypeDropdown(!showDocTypeDropdown)}
-                  className="w-full h-14 px-4 rounded-2xl border border-stone-200 dark:border-stone-600 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all flex items-center justify-between bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700"
+                  className="w-full h-14 px-4 rounded-2xl border border-stone-200 dark:border-stone-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all flex items-center justify-between bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700"
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
@@ -938,7 +938,7 @@ export function VerifyDocuments({
                     if (verificationStatus) resetSearch();
                   }}
                   onKeyDown={(e) => e.key === "Enter" && handleVerify()}
-                  className="w-full h-14 px-6 rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all font-mono text-base uppercase tracking-wider"
+                  className="w-full h-14 px-6 rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all font-mono text-base uppercase tracking-wider"
                 />
                 <p className="text-xs text-stone-400 dark:text-stone-500 mt-1.5 pl-1">
                   {L("Mfano:", "Example:")} <span className="font-mono">{selectedDocument.placeholder}</span>

@@ -261,7 +261,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
     >
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-stone-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight">
             {lang === "sw" ? "Dashibodi ya Mtumishi" : "Staff Dashboard"}
           </h1>
           <p className="text-stone-500 font-medium">
@@ -312,7 +312,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white rounded-4xl border border-stone-100 shadow-xl overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-3xl border border-stone-100 shadow-xl overflow-hidden">
           <div className="px-8 py-6 border-b border-stone-100 flex items-center justify-between">
             <h3 className="text-xl font-bold text-stone-900">
               {lang === "sw" ? "Maombi ya Karibuni" : "Recent Applications"}
@@ -362,7 +362,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-stone-900 rounded-4xl p-8 text-white relative overflow-hidden shadow-xl">
+          <div className="bg-stone-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <UserCheck size={20} className="text-emerald-400" />
               {lang === "sw" ? "Njia za Mkato" : "Quick Access"}
