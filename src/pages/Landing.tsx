@@ -270,27 +270,13 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
             >
               <div className="relative z-10 bg-white rounded-[2rem] border border-stone-200 shadow-2xl overflow-hidden aspect-4/5 lg:aspect-square max-h-[420px] lg:max-h-none">
                 <img
-                  src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1000"
-                  alt="Tanzania Digital"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
+                  src="/hero-image.png"
+                  alt="Mtaani Kiganjani — Huduma za Serikali za Mtaa Tanzania"
+                  className="w-full h-full object-cover object-center"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
                   <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white">
-                        <CheckCircle2 size={16} />
-                      </div>
-                      <span className="text-white font-bold text-sm">
-                        {lang === "sw" ? "Ombi Limeidhinishwa" : "Application Approved"}
-                      </span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
-                      <div className="h-full w-full bg-emerald-500 rounded-full" />
-                    </div>
-                  </div>
-                </div>
               </div>
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-100 rounded-full blur-3xl opacity-50 -z-10" />
               <div className="absolute -bottom-10 -left-10 w-56 h-56 bg-blue-100 rounded-full blur-3xl opacity-50 -z-10" />

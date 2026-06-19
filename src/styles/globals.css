@@ -1,4 +1,4 @@
-/* Font imports — loaded in index.html <head> to avoid bundler issues */
+/* Font imports are handled in index.html <link> to avoid @import order issues */
 
 /* Theme configuration */
 :root {
