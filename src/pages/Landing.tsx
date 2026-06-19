@@ -733,6 +733,28 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                   </li>
                 ))}
               </ul>
+
+              {/* Wadau Katika Utendaji */}
+              <h4 className="font-black text-xs uppercase tracking-widest text-stone-300 flex items-center gap-2 pt-2">
+                <span className="w-4 h-0.5 bg-emerald-500 inline-block" />
+                {lang === "sw" ? "Wadau Katika Utendaji" : "Implementation Partners"}
+              </h4>
+              <ul className="space-y-2.5 text-sm text-stone-400">
+                {[
+                  { label: "RITA — Wakala wa Usajili, Ufilisi na Udhamini", href: "https://www.rita.go.tz" },
+                  { label: lang === "sw" ? "Idara ya Uhamiaji" : "Immigration Department", href: "https://www.immigration.go.tz" },
+                  { label: lang === "sw" ? "Jeshi la Polisi Tanzania" : "Tanzania Police Force", href: "https://www.polisi.go.tz" },
+                  { label: lang === "sw" ? "Wizara ya Mambo ya Ndani ya Nchi" : "Ministry of Home Affairs", href: "https://www.mhome.go.tz" },
+                ].map((l) => (
+                  <li key={l.href}>
+                    <a href={l.href} target="_blank" rel="noopener noreferrer"
+                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                      <ExternalLink size={11} className="shrink-0" />
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             {/* Contact info (§2.1.v.e — Mawasiliano ya Taasisi) */}
