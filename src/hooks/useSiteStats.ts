@@ -36,6 +36,26 @@ export function useOnlineCount(): number {
 }
 
 /**
+ * useLiveAppCount — real count of submitted applications from the DB.
+ */
+export function useLiveAppCount(): number | null {
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .then(({ count: c }) => {
+        if (!cancelled && typeof c === "number") setCount(c);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  return count;
+}
+
+/**
  * useSiteVisits — total cumulative site visits. Increments once per browser
  * session (sessionStorage guard) and returns the running total.
  */

@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import { useOnlineCount, useSiteVisits } from "@/hooks/useSiteStats";
+import { useOnlineCount, useSiteVisits, useLiveAppCount } from "@/hooks/useSiteStats";
 import { TANZANIA_LOGO_URL } from "@/constants/services";
 
 interface LandingProps {
@@ -33,6 +33,7 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
   const { isDark, toggle: toggleDark } = useDarkMode();
   const onlineCount = useOnlineCount();
   const siteVisits = useSiteVisits();
+  const liveAppCount = useLiveAppCount();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -307,10 +308,26 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-10">
             {[
-              { num: "26", lbl: lang === "sw" ? "Mikoa" : "Regions" },
-              { num: "184", lbl: lang === "sw" ? "Halmashauri" : "Councils" },
-              { num: "4,000+", lbl: lang === "sw" ? "Mitaa" : "Streets" },
-              { num: "1M+", lbl: lang === "sw" ? "Maombi" : "Applications" },
+              {
+                // Tanzania has 31 regions (26 mainland + 5 Zanzibar) per TAMISEMI
+                num: "31",
+                lbl: lang === "sw" ? "Mikoa" : "Regions",
+              },
+              {
+                // 185 LGAs in Tanzania per TAMISEMI 2024 data
+                num: "185",
+                lbl: lang === "sw" ? "Halmashauri" : "Councils",
+              },
+              {
+                // 9 services currently live on E-Mtaa
+                num: "9",
+                lbl: lang === "sw" ? "Huduma Zilizopo" : "Live Services",
+              },
+              {
+                // Live count from DB — shows real number or "—" while loading
+                num: liveAppCount !== null ? liveAppCount.toLocaleString() : "—",
+                lbl: lang === "sw" ? "Maombi Yaliyowasilishwa" : "Applications Filed",
+              },
             ].map(({ num, lbl }) => (
               <div key={lbl} className="text-center space-y-1">
                 <div className="text-2xl sm:text-4xl lg:text-5xl font-black text-emerald-400">
