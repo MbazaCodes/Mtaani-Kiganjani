@@ -20,6 +20,9 @@
   --font-family-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-family-heading: "Outfit", sans-serif;
   --font-family-serif: "Outfit", sans-serif;
+  /* Also expose as --font-* for direct var() use in globals.css */
+  --font-heading: "Outfit", sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 @import "./styles/globals.css";
