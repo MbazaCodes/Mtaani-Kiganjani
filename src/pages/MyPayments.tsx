@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import {
   Wallet,
@@ -22,9 +22,17 @@ import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Application } from "@/lib/supabase";
 import { RefreshButton } from "@/components/ui/RefreshButton";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { RisitiMalipoPDF } from "@/components/documents/RisitiMalipoPDF";
 import { generateQRDataUrl } from "@/lib/qr";
+
+// Lazy-load heavy PDF dependencies — only loaded when user clicks a receipt
+const PDFDownloadLink = lazy(() => import("@react-pdf/renderer").then((m) => ({ default: (m.PDFDownloadLink as unknown) as React.ComponentType<{
+    document: React.ReactElement;
+    fileName: string;
+    children: (p: { loading: boolean; error: Error | null }) => React.ReactNode;
+  }> })));
+const RisitiMalipoPDF = lazy(() => import("@/components/documents/RisitiMalipoPDF").then((m) => ({ default: (m.RisitiMalipoPDF as unknown) as React.ComponentType<Record<string, unknown>> })));
+
+const PAGE_SIZE = 20;
 
 interface PaymentRecord {
   id: string;
@@ -64,11 +72,6 @@ const ReceiptDownloadButton: React.FC<{
   amount: number;
   L: (sw: string, en: string) => string;
 }> = ({ app, lang, amount, L }) => {
-  const PDFLink = PDFDownloadLink as unknown as React.ComponentType<{
-    document: React.ReactElement;
-    fileName: string;
-    children: (p: { loading: boolean; error: Error | null }) => React.ReactNode;
-  }>;
   const [qr, setQr] = useState<string | null>(null);
   const [loadingQr, setLoadingQr] = useState(false);
 
@@ -110,12 +113,13 @@ const ReceiptDownloadButton: React.FC<{
         await generateQRDataUrl(app as unknown as Parameters<typeof generateQRDataUrl>[0], "RCP"),
       );
     } catch {
-      setQr(""); // proceed without QR rather than fail
+      setQr("");
     } finally {
       setLoadingQr(false);
     }
   };
 
+  // Phase 1: Click to generate QR
   if (qr === null) {
     return (
       <button
@@ -130,34 +134,43 @@ const ReceiptDownloadButton: React.FC<{
     );
   }
 
+  // Phase 2: QR ready, preload PDF lib then show download link
   return (
-    <PDFLink
-      document={
-        <RisitiMalipoPDF
-          application={
-            appForReceipt as unknown as Parameters<typeof RisitiMalipoPDF>[0]["application"]
-          }
-          lang={lang as "sw" | "en"}
-          qrDataUrl={qr || undefined}
-        />
+    <Suspense
+      fallback={
+        <span className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">
+          <Loader2 size={14} className="animate-spin" /> {L("Inaandaa...", "Preparing...")}
+        </span>
       }
-      fileName={`Risiti_${app.application_number}.pdf`}
     >
-      {({ loading, error }) => (
-        <button
-          className={cn(
-            "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors",
-            error
-              ? "bg-red-50 text-red-500"
-              : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700",
-          )}
-          title={L("Pakua Risiti", "Download Receipt")}
-        >
-          {loading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-          {error ? L("Hitilafu", "Error") : L("Risiti", "Receipt")}
-        </button>
-      )}
-    </PDFLink>
+      <PDFDownloadLink
+        document={
+          <RisitiMalipoPDF
+            application={
+              appForReceipt as unknown as Record<string, unknown>
+            }
+            lang={lang as "sw" | "en"}
+            qrDataUrl={qr || undefined}
+          />
+        }
+        fileName={`Risiti_${app.application_number}.pdf`}
+      >
+        {({ loading, error }) => (
+          <button
+            className={cn(
+              "flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors",
+              error
+                ? "bg-red-50 text-red-500"
+                : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700",
+            )}
+            title={L("Pakua Risiti", "Download Receipt")}
+          >
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            {error ? L("Hitilafu", "Error") : L("Risiti", "Receipt")}
+          </button>
+        )}
+      </PDFDownloadLink>
+    </Suspense>
   );
 };
 
@@ -172,117 +185,124 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"history" | "receipts" | "outstanding">("history");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // ── Fetch data ─────────────────────────────────────────────────────────
+  // ── Fetch data — ALL queries run in parallel via Promise.all ──────────
   const fetchAll = useCallback(async () => {
     if (!user?.id) return;
     setLoading(true);
-    {
-      // 1. Get user's application IDs first
-      const { data: apps } = await supabase
-        .from("applications")
-        .select("id")
-        .eq("user_id", user.id);
-      const appIds = (apps || []).map((a) => a.id);
+    setVisibleCount(PAGE_SIZE);
 
-      // 2. Fetch payments for those applications
-      let finalPayments: PaymentRecord[] = [];
-      if (appIds.length > 0) {
-        const { data: paymentData } = await supabase
-          .from("payments")
-          .select("*, application:application_id(id, application_number, service_name, status)")
-          .in("application_id", appIds)
-          .order("created_at", { ascending: false });
-        finalPayments = (paymentData as PaymentRecord[]) || [];
-      }
-
-      // 3. Also build payment-like records from paid/issued applications
-      //    (covers cases where payment was processed but no payments table entry)
-      const { data: paidApps } = await supabase
+    // Fire all 4 queries simultaneously
+    const [
+      appsRes,
+      paidAppsRes,
+      issuedRes,
+      outstandingRes,
+    ] = await Promise.all([
+      // 1. All user application IDs
+      supabase.from("applications").select("id").eq("user_id", user.id),
+      // 2. Paid/issued applications (for building payment records)
+      supabase
         .from("applications")
         .select(
           "id, application_number, service_name, status, form_data, payment_data, created_at, updated_at",
         )
         .eq("user_id", user.id)
-        .in("status", ["paid", "issued", "approved", "verified"]);
-
-      if (paidApps) {
-        for (const app of paidApps) {
-          const pd = (app.payment_data || {}) as Record<string, unknown> & {
-            amount?: number;
-            payment_method?: string;
-            transaction_id?: string;
-            receipt_number?: string;
-          };
-          const fd = (app.form_data || {}) as Record<string, unknown> & { service_fee?: number };
-          const amount = getApplicationAmount(app);
-          // Skip if already in payments table
-          if (finalPayments.find((p) => (p.application as { id?: string })?.id === app.id))
-            continue;
-          if (Number(amount) > 0) {
-            finalPayments.push({
-              id: app.id,
-              amount: Number(amount),
-              currency: "TZS",
-              payment_method: pd.payment_method || "E-Mtaa",
-              transaction_id: pd.transaction_id,
-              receipt_number: pd.receipt_number || `RCP-${app.application_number}`,
-              status: "completed",
-              created_at: app.updated_at || app.created_at,
-              application: {
-                id: app.id,
-                application_number: app.application_number,
-                service_name: app.service_name,
-                status: app.status,
-              },
-            });
-          }
-        }
-      }
-
-      // Sort by date
-      finalPayments.sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      );
-      setPayments(finalPayments);
-
-      // 2. Issued applications (receipt vault)
-      const { data: issued } = await supabase
+        .in("status", ["paid", "issued", "approved", "verified"]),
+      // 3. Issued applications (receipt vault)
+      supabase
         .from("applications")
         .select("id, application_number, service_name, status, created_at, form_data, payment_data")
         .eq("user_id", user.id)
         .eq("status", "issued")
-        .order("created_at", { ascending: false });
-      setIssuedApps((issued as IssuedDoc[]) || []);
-
-      // 3. Outstanding — any application that needs payment and isn't paid/issued/rejected
-      const { data: outstanding, error: outErr } = await supabase
+        .order("created_at", { ascending: false }),
+      // 4. Outstanding/unpaid applications
+      supabase
         .from("applications")
         .select(
           "id, application_number, service_name, status, created_at, form_data, payment_data, paid_at",
         )
         .eq("user_id", user.id)
         .in("status", ["pending_payment", "approved", "verified"])
+        .order("created_at", { ascending: false }),
+    ]);
+
+    const appIds = (appsRes.data || []).map((a) => a.id);
+
+    // Fetch payments table (only if user has applications)
+    let finalPayments: PaymentRecord[] = [];
+    if (appIds.length > 0) {
+      const { data: paymentData } = await supabase
+        .from("payments")
+        .select("*, application:application_id(id, application_number, service_name, status)")
+        .in("application_id", appIds)
         .order("created_at", { ascending: false });
-      if (outErr) console.warn("[MyPayments] outstanding query error:", outErr.message);
-
-      // Only keep ones with a fee that haven't been paid
-      const unpaidOutstanding = (outstanding || []).filter((app) => {
-        const isPaid = !!(
-          app.paid_at ||
-          (app.payment_data as Record<string, unknown>)?.transaction_id ||
-          (app.form_data as Record<string, unknown>)?.payment_data
-        );
-        const fee = getApplicationAmount(app);
-        return !isPaid && fee > 0;
-      });
-      setOutstandingApps(unpaidOutstanding as IssuedDoc[]);
-
-      // Auto-show outstanding tab if there are unpaid items
-      if (unpaidOutstanding.length > 0) setActiveTab("outstanding");
-
-      setLoading(false);
+      finalPayments = (paymentData as PaymentRecord[]) || [];
     }
+
+    // Merge paid apps into payments (covers cases where payment was processed but no payments table entry)
+    const paidApps = paidAppsRes.data;
+    if (paidApps) {
+      for (const app of paidApps) {
+        const pd = (app.payment_data || {}) as Record<string, unknown> & {
+          amount?: number;
+          payment_method?: string;
+          transaction_id?: string;
+          receipt_number?: string;
+        };
+        const amount = getApplicationAmount(app);
+        // Skip if already in payments table
+        if (finalPayments.find((p) => (p.application as { id?: string })?.id === app.id))
+          continue;
+        if (Number(amount) > 0) {
+          finalPayments.push({
+            id: app.id,
+            amount: Number(amount),
+            currency: "TZS",
+            payment_method: pd.payment_method || "E-Mtaa",
+            transaction_id: pd.transaction_id,
+            receipt_number: pd.receipt_number || `RCP-${app.application_number}`,
+            status: "completed",
+            created_at: app.updated_at || app.created_at,
+            application: {
+              id: app.id,
+              application_number: app.application_number,
+              service_name: app.service_name,
+              status: app.status,
+            },
+          });
+        }
+      }
+    }
+
+    // Sort by date
+    finalPayments.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+    setPayments(finalPayments);
+
+    // Issued apps
+    setIssuedApps((issuedRes.data as IssuedDoc[]) || []);
+
+    // Outstanding — filter to only unpaid with a fee
+    const outErr = outstandingRes.error;
+    if (outErr) console.warn("[MyPayments] outstanding query error:", outErr.message);
+    const unpaidOutstanding = (outstandingRes.data || []).filter((app) => {
+      const isPaid = !!(
+        app.paid_at ||
+        (app.payment_data as Record<string, unknown>)?.transaction_id ||
+        (app.form_data as Record<string, unknown>)?.payment_data
+      );
+      const fee = getApplicationAmount(app);
+      return !isPaid && fee > 0;
+    });
+    setOutstandingApps(unpaidOutstanding as IssuedDoc[]);
+
+    // Auto-show outstanding tab if there are unpaid items
+    if (unpaidOutstanding.length > 0) setActiveTab("outstanding");
+
+    setLoading(false);
   }, [user?.id]);
 
   useEffect(() => {
@@ -327,28 +347,38 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
     };
   }, [payments, outstandingApps]);
 
-  // ── Search filter ──────────────────────────────────────────────────────
-  const filteredPayments = searchQuery
-    ? payments.filter(
-        (p) =>
-          (p.receipt_number || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (p.transaction_id || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          ((p.application as PaymentRecord["application"])?.application_number || "")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          ((p.application as PaymentRecord["application"])?.service_name || "")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()),
-      )
-    : payments;
+  // ── Search filter (paginated) ────────────────────────────────────────
+  const allFilteredPayments = useMemo(
+    () =>
+      searchQuery
+        ? payments.filter(
+            (p) =>
+              (p.receipt_number || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (p.transaction_id || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+              ((p.application as PaymentRecord["application"])?.application_number || "")
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
+              ((p.application as PaymentRecord["application"])?.service_name || "")
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()),
+          )
+        : payments,
+    [payments, searchQuery],
+  );
+  const visiblePayments = useMemo(() => allFilteredPayments.slice(0, visibleCount), [allFilteredPayments, visibleCount]);
+  const hasMorePayments = visibleCount < allFilteredPayments.length;
 
-  const filteredReceipts = searchQuery
-    ? issuedApps.filter(
-        (a) =>
-          a.application_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          a.service_name.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    : issuedApps;
+  const filteredReceipts = useMemo(
+    () =>
+      searchQuery
+        ? issuedApps.filter(
+            (a) =>
+              a.application_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              a.service_name.toLowerCase().includes(searchQuery.toLowerCase()),
+          )
+        : issuedApps,
+    [issuedApps, searchQuery],
+  );
 
   const fmt = (n: number) => `TSh ${n.toLocaleString("en-US")}`;
 
@@ -510,7 +540,7 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
           {/* HISTORY TAB */}
           {activeTab === "history" && (
             <div className="space-y-2">
-              {filteredPayments.length === 0 ? (
+              {allFilteredPayments.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-2xl border border-stone-200">
                   <Wallet size={40} className="mx-auto text-stone-300 mb-3" />
                   <p className="font-bold text-stone-500">
@@ -518,7 +548,7 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
                   </p>
                 </div>
               ) : (
-                filteredPayments.map((p) => {
+                visiblePayments.map((p) => {
                   const app = p.application as PaymentRecord["application"];
                   return (
                     <div
@@ -574,6 +604,14 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
                     </div>
                   );
                 })
+              )}
+              {hasMorePayments && (
+                <button
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  className="w-full py-3 text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors"
+                >
+                  {L("Pakia Zaidi", "Load More")} ({allFilteredPayments.length - visibleCount} {L("zaidi", "remaining")})
+                </button>
               )}
             </div>
           )}
