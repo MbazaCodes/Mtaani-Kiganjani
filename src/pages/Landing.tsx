@@ -4,6 +4,7 @@ import {
   Building2,
   ArrowRight,
   ShieldCheck,
+  Shield,
   Globe2,
   Moon,
   Sun,
@@ -17,6 +18,9 @@ import {
   Menu,
   X,
   Eye,
+  ExternalLink,
+  Mail,
+  MessageSquare,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useDarkMode } from "@/hooks/useDarkMode";
@@ -654,47 +658,76 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
         </div>
       </section>
 
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="bg-white border-t border-stone-200 py-10 sm:py-16 px-4 sm:px-6">
+      {/* ── Footer (OR-MUU 2014 §2.1.v — mawasiliano, muundo, mkataba wa huduma) ─── */}
+      <footer className="bg-stone-900 text-white pt-14 pb-8 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10">
-            <div className="col-span-2 space-y-4">
-              <div className="flex items-center gap-2">
-                <img
-                  src={TANZANIA_LOGO_URL}
-                  alt="Coat of Arms"
-                  className="w-9 h-9 object-contain"
-                  referrerPolicy="no-referrer"
-                />
+
+          {/* Top grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+            {/* Brand + about */}
+            <div className="lg:col-span-1 space-y-4">
+              <div className="flex items-center gap-3">
+                <img src={TANZANIA_LOGO_URL} alt="Nembo ya Tanzania" className="w-10 h-10 object-contain" />
                 <div>
-                  <span className="text-lg font-black tracking-tighter text-stone-900 block">
-                    E-MTAA
-                  </span>
-                  <span className="text-[9px] font-bold text-stone-500 uppercase tracking-widest">
-                    Digital Local Government
-                  </span>
+                  <p className="font-black text-lg tracking-tight text-white">MTAANI KIGANJANI</p>
+                  <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">E-Mtaa Portal</p>
                 </div>
               </div>
-              <p className="text-stone-500 max-w-xs font-medium leading-relaxed text-sm">
+              <p className="text-stone-400 text-sm leading-relaxed">
                 {lang === "sw"
-                  ? "Mfumo rasmi wa kidijitali wa serikali za mitaa Tanzania."
-                  : "The official digital portal for local government in Tanzania."}
+                  ? "Mfumo rasmi wa kidijitali wa Serikali za Mitaa Tanzania — unaowezesha wananchi kupata huduma za serikali ya mtaa bila kuacha nyumbani."
+                  : "Tanzania's official digital local government portal — enabling citizens to access ward-level services from anywhere."}
               </p>
+              {/* eGA compliance badge */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="text-[9px] font-black bg-emerald-900 text-emerald-400 border border-emerald-700 px-2 py-1 rounded uppercase tracking-widest">PO-RALG / TAMISEMI</span>
+                <span className="text-[9px] font-black bg-stone-800 text-stone-400 border border-stone-600 px-2 py-1 rounded uppercase tracking-widest">eGA Compliant</span>
+              </div>
             </div>
 
+            {/* Services (§2.1.xiii — Nifanyeje) */}
             <div className="space-y-4">
-              <h4 className="font-bold text-stone-900 uppercase tracking-widest text-xs">
-                {lang === "sw" ? "Viungo" : "Links"}
+              <h4 className="font-black text-xs uppercase tracking-widest text-stone-300 flex items-center gap-2">
+                <span className="w-4 h-0.5 bg-emerald-500 inline-block" />
+                {lang === "sw" ? "Huduma Zetu" : "Our Services"}
               </h4>
-              <ul className="space-y-2.5 text-sm font-semibold text-stone-500">
+              <ul className="space-y-2 text-sm text-stone-400">
                 {[
-                  { label: lang === "sw" ? "Mwanzo" : "Home", href: "/" },
-                  { label: lang === "sw" ? "Huduma" : "Services", href: "/services" },
-                  { label: lang === "sw" ? "Msaada" : "Help & FAQ", href: "/help" },
-                  { label: lang === "sw" ? "Faragha" : "Privacy", href: "/legal" },
+                  lang === "sw" ? "Cheti cha Mkazi" : "Residency Certificate",
+                  lang === "sw" ? "Kibali cha Mazishi" : "Burial Permit",
+                  lang === "sw" ? "Kibali cha Sherehe" : "Celebration Permit",
+                  lang === "sw" ? "Kibali cha Ujenzi" : "Construction Permit",
+                  lang === "sw" ? "Barua ya Utambulisho" : "Introduction Letter",
+                  lang === "sw" ? "Makubaliano ya Mauzo/Pango" : "Sale/Rental Agreement",
+                  lang === "sw" ? "Taarifa ya Mgogoro" : "Dispute Report",
+                ].map((s) => (
+                  <li key={s} className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors cursor-pointer">
+                    <span className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Government links (§2.1.v.a — taasisi iliyoanzishwa na mamlaka) */}
+            <div className="space-y-4">
+              <h4 className="font-black text-xs uppercase tracking-widest text-stone-300 flex items-center gap-2">
+                <span className="w-4 h-0.5 bg-emerald-500 inline-block" />
+                {lang === "sw" ? "Serikali ya Tanzania" : "Government of Tanzania"}
+              </h4>
+              <ul className="space-y-2.5 text-sm text-stone-400">
+                {[
+                  { label: "PO-RALG (TAMISEMI)", href: "https://www.tamisemi.go.tz" },
+                  { label: "eGA (Serikali Mtandao)", href: "https://www.ega.go.tz" },
+                  { label: "NIDA", href: "https://www.nida.go.tz" },
+                  { label: "Ofisi ya Rais (OR-TAMISEMI)", href: "https://www.tamisemi.go.tz" },
+                  { label: "Serikali.go.tz", href: "https://www.serikali.go.tz" },
                 ].map((l) => (
                   <li key={l.href}>
-                    <a href={l.href} className="hover:text-emerald-600 transition-colors">
+                    <a href={l.href} target="_blank" rel="noopener noreferrer"
+                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                      <ExternalLink size={11} className="shrink-0" />
                       {l.label}
                     </a>
                   </li>
@@ -702,60 +735,61 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               </ul>
             </div>
 
+            {/* Contact info (§2.1.v.e — Mawasiliano ya Taasisi) */}
             <div className="space-y-4">
-              <h4 className="font-bold text-stone-900 uppercase tracking-widest text-xs">
-                {lang === "sw" ? "Serikali ya Tanzania" : "Government of Tanzania"}
+              <h4 className="font-black text-xs uppercase tracking-widest text-stone-300 flex items-center gap-2">
+                <span className="w-4 h-0.5 bg-emerald-500 inline-block" />
+                {lang === "sw" ? "Mawasiliano" : "Contact Us"}
               </h4>
-              <ul className="space-y-2.5 text-sm font-semibold text-stone-500">
-                <li>
-                  <a
-                    href="https://www.tamisemi.go.tz"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-emerald-600 transition-colors flex items-center gap-1.5"
-                  >
-                    PO-RALG (TAMISEMI)
+              <ul className="space-y-3 text-sm text-stone-400">
+                <li className="flex items-start gap-2">
+                  <MapPin size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span>Ofisi ya Rais — TAMISEMI<br />Mtaa wa Magogoni, Dodoma</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Mail size={14} className="text-emerald-500 shrink-0" />
+                  <a href="mailto:msaada@e-mtaatz.xyz" className="hover:text-emerald-400 transition-colors">
+                    msaada@e-mtaatz.xyz
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="https://www.ega.go.tz"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-emerald-600 transition-colors flex items-center gap-1.5"
-                  >
-                    e-Government Agency
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://www.nida.go.tz"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-emerald-600 transition-colors flex items-center gap-1.5"
-                  >
-                    NIDA
-                  </a>
-                </li>
-                <li className="flex items-center gap-1.5 text-stone-400">
-                  <MapPin size={12} /> Dodoma, Tanzania
+                <li className="flex items-start gap-2">
+                  <Shield size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span className="text-xs leading-relaxed">
+                    {lang === "sw"
+                      ? "Mfumo huu una hifadhi salama ya data kwa mujibu wa Sheria ya Serikali Mtandao, 2019."
+                      : "This system complies with the eGovernment Act, 2019 for data protection."}
+                  </span>
                 </li>
               </ul>
+
+              {/* Feedback link (OR-MUU §2.1.xi — sehemu ya mrejesho) */}
+              <a href="mailto:mrejesho@e-mtaatz.xyz"
+                className="inline-flex items-center gap-2 mt-2 px-3 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-colors">
+                <MessageSquare size={12} />
+                {lang === "sw" ? "Tuma Mrejesho" : "Send Feedback"}
+              </a>
             </div>
           </div>
 
-          <div className="pt-6 border-t border-stone-100 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <p className="text-xs font-bold text-stone-400">
-              © {new Date().getFullYear()} E-MTAA.{" "}
-              {lang === "sw" ? "Haki zote zimehifadhiwa." : "All rights reserved."}
-            </p>
-            <div className="flex items-center gap-3">
-              <span className="text-[9px] font-black bg-stone-100 text-stone-500 px-2 py-1 rounded uppercase tracking-widest">
-                PO-RALG
-              </span>
-              <span className="text-[9px] font-black bg-emerald-100 text-emerald-600 px-2 py-1 rounded uppercase tracking-widest">
-                Tanzania Digital
-              </span>
+          {/* Divider */}
+          <div className="border-t border-stone-700 pt-8">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="text-xs text-stone-500 text-center sm:text-left space-y-1">
+                <p>
+                  © {new Date().getFullYear()} Mtaani Kiganjani (E-Mtaa) —{" "}
+                  {lang === "sw" ? "Haki zote zimehifadhiwa." : "All rights reserved."}
+                </p>
+                <p className="text-[10px]">
+                  {lang === "sw"
+                    ? "Inatekelezwa kwa mujibu wa Mwongozo wa Kusimamia na Kuendesha Tovuti za Serikali (OR-MUU, 2014) na Viwango vya eGA (2025)."
+                    : "Operated in compliance with the Government Website Management Guidelines (OR-MUU, 2014) and eGA Standards (2025)."}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 justify-center">
+                <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">ISO 9001:2015</span>
+                <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">eGA/APA/009</span>
+                <span className="text-[9px] font-black bg-emerald-900 text-emerald-400 px-2 py-1 rounded uppercase tracking-widest">Tanzania Digital</span>
+              </div>
             </div>
           </div>
         </div>

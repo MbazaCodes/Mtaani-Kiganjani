@@ -1,26 +1,65 @@
 <!doctype html>
-<html lang="en">
+<!--
+  Mtaani Kiganjani (E-Mtaa) — Mfumo wa Kidijitali wa Serikali za Mitaa Tanzania
+  Unatekelezwa kwa mujibu wa:
+    • Mwongozo wa Kusimamia na Kuendesha Tovuti za Serikali (OR-MUU, Desemba 2014)
+    • Viwango na Miongozo ya Serikali Mtandao (eGA, Februari 2025)
+    • Sheria ya Serikali Mtandao, 2019 & Kanuni za Serikali Mtandao, 2020
+-->
+<html lang="sw" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ── Identity & SEO (OR-MUU 2014 §2.1 — nembo ya Taifa na utambulisho) ── -->
+    <title>Mtaani Kiganjani (E-Mtaa) | Huduma za Serikali za Mitaa Tanzania</title>
+    <meta name="description" content="Mtaani Kiganjani — Mfumo rasmi wa kidijitali wa Serikali za Mitaa Tanzania. Omba vyeti, vibali, barua za utambulisho na huduma nyingine za serikali ya mtaa mkononi mwako. Powered by PO-RALG / TAMISEMI." />
+    <meta name="keywords" content="E-Mtaa, Serikali za Mitaa, Tanzania, TAMISEMI, PO-RALG, eGA, huduma za serikali, kibali, cheti, barua ya utambulisho, ombi, kata, halmashauri" />
+    <meta name="author" content="Mamlaka ya Serikali Mtandao (eGA) / PO-RALG" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="Swahili" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="generator" content="E-Mtaa Platform v1.0" />
+
+    <!-- ── Open Graph (eGA APA/009 — Viwango vya kiufundi na Miongozo ya Tovuti) ── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Mtaani Kiganjani (E-Mtaa)" />
+    <meta property="og:title" content="Mtaani Kiganjani — Huduma za Serikali za Mitaa Tanzania" />
+    <meta property="og:description" content="Omba huduma za serikali ya mtaa mkononi mwako — vyeti, vibali, barua za utambulisho na zaidi." />
+    <meta property="og:image" content="/hero-image.png" />
+    <meta property="og:url" content="https://e-mtaatz.xyz" />
+    <meta property="og:locale" content="sw_TZ" />
+    <meta property="og:locale:alternate" content="en_TZ" />
+
+    <!-- ── Twitter / X Card ── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Mtaani Kiganjani — Huduma za Serikali za Mitaa Tanzania" />
+    <meta name="twitter:description" content="Omba huduma za serikali ya mtaa mkononi mwako." />
+    <meta name="twitter:image" content="/hero-image.png" />
+
+    <!-- ── Government identity (OR-MUU 2014 §2.1.i — nembo ya Taifa) ── -->
     <link rel="icon" type="image/png" href="/tz-coat-of-arms.png" />
     <link rel="apple-touch-icon" href="/tz-coat-of-arms.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>E-Serikali Mtaa - Huduma za Serikali za Mtaa Tanzania</title>
-    <meta name="description" content="E-Serikali Mtaa - Mfumo wa Huduma za Serikali za Mtaa Tanzania." />
+    <link rel="shortcut icon" href="/tz-coat-of-arms.png" />
+
+    <!-- ── PWA / Mobile (OR-MUU 2014 §3.1.ii — Tovuti kwa vifaa vya mkononi) ── -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#059669" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="E-Mtaa" />
-    <!-- Google Fonts — loaded here to avoid CSS @import order issues -->
+
+    <!-- ── Fonts ── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <!-- Dark mode init: apply before React renders to prevent flash -->
+
+    <!-- ── Security (eGA ISA/004 — Usalama wa Serikali Mtandao) ── -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+
+    <!-- ── Dark mode init ── -->
     <script>
       (function () {
         try {
