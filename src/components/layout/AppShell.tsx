@@ -1,22 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { PaymentGateway } from "@/components/PaymentGateway";
 import { useAuth } from "@/context/AuthContext";
-import { HelpPage } from "@/pages/HelpPage";
-import { LegalPage } from "@/pages/LegalPage";
-import { AboutPage } from "@/pages/AboutPage";
-import { ServiceCharterPage } from "@/pages/ServiceCharterPage";
-import { SecurityPolicyPage } from "@/pages/SecurityPolicyPage";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAppContext } from "@/context/AppContext";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { getCurrencyForUser, type CurrencyCode } from "@/lib/currency";
 import type { ViewName } from "@/types";
+
+// PERF: Lazy-load these pages — they're only shown inside drawers/overlays
+const HelpPage = React.lazy(() => import("@/pages/HelpPage").then(m => ({ default: m.HelpPage })));
+const LegalPage = React.lazy(() => import("@/pages/LegalPage").then(m => ({ default: m.LegalPage })));
+const AboutPage = React.lazy(() => import("@/pages/AboutPage").then(m => ({ default: m.AboutPage })));
+const ServiceCharterPage = React.lazy(() => import("@/pages/ServiceCharterPage").then(m => ({ default: m.ServiceCharterPage })));
+const SecurityPolicyPage = React.lazy(() => import("@/pages/SecurityPolicyPage").then(m => ({ default: m.SecurityPolicyPage })));
+const PaymentGateway = React.lazy(() => import("@/components/PaymentGateway").then(m => ({ default: m.PaymentGateway })));
 
 /** Maps ViewName → URL path */
 export const VIEW_PATHS: Record<ViewName, string> = {
@@ -112,6 +113,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar currentView={currentView} setView={setView} />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+          <React.Suspense fallback={<div className="p-8 text-center text-stone-400">Loading...</div>}>
           {currentView === "help_faq" ? (
             <HelpPage lang={lang} />
           ) : currentView === "legal" ? (
@@ -125,6 +127,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           ) : (
             children
           )}
+          </React.Suspense>
           {/* Demonstration disclaimer footer */}
           <footer className="mt-8 pt-4 border-t border-stone-200">
             <p className="text-center text-[11px] leading-relaxed text-stone-400 max-w-3xl mx-auto px-4">
@@ -139,8 +142,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         </main>
       </div>
 
-      <AnimatePresence>
-        {payingApplication && (
+      {payingApplication && (
+        <React.Suspense fallback={null}>
           <PaymentGateway
             applicationId={payingApplication.id}
             amount={getPaymentAmount(payingApplication)}
@@ -152,8 +155,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             lang={lang}
             currency={currency}
           />
-        )}
-      </AnimatePresence>
+        </React.Suspense>
+      )}
     </div>
   );
 };

@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { Check, Eye, EyeOff, Loader2, Lock, User as UserIcon } from "lucide-react";
 
 import { useAuth } from "./context/AuthContext";
@@ -60,8 +59,17 @@ const ApplicationReview = React.lazy(() => import("./components/ApplicationRevie
 
 // Apply page needs AppContext
 import { useAppContext } from "./context/AppContext";
-import { HARDCODED_SERVICES } from "./constants/services";
 import { useRouterView } from "./components/layout/AppShell";
+
+// Lazy-load heavy services data — only needed when viewing applications
+let _HARDCODED_SERVICES: typeof import("./constants/services").HARDCODED_SERVICES | null = null;
+function getHardcodedServices() {
+  if (!_HARDCODED_SERVICES) {
+    // Dynamic import cached after first load
+    import("./constants/services").then(m => { _HARDCODED_SERVICES = m.HARDCODED_SERVICES; });
+  }
+  return _HARDCODED_SERVICES;
+}
 import {
   AppSplashSkeleton,
   DashboardSkeleton,
@@ -116,28 +124,24 @@ function PublicHome() {
         }}
         onShowVerify={() => navigate("/verify")}
       />
-      <AnimatePresence>
-        {showAuth && (
-          <Auth
-            mode={authMode}
-            onClose={() => {
-              setShowAuth(false);
-              setAuthDiaspora(false);
-              // After signup/login, navigate to dashboard immediately
-              // (useEffect above handles it too, but this fires first)
-            }}
-            onSuccess={(role?: string) => {
-              setShowAuth(false);
-              setAuthDiaspora(false);
-              if (role === "admin") navigate("/admin", { replace: true });
-              else if (role === "staff") navigate("/staff", { replace: true });
-              else navigate("/dashboard", { replace: true });
-            }}
-            setMode={setAuthMode}
-            isDiaspora={authDiaspora}
-          />
-        )}
-      </AnimatePresence>
+      {showAuth && (
+        <Auth
+          mode={authMode}
+          onClose={() => {
+            setShowAuth(false);
+            setAuthDiaspora(false);
+          }}
+          onSuccess={(role?: string) => {
+            setShowAuth(false);
+            setAuthDiaspora(false);
+            if (role === "admin") navigate("/admin", { replace: true });
+            else if (role === "staff") navigate("/staff", { replace: true });
+            else navigate("/dashboard", { replace: true });
+          }}
+          setMode={setAuthMode}
+          isDiaspora={authDiaspora}
+        />
+      )}
     </>
   );
 }
@@ -193,7 +197,8 @@ function ApplicationsRoute() {
       onRefresh={fetchApplications}
       onResumeDraft={(draft) => {
         setSelectedDraft(draft);
-        const realService = HARDCODED_SERVICES.find((s) => s.id === draft.service_id);
+        const services = getHardcodedServices();
+        const realService = services?.find((s) => s.id === draft.service_id);
         setSelectedService(
           realService ?? {
             id: draft.service_id,
@@ -259,16 +264,11 @@ function CitizensRoute() {
   return null;
 }
 
-// Page transition wrapper
+// Page transition wrapper — pure CSS, no framer-motion needed
 const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <motion.div
-    initial={{ opacity: 0, x: 16 }}
-    animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -16 }}
-    transition={{ duration: 0.18 }}
-  >
+  <div className="animate-[fade-in_0.15s_ease-out]">
     {children}
-  </motion.div>
+  </div>
 );
 
 // Main router
@@ -488,17 +488,13 @@ export default function App() {
               path="/verify"
               element={
                 <div className="min-h-screen bg-stone-50">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="py-8 px-4 max-w-5xl mx-auto"
-                  >
+                  <div className="py-8 px-4 max-w-5xl mx-auto">
                     <VerifyDocuments
                       lang={lang}
                       onBack={() => window.history.back()}
                       userRole="citizen"
                     />
-                  </motion.div>
+                  </div>
                 </div>
               }
             />
