@@ -274,9 +274,6 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                   alt="Mtaani Kiganjani — Huduma za Serikali za Mtaa Tanzania"
                   className="w-full h-full object-cover object-center"
                 />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl">
-                    <div className="flex items-center gap-3 mb-2">
               </div>
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-100 rounded-full blur-3xl opacity-50 -z-10" />
               <div className="absolute -bottom-10 -left-10 w-56 h-56 bg-blue-100 rounded-full blur-3xl opacity-50 -z-10" />
