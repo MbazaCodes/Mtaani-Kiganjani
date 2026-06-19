@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">E-Serikali Mtaa</string>
+    <string name="title_activity_main">E-Serikali Mtaa</string>
+    <string name="package_name">tz.go.e_serikali_mtaa</string>
+    <string name="custom_url_scheme">tz.go.e_serikali_mtaa</string>
+</resources>

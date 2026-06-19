@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Government shield icon -->
+    <path
+        android:fillColor="#059669"
+        android:pathData="M54,24L30,36V54C30,72 40,88 54,92C68,88 78,72 78,54V36L54,24Z"/>
+    <!-- Check mark inside shield -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeWidth="0"
+        android:pathData="M42,54L50,62L66,46"/>
+    <!-- T for Tanzania text -->
+    <path
+        android:fillColor="#059669"
+        android:pathData="M54,74L48,74L48,72L52,72L52,68L48,68L48,66L52,66L52,62L48,62L48,60L60,60L60,62L56,62L56,66L60,66L60,68L56,68L56,72L60,72L60,74L54,74Z"/>
+</vector>

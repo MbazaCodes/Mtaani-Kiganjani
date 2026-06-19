@@ -1,0 +1,19 @@
+include ':app'
+
+// Capacitor core Android library
+include ':capacitor-android'
+project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
+
+// Capacitor plugins with Android support
+def capacitorPackages = [
+    '@capacitor/app',
+    '@capacitor/haptics',
+    '@capacitor/status-bar',
+    '@capacitor/splash-screen'
+]
+
+capacitorPackages.each { pkg ->
+    def pkgName = pkg.substring(pkg.lastIndexOf('/') + 1)
+    include ":capacitor-${pkgName}"
+    project(":capacitor-${pkgName}").projectDir = new File("../node_modules/${pkg}/android")
+}
