@@ -745,6 +745,7 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                   { label: lang === "sw" ? "Idara ya Uhamiaji" : "Immigration Department", href: "https://www.immigration.go.tz" },
                   { label: lang === "sw" ? "Jeshi la Polisi Tanzania" : "Tanzania Police Force", href: "https://www.polisi.go.tz" },
                   { label: lang === "sw" ? "Wizara ya Mambo ya Ndani ya Nchi" : "Ministry of Home Affairs", href: "https://www.mhome.go.tz" },
+                  { label: lang === "sw" ? "Mahakama ya Tanzania" : "Judiciary of Tanzania", href: "https://www.judiciary.go.tz" },
                 ].map((l) => (
                   <li key={l.href}>
                     <a href={l.href} target="_blank" rel="noopener noreferrer"
