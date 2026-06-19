@@ -1,14 +1,11 @@
 /**
  * SignaturePad — lightweight, dependency-free signature capture.
  *
- * Draws on an HTML canvas with mouse or touch, then exports the result as a
- * trimmed PNG data URL. No external library required.
+ * Uses native touch/mouse listeners (non-passive) so preventDefault works
+ * correctly on mobile and stops page scroll while drawing.
  *
  * Usage:
  *   <SignaturePad value={sig} onChange={setSig} lang="sw" />
- *
- * - value: existing data-URL signature (shows a preview with a "redraw" option)
- * - onChange(dataUrl | null): fires when the user saves or clears
  */
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Eraser, Check, RotateCcw } from "lucide-react";
@@ -68,38 +65,65 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     }
   }, [editing, setupCanvas]);
 
-  const pointerPos = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const rect = canvasRef.current!.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  };
+  // Native non-passive listeners — required for e.preventDefault() to work on mobile
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !editing) return;
 
-  const start = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    drawing.current = true;
-    last.current = pointerPos(e);
-    canvasRef.current?.setPointerCapture(e.pointerId);
-  };
+    const getPos = (e: TouchEvent | MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      if ("touches" in e && e.touches.length > 0) {
+        return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+      }
+      return { x: (e as MouseEvent).clientX - rect.left, y: (e as MouseEvent).clientY - rect.top };
+    };
 
-  const move = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!drawing.current) return;
-    e.preventDefault();
-    const ctx = canvasRef.current?.getContext("2d");
-    const pos = pointerPos(e);
-    if (ctx && last.current) {
-      ctx.beginPath();
-      ctx.moveTo(last.current.x, last.current.y);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-      hasDrawn.current = true;
-      if (empty) setEmpty(false);
-    }
-    last.current = pos;
-  };
+    const onStart = (e: TouchEvent | MouseEvent) => {
+      e.preventDefault();
+      drawing.current = true;
+      last.current = getPos(e);
+    };
 
-  const end = () => {
-    drawing.current = false;
-    last.current = null;
-  };
+    const onMove = (e: TouchEvent | MouseEvent) => {
+      if (!drawing.current) return;
+      e.preventDefault();
+      const ctx = canvas.getContext("2d");
+      const pos = getPos(e);
+      if (ctx && last.current) {
+        ctx.beginPath();
+        ctx.moveTo(last.current.x, last.current.y);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        hasDrawn.current = true;
+        setEmpty(false);
+      }
+      last.current = pos;
+    };
+
+    const onEnd = () => {
+      drawing.current = false;
+      last.current = null;
+    };
+
+    const opts: AddEventListenerOptions = { passive: false };
+    canvas.addEventListener("touchstart", onStart, opts);
+    canvas.addEventListener("touchmove", onMove, opts);
+    canvas.addEventListener("touchend", onEnd);
+    canvas.addEventListener("mousedown", onStart);
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("mouseup", onEnd);
+    canvas.addEventListener("mouseleave", onEnd);
+
+    return () => {
+      canvas.removeEventListener("touchstart", onStart);
+      canvas.removeEventListener("touchmove", onMove);
+      canvas.removeEventListener("touchend", onEnd);
+      canvas.removeEventListener("mousedown", onStart);
+      canvas.removeEventListener("mousemove", onMove);
+      canvas.removeEventListener("mouseup", onEnd);
+      canvas.removeEventListener("mouseleave", onEnd);
+    };
+  }, [editing]);
 
   const clear = () => {
     const canvas = canvasRef.current;
@@ -160,10 +184,6 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
       <div ref={wrapRef} className="relative">
         <canvas
           ref={canvasRef}
-          onPointerDown={start}
-          onPointerMove={move}
-          onPointerUp={end}
-          onPointerLeave={end}
           className="w-full border-2 border-dashed border-stone-300 rounded-xl bg-stone-50 touch-none cursor-crosshair"
           style={{ height }}
         />
