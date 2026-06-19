@@ -218,7 +218,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
             ward, district, region,
             is_verified, verification_level,
             profile_completion_pct, is_diaspora,
-            date_of_birth, birth_date, street
+            date_of_birth, street
           )
         `,
         )
