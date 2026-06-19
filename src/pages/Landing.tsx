@@ -84,6 +84,31 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
             >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
+            {/* About Us */}
+            <a
+              href="#about"
+              className="text-sm font-bold text-stone-600 hover:text-stone-900 px-3 py-2 rounded-xl hover:bg-stone-50 transition-colors"
+            >
+              {lang === "sw" ? "Kuhusu Sisi" : "About Us"}
+            </a>
+            {/* Machapisho */}
+            <a
+              href="https://www.ega.go.tz/documents"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-bold text-stone-600 hover:text-stone-900 px-3 py-2 rounded-xl hover:bg-stone-50 transition-colors"
+            >
+              {lang === "sw" ? "Machapisho" : "Publications"}
+            </a>
+            {/* Kituo cha Habari */}
+            <a
+              href="https://www.ega.go.tz/standard/3#"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-bold text-stone-600 hover:text-stone-900 px-3 py-2 rounded-xl hover:bg-stone-50 transition-colors"
+            >
+              {lang === "sw" ? "Kituo cha Habari" : "News Centre"}
+            </a>
             {onShowVerify && (
               <button
                 onClick={onShowVerify}
@@ -145,6 +170,31 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
             >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
+            <a
+              href="#about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full text-left text-sm font-bold text-stone-700 flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-stone-50"
+            >
+              {lang === "sw" ? "Kuhusu Sisi" : "About Us"}
+            </a>
+            <a
+              href="https://www.ega.go.tz/documents"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full text-left text-sm font-bold text-stone-700 flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-stone-50"
+            >
+              {lang === "sw" ? "Machapisho" : "Publications"}
+            </a>
+            <a
+              href="https://www.ega.go.tz/standard/3#"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full text-left text-sm font-bold text-stone-700 flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-stone-50"
+            >
+              {lang === "sw" ? "Kituo cha Habari" : "News Centre"}
+            </a>
             {onShowVerify && (
               <button
                 onClick={() => {
@@ -746,6 +796,29 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                   { label: lang === "sw" ? "Jeshi la Polisi Tanzania" : "Tanzania Police Force", href: "https://www.polisi.go.tz" },
                   { label: lang === "sw" ? "Wizara ya Mambo ya Ndani ya Nchi" : "Ministry of Home Affairs", href: "https://www.mhome.go.tz" },
                   { label: lang === "sw" ? "Mahakama ya Tanzania" : "Judiciary of Tanzania", href: "https://www.judiciary.go.tz" },
+                ].map((l) => (
+                  <li key={l.href}>
+                    <a href={l.href} target="_blank" rel="noopener noreferrer"
+                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                      <ExternalLink size={11} className="shrink-0" />
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              {/* TEHAMA na Mawasiliano */}
+              <h4 className="font-black text-xs uppercase tracking-widest text-stone-300 flex items-center gap-2 pt-3">
+                <span className="w-4 h-0.5 bg-emerald-500 inline-block" />
+                {lang === "sw" ? "TEHAMA na Mawasiliano" : "ICT & Communications"}
+              </h4>
+              <ul className="space-y-2.5 text-sm text-stone-400">
+                {[
+                  { label: lang === "sw" ? "Ofisi ya Rais — MCIT" : "President's Office — MCIT", href: "https://www.mcit.go.tz" },
+                  { label: "TCRA — Mamlaka ya Mawasiliano", href: "https://www.tcra.go.tz" },
+                  { label: "COSTECH — Sayansi na Teknolojia", href: "https://www.costech.or.tz" },
+                  { label: "TTCL — Tanzania Telecom", href: "https://www.ttcl.co.tz" },
+                  { label: lang === "sw" ? "Tume ya TEHAMA Tanzania" : "ICT Commission Tanzania", href: "https://www.ega.go.tz" },
                 ].map((l) => (
                   <li key={l.href}>
                     <a href={l.href} target="_blank" rel="noopener noreferrer"
