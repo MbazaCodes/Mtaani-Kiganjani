@@ -105,6 +105,13 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
             >
               {lang === "sw" ? "Kituo cha Habari" : "News Centre"}
             </a>
+            {/* Taasisi */}
+            <a
+              href="/taasisi"
+              className="text-sm font-bold text-stone-600 hover:text-stone-900 px-3 py-2 rounded-xl hover:bg-stone-50 transition-colors"
+            >
+              {lang === "sw" ? "Taasisi" : "Institutions"}
+            </a>
             {onShowVerify && (
               <button
                 onClick={onShowVerify}
@@ -186,6 +193,13 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               className="w-full text-left text-sm font-bold text-stone-700 flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-stone-50"
             >
               {lang === "sw" ? "Kituo cha Habari" : "News Centre"}
+            </a>
+            <a
+              href="/taasisi"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full text-left text-sm font-bold text-stone-700 flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-stone-50"
+            >
+              {lang === "sw" ? "Taasisi za Serikali" : "Govt Institutions"}
             </a>
             {onShowVerify && (
               <button
