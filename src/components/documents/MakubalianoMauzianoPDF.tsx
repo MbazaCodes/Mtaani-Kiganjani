@@ -32,6 +32,32 @@ const ls = StyleSheet.create({
     marginBottom: 4,
     letterSpacing: 0.5,
   },
+  partyHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+    gap: 8,
+  },
+  photoBox: {
+    width: 52,
+    height: 64,
+    borderWidth: 1,
+    borderColor: "#d6d3d1",
+    backgroundColor: "#f5f5f4",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 2,
+    flexShrink: 0,
+  },
+  photoImg: { width: 52, height: 64, objectFit: "cover", borderRadius: 2 },
+  photoPlaceholder: {
+    fontSize: 5.5,
+    color: "#a8a29e",
+    textAlign: "center",
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  partyDetails: { flex: 1 },
   priceBox: {
     backgroundColor: "#f7f7f7",
     borderWidth: 0.5,
@@ -86,6 +112,13 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
     formatFullName(user) !== "N/A" ? formatFullName(user) : String(fd.seller_name || "N/A");
   const sellerNida = user?.nida_number || fd.seller_nida || "—";
   const sellerCitizenId = user?.citizen_id || fd.seller_citizen_id || "—";
+
+  // Photos — check uploaded_documents for seller/buyer selfie, then fall back to profile
+  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string; url?: string }[];
+  const sellerSelfie = uploadedDocs.find(d => d.type === "seller_selfie" || d.type === "selfie");
+  const buyerSelfie  = uploadedDocs.find(d => d.type === "buyer_selfie");
+  const sellerPhotoRaw = sellerSelfie?.dataUrl || sellerSelfie?.url || user?.photo_url || fd.seller_photo_url || null;
+  const buyerPhotoRaw  = buyerSelfie?.dataUrl  || buyerSelfie?.url  || fd.buyer_photo_url  || null;
 
   const assetType = String(fd.asset_type || "");
   const isRental = assetType.startsWith("KODI");
@@ -267,35 +300,59 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
           <View style={s.colLeft}>
             <View style={ls.partyBox}>
               <Text style={ls.partyRole}>{L.sellerParty}</Text>
-              <Row label={sw ? "Jina" : "Name"} value={sellerName} />
-              <Row label="NIDA" value={sellerNida} />
-              <Row label={sw ? "Raia ID" : "Cit. ID"} value={sellerCitizenId} />
-              {fd.seller_tin ? <Row label="TIN" value={fd.seller_tin ?? ""} /> : <View />}
-              {fd.seller_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.seller_phone} />}
-              {application.users?.ward && (
-                <Row
-                  label={sw ? "Kata" : "Ward"}
-                  value={`${application.users.ward}, ${application.users?.district || ""}`}
-                />
-              )}
+              <View style={ls.partyHeader}>
+                {/* Seller photo */}
+                <View style={ls.photoBox}>
+                  {sellerPhotoRaw ? (
+                    <Image src={sellerPhotoRaw} style={ls.photoImg} />
+                  ) : (
+                    <Text style={ls.photoPlaceholder}>{"PICHA\nPHOTO"}</Text>
+                  )}
+                </View>
+                <View style={ls.partyDetails}>
+                  <Row label={sw ? "Jina" : "Name"} value={sellerName} />
+                  <Row label="NIDA" value={sellerNida} />
+                  <Row label={sw ? "Raia ID" : "Cit. ID"} value={sellerCitizenId} />
+                  {fd.seller_tin ? <Row label="TIN" value={fd.seller_tin ?? ""} /> : <View />}
+                  {fd.seller_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.seller_phone} />}
+                  {application.users?.ward && (
+                    <Row
+                      label={sw ? "Kata" : "Ward"}
+                      value={`${application.users.ward}, ${application.users?.district || ""}`}
+                    />
+                  )}
+                </View>
+              </View>
             </View>
           </View>
           <View style={s.colRight}>
             <View style={ls.partyBox}>
               <Text style={ls.partyRole}>{L.buyerParty}</Text>
-              <Row
-                label={sw ? "Jina" : "Name"}
-                value={fd.second_party_name || fd.buyer_name || fd.tenant_name}
-              />
-              <Row label="NIDA" value={fd.buyer_nida || fd.tenant_nida || fd.target_user_nida} />
-              <Row label={sw ? "Raia ID" : "Cit. ID"} value={fd.second_party_citizen_id ?? ""} />
-              {fd.buyer_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.buyer_phone} />}
-              {fd.buyer_ward && (
-                <Row
-                  label={sw ? "Kata" : "Ward"}
-                  value={`${fd.buyer_ward}, ${fd.buyer_district || ""}`}
-                />
-              )}
+              <View style={ls.partyHeader}>
+                {/* Buyer photo */}
+                <View style={ls.photoBox}>
+                  {buyerPhotoRaw ? (
+                    <Image src={buyerPhotoRaw} style={ls.photoImg} />
+                  ) : (
+                    <Text style={ls.photoPlaceholder}>{"PICHA\nPHOTO"}</Text>
+                  )}
+                </View>
+                <View style={ls.partyDetails}>
+                  <Row
+                    label={sw ? "Jina" : "Name"}
+                    value={fd.second_party_name || fd.buyer_name || fd.tenant_name}
+                  />
+                  <Row label="NIDA" value={fd.buyer_nida || fd.tenant_nida || fd.target_user_nida} />
+                  <Row label={sw ? "Raia ID" : "Cit. ID"} value={fd.second_party_citizen_id ?? ""} />
+                  {fd.buyer_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.buyer_phone} />}
+                  {fd.buyer_ward && (
+                    <Row
+                      label={sw ? "Kata" : "Ward"}
+                      value={`${fd.buyer_ward}, ${fd.buyer_district || ""}`}
+                    />
+                  )}
+                </View>
+              </View>
             </View>
           </View>
         </View>

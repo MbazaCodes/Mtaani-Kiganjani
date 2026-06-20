@@ -41,6 +41,15 @@ const ls = StyleSheet.create({
     padding: 8,
     marginVertical: 4,
   },
+  partyHeader: { flexDirection: "row", alignItems: "flex-start", gap: 6, marginBottom: 4 },
+  photoBox: {
+    width: 48, height: 60, borderWidth: 1, borderColor: "#d6d3d1",
+    backgroundColor: "#f5f5f4", alignItems: "center", justifyContent: "center",
+    borderRadius: 2, flexShrink: 0,
+  },
+  photoImg: { width: 48, height: 60, objectFit: "cover", borderRadius: 2 },
+  photoPlaceholder: { fontSize: 5, color: "#a8a29e", textAlign: "center", textTransform: "uppercase" },
+  partyDetails: { flex: 1 },
   partyLabel: {
     fontSize: 7.5,
     color: "#0d9488",
@@ -120,6 +129,11 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
   qrDataUrl,
 }) => {
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
+  const uploadedDocs = ((application.form_data as any)?.uploaded_documents || []) as { type?: string; dataUrl?: string; url?: string }[];
+  const landlordSelfie = uploadedDocs.find(d => d.type === "landlord_selfie" || d.type === "selfie");
+  const tenantSelfie   = uploadedDocs.find(d => d.type === "tenant_selfie");
+  const landlordPhotoRaw = landlordSelfie?.dataUrl || landlordSelfie?.url || application.users?.photo_url || (fd as any).landlord_photo_url || null;
+  const tenantPhotoRaw   = tenantSelfie?.dataUrl   || tenantSelfie?.url   || (fd as any).tenant_photo_url || null;
   const weoSig = fd.weo_signature;
   const weoStamp = fd.weo_stamp;
   const weoName = fd.weo_name;
@@ -189,32 +203,43 @@ export const MakubalianoPangoPDF: React.FC<DocumentPDFProps> = ({
         <View style={s.twoCol}>
           <View style={[s.colLeft, ls.partyBox]}>
             <Text style={ls.partyLabel}>{sw ? "MPANGISHAJI" : "LANDLORD"}</Text>
-            <Row
-              label={sw ? "Jina" : "Name"}
-              value={
-                (fd as any).landlord_name ||
-                (application.users
-                  ? `${application.users.first_name || ""} ${application.users.middle_name || ""} ${application.users.last_name || ""}`
-                      .replace(/\s+/g, " ")
-                      .trim()
-                  : "") ||
-                `${(fd as any).first_name || ""} ${(fd as any).last_name || ""}`.trim()
-              }
-            />
-            <Row
-              label="NIDA"
-              value={(fd as any).landlord_nida || application.users?.nida_number || ""}
-            />
-            <Row
-              label={sw ? "Simu" : "Phone"}
-              value={(fd as any).landlord_phone || application.users?.phone || ""}
-            />
+            <View style={ls.partyHeader}>
+              <View style={ls.photoBox}>
+                {landlordPhotoRaw
+                  ? <Image src={landlordPhotoRaw} style={ls.photoImg} />
+                  : <Text style={ls.photoPlaceholder}>{"PICHA\nPHOTO"}</Text>}
+              </View>
+              <View style={ls.partyDetails}>
+                <Row
+                  label={sw ? "Jina" : "Name"}
+                  value={
+                    (fd as any).landlord_name ||
+                    (application.users
+                      ? `${application.users.first_name || ""} ${application.users.middle_name || ""} ${application.users.last_name || ""}`
+                          .replace(/\s+/g, " ").trim()
+                      : "") ||
+                    `${(fd as any).first_name || ""} ${(fd as any).last_name || ""}`.trim()
+                  }
+                />
+                <Row label="NIDA" value={(fd as any).landlord_nida || application.users?.nida_number || ""} />
+                <Row label={sw ? "Simu" : "Phone"} value={(fd as any).landlord_phone || application.users?.phone || ""} />
+              </View>
+            </View>
           </View>
           <View style={[s.colRight, ls.partyBox]}>
             <Text style={ls.partyLabel}>{sw ? "MPANGAJI" : "TENANT"}</Text>
-            <Row label={sw ? "Jina" : "Name"} value={fd.tenant_name ?? ""} />
-            <Row label="NIDA" value={fd.tenant_nida ?? ""} />
-            <Row label={sw ? "Simu" : "Phone"} value={fd.tenant_phone ?? ""} />
+            <View style={ls.partyHeader}>
+              <View style={ls.photoBox}>
+                {tenantPhotoRaw
+                  ? <Image src={tenantPhotoRaw} style={ls.photoImg} />
+                  : <Text style={ls.photoPlaceholder}>{"PICHA\nPHOTO"}</Text>}
+              </View>
+              <View style={ls.partyDetails}>
+                <Row label={sw ? "Jina" : "Name"} value={fd.tenant_name ?? ""} />
+                <Row label="NIDA" value={fd.tenant_nida ?? ""} />
+                <Row label={sw ? "Simu" : "Phone"} value={fd.tenant_phone ?? ""} />
+              </View>
+            </View>
           </View>
         </View>
 

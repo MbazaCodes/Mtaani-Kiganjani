@@ -168,6 +168,8 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
     installment_details: "",
     transfer_date: "",
     special_conditions: "",
+    seller_photo: "",
+    buyer_photo: "",
     witness1_name: "",
     witness1_phone: "",
     witness1_nida: "",
@@ -1056,6 +1058,88 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                 />
               </Field>
             )}
+            {/* Party Photos — seller + buyer */}
+            <div className="space-y-3">
+              <div>
+                <label className={lbl}>
+                  {L("Picha za Wahusika (Muhimu)", "Party Photos (Required for PDF)")}
+                </label>
+                <p className="text-xs text-stone-400 mb-3">
+                  {L("Picha zitaonekana kwenye hati ya makubaliano kama uthibitisho.", "Photos appear on the agreement document as verification.")}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Seller photo */}
+                <div className="border border-stone-200 rounded-xl p-3 space-y-2">
+                  <p className="text-xs font-bold text-stone-600 uppercase tracking-wide">
+                    {L("Picha ya Muuzaji / Mpangishaji", "Seller / Landlord Photo")}
+                  </p>
+                  {vals.seller_photo ? (
+                    <div className="relative">
+                      <img src={vals.seller_photo} alt="seller" className="w-full h-28 object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => set("seller_photo", "")}
+                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+                      >✕</button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-all">
+                      <span className="text-2xl mb-1">📷</span>
+                      <span className="text-xs text-stone-400">{L("Bonyeza kupakia picha", "Click to upload photo")}</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = () => set("seller_photo", reader.result as string);
+                          reader.readAsDataURL(file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+                {/* Buyer photo */}
+                <div className="border border-stone-200 rounded-xl p-3 space-y-2">
+                  <p className="text-xs font-bold text-stone-600 uppercase tracking-wide">
+                    {L("Picha ya Mnunuzi / Mpangaji", "Buyer / Tenant Photo")}
+                  </p>
+                  {vals.buyer_photo ? (
+                    <div className="relative">
+                      <img src={vals.buyer_photo} alt="buyer" className="w-full h-28 object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => set("buyer_photo", "")}
+                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+                      >✕</button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all">
+                      <span className="text-2xl mb-1">📷</span>
+                      <span className="text-xs text-stone-400">{L("Bonyeza kupakia picha", "Click to upload photo")}</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = () => set("buyer_photo", reader.result as string);
+                          reader.readAsDataURL(file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Documents */}
             <div>
               <label className={lbl}>
