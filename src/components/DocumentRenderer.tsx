@@ -82,6 +82,38 @@ function useQRCode(application: Application | null, code: string) {
   return qr;
 }
 
+// ── Hook: convert any photo URL to base64 for react-pdf ────────────────────────
+// react-pdf cannot fetch external URLs — needs base64 data URL
+async function urlToBase64(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+function usePhotoBase64(rawPhoto: string | null | undefined): string | null {
+  const [base64, setBase64] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!rawPhoto) { setBase64(null); return; }
+    // Already base64 — use as-is
+    if (rawPhoto.startsWith("data:")) { setBase64(rawPhoto); return; }
+    // External URL — fetch and convert
+    urlToBase64(rawPhoto).then(setBase64);
+  }, [rawPhoto]);
+
+  return base64;
+}
+
 // ── Pure react-pdf document (use this as the `document=` prop for PDFDownloadLink) ──
 // CertificatePDFDocument accepts a pre-generated qrDataUrl so it has no async work
 export const CertificatePDFDocument: React.FC<{
@@ -108,13 +140,17 @@ export const DocumentRenderer: React.FC<{
 
   // Resolve photo: prop chain matches what PDF components expect
   const fd = (application.form_data || {}) as Record<string, unknown>;
-  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string }[];
+  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string; url?: string }[];
   const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
-  const photoUrl =
+  // selfie may be base64 (dataUrl) or Supabase Storage URL (url)
+  const rawPhoto =
     selfieDoc?.dataUrl ||
+    selfieDoc?.url ||
     (application.users as Record<string, unknown> | null)?.photo_url as string | null ||
     fd.photo_url as string | null ||
     null;
+  // Convert URL → base64 if needed (react-pdf can't fetch external URLs)
+  const photoUrl = usePhotoBase64(rawPhoto);
 
   if (!qrDataUrl) {
     return (

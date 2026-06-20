@@ -94,9 +94,9 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
   const sw = lang === "sw";
 
   // Photo: prop → uploaded selfie → profile photo_url → placeholder
-  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string }[];
+  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string; url?: string }[];
   const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
-  const photo = photoUrl || selfieDoc?.dataUrl || user?.photo_url || fd.photo_url || null;
+  const photo = photoUrl || selfieDoc?.dataUrl || selfieDoc?.url || user?.photo_url || fd.photo_url || null;
 
   const institutions = Array.isArray(fd.institutions) ? (fd.institutions as any[]) : [];
   const firstInst = institutions[0] || {};
