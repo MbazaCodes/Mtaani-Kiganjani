@@ -154,7 +154,7 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
   const sw = lang === "sw";
   const qr = qrDataUrl || generateQRCodeUrl(application, "RCP");
 
-  const amount = pd.amount || fd.service_fee || fd.amount || getApplicationAmount(application);
+  const amount = pd.amount || fd.total_fee || fd.service_fee || fd.amount || fd.payment_amount || getApplicationAmount(application);
   const receiptNo = pd.receipt_number || `RCP-${application.application_number}`;
 
   const TableRow = ({ label, value, alt }: { label: string; value: string; alt?: boolean }) => (

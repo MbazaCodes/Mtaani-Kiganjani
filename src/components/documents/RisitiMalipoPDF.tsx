@@ -112,7 +112,7 @@ export const RisitiMalipoPDF: React.FC<DocumentPDFProps> = ({ application, lang,
   const payerCitizenId = user?.citizen_id || fd.payer_citizen_id || "—";
   const payerPhone = user?.phone || fd.payer_phone_snapshot || fd.payer_phone || "—";
 
-  const amount = Number(pd.amount || fd.service_fee || application.services?.fee || 0);
+  const amount = Number(pd.amount || fd.total_fee || fd.service_fee || fd.amount || fd.payment_amount || application.services?.fee || 0);
   const method = String(pd.payment_method || "mpesa");
   const methodLabel = (PAYMENT_METHODS[method.toLowerCase()] || { sw: method, en: method })[lang];
   const txnId = String(pd.transaction_id || application.application_number || "—");
