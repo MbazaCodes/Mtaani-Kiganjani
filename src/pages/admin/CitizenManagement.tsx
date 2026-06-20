@@ -715,10 +715,17 @@ export function CitizenManagement() {
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 font-bold">
-                            {citizen.first_name[0]}
-                            {citizen.last_name[0]}
-                          </div>
+                          {citizen.photo_url ? (
+                            <img
+                              src={citizen.photo_url}
+                              alt="profile"
+                              className="w-10 h-10 rounded-full object-cover border border-stone-200 shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 font-bold shrink-0">
+                              {citizen.first_name?.[0]}{citizen.last_name?.[0]}
+                            </div>
+                          )}
                           <div>
                             <p className="font-bold text-stone-900">
                               {citizen.first_name} {citizen.last_name}
@@ -849,10 +856,18 @@ export function CitizenManagement() {
               {/* Header */}
               <div className="px-8 py-6 border-b border-stone-100 flex items-center justify-between bg-linear-to-r from-emerald-50 to-blue-50">
                 <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-full bg-linear-to-br from-emerald-500 to-blue-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                    {selectedCitizen.first_name?.[0] || "C"}
-                    {selectedCitizen.last_name?.[0] || "Z"}
-                  </div>
+                  {selectedCitizen.photo_url ? (
+                    <img
+                      src={selectedCitizen.photo_url}
+                      alt="profile"
+                      className="h-16 w-16 rounded-full object-cover border-2 border-white shadow-lg"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                      {selectedCitizen.first_name?.[0] || "C"}
+                      {selectedCitizen.last_name?.[0] || "Z"}
+                    </div>
+                  )}
                   <div>
                     <h3 className="text-xl font-heading font-extrabold text-stone-900">
                       {selectedCitizen.first_name} {selectedCitizen.middle_name}{" "}
