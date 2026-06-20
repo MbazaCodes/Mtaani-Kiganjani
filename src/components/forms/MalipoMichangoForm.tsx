@@ -186,6 +186,7 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
   isLoading,
   lang = "sw",
   userProfile,
+  onViewApplications,
 }) => {
   const t = labels[lang];
   const L = (sw: string, en: string) => (lang === "sw" ? sw : en);

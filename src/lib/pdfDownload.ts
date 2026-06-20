@@ -75,7 +75,7 @@ export async function downloadAgreementPDF(
     );
 
     return true;
-  } catch (_err) {
+  } catch (err) {
     console.error("PDF download error:", err);
     return false;
   }

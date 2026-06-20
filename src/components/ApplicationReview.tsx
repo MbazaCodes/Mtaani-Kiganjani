@@ -425,7 +425,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
 
     // Embed the approving officer's signature, stamp and name into form_data so
     // they render in the Ward Executive Officer section of the certificate.
-    const existingFormData = (selected.form_data as Record<string, unknown>) || {};
+    const existingFormData = (selected.form_data as unknown as Record<string, unknown>) || {};
     const officerName = `${user.first_name ?? ""} ${user.middle_name ?? ""} ${user.last_name ?? ""}`
       .replace(/\s+/g, " ")
       .trim();
@@ -582,11 +582,11 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
     // ── Payment gate: ensure application is paid before issuing ───────────
     const hasPaid = !!(
       selected.paid_at ||
-      (selected.form_data as Record<string, unknown>)?.payment_data ||
-      (selected.payment_data as Record<string, unknown>)?.transaction_id
+      (selected.form_data as unknown as Record<string, unknown>)?.payment_data ||
+      (selected.payment_data as unknown as Record<string, unknown>)?.transaction_id
     );
     const fee = (selected.services as { fee?: number })?.fee ?? 0;
-    const formFee = (selected.form_data as Record<string, unknown>)?.service_fee;
+    const formFee = (selected.form_data as unknown as Record<string, unknown>)?.service_fee;
     const effectiveFee = fee > 0 ? fee : typeof formFee === "number" ? formFee : 0;
 
     if (effectiveFee > 0 && !hasPaid) {
@@ -618,7 +618,7 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
         });
       }
       // Notify registered witnesses (those selected from system lookup)
-      const fd = (selected.form_data || {}) as Record<string, unknown>;
+      const fd = (selected.form_data || {}) as unknown as Record<string, unknown>;
       const witnessIds = [fd.witness1_user_id, fd.witness2_user_id].filter(
         (id): id is string => typeof id === "string" && id.length > 0,
       );
@@ -639,12 +639,12 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
   // ─── Categorized form_data ──────────────────────────────────────────────
   const formDataEntries = useMemo(() => {
     if (!selected?.form_data) return { fields: [], docs: [] };
-    const entries = Object.entries(selected.form_data as Record<string, unknown>);
+    const entries = Object.entries(selected.form_data as unknown as Record<string, unknown>);
     const fields: [string, unknown][] = [];
     const docs: { key: string; url: string }[] = [];
 
     // Structured uploads saved by submitApplication (selfie, id_front, etc.)
-    const uploaded = (selected.form_data as Record<string, unknown>).uploaded_documents;
+    const uploaded = (selected.form_data as unknown as Record<string, unknown>).uploaded_documents;
     if (Array.isArray(uploaded)) {
       uploaded.forEach((d) => {
         const doc = d as { type?: string; name?: string; dataUrl?: string };
@@ -1292,13 +1292,13 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                 )}
 
                 {/* Fee */}
-                {Number((selected.form_data as Record<string, unknown>)?.total_fee ?? 0) > 0 && (
+                {Number((selected.form_data as unknown as Record<string, unknown>)?.total_fee ?? 0) > 0 && (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex justify-between items-center">
                     <span className="text-xs font-bold text-emerald-800">{L("Ada:", "Fee:")}</span>
                     <span className="text-lg font-black text-emerald-700">
                       TSh{" "}
                       {(
-                        (selected.form_data as Record<string, unknown>)?.total_fee as number
+                        (selected.form_data as unknown as Record<string, unknown>)?.total_fee as number
                       ).toLocaleString()}
                     </span>
                   </div>
@@ -1512,11 +1512,11 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                 (() => {
                   const hasPaidCheck = !!(
                     selected.paid_at ||
-                    (selected.form_data as Record<string, unknown>)?.payment_data ||
-                    (selected.payment_data as Record<string, unknown>)?.transaction_id
+                    (selected.form_data as unknown as Record<string, unknown>)?.payment_data ||
+                    (selected.payment_data as unknown as Record<string, unknown>)?.transaction_id
                   );
                   const svcFee = (selected.services as { fee?: number })?.fee ?? 0;
-                  const frmFee = (selected.form_data as Record<string, unknown>)?.service_fee;
+                  const frmFee = (selected.form_data as unknown as Record<string, unknown>)?.service_fee;
                   const eFee = svcFee > 0 ? svcFee : typeof frmFee === "number" ? frmFee : 0;
                   const needsPayment = eFee > 0 && !hasPaidCheck;
                   return (

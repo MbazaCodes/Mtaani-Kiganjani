@@ -335,7 +335,7 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
         return;
       }
       setTenantFound(data as TenantProfile);
-    } catch (_error) {
+    } catch (error) {
       console.error("tenant lookup failed", error);
       setTenantError(L("Hitilafu ya mtandao. Jaribu tena.", "Network error. Please try again."));
     } finally {

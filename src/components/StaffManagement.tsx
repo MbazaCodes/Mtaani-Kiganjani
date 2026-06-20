@@ -203,7 +203,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
         return;
       }
       setStaff(data || []);
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching staff:", error);
       showToast(lang === "sw" ? "Hitilafu kupakia watumishi" : "Error fetching staff", "error");
       setStaff([]);

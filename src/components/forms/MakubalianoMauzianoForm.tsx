@@ -155,6 +155,8 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
   const [buyerSearching, setBuyerSearching] = useState(false);
   const [buyerError, setBuyerError] = useState("");
 
+  const [sellerPhoto, setSellerPhoto] = useState("");
+  const [buyerPhoto, setBuyerPhoto] = useState("");
   const [vals, setVals] = useState<FormValues>({
     buyer_search_term: "",
     buyer_search_type: "NIDA",
@@ -168,8 +170,6 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
     installment_details: "",
     transfer_date: "",
     special_conditions: "",
-    seller_photo: "",
-    buyer_photo: "",
     witness1_name: "",
     witness1_phone: "",
     witness1_nida: "",
@@ -308,7 +308,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
         return;
       }
       setBuyerFound(data as BuyerProfile);
-    } catch (_error) {
+    } catch (error) {
       console.error("buyer lookup failed", error);
       setBuyerError(L("Hitilafu ya mtandao. Jaribu tena.", "Network error. Please try again."));
     } finally {
@@ -1074,9 +1074,9 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                   <p className="text-xs font-bold text-stone-600 uppercase tracking-wide">
                     {L("Picha ya Muuzaji / Mpangishaji", "Seller / Landlord Photo")}
                   </p>
-                  {vals.seller_photo ? (
+                  {sellerPhoto ? (
                     <div className="relative">
-                      <img src={vals.seller_photo} alt="seller" className="w-full h-28 object-cover rounded-lg" />
+                      <img src={sellerPhoto} alt="seller" className="w-full h-28 object-cover rounded-lg" />
                       <button
                         type="button"
                         onClick={() => set("seller_photo", "")}
@@ -1108,9 +1108,9 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                   <p className="text-xs font-bold text-stone-600 uppercase tracking-wide">
                     {L("Picha ya Mnunuzi / Mpangaji", "Buyer / Tenant Photo")}
                   </p>
-                  {vals.buyer_photo ? (
+                  {buyerPhoto ? (
                     <div className="relative">
-                      <img src={vals.buyer_photo} alt="buyer" className="w-full h-28 object-cover rounded-lg" />
+                      <img src={buyerPhoto} alt="buyer" className="w-full h-28 object-cover rounded-lg" />
                       <button
                         type="button"
                         onClick={() => set("buyer_photo", "")}

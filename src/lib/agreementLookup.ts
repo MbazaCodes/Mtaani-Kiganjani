@@ -63,7 +63,7 @@ export async function findAgreementCounterparty(
     // Function missing means the SQL patch has not been applied yet. Fall back
     // to table reads for local/dev databases that allow direct lookup.
     if (error && !["PGRST202", "42883"].includes(String(error.code))) throw error;
-  } catch (_error) {
+  } catch (error) {
     const code = (error as { code?: string }).code;
     if (!["PGRST202", "42883"].includes(String(code))) throw error;
   }

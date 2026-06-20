@@ -8,7 +8,7 @@ import { Application } from "@/lib/supabase";
 import { formatDate, generateQRCodeUrl } from "./types";
 import { ReceiptPage } from "./ReceiptPage";
 
-interface Props { application: Application; lang?: string; qrDataUrl?: string | null; }
+interface Props { application: Application; lang?: "sw" | "en"; qrDataUrl?: string; }
 
 const s = StyleSheet.create({
   page: { backgroundColor: "#ffffff", padding: 32, fontFamily: "Helvetica" },
@@ -66,7 +66,7 @@ export const OmbiArdhiKijijiPDF: React.FC<Props> = ({ application, lang = "sw", 
         <View style={s.stamp}>
           <Text style={s.stampLabel}>{sw ? "Sahibu na:" : "Authorized by:"}</Text>
           <Text style={s.stampName}>{application.ward || "Ofisi ya Mtaa"}</Text>
-          {qrDataUrl && <Image src={qrDataUrl} style={s.qr} />}
+          {qrDataUrl ? <Image src={qrDataUrl} style={s.qr} /> : null}
         </View>
         <Text style={s.validity}>{sw ? "Hati hii ni rasmi. Thibitisha kwa QR code." : "This document is official. Verify via QR code."}</Text>
       </Page>

@@ -142,6 +142,8 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
   const fd = (application.form_data || {}) as {
     service_fee?: number;
     amount?: number;
+    total_fee?: number;
+    payment_amount?: number;
     applicant_name?: string;
   };
   const pd = (application.payment_data || {}) as {

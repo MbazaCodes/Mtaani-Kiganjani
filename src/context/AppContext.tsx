@@ -98,7 +98,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Embed the citizen's profile photo into form_data so the certificate can
       // show it regardless of who downloads it (staff don't have the citizen's photo).
       if (user.photo_url && !(formData as Record<string, unknown>).photo_url) {
-        (formData as Record<string, unknown>).photo_url = user.photo_url;
+        (formData as Record<string, unknown>).photo_url = (user as unknown as Record<string, unknown>)?.photo_url;
       }
       if (!(formData as Record<string, unknown>).applicant_name) {
         (formData as Record<string, unknown>).applicant_name =

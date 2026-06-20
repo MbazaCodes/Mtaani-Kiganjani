@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       return data as UserProfile;
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching user profile:", error);
       return null;
     }
@@ -191,7 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setUser(null);
         }
-      } catch (_error) {
+      } catch (error) {
         if (!isMounted) return;
         setSession(null);
         setUser(null);
