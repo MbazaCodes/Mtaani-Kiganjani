@@ -321,7 +321,7 @@ export function CitizenManagement() {
     try {
       const { data, error } = await supabase
         .from("users")
-        .select("*")
+        .select("id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, date_of_birth, place_of_birth, nationality, photo_url")
         .eq("id", citizen.id)
         .maybeSingle();
       if (!error && data) {
@@ -336,7 +336,7 @@ export function CitizenManagement() {
         });
       }
     } catch (_err) {
-      console.error("Error fetching full citizen profile:", err);
+      console.error("Error fetching full citizen profile:", _err);
     }
   };
 
