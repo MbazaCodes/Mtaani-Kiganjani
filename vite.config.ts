@@ -77,14 +77,23 @@ export default defineConfig({
           if (id.includes("node_modules/zod")) {
             return "validation";
           }
+          // Address data — large static JSON only needed in forms with address fields
+          if (id.includes("/lib/addressData")) return "address-data";
           // Admin pages — only staff/admin ever load these
           if (id.includes("/pages/admin/") || id.includes("/pages/staff/") || id.includes("/pages/department/")) {
             return "admin-staff";
           }
-          // Form components — only loaded on /apply route
-          if (id.includes("/components/forms/")) {
-            return "forms";
-          }
+          // Form components — each form as its own chunk for granular loading
+          if (id.includes("/components/forms/BaruaUtambulishoForm")) return "form-barua";
+          if (id.includes("/components/forms/UtambulishoMkaziForm")) return "form-mkazi";
+          if (id.includes("/components/forms/KibariMazishiForm"))    return "form-mazishi";
+          if (id.includes("/components/forms/KibariShereheForm"))     return "form-sherehe";
+          if (id.includes("/components/forms/KibariUjeziMdogoForm"))  return "form-ujezi";
+          if (id.includes("/components/forms/MakubalianoMauzianoForm")) return "form-mauzo";
+          if (id.includes("/components/forms/MakubalianoPangoForm"))  return "form-pango";
+          if (id.includes("/components/forms/MalipoMichangoForm"))    return "form-malipo";
+          if (id.includes("/components/forms/MgogoroMashauriForm"))   return "form-mgogoro";
+          if (id.includes("/components/forms/")) return "forms-shared";
           // PDF document templates
           if (id.includes("/components/documents/")) {
             return "pdf-docs";

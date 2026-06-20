@@ -141,7 +141,7 @@ export function CitizenManagement() {
 
       setPendingChanges(data || []);
     } catch (_error) {
-      console.error("Exception fetching profile changes:", error);
+      console.error("Exception fetching profile changes:", _error);
       setPendingChanges([]);
     } finally {
       setLoadingChanges(false);
