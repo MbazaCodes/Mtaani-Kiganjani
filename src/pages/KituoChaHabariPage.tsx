@@ -52,6 +52,19 @@ export function KituoChaHabariPage({ lang = "sw" }: KituoChaHabariPageProps) {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-8">
+      {/* Back to Home */}
+      <div className="mb-6">
+        <a
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-bold text-stone-500 hover:text-emerald-600 transition-colors group"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          {lang === "sw" ? "Rudi Nyumbani" : "Back to Home"}
+        </a>
+      </div>
+
       {/* Header */}
       <div className="text-center space-y-3">
         <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-black uppercase tracking-widest rounded-full">
