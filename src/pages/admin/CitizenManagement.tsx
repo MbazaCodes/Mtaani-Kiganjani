@@ -847,15 +847,15 @@ export function CitizenManagement() {
       {/* Citizen Details Modal */}
       <AnimatePresence>
         {showDetailsModal && selectedCitizen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] overflow-y-auto relative z-[9999]"
             >
               {/* Header */}
-              <div className="px-8 py-6 border-b border-stone-100 flex items-center justify-between bg-linear-to-r from-emerald-50 to-blue-50">
+              <div className="px-8 py-6 border-b border-stone-100 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-blue-50">
                 <div className="flex items-center gap-4">
                   {selectedCitizen.photo_url ? (
                     <img
@@ -1495,4 +1495,6 @@ export function CitizenManagement() {
       </AnimatePresence>
     </motion.div>
   );
-}
+};
+
+export default CitizenManagement;
