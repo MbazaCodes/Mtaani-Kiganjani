@@ -15,6 +15,7 @@ import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 const Landing = React.lazy(() => import("./pages/Landing").then(m => ({ default: m.Landing })));
 const NotFound = React.lazy(() => import("./pages/NotFound").then(m => ({ default: m.NotFound })));
 const MachapishoPage = React.lazy(() => import("./pages/MachapishoPage").then(m => ({ default: m.MachapishoPage })));
+const AboutPage = React.lazy(() => import("./pages/AboutPage").then(m => ({ default: m.AboutPage })));
 const KituoChaHabariPage = React.lazy(() => import("./pages/KituoChaHabariPage").then(m => ({ default: m.KituoChaHabariPage })));
 const HelpPage = React.lazy(() => import("./pages/HelpPage").then(m => ({ default: m.HelpPage })));
 const LegalPage = React.lazy(() => import("./pages/LegalPage").then(m => ({ default: m.LegalPage })));
@@ -865,6 +866,11 @@ export default function App() {
 
             {/* Email confirmation redirect */}
             {/* Public info pages */}
+            <Route path="/about" element={
+              <React.Suspense fallback={<AppSplashSkeleton />}>
+                <AboutPage lang={lang} />
+              </React.Suspense>
+            } />
             <Route path="/machapisho" element={
               <React.Suspense fallback={<AppSplashSkeleton />}>
                 <MachapishoPage lang={lang} />

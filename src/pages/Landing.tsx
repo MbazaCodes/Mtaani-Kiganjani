@@ -86,7 +86,7 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
             </button>
             {/* About Us */}
             <a
-              href="#about"
+              href="/about"
               className="text-sm font-bold text-stone-600 hover:text-stone-900 px-3 py-2 rounded-xl hover:bg-stone-50 transition-colors"
             >
               {lang === "sw" ? "Kuhusu Sisi" : "About Us"}
@@ -167,7 +167,7 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             <a
-              href="#about"
+              href="/about"
               onClick={() => setMobileMenuOpen(false)}
               className="w-full text-left text-sm font-bold text-stone-700 flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-stone-50"
             >
