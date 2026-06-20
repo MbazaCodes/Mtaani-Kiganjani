@@ -18,6 +18,13 @@ import { MakubalianoMauzianoPDF } from "./documents/MakubalianoMauzianoPDF";
 import { MakubalianoPangoPDF } from "./documents/MakubalianoPangoPDF";
 import { RisitiMalipoPDF } from "./documents/RisitiMalipoPDF";
 import { MgogoroMashauriPDF } from "./documents/MgogoroMashauriPDF";
+import { KibariaBiasharaNdogoPDF } from "./documents/KibariaBiasharaNdogoPDF";
+import { UsajiliKikundiPDF } from "./documents/UsajiliKikundiPDF";
+import { OmbiMsaadaJamiiPDF } from "./documents/OmbiMsaadaJamiiPDF";
+import { UsajiliMifugoPDF } from "./documents/UsajiliMifugoPDF";
+import { ChetiUzawaPDF } from "./documents/ChetiUzawaPDF";
+import { ChetiMwanafunziPDF } from "./documents/ChetiMwanafunziPDF";
+import { OmbiArdhiKijijiPDF } from "./documents/OmbiArdhiKijijiPDF";
 import type { DocumentPDFProps } from "./documents/types";
 
 // Map service_id / name keywords to PDF component + service code
@@ -66,6 +73,22 @@ function resolvePDF(application: Application): PDFFactory {
   // Service 9 — Migogoro na Mashauri (Disputes & Issues)
   if (id === "9" || name.includes("MIGOGORO") || name.includes("MASHAURI"))
     return { Component: MgogoroMashauriPDF, code: "DS", filenamePrefix: "taarifa-mgogoro" };
+
+  // New services
+  if (name.includes("BIASHARA NDOGO") || name.includes("BIASHARA"))
+    return { Component: KibariaBiasharaNdogoPDF, code: "BN", filenamePrefix: "kibari-biashara" };
+  if (name.includes("KIKUNDI") || name.includes("CHAMA"))
+    return { Component: UsajiliKikundiPDF, code: "KK", filenamePrefix: "usajili-kikundi" };
+  if (name.includes("MSAADA"))
+    return { Component: OmbiMsaadaJamiiPDF, code: "MJ", filenamePrefix: "msaada-jamii" };
+  if (name.includes("MIFUGO"))
+    return { Component: UsajiliMifugoPDF, code: "MF", filenamePrefix: "usajili-mifugo" };
+  if (name.includes("UZAWA"))
+    return { Component: ChetiUzawaPDF, code: "UZ", filenamePrefix: "cheti-uzawa" };
+  if (name.includes("MWANAFUNZI"))
+    return { Component: ChetiMwanafunziPDF, code: "MF2", filenamePrefix: "cheti-mwanafunzi" };
+  if (name.includes("ARDHI"))
+    return { Component: OmbiArdhiKijijiPDF, code: "AK", filenamePrefix: "ardhi-kijiji" };
 
   // Default: receipt-style fallback
   return { Component: RisitiMalipoPDF, code: "DOC", filenamePrefix: "hati" };

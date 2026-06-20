@@ -25,6 +25,13 @@ import { MakubalianoMauzianoForm } from "./MakubalianoMauzianoForm";
 import { MakubalianoPangoForm } from "./MakubalianoPangoForm";
 import { MalipoMichangoForm } from "./MalipoMichangoForm";
 import { MgogoroMashauriForm } from "./MgogoroMashauriForm";
+import { KibariaBiasharaNdogoForm } from "./KibariaBiasharaNdogoForm";
+import { UsajiliKikundiForm } from "./UsajiliKikundiForm";
+import { OmbiMsaadaJamiiForm } from "./OmbiMsaadaJamiiForm";
+import { UsajiliMifugoForm } from "./UsajiliMifugoForm";
+import { ChetiUzawaForm } from "./ChetiUzawaForm";
+import { ChetiMwanafunziForm } from "./ChetiMwanafunziForm";
+import { OmbiArdhiKijijiForm } from "./OmbiArdhiKijijiForm";
 import React from "react";
 import { FormProps } from "./types";
 
@@ -38,6 +45,13 @@ export const SERVICE_FORMS: Record<string, React.FC<FormProps>> = {
   "Makubaliano ya Pango": MakubalianoPangoForm,
   "Malipo na Michango": MalipoMichangoForm,
   "Migogoro na Mashauri": MgogoroMashauriForm,
+  "Kibari cha Biashara Ndogo": KibariaBiasharaNdogoForm,
+  "Usajili wa Kikundi": UsajiliKikundiForm,
+  "Ombi la Msaada wa Jamii": OmbiMsaadaJamiiForm,
+  "Usajili wa Mifugo": UsajiliMifugoForm,
+  "Cheti cha Uzawa": ChetiUzawaForm,
+  "Cheti cha Mwanafunzi": ChetiMwanafunziForm,
+  "Ombi la Ardhi ya Kijiji": OmbiArdhiKijijiForm,
 };
 
 export const getServiceForm = (serviceName: string): React.FC<FormProps> | null => {
@@ -47,3 +61,4 @@ export const getServiceForm = (serviceName: string): React.FC<FormProps> | null 
 export const hasServiceForm = (serviceName: string): boolean => {
   return serviceName in SERVICE_FORMS;
 };
+

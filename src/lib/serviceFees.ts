@@ -12,7 +12,14 @@ const SERVICE_FEES: Record<string, number> = {
   "Barua ya Utambulisho": 3000,
   "Makubaliano ya Mauzo": 5000, // min for sales (3% of value, min 5000)
   "Makubaliano ya Pango": 10000, // min for rental
-  "Migogoro na Mashauri": 5000, // citizen disputes
+  "Migogoro na Mashauri": 5000,
+  "Kibari cha Biashara Ndogo": 10000,
+  "Usajili wa Kikundi": 5000,
+  "Ombi la Msaada wa Jamii": 0,
+  "Usajili wa Mifugo": 3000,
+  "Cheti cha Uzawa": 3000,
+  "Cheti cha Mwanafunzi": 2000,
+  "Ombi la Ardhi ya Kijiji": 5000, // citizen disputes
   // Malipo na Michango is variable (amount = the payment itself)
 };
 
