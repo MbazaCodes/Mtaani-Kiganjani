@@ -206,11 +206,44 @@ interface FormValues {
 }
 
 
+
+// ─── Purpose → Suggested Institutions Mapping ────────────────────────────────
+// Maps each purpose to suggested govt category + private sector
+
+interface PurposeMapping {
+  govCatId: string;          // pre-select govt category
+  suggestedGovIds: string[]; // highlight these institution IDs
+  privateSector: string;     // pre-select private sector
+}
+
+const PURPOSE_MAPPING: Record<string, PurposeMapping> = {
+  BENKI:           { govCatId: "uchumi",    suggestedGovIds: ["bot", "mof"],           privateSector: "benki" },
+  MKOPO:           { govCatId: "uchumi",    suggestedGovIds: ["bot", "brela"],          privateSector: "benki" },
+  BIMA:            { govCatId: "afya",      suggestedGovIds: ["nhif"],                  privateSector: "benki" },
+  AJIRA:           { govCatId: "serikali",  suggestedGovIds: ["utumishi", "tamisemi"],  privateSector: "biashara" },
+  WAAJIRI:         { govCatId: "serikali",  suggestedGovIds: ["utumishi"],              privateSector: "biashara" },
+  CHUO:            { govCatId: "elimu",     suggestedGovIds: ["tcu", "heslb", "necta"], privateSector: "elimu" },
+  KUSAJILI_MTOTO:  { govCatId: "elimu",     suggestedGovIds: ["moe"],                   privateSector: "elimu" },
+  PASIPOTI:        { govCatId: "usalama",   suggestedGovIds: ["immigration", "mhome"],  privateSector: "nyingine" },
+  SIM:             { govCatId: "tehama",    suggestedGovIds: ["tcra"],                  privateSector: "mawasiliano" },
+  LESENI_UDEREVA:  { govCatId: "miundombinu", suggestedGovIds: ["sumatra", "tanroads"], privateSector: "usafiri" },
+  LESENI_BIASHARA: { govCatId: "uchumi",   suggestedGovIds: ["brela", "tra"],           privateSector: "biashara" },
+  TRA:             { govCatId: "uchumi",    suggestedGovIds: ["tra", "zra"],            privateSector: "benki" },
+  SERIKALI:        { govCatId: "serikali",  suggestedGovIds: ["tamisemi", "utumishi"],  privateSector: "nyingine" },
+  HUDUMA_UMEME_MAJI: { govCatId: "miundombinu", suggestedGovIds: ["ewura"],            privateSector: "hali_ya_hewa" },
+  ARDHI:           { govCatId: "ardhi",     suggestedGovIds: ["ardhi", "nhc"],          privateSector: "ujenzi" },
+  AFYA:            { govCatId: "afya",      suggestedGovIds: ["moh", "nhif", "tfda"],   privateSector: "afya" },
+  DHAMANA_POLISI:  { govCatId: "usalama",   suggestedGovIds: ["polisi", "mahakama"],    privateSector: "nyingine" },
+  UDHAMINI:        { govCatId: "usalama",   suggestedGovIds: ["mahakama", "rita"],      privateSector: "nyingine" },
+  NYINGINEZO:      { govCatId: "",          suggestedGovIds: [],                         privateSector: "" },
+};
+
 // ─── GovInstPicker — proper component so hooks aren't called inside .map() ───
 
 interface GovInstPickerProps {
   lang: string;
   instName: string;
+  purpose: string;           // drives pre-selection
   onSelect: (name: string, fullName: string, location?: string) => void;
   onNameChange: (v: string) => void;
   nameError?: string;
@@ -218,26 +251,39 @@ interface GovInstPickerProps {
 }
 
 const GovInstPicker: React.FC<GovInstPickerProps> = ({
-  lang, instName, onSelect, onNameChange, nameError, inputCls: nameCls,
+  lang, instName, purpose, onSelect, onNameChange, nameError, inputCls: nameCls,
 }) => {
-  const [govCatId, setGovCatId] = React.useState("");
+  const mapping = PURPOSE_MAPPING[purpose] || { govCatId: "", suggestedGovIds: [], privateSector: "" };
+  const [govCatId, setGovCatId] = React.useState(mapping.govCatId);
   const [govSearch, setGovSearch] = React.useState("");
   const L = (sw: string, en: string) => lang === "sw" ? sw : en;
 
+  // When purpose changes, reset category to suggested one
+  React.useEffect(() => {
+    setGovCatId(mapping.govCatId);
+    setGovSearch("");
+  }, [purpose, mapping.govCatId]);
+
   const selCat = CATEGORIES.find(c => c.id === govCatId);
-  const filteredInst = selCat
-    ? selCat.taasisi.filter(t =>
-        t.name.toLowerCase().includes(govSearch.toLowerCase()) ||
-        (t.nameFull || "").toLowerCase().includes(govSearch.toLowerCase())
-      )
-    : [];
+
+  // Sort: suggested first, then rest
+  const sortedInst = selCat ? [
+    ...selCat.taasisi.filter(t => mapping.suggestedGovIds.includes(t.id)),
+    ...selCat.taasisi.filter(t => !mapping.suggestedGovIds.includes(t.id)),
+  ] : [];
+
+  const filteredInst = sortedInst.filter(t =>
+    !govSearch ||
+    t.name.toLowerCase().includes(govSearch.toLowerCase()) ||
+    (t.nameFull || "").toLowerCase().includes(govSearch.toLowerCase())
+  );
 
   return (
     <div className="space-y-3">
-      {/* Category dropdown */}
+      {/* Category dropdown — pre-selected based on purpose */}
       <div>
         <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1.5">
-          {L("Chagua Mkundo wa Serikali", "Select Government Category")}
+          {L("Mkundo wa Taasisi za Serikali", "Government Category")}
         </p>
         <select
           value={govCatId}
@@ -251,9 +297,14 @@ const GovInstPicker: React.FC<GovInstPickerProps> = ({
             </option>
           ))}
         </select>
+        {govCatId && mapping.govCatId === govCatId && (
+          <p className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+            <Check size={10} /> {L("Imependekezwa kwa sababu uliyochagua", "Suggested based on your purpose")}
+          </p>
+        )}
       </div>
 
-      {/* Institution list triggered by category */}
+      {/* Institution list */}
       {selCat && (
         <div className="space-y-2">
           <div className="relative">
@@ -266,38 +317,66 @@ const GovInstPicker: React.FC<GovInstPickerProps> = ({
               className="w-full pl-9 pr-3 py-2.5 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
+
+          {/* Suggested badge */}
+          {mapping.suggestedGovIds.length > 0 && !govSearch && (
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+              {L("Zinazopendekezwa kwa sababu yako", "Suggested for your purpose")}
+            </p>
+          )}
+
           <div className="space-y-1.5 max-h-52 overflow-y-auto rounded-xl border border-stone-100 p-1">
-            {filteredInst.map(t => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => onSelect(t.name, t.nameFull || "", t.location)}
-                className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${
-                  instName === t.name
-                    ? "bg-emerald-50 border-emerald-400"
-                    : "bg-white border-transparent hover:border-stone-200 hover:bg-stone-50"
-                }`}
-              >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${instName === t.name ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-600"}`}>
-                  {t.name.slice(0, 2)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className={`text-xs font-bold ${instName === t.name ? "text-emerald-800" : "text-stone-800"}`}>{t.name}</p>
-                  {t.nameFull && <p className="text-[9px] text-stone-400 truncate">{t.nameFull}</p>}
-                </div>
-                {instName === t.name && <Check size={13} className="text-emerald-600 shrink-0" />}
-              </button>
-            ))}
-            {filteredInst.length === 0 && govSearch && (
+            {filteredInst.map(t => {
+              const isSuggested = mapping.suggestedGovIds.includes(t.id);
+              const isSelected = instName === t.name;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => onSelect(t.name, t.nameFull || "", t.location)}
+                  className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${
+                    isSelected
+                      ? "bg-emerald-50 border-emerald-400"
+                      : isSuggested
+                      ? "bg-emerald-50/40 border-emerald-200 hover:bg-emerald-50"
+                      : "bg-white border-transparent hover:border-stone-200 hover:bg-stone-50"
+                  }`}
+                >
+                  <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${
+                    isSelected ? "bg-emerald-100 text-emerald-700" :
+                    isSuggested ? "bg-emerald-100 text-emerald-600" :
+                    "bg-stone-100 text-stone-600"
+                  }`}>
+                    {t.name.slice(0, 2)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <p className={`text-xs font-bold ${isSelected ? "text-emerald-800" : "text-stone-800"}`}>{t.name}</p>
+                      {isSuggested && !isSelected && (
+                        <span className="text-[8px] font-black bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full">
+                          {L("INAYOFAA", "MATCH")}
+                        </span>
+                      )}
+                    </div>
+                    {t.nameFull && <p className="text-[9px] text-stone-400 truncate">{t.nameFull}</p>}
+                  </div>
+                  {isSelected && <Check size={13} className="text-emerald-600 shrink-0" />}
+                </button>
+              );
+            })}
+            {filteredInst.length === 0 && (
               <p className="text-xs text-stone-400 text-center py-3">
-                {L("Hakuna taasisi inayofanana. Jaza jina mwenyewe chini.", "Not found. Enter manually below.")}
+                {govSearch
+                  ? L("Hakuna taasisi inayofanana.", "No matching institutions.")
+                  : L("Hakuna taasisi katika mkundo huu.", "No institutions in this category.")}
               </p>
             )}
           </div>
         </div>
       )}
 
-      {/* Manual name field — always visible */}
+      {/* Manual name field */}
       <div>
         <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
           {L("Jina la Taasisi", "Institution Name")}
@@ -1543,7 +1622,9 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                             setInst(i, "inst_type", opt.value as "serikali" | "private");
                             setInst(i, "name", "");
                             setInst(i, "department", "");
-                            setInst(i, "private_sector", "");
+                            // Pre-select private sector based on purpose
+                            const mapping = PURPOSE_MAPPING[vals.purpose] || { privateSector: "" };
+                            setInst(i, "private_sector", opt.value === "private" ? mapping.privateSector : "");
                             clrErr(`inst_name_${i}`);
                           }}
                           className={`py-3 px-2 rounded-xl border-2 flex flex-col items-center gap-1 transition-all text-center ${
@@ -1566,6 +1647,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                     <GovInstPicker
                       lang={lang}
                       instName={inst.name}
+                      purpose={vals.purpose}
                       onSelect={(name, fullName, location) => {
                         setInst(i, "name", name);
                         setInst(i, "department", fullName);
@@ -1591,13 +1673,18 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                               key={sec.value}
                               type="button"
                               onClick={() => { setInst(i, "private_sector", sec.value); setInst(i, "name", ""); clrErr(`inst_name_${i}`); }}
-                              className={`py-2 px-3 rounded-xl border-2 text-left transition-all text-xs font-bold ${
+    className={`py-2 px-3 rounded-xl border-2 text-left transition-all text-xs font-bold relative ${
                                 inst.private_sector === sec.value
                                   ? "bg-blue-50 border-blue-500 text-blue-700"
+                                  : (PURPOSE_MAPPING[vals.purpose] || {}).privateSector === sec.value
+                                  ? "bg-blue-50/50 border-blue-300 text-blue-600"
                                   : "bg-white border-stone-200 text-stone-600 hover:border-stone-300"
                               }`}
                             >
                               {lang === "sw" ? sec.labelSw : sec.labelEn}
+                              {(PURPOSE_MAPPING[vals.purpose] || {}).privateSector === sec.value && inst.private_sector !== sec.value && (
+                                <span className="block text-[8px] font-black text-blue-500 mt-0.5">{lang === "sw" ? "INAYOFAA" : "MATCH"}</span>
+                              )}
                             </button>
                           ))}
                         </div>
