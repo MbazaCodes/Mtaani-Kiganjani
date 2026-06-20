@@ -31,17 +31,15 @@ export function BottomNav() {
 
   const staffItems: NavItem[] = [
     { icon: <LayoutDashboard size={22} />, label: sw ? "Dashibodi" : "Dashboard",  view: "staff_dashboard" },
-    { icon: <ClipboardList size={22} />,   label: sw ? "Maombi" : "Review",        view: "application_review" },
+    { icon: <ClipboardList size={22} />,   label: sw ? "Maombi" : "Apps",          view: "application_review" },
     { icon: <Users size={22} />,           label: sw ? "Wananchi" : "Citizens",    view: "manual_verification" },
-    { icon: <Bell size={22} />,            label: sw ? "Arifa" : "Alerts",         view: "notifications" },
     { icon: <User size={22} />,            label: sw ? "Profaili" : "Profile",     view: "profile" },
   ];
 
   const adminItems: NavItem[] = [
     { icon: <LayoutDashboard size={22} />, label: sw ? "Dashibodi" : "Dashboard",  view: "admin_dashboard" },
-    { icon: <ClipboardList size={22} />,   label: sw ? "Maombi" : "Review",        view: "application_review" },
-    { icon: <Users size={22} />,           label: sw ? "Watumishi" : "Staff",      view: "staff_management" },
-    { icon: <BarChart2 size={22} />,       label: sw ? "Ripoti" : "Reports",       view: "admin_logs" },
+    { icon: <ClipboardList size={22} />,   label: sw ? "Maombi" : "Apps",          view: "application_review" },
+    { icon: <Users size={22} />,           label: sw ? "Wananchi" : "Citizens",    view: "citizen_management" },
     { icon: <User size={22} />,            label: sw ? "Profaili" : "Profile",     view: "profile" },
   ];
 

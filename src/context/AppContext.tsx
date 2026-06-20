@@ -198,6 +198,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           selectedService.id ?? "",
         );
 
+        // Compute final status: Malipo na Michango bypasses staff approval
+        const isMalipo = selectedService.name.toLowerCase().includes("malipo") ||
+                         selectedService.name.toLowerCase().includes("michango");
+        const finalStatus = isMalipo ? "paid" : "submitted";
+
         const { error, data: insertedApp } = await supabase
           .from("applications")
           .insert({
@@ -206,7 +211,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             service_name: selectedService.name ?? selectedService.name_en,
             application_number: applicationNumber,
             form_data: formData,
-            status: "submitted",
+            status: finalStatus,
             region: user.region ?? null,
             district: user.district ?? null,
             ward: user.ward ?? null,
@@ -217,6 +222,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             target_user_nida: sendForApproval ? (formData.target_user_nida ?? null) : null,
             target_user_role: sendForApproval ? targetUserRole : null,
             agreement_status: sendForApproval && targetUserId ? "pending" : null,
+            approved_at: isMalipo ? new Date().toISOString() : null,
           })
           .select()
           .single();
