@@ -1660,36 +1660,41 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                     />
                   )}
 
-                  {/* ── PRIVATE: Sector → Company name ── */}
+                  {/* ── PRIVATE: Sector dropdown → Company name ── */}
                   {inst.inst_type === "private" && (
                     <div className="space-y-3">
+                      {/* Sector dropdown */}
                       <div>
-                        <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-2">
-                          {L("Chagua Sekta", "Select Sector")}
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {PRIVATE_SECTORS.map(sec => (
-                            <button
-                              key={sec.value}
-                              type="button"
-                              onClick={() => { setInst(i, "private_sector", sec.value); setInst(i, "name", ""); clrErr(`inst_name_${i}`); }}
-    className={`py-2 px-3 rounded-xl border-2 text-left transition-all text-xs font-bold relative ${
-                                inst.private_sector === sec.value
-                                  ? "bg-blue-50 border-blue-500 text-blue-700"
-                                  : (PURPOSE_MAPPING[vals.purpose] || {}).privateSector === sec.value
-                                  ? "bg-blue-50/50 border-blue-300 text-blue-600"
-                                  : "bg-white border-stone-200 text-stone-600 hover:border-stone-300"
-                              }`}
-                            >
-                              {lang === "sw" ? sec.labelSw : sec.labelEn}
-                              {(PURPOSE_MAPPING[vals.purpose] || {}).privateSector === sec.value && inst.private_sector !== sec.value && (
-                                <span className="block text-[8px] font-black text-blue-500 mt-0.5">{lang === "sw" ? "INAYOFAA" : "MATCH"}</span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
+                        <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+                          {L("Chagua Sekta", "Select Sector")}<span className="text-red-500 ml-0.5">*</span>
+                        </label>
+                        <select
+                          value={inst.private_sector}
+                          onChange={e => {
+                            setInst(i, "private_sector", e.target.value);
+                            setInst(i, "name", "");
+                            clrErr(`inst_name_${i}`);
+                          }}
+                          className={inputCls(`inst_sector_${i}`)}
+                        >
+                          <option value="">{L("-- Chagua sekta --", "-- Select sector --")}</option>
+                          {PRIVATE_SECTORS.map(sec => {
+                            const isSuggested = (PURPOSE_MAPPING[vals.purpose] || {}).privateSector === sec.value;
+                            return (
+                              <option key={sec.value} value={sec.value}>
+                                {lang === "sw" ? sec.labelSw : sec.labelEn}{isSuggested ? (lang === "sw" ? " ★ Inayofaa" : " ★ Suggested") : ""}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        {inst.private_sector && (PURPOSE_MAPPING[vals.purpose] || {}).privateSector === inst.private_sector && (
+                          <p className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                            <Check size={10} /> {L("Sekta inayofaa kwa sababu uliyochagua", "Sector matches your purpose")}
+                          </p>
+                        )}
                       </div>
 
+                      {/* Company name — shown after sector selected */}
                       {inst.private_sector && (
                         <Field name={`inst_name_${i}`} label={L("Jina la Kampuni / Taasisi", "Company / Institution Name")} required>
                           <input
@@ -1697,9 +1702,15 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                             onChange={e => { setInst(i, "name", e.target.value); clrErr(`inst_name_${i}`); }}
                             placeholder={
                               inst.private_sector === "mawasiliano" ? L("Mfano: Airtel, Vodacom, TTCL", "E.g. Airtel, Vodacom, TTCL") :
-                              inst.private_sector === "benki" ? L("Mfano: NMB, CRDB, Stanbic", "E.g. NMB, CRDB, Stanbic") :
-                              inst.private_sector === "elimu" ? L("Mfano: Shule ya XYZ", "E.g. XYZ School") :
-                              L("Jaza jina la kampuni", "Enter company name")
+                              inst.private_sector === "benki"        ? L("Mfano: NMB, CRDB, Stanbic, KCB", "E.g. NMB, CRDB, Stanbic, KCB") :
+                              inst.private_sector === "elimu"        ? L("Mfano: Shule ya XYZ, Chuo cha ABC", "E.g. XYZ School, ABC College") :
+                              inst.private_sector === "afya"         ? L("Mfano: AAR, Aga Khan, Regency", "E.g. AAR, Aga Khan, Regency") :
+                              inst.private_sector === "ujenzi"       ? L("Mfano: Karibu Homes, Watumishi Housing", "E.g. Karibu Homes, Watumishi Housing") :
+                              inst.private_sector === "usafiri"      ? L("Mfano: Dar Express, Kilimanjaro Fast", "E.g. Dar Express, Kilimanjaro Fast") :
+                              inst.private_sector === "tehama"       ? L("Mfano: Selcom, TTCL Data, Maxcom", "E.g. Selcom, TTCL Data, Maxcom") :
+                              inst.private_sector === "viwanda"      ? L("Mfano: Tanzania Breweries, Bakhresa", "E.g. Tanzania Breweries, Bakhresa") :
+                              inst.private_sector === "kilimo"       ? L("Mfano: Azam Rice, Bidco Tanzania", "E.g. Azam Rice, Bidco Tanzania") :
+                              L("Jaza jina la kampuni au taasisi", "Enter company or institution name")
                             }
                             className={inputCls(`inst_name_${i}`)}
                           />
