@@ -236,7 +236,7 @@ export function CitizenManagement() {
     try {
       const { data, error } = await supabase
         .from("users")
-        .select("id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, birth_date, date_of_birth, place_of_birth, nationality")
+        .select("id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, date_of_birth, place_of_birth, nationality")
         .eq("role", "citizen")
         .order("created_at", { ascending: false })
         .limit(500);
