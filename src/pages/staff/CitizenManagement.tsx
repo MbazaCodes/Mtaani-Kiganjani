@@ -196,12 +196,14 @@ export function StaffCitizenManagement() {
   const fetchCitizens = async () => {
     setLoading(true);
     try {
-      // Staff only see citizens in their assigned region/district
+      // Only fetch columns needed for the list view — skip photo_url (base64, large)
+      // photo_url is fetched on-demand when a citizen row is clicked (openCitizen)
       let query = supabase
         .from("users")
-        .select("*")
+        .select("id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, birth_date, date_of_birth, place_of_birth, nationality")
         .eq("role", "citizen")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
 
       if (staffUser?.assigned_region) {
         query = query.eq("region", staffUser.assigned_region);
@@ -224,7 +226,7 @@ export function StaffCitizenManagement() {
 
       setCitizens(data || []);
     } catch (_error) {
-      console.error("Error fetching citizens:", error);
+      console.error("Error fetching citizens:", _error);
       setCitizens([]);
     } finally {
       setLoading(false);
@@ -269,13 +271,21 @@ export function StaffCitizenManagement() {
   const openCitizen = async (citizen: UserProfile) => {
     setSelectedCitizen(citizen);
     setLoadingApps(true);
-    const { data } = await supabase
-      .from("applications")
-      .select("id, service_name, status, created_at, application_number")
-      .eq("user_id", citizen.id)
-      .order("created_at", { ascending: false })
-      .limit(10);
-    setCitizenApps(data || []);
+    // Fetch full profile (including photo_url) + applications in parallel
+    const [profileRes, appsRes] = await Promise.all([
+      supabase.from("users").select("photo_url, email_confirmed_at").eq("id", citizen.id).single(),
+      supabase
+        .from("applications")
+        .select("id, service_name, status, created_at, application_number")
+        .eq("user_id", citizen.id)
+        .order("created_at", { ascending: false })
+        .limit(10),
+    ]);
+    // Merge photo_url into selected citizen
+    if (profileRes.data) {
+      setSelectedCitizen(prev => prev ? { ...prev, photo_url: profileRes.data.photo_url } : prev);
+    }
+    setCitizenApps(appsRes.data || []);
     setLoadingApps(false);
   };
 

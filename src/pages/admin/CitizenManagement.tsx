@@ -236,9 +236,10 @@ export function CitizenManagement() {
     try {
       const { data, error } = await supabase
         .from("users")
-        .select("*")
+        .select("id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, birth_date, date_of_birth, place_of_birth, nationality")
         .eq("role", "citizen")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
 
       if (error) {
         console.error("Error fetching citizens:", error);
@@ -248,7 +249,7 @@ export function CitizenManagement() {
       }
       setCitizens(data || []);
     } catch (_error) {
-      console.error("Exception in fetchCitizens:", error);
+      console.error("Exception in fetchCitizens:", _error);
       showToast(lang === "sw" ? "Hitilafu kupata wananchi" : "Error fetching citizens", "error");
       setCitizens([]);
     } finally {
