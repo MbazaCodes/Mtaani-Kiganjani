@@ -13,6 +13,7 @@ export interface FormProps {
   lang?: FormLanguage;
   userProfile?: UserProfile | null;
   draftId?: string;
+  onViewApplications?: () => void;
 }
 
 export const labels = {

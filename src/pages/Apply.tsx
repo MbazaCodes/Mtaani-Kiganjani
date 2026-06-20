@@ -502,6 +502,7 @@ export function Apply({ selectedService, onBack, onSubmit, draft }: ApplyProps) 
                 lang={lang}
                 userProfile={userProfileForForm}
                 draftId={draft?.id}
+                onViewApplications={() => setView("my_payments")}
               />
             );
           })()

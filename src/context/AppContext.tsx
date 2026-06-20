@@ -138,7 +138,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         service_name: selectedService.name,
         application_number: applicationNumber,
         form_data: formData,
-        status: "submitted" as const,
+        // Malipo na Michango goes straight to paid — no staff approval needed
+        status: (selectedService.name.toLowerCase().includes("malipo") ||
+                 selectedService.name.toLowerCase().includes("michango"))
+          ? "paid" as const
+          : "submitted" as const,
         region: user.region,
         district: user.district,
         ward: user.ward,

@@ -530,12 +530,12 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
         </div>
         <div className="space-y-2">
           <h3 className="text-xl font-black text-stone-900">
-            {L("Malipo Yamewasilishwa!", "Payment Submitted!")}
+            {L("Malipo Yamekamilika!", "Payment Complete!")}
           </h3>
           <p className="text-stone-500 text-sm">
             {L(
-              "Tutathibitisha malipo na kukutumia risiti rasmi.",
-              "We will confirm the payment and send you an official receipt.",
+              "Malipo yamefanikiwa. Pakua risiti yako rasmi hapa chini.",
+              "Payment successful. Download your official receipt below.",
             )}
           </p>
         </div>
@@ -556,7 +556,7 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
                 L("Tarehe", "Date"),
                 new Date().toLocaleDateString(lang === "sw" ? "sw-TZ" : "en-US"),
               ],
-              [L("Hali", "Status"), L("Inasubiri Uthibitisho", "Pending Confirmation")],
+              [L("Hali", "Status"), L("Imelipwa ✓", "Paid ✓")],
             ].map(([l, v]) => (
               <div key={String(l)} className="flex justify-between text-sm">
                 <span className="text-stone-500">{l}</span>
@@ -565,35 +565,41 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
             ))}
           </div>
         </div>
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-left max-w-sm mx-auto">
-          <p className="text-xs font-bold text-blue-700 mb-2">
-            {L("Hatua Zinazofuata", "What Happens Next")}
+        {/* Receipt download + view applications */}
+        <div className="flex flex-col gap-3 max-w-sm mx-auto w-full">
+          <button
+            onClick={() => {
+              // Navigate to applications to view and download receipt
+              if (onViewApplications) onViewApplications();
+            }}
+            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl flex items-center justify-center gap-2 transition-colors text-sm"
+          >
+            <Download size={18} />
+            {L("Pakua Risiti ya Malipo", "Download Payment Receipt")}
+          </button>
+          <button
+            onClick={() => {
+              if (onViewApplications) onViewApplications();
+            }}
+            className="w-full py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-2xl flex items-center justify-center gap-2 transition-colors text-sm"
+          >
+            {L("Tazama Malipo Yangu", "View My Payments")}
+          </button>
+        </div>
+        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-left max-w-sm mx-auto">
+          <p className="text-xs font-bold text-emerald-700 mb-2">
+            {L("Uthibitisho", "Confirmation")}
           </p>
           <ul className="space-y-1.5">
             {[
-              L("Ofisi itathibitisha malipo yako", "Office will verify your payment"),
-              L(
-                "Utapokea risiti rasmi kwa email/SMS",
-                "You will receive an official receipt by email/SMS",
-              ),
               vals.category === "FAINI"
-                ? L(
-                    "Faini yako itafutwa kutoka kwenye rekodi",
-                    "The fine will be cleared from your record",
-                  )
-                : L(
-                    "Malipo yako yatarekodi kwenye historia ya akaunti",
-                    "The payment will be recorded in your account history",
-                  ),
-              L(
-                "Tunzia namba ya rejea kwa marejeleo",
-                "Keep this reference number for future reference",
-              ),
+                ? L("Faini yako imefutwa kutoka kwenye rekodi", "The fine has been cleared from your record")
+                : L("Malipo yamerekodiwa kwenye historia ya akaunti", "Payment recorded in your account history"),
+              L("Namba ya rejea imetumwa kwa SMS/email", "Reference number sent via SMS/email"),
+              L("Tunzia namba ya rejea kwa usalama", "Keep this reference number safe"),
             ].map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-blue-700">
-                <span className="w-4 h-4 rounded-full bg-blue-200 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
-                  {i + 1}
-                </span>
+              <li key={i} className="flex items-start gap-2 text-xs text-emerald-700">
+                <CheckCircle2 size={14} className="shrink-0 mt-0.5" />
                 {item}
               </li>
             ))}
