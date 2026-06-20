@@ -4,7 +4,7 @@
  * Provides quick access to the 4-5 most used views per role.
  */
 import React from "react";
-import { LayoutDashboard, Plus, FileText, Bell, User, ClipboardList, Users, BarChart2 } from "lucide-react";
+import { LayoutDashboard, Plus, FileText, Bell, User, ClipboardList, Users, BarChart2, CreditCard } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouterView } from "./AppShell";
@@ -22,11 +22,11 @@ export function BottomNav() {
   type NavItem = { icon: React.ReactNode; label: string; view: ViewName };
 
   const citizenItems: NavItem[] = [
-    { icon: <LayoutDashboard size={22} />, label: sw ? "Nyumbani" : "Home",        view: "dashboard" },
-    { icon: <Plus size={22} />,           label: sw ? "Omba" : "Apply",            view: "services" },
-    { icon: <FileText size={22} />,       label: sw ? "Maombi" : "Applications",   view: "applications" },
-    { icon: <Bell size={22} />,           label: sw ? "Arifa" : "Alerts",          view: "notifications" },
-    { icon: <User size={22} />,           label: sw ? "Profaili" : "Profile",      view: "profile" },
+    { icon: <LayoutDashboard size={22} />, label: sw ? "Nyumbani" : "Home",       view: "dashboard" },
+    { icon: <Plus size={22} />,            label: sw ? "Omba" : "Apply",           view: "services" },
+    { icon: <FileText size={22} />,        label: sw ? "Maombi" : "Apps",          view: "applications" },
+    { icon: <CreditCard size={22} />,      label: sw ? "Malipo" : "Payments",      view: "my_payments" },
+    { icon: <User size={22} />,            label: sw ? "Profaili" : "Profile",     view: "profile" },
   ];
 
   const staffItems: NavItem[] = [
