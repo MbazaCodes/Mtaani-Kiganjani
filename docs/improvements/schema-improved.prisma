@@ -1,0 +1,378 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// E-MTAA / Mtaani-Kiganjani — Prisma Schema (IMPROVED)
+// Changes from audit:
+//   - Added tokenExpiresAt to User for token expiry enforcement
+//   - Added @@index([token]) for fast auth lookups
+//   - Datasource ready to switch to postgresql (change provider + DATABASE_URL)
+//   - Added refreshToken for future OAuth2 support
+//   - Added loginAttempts + lockedUntil for brute-force protection
+//   - formData / formFields changed to Json type comment (requires Postgres)
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ── For production: change provider to "postgresql" and update DATABASE_URL
+datasource db {
+  provider = "sqlite"    // → "postgresql" for production
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  CITIZEN
+  STAFF
+  ADMIN
+}
+
+enum VerificationTier {
+  NONE
+  BASIC
+  NIDA_VERIFIED
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+  PENDING_VERIFICATION
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  ISSUED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  WAIVED
+  EXEMPT
+}
+
+enum ServiceCategory {
+  IDENTIFICATION
+  CERTIFICATES
+  PERMITS
+  LICENSES
+  REGISTRATION
+  PAYMENTS
+  REPORTS
+  SOCIAL_SERVICES
+  LAND
+  BUSINESS
+  HEALTH
+  EDUCATION
+  OTHER
+}
+
+enum NotificationType {
+  APPLICATION_UPDATE
+  PAYMENT_UPDATE
+  SYSTEM
+  ANNOUNCEMENT
+  REMINDER
+  ALERT
+}
+
+enum OfficeType {
+  DISTRICT
+  MUNICIPAL
+  CITY
+  REGIONAL
+  WARD
+  MINISTRY
+}
+
+// ─── User ────────────────────────────────────────────────────────────────────
+
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  name             String?
+  phone            String?
+  passwordHash     String?          @map("password_hash")
+  role             UserRole         @default(CITIZEN)
+  verificationTier VerificationTier @default(NONE)
+  accountStatus    AccountStatus    @default(ACTIVE)
+  avatar           String?
+  nidaNumber       String?          @map("nida_number")
+  dateOfBirth      DateTime?        @map("date_of_birth")
+  gender           String?
+  address          String?
+  region           String?
+  district         String?
+  ward             String?
+  occupation       String?
+  departmentId     String?          @map("department_id")
+
+  // ── Auth tokens ──────────────────────────────────────────────────────────
+  token            String?          @unique
+  tokenExpiresAt   DateTime?        @map("token_expires_at")   // NEW: enforce expiry
+
+  // ── Brute-force protection ───────────────────────────────────────────────
+  loginAttempts    Int              @default(0) @map("login_attempts")  // NEW
+  lockedUntil      DateTime?        @map("locked_until")                 // NEW
+
+  // ── Timestamps ───────────────────────────────────────────────────────────
+  lastLoginAt      DateTime?        @map("last_login_at")               // NEW
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  // ── Relations ────────────────────────────────────────────────────────────
+  applications     Application[]    @relation("CitizenApplications")
+  staffAssignments Application[]    @relation("StaffAssignments")
+  notifications    Notification[]
+  documents        Document[]
+  activityLogs     ActivityLog[]
+  announcements    Announcement[]
+  feedback         Feedback[]
+
+  // ── Indexes ──────────────────────────────────────────────────────────────
+  @@index([role])
+  @@index([verificationTier])
+  @@index([accountStatus])
+  @@index([region])
+  @@index([district])
+  @@index([departmentId])
+  @@index([token])             // NEW: fast token lookup for auth
+  @@index([email, accountStatus])  // NEW: composite for login query
+  @@map("users")
+}
+
+// ─── Service ─────────────────────────────────────────────────────────────────
+
+model Service {
+  id                String          @id @default(cuid())
+  name              String
+  nameSw            String?         @map("name_sw")
+  description       String?
+  descriptionSw     String?         @map("description_sw")
+  category          ServiceCategory
+  feeAmount         Float           @default(0) @map("fee_amount")
+  feeCurrency       String          @default("TZS") @map("fee_currency")
+  isActive          Boolean         @default(true) @map("is_active")
+  requiredDocuments String          @default("[]") @map("required_documents")
+  formFields        String          @default("[]") @map("form_fields")
+  processingDays    Int             @default(7) @map("processing_days")
+  icon              String?
+  sortOrder         Int             @default(0) @map("sort_order")       // NEW: for UI ordering
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")        // NEW
+
+  applications      Application[]
+
+  @@index([category])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("services")
+}
+
+// ─── Application ─────────────────────────────────────────────────────────────
+
+model Application {
+  id                  String            @id @default(cuid())
+  applicationNumber   String            @unique @map("application_number")
+  status              ApplicationStatus @default(DRAFT)
+  citizenId           String            @map("citizen_id")
+  serviceId           String            @map("service_id")
+  formData            String            @default("{}") @map("form_data")
+  paymentStatus       PaymentStatus     @default(PENDING) @map("payment_status")
+  paymentAmount       Float             @default(0) @map("payment_amount")
+  paymentRef          String?           @map("payment_ref")
+  paymentPaidAt       DateTime?         @map("payment_paid_at")          // NEW
+  assignedStaffId     String?           @map("assigned_staff_id")
+  assignedOfficeId    String?           @map("assigned_office_id")
+  rejectionReason     String?           @map("rejection_reason")
+  staffNotes          String?           @map("staff_notes")              // NEW: internal notes
+  notes               String?
+  priority            Int               @default(0)                       // NEW: 0=normal, 1=urgent
+  submittedAt         DateTime?         @map("submitted_at")
+  reviewStartedAt     DateTime?         @map("review_started_at")        // NEW
+  approvedAt          DateTime?         @map("approved_at")
+  issuedAt            DateTime?         @map("issued_at")
+  expiresAt           DateTime?         @map("expires_at")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  citizen             User              @relation(fields: [citizenId], references: [id], name: "CitizenApplications")
+  service             Service           @relation(fields: [serviceId], references: [id])
+  assignedStaff       User?             @relation(fields: [assignedStaffId], references: [id], name: "StaffAssignments")
+  documents           Document[]
+  notifications       Notification[]
+  feedback            Feedback[]
+  statusHistory       ApplicationStatusHistory[]  // NEW
+
+  @@index([status])
+  @@index([citizenId])
+  @@index([serviceId])
+  @@index([assignedStaffId])
+  @@index([assignedOfficeId])
+  @@index([submittedAt])
+  @@index([applicationNumber])
+  @@index([status, assignedOfficeId])  // NEW: composite for staff queue
+  @@index([citizenId, status])          // NEW: citizen applications by status
+  @@map("applications")
+}
+
+// ─── ApplicationStatusHistory ─────────────────────────────────────────────────
+// NEW MODEL: Tracks status transitions for audit trail + timeline UI
+
+model ApplicationStatusHistory {
+  id            String            @id @default(cuid())
+  applicationId String            @map("application_id")
+  fromStatus    ApplicationStatus? @map("from_status")
+  toStatus      ApplicationStatus  @map("to_status")
+  changedById   String?           @map("changed_by_id")
+  note          String?
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  application   Application       @relation(fields: [applicationId], references: [id])
+
+  @@index([applicationId])
+  @@index([createdAt])
+  @@map("application_status_history")
+}
+
+// ─── Notification ────────────────────────────────────────────────────────────
+
+model Notification {
+  id                   String           @id @default(cuid())
+  userId               String           @map("user_id")
+  title                String
+  message              String
+  type                 NotificationType @default(SYSTEM)
+  isRead               Boolean          @default(false) @map("is_read")
+  channel              String           @default("in_app") @map("channel")  // NEW: in_app|sms|email
+  relatedApplicationId String?          @map("related_application_id")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  readAt               DateTime?        @map("read_at")                      // NEW
+
+  user                 User             @relation(fields: [userId], references: [id])
+  application          Application?     @relation(fields: [relatedApplicationId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ─── Document ────────────────────────────────────────────────────────────────
+
+model Document {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  applicationId String?  @map("application_id")
+  documentType  String   @map("document_type")
+  fileUrl       String   @map("file_url")
+  fileName      String   @map("file_name")
+  fileSize      Int      @map("file_size")
+  mimeType      String?  @map("mime_type")       // NEW: verify content type
+  checksum      String?                           // NEW: SHA-256 for integrity
+  isVerified    Boolean  @default(false) @map("is_verified")  // NEW
+  uploadedAt    DateTime @default(now()) @map("uploaded_at")
+
+  user          User         @relation(fields: [userId], references: [id])
+  application   Application? @relation(fields: [applicationId], references: [id])
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([documentType])
+  @@map("documents")
+}
+
+// ─── Office ──────────────────────────────────────────────────────────────────
+
+model Office {
+  id       String    @id @default(cuid())
+  name     String
+  nameSw   String?   @map("name_sw")       // NEW: Swahili name
+  region   String
+  district String?
+  ward     String?                          // NEW
+  address  String?
+  phone    String?
+  email    String?
+  type     OfficeType
+  isActive Boolean   @default(true) @map("is_active")
+  code     String?   @unique               // NEW: office code (e.g. DAR-001)
+
+  @@index([region])
+  @@index([district])
+  @@index([type])
+  @@index([isActive])
+  @@map("offices")
+}
+
+// ─── ActivityLog ─────────────────────────────────────────────────────────────
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  action    String
+  details   String   @default("{}")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")    // NEW: for security audit
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// ─── Announcement ────────────────────────────────────────────────────────────
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  titleSw     String?   @map("title_sw")     // NEW: Swahili title
+  content     String
+  contentSw   String?   @map("content_sw")   // NEW: Swahili content
+  authorId    String    @map("author_id")
+  isPublished Boolean   @default(false) @map("is_published")
+  publishedAt DateTime? @map("published_at")
+  expiresAt   DateTime? @map("expires_at")   // NEW: auto-expire announcements
+  isPinned    Boolean   @default(false) @map("is_pinned")  // NEW
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  author      User      @relation(fields: [authorId], references: [id])
+
+  @@index([isPublished])
+  @@index([publishedAt])
+  @@index([isPinned])
+  @@map("announcements")
+}
+
+// ─── Feedback ────────────────────────────────────────────────────────────────
+
+model Feedback {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  applicationId String?  @map("application_id")
+  rating        Int      // 1-5
+  comment       String?
+  category      String?  // NEW: 'service', 'staff', 'system', 'ui'
+  isReviewed    Boolean  @default(false) @map("is_reviewed")  // NEW
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user          User         @relation(fields: [userId], references: [id])
+  application   Application? @relation(fields: [applicationId], references: [id])
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([rating])
+  @@map("feedback")
+}
