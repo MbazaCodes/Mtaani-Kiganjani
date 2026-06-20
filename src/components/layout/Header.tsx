@@ -47,8 +47,8 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm transition-colors">
-      <div className="flex items-center gap-2 sm:gap-4">
+    <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-2 sm:px-6 py-2 sm:py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm transition-colors">
+      <div className="flex items-center gap-1 sm:gap-4">
         <button
           onClick={onMenuClick}
           className="p-2 -ml-2 hover:bg-stone-100 rounded-lg lg:hidden text-stone-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -59,18 +59,18 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Menu size={24} aria-hidden="true" />
         </button>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <img
             src={TANZANIA_LOGO_URL}
             alt="Coat of Arms of Tanzania"
-            className="w-8 h-8 sm:w-12 sm:h-12 object-contain"
+            className="w-6 h-6 sm:w-12 sm:h-12 object-contain"
             referrerPolicy="no-referrer"
           />
           <div className="h-8 sm:h-10 w-px bg-stone-200 dark:bg-stone-700 hidden sm:block" aria-hidden="true"></div>
           <div className="flex flex-col leading-none">
-            <span className="text-base sm:text-lg font-black tracking-tighter text-stone-900 dark:text-stone-100 flex items-center gap-1">
+            <span className="text-sm sm:text-lg font-black tracking-tighter text-stone-900 dark:text-stone-100 flex items-center gap-1">
               E-MTAA
-              <span className="text-[7px] sm:text-[9px] text-white px-1 py-0.5 rounded font-bold tracking-normal align-middle bg-primary ml-1">
+              <span className="text-[7px] sm:text-[9px] text-white px-1 py-0.5 rounded font-bold tracking-normal align-middle bg-primary ml-1 hidden sm:inline">
                 PORTAL
               </span>
             </span>
@@ -81,7 +81,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex items-center gap-1 sm:gap-4">
         {isStaffOrAdmin && (
           <div
             className="hidden sm:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1"
@@ -101,14 +101,14 @@ export function Header({ onMenuClick }: HeaderProps) {
           </div>
         )}
         <div
-          className="flex items-center gap-1 sm:gap-2 bg-stone-100 dark:bg-stone-800 rounded-full p-1 mr-1 sm:mr-2"
+          className="flex items-center gap-0.5 sm:gap-2 bg-stone-100 dark:bg-stone-800 rounded-full p-0.5 sm:p-1 mr-0.5 sm:mr-2"
           role="group"
           aria-label="Language selector"
         >
           <button
             onClick={() => setLang("sw")}
             className={cn(
-              "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
+              "px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
               lang === "sw"
                 ? "bg-white dark:bg-stone-700 shadow-sm text-primary"
                 : "text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700",
@@ -122,7 +122,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           <button
             onClick={() => setLang("en")}
             className={cn(
-              "px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
+              "px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
               lang === "en"
                 ? "bg-white dark:bg-stone-700 shadow-sm text-primary"
                 : "text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-700",
@@ -138,7 +138,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         {/* Dark / Light toggle */}
         <button
           onClick={toggleDark}
-          className="p-2 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 hover:text-stone-700 dark:hover:text-stone-200 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 mr-1 sm:mr-2"
+          className="p-1.5 sm:p-2 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 hover:text-stone-700 dark:hover:text-stone-200 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 mr-0 sm:mr-2"
           aria-label={isDark ? (lang === "sw" ? "Washa mwanga" : "Switch to light mode") : (lang === "sw" ? "Washa giza" : "Switch to dark mode")}
           title={isDark ? (lang === "sw" ? "Mwanga" : "Light mode") : (lang === "sw" ? "Giza" : "Dark mode")}
           type="button"
@@ -150,7 +150,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         {user && (
           <button
             onClick={() => setView("notifications")}
-            className="relative p-2 text-stone-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
+            className="relative p-1.5 sm:p-2 text-stone-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
             aria-label="Notifications"
             title={lang === "sw" ? "Arifa zako" : "Your notifications"}
             type="button"
