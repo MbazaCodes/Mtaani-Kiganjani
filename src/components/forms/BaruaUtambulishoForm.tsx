@@ -222,6 +222,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [signature, setSignature] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [purposeGroup, setPurposeGroup] = useState("");
   const errorsRef = useRef(errors);
   errorsRef.current = errors;
 
@@ -1181,74 +1182,55 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
               </p>
             </div>
 
-            {/* Categorized purpose pills */}
-            <div className="space-y-4">
-              {PURPOSE_CATEGORIES.map((group) => (
-                <div key={group.groupEn}>
-                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-2">
-                    {lang === "sw" ? group.groupSw : group.groupEn}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {group.items.map((item) => (
-                      <button
-                        key={item.value}
-                        type="button"
-                        onClick={() => { set("purpose", item.value); set("purpose_details", ""); clrErr("purpose"); }}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all text-left ${
-                          vals.purpose === item.value
-                            ? "bg-emerald-600 border-emerald-600 text-white"
-                            : "bg-white border-stone-200 text-stone-600 hover:border-emerald-300 hover:bg-emerald-50"
-                        }`}
-                      >
-                        {item.label.split("(")[0].trim()}
-                      </button>
+            {/* Dropdown 1: Category */}
+            <Field name="purpose_group" label={L("Mkundo wa Sababu", "Purpose Category")} required>
+              <select
+                value={purposeGroup}
+                onChange={(e) => {
+                  setPurposeGroup(e.target.value);
+                  set("purpose", e.target.value === "NYINGINEZO" ? "NYINGINEZO" : "");
+                  set("purpose_details", "");
+                  clrErr("purpose");
+                }}
+                className={inputCls("purpose_group")}
+              >
+                <option value="">{L("-- Chagua mkundo wa sababu --", "-- Select purpose category --")}</option>
+                {PURPOSE_CATEGORIES.map(g => (
+                  <option key={g.groupEn} value={g.groupEn}>
+                    {lang === "sw" ? g.groupSw : g.groupEn}
+                  </option>
+                ))}
+                <option value="NYINGINEZO">{L("Nyinginezo (Sababu Nyingine)", "Other Reason")}</option>
+              </select>
+            </Field>
+
+            {/* Dropdown 2: Sub-type — triggered by category */}
+            {purposeGroup && purposeGroup !== "NYINGINEZO" && (() => {
+              const group = PURPOSE_CATEGORIES.find(g => g.groupEn === purposeGroup);
+              if (!group) return null;
+              return (
+                <Field name="purpose" label={lang === "sw" ? group.groupSw : group.groupEn} required>
+                  <select
+                    value={vals.purpose}
+                    onChange={(e) => { set("purpose", e.target.value); clrErr("purpose"); }}
+                    className={inputCls("purpose")}
+                  >
+                    <option value="">{L("-- Chagua sababu --", "-- Select reason --")}</option>
+                    {group.items.map(item => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
                     ))}
-                  </div>
-                </div>
-              ))}
+                  </select>
+                </Field>
+              );
+            })()}
 
-              {/* Nyinginezo / Other */}
-              <div>
-                <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-2">
-                  {L("Sababu Nyingine", "Other Reason")}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => { set("purpose", "NYINGINEZO"); clrErr("purpose"); }}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
-                    vals.purpose === "NYINGINEZO"
-                      ? "bg-stone-800 border-stone-800 text-white"
-                      : "bg-white border-stone-200 text-stone-600 hover:border-stone-400"
-                  }`}
-                >
-                  {L("Nyinginezo — Eleza hapa chini", "Other — Describe below")}
-                </button>
-              </div>
-            </div>
-
-            {errors.purpose && (
-              <p className="text-red-500 text-xs flex items-center gap-1">
-                <AlertCircle size={11} /> {errors.purpose}
-              </p>
-            )}
-
-            {/* Selected purpose display */}
-            {vals.purpose && vals.purpose !== "NYINGINEZO" && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
-                <Check size={14} className="text-emerald-600 shrink-0" />
-                <div>
-                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">{L("Umechagua", "Selected")}</p>
-                  <p className="text-sm font-bold text-emerald-900">
-                    {PURPOSES.find((p) => p.value === vals.purpose)?.label}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {vals.purpose === "NYINGINEZO" && (
+            {/* Free text for Nyinginezo */}
+            {purposeGroup === "NYINGINEZO" && (
               <Field
                 name="purpose_details"
-                label={L("Eleza Sababu", "Describe the Purpose")}
+                label={L("Eleza Sababu Yako", "Describe Your Purpose")}
                 required
                 hint={L("Eleza kwa undani sababu ya maombi yako", "Describe your reason in detail")}
               >
@@ -1260,6 +1242,25 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                   className={`${inputCls("purpose_details")} resize-none`}
                 />
               </Field>
+            )}
+
+            {errors.purpose && (
+              <p className="text-red-500 text-xs flex items-center gap-1">
+                <AlertCircle size={11} /> {errors.purpose}
+              </p>
+            )}
+
+            {/* Confirmation chip */}
+            {vals.purpose && vals.purpose !== "NYINGINEZO" && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
+                <Check size={14} className="text-emerald-600 shrink-0" />
+                <div>
+                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">{L("Umechagua", "Selected")}</p>
+                  <p className="text-sm font-bold text-emerald-900">
+                    {PURPOSES.find((p) => p.value === vals.purpose)?.label}
+                  </p>
+                </div>
+              </div>
             )}
 
             <Field name="urgency" label={L("Kiwango cha Haraka", "Urgency Level")}>
