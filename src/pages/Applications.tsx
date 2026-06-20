@@ -427,7 +427,7 @@ export function Applications({
                     >
                       <div className="p-4 space-y-4">
                         {/* Progress */}
-                        <StatusTimeline status={app.status} lang={lang} />
+                        <StatusTimeline status={app.status} lang={lang} serviceName={app.service_name} />
 
                         {/* Staff feedback */}
                         {app.feedback && (
@@ -481,8 +481,8 @@ export function Applications({
                             </div>
                           )}
 
-                        {/* ── DOCUMENT DOWNLOADS (issued + paid) ── */}
-                        {app.status === "issued" && paid && (
+                        {/* ── DOCUMENT DOWNLOADS (issued + paid + Malipo paid) ── */}
+                        {(app.status === "issued" || (app.status === "paid" && (app.service_name?.toLowerCase().includes("malipo") || app.service_name?.toLowerCase().includes("michango")))) && (
                           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
                             <p className="text-xs font-black text-emerald-700 uppercase tracking-widest">
                               {L("Hati Rasmi Yako", "Your Official Document")}
