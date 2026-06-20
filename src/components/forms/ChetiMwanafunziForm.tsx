@@ -33,7 +33,7 @@ const generateStudentId = (region: string): string => {
   const year = new Date().getFullYear();
   const regionCode = REGION_CODES[region] || "TZ";
   const unique = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `ST-${year}-${regionCode}-${unique}`;
+  return `TSID-${year}-${unique}`;
 };
 
 const EDUCATION_LEVELS = [
@@ -70,6 +70,7 @@ interface FormVals {
   school_name: string; education_level: string; class_year: string;
   class_year_manual: string;
   student_number: string; admission_number: string;
+  blood_group: string; nationality: string; enrollment_date: string;
   school_district: string; school_region: string;
   generated_student_id: string;
   purpose: string; purpose_other: string;
@@ -100,6 +101,7 @@ export const ChetiMwanafunziForm: React.FC<FormProps> = ({ onSubmit, isLoading, 
     student_photo: "",
     school_name: "", education_level: "", class_year: "", class_year_manual: "",
     student_number: "", admission_number: "",
+    blood_group: "", nationality: "Mtanzania", enrollment_date: "",
     school_district: userProfile?.district || "", school_region: userProfile?.region || "",
     generated_student_id: "",
     purpose: "", purpose_other: "",
@@ -497,6 +499,23 @@ export const ChetiMwanafunziForm: React.FC<FormProps> = ({ onSubmit, isLoading, 
               {schoolRegions.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={lbl}>{L(lang, "Kikundi cha Damu", "Blood Group")}</label>
+              <select value={vals.blood_group} onChange={e => set("blood_group", e.target.value)} className={inputCls()}>
+                <option value="">{L(lang, "-- Chagua --", "-- Select --")}</option>
+                {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(bg => <option key={bg} value={bg}>{bg}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={lbl}>{L(lang, "Tarehe ya Kuandikishwa", "Enrollment Date")}</label>
+              <input type="date" value={vals.enrollment_date} onChange={e => set("enrollment_date", e.target.value)} className={inputCls()}/>
+            </div>
+          </div>
+          <div>
+            <label className={lbl}>{L(lang, "Uraia", "Nationality")}</label>
+            <input value={vals.nationality} onChange={e => set("nationality", e.target.value)} className={inputCls()} placeholder={L(lang, "Mfano: Mtanzania", "E.g. Tanzanian")}/>
+          </div>
           <div>
             <label className={lbl}>{L(lang, "Wilaya ya Shule", "School District")}</label>
             <select value={vals.school_district} onChange={e => set("school_district", e.target.value)} className={inputCls()} disabled={!vals.school_region}>
@@ -510,8 +529,19 @@ export const ChetiMwanafunziForm: React.FC<FormProps> = ({ onSubmit, isLoading, 
       {/* ── PARENT / GUARDIAN ── */}
       {step === "mzazi" && (
         <div className="space-y-4">
-          <div className={secHdr}><p className="font-bold text-emerald-800 text-sm">{L(lang, "MZAZI / MLEZI", "PARENT / GUARDIAN")}</p>
-            <p className="text-xs text-emerald-600 mt-1">{L(lang, "Inahitajika zaidi kwa wanafunzi wa msingi na sekondari", "Mainly required for primary and secondary students")}</p>
+          <div className={secHdr}>
+            <p className="font-bold text-emerald-800 text-sm">{L(lang, "MZAZI / MLEZI", "PARENT / GUARDIAN")}</p>
+            {(() => {
+              const age = vals.student_dob ? Math.floor((Date.now() - new Date(vals.student_dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 99;
+              return age < 18 ? (
+                <div className="flex items-center gap-2 mt-2 bg-red-50 border border-red-200 rounded-xl p-2">
+                  <AlertCircle size={13} className="text-red-500 shrink-0"/>
+                  <p className="text-xs text-red-700 font-bold">{L(lang, "Mwanafunzi ana umri chini ya miaka 18 — taarifa za mzazi/mlezi ni lazima", "Student is under 18 — parent/guardian details are mandatory")}</p>
+                </div>
+              ) : (
+                <p className="text-xs text-emerald-600 mt-1">{L(lang, "Inahitajika kwa wanafunzi chini ya miaka 18", "Required for students under 18")}</p>
+              );
+            })()}
           </div>
 
           {/* Toggle: use profile or different person */}
@@ -604,7 +634,7 @@ export const ChetiMwanafunziForm: React.FC<FormProps> = ({ onSubmit, isLoading, 
 
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-700">
             <p className="font-bold">{L(lang, "ℹ️ Kuhusu Namba ya ID", "ℹ️ About Student ID")}</p>
-            <p className="mt-1">{L(lang, `Mfumo wa namba: ST-MWAKA-MKOA-NAMBA (mfano: ST-2026-${REGION_CODES[vals.student_region] || "TZ"}-A12345). Namba hii ni ya maisha yote na itatumika kutambua mwanafunzi huyu daima.`, `Format: ST-YEAR-REGION-NUMBER (e.g. ST-2026-${REGION_CODES[vals.student_region] || "TZ"}-A12345). This ID is for lifetime recognition.`)}</p>
+            <p className="mt-1">{L(lang, `TSID ni mfumo wa kitaifa wa utambulisho wa wanafunzi. Namba (mfano: TSID-2026-A1B2C3) ni ya maisha yote na inatumika kuhusu elimu, NHIF, mikopo na huduma zote za serikali.`, `TSID is Tanzania's nationwide student ID system. The number (e.g. TSID-2026-A1B2C3) is for lifetime use across education, NHIF, loans and all government services.`)}</p>
           </div>
         </div>
       )}
