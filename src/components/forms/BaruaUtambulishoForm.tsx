@@ -205,6 +205,120 @@ interface FormValues {
   data_confirmed: boolean;
 }
 
+
+// ─── GovInstPicker — proper component so hooks aren't called inside .map() ───
+
+interface GovInstPickerProps {
+  lang: string;
+  instName: string;
+  onSelect: (name: string, fullName: string, location?: string) => void;
+  onNameChange: (v: string) => void;
+  nameError?: string;
+  inputCls: string;
+}
+
+const GovInstPicker: React.FC<GovInstPickerProps> = ({
+  lang, instName, onSelect, onNameChange, nameError, inputCls: nameCls,
+}) => {
+  const [govCatId, setGovCatId] = React.useState("");
+  const [govSearch, setGovSearch] = React.useState("");
+  const L = (sw: string, en: string) => lang === "sw" ? sw : en;
+
+  const selCat = CATEGORIES.find(c => c.id === govCatId);
+  const filteredInst = selCat
+    ? selCat.taasisi.filter(t =>
+        t.name.toLowerCase().includes(govSearch.toLowerCase()) ||
+        (t.nameFull || "").toLowerCase().includes(govSearch.toLowerCase())
+      )
+    : [];
+
+  return (
+    <div className="space-y-3">
+      {/* Category dropdown */}
+      <div>
+        <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1.5">
+          {L("Chagua Mkundo wa Serikali", "Select Government Category")}
+        </p>
+        <select
+          value={govCatId}
+          onChange={e => { setGovCatId(e.target.value); setGovSearch(""); }}
+          className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+        >
+          <option value="">{L("-- Chagua mkundo --", "-- Select category --")}</option>
+          {CATEGORIES.map(cat => (
+            <option key={cat.id} value={cat.id}>
+              {lang === "sw" ? cat.nameSw : cat.nameEn} ({cat.taasisi.length})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Institution list triggered by category */}
+      {selCat && (
+        <div className="space-y-2">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+            <input
+              type="text"
+              value={govSearch}
+              onChange={e => setGovSearch(e.target.value)}
+              placeholder={L("Tafuta taasisi...", "Search institution...")}
+              className="w-full pl-9 pr-3 py-2.5 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+          <div className="space-y-1.5 max-h-52 overflow-y-auto rounded-xl border border-stone-100 p-1">
+            {filteredInst.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => onSelect(t.name, t.nameFull || "", t.location)}
+                className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${
+                  instName === t.name
+                    ? "bg-emerald-50 border-emerald-400"
+                    : "bg-white border-transparent hover:border-stone-200 hover:bg-stone-50"
+                }`}
+              >
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${instName === t.name ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-600"}`}>
+                  {t.name.slice(0, 2)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-xs font-bold ${instName === t.name ? "text-emerald-800" : "text-stone-800"}`}>{t.name}</p>
+                  {t.nameFull && <p className="text-[9px] text-stone-400 truncate">{t.nameFull}</p>}
+                </div>
+                {instName === t.name && <Check size={13} className="text-emerald-600 shrink-0" />}
+              </button>
+            ))}
+            {filteredInst.length === 0 && govSearch && (
+              <p className="text-xs text-stone-400 text-center py-3">
+                {L("Hakuna taasisi inayofanana. Jaza jina mwenyewe chini.", "Not found. Enter manually below.")}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Manual name field — always visible */}
+      <div>
+        <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">
+          {L("Jina la Taasisi", "Institution Name")}
+          <span className="text-red-500 ml-0.5">*</span>
+        </label>
+        <input
+          value={instName}
+          onChange={e => onNameChange(e.target.value)}
+          placeholder={L("Chagua kutoka orodha au jaza mwenyewe", "Pick from list or enter manually")}
+          className={nameCls}
+        />
+        {nameError && (
+          <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <AlertCircle size={11} />{nameError}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export const BaruaUtambulishoForm: React.FC<FormProps> = ({
@@ -1448,105 +1562,21 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
                   </div>
 
                   {/* ── SERIKALI: Category → Institution picker ── */}
-                  {inst.inst_type === "serikali" && (() => {
-                    const [govCatId, setGovCatId] = React.useState("");
-                    const [govSearch, setGovSearch] = React.useState("");
-                    const selCat = CATEGORIES.find(c => c.id === govCatId);
-                    const filteredInst = selCat
-                      ? selCat.taasisi.filter(t =>
-                          t.name.toLowerCase().includes(govSearch.toLowerCase()) ||
-                          (t.nameFull || "").toLowerCase().includes(govSearch.toLowerCase())
-                        )
-                      : [];
-                    return (
-                      <div className="space-y-3">
-                        {/* Category grid */}
-                        <div>
-                          <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-2">
-                            {L("Chagua Mkundo wa Serikali", "Select Government Category")}
-                          </p>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {CATEGORIES.map(cat => (
-                              <button
-                                key={cat.id}
-                                type="button"
-                                onClick={() => { setGovCatId(cat.id); setGovSearch(""); setInst(i, "name", ""); setInst(i, "department", ""); clrErr(`inst_name_${i}`); }}
-                                className={`p-2.5 rounded-xl border-2 text-left transition-all ${
-                                  govCatId === cat.id
-                                    ? "bg-emerald-50 border-emerald-500"
-                                    : "bg-white border-stone-200 hover:border-stone-300"
-                                }`}
-                              >
-                                <p className={`text-xs font-bold leading-tight ${govCatId === cat.id ? "text-emerald-700" : "text-stone-700"}`}>
-                                  {lang === "sw" ? cat.nameSw : cat.nameEn}
-                                </p>
-                                <p className="text-[9px] text-stone-400 mt-0.5">{cat.taasisi.length} taasisi</p>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Institution list */}
-                        {selCat && (
-                          <div className="space-y-2">
-                            <div className="relative">
-                              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-                              <input
-                                type="text"
-                                value={govSearch}
-                                onChange={e => setGovSearch(e.target.value)}
-                                placeholder={L("Tafuta taasisi...", "Search institution...")}
-                                className="w-full pl-9 pr-3 py-2.5 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                              />
-                            </div>
-                            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                              {filteredInst.map(t => (
-                                <button
-                                  key={t.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setInst(i, "name", t.name);
-                                    setInst(i, "department", t.nameFull || "");
-                                    if (t.location) setInst(i, "address", t.location);
-                                    clrErr(`inst_name_${i}`);
-                                  }}
-                                  className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${
-                                    inst.name === t.name
-                                      ? "bg-emerald-50 border-emerald-400"
-                                      : "bg-white border-stone-100 hover:border-stone-300"
-                                  }`}
-                                >
-                                  <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${inst.name === t.name ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-600"}`}>
-                                    {t.name.slice(0, 2)}
-                                  </span>
-                                  <div className="min-w-0">
-                                    <p className={`text-xs font-bold ${inst.name === t.name ? "text-emerald-800" : "text-stone-800"}`}>{t.name}</p>
-                                    {t.nameFull && <p className="text-[9px] text-stone-400 truncate">{t.nameFull}</p>}
-                                  </div>
-                                  {inst.name === t.name && <Check size={13} className="text-emerald-600 ml-auto shrink-0" />}
-                                </button>
-                              ))}
-                              {filteredInst.length === 0 && govSearch && (
-                                <p className="text-xs text-stone-400 text-center py-3">
-                                  {L("Hakuna taasisi. Jaza jina mwenyewe:", "Not found. Enter manually:")}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Manual override */}
-                        <Field name={`inst_name_${i}`} label={L("Jina la Taasisi (au Jaza Mwenyewe)", "Institution Name (or Enter Manually)")} required>
-                          <input
-                            value={inst.name}
-                            onChange={e => { setInst(i, "name", e.target.value); clrErr(`inst_name_${i}`); }}
-                            placeholder={L("Jaza au badilisha jina la taasisi", "Fill or edit institution name")}
-                            className={inputCls(`inst_name_${i}`)}
-                          />
-                        </Field>
-                      </div>
-                    );
-                  })()}
+                  {inst.inst_type === "serikali" && (
+                    <GovInstPicker
+                      lang={lang}
+                      instName={inst.name}
+                      onSelect={(name, fullName, location) => {
+                        setInst(i, "name", name);
+                        setInst(i, "department", fullName);
+                        if (location) setInst(i, "address", location);
+                        clrErr(`inst_name_${i}`);
+                      }}
+                      onNameChange={(v) => { setInst(i, "name", v); clrErr(`inst_name_${i}`); }}
+                      nameError={errors[`inst_name_${i}`]}
+                      inputCls={inputCls(`inst_name_${i}`)}
+                    />
+                  )}
 
                   {/* ── PRIVATE: Sector → Company name ── */}
                   {inst.inst_type === "private" && (
