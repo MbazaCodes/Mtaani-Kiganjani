@@ -111,7 +111,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         setView={setView}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         <Sidebar currentView={currentView} setView={setView} />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 pb-24 sm:pb-6">
           <React.Suspense fallback={<div className="p-8 text-center text-stone-400">Loading...</div>}>
