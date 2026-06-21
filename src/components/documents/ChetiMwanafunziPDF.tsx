@@ -5,6 +5,7 @@
 import React from "react";
 import { Page, Text, View, Image, StyleSheet, Document } from "@react-pdf/renderer";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
+import { generateQRDataUrl } from "@/lib/qr";
 import { Application } from "@/lib/supabase";
 import { formatDate } from "./types";
 import { ReceiptPage } from "./ReceiptPage";
@@ -268,7 +269,13 @@ const Back:React.FC<{d:ReturnType<typeof gd>}> = ({d}) => (
 
 export const ChetiMwanafunziPDF:React.FC<Props> = ({application,lang="sw",qrDataUrl}) => {
   const d=gd(application);
-  const qr=qrDataUrl||undefined;
+  const [internalQr, setInternalQr] = React.useState<string|undefined>(undefined);
+  React.useEffect(() => {
+    if (!qrDataUrl) {
+      generateQRDataUrl(application, "CHE").then(url => setInternalQr(url || undefined));
+    }
+  }, [application, qrDataUrl]);
+  const qr = qrDataUrl || internalQr;
   const PW=CW+40, PH=CH+40;
   return (
     <Document>

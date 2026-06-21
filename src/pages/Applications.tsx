@@ -38,6 +38,7 @@ import { DocumentRenderer, DocumentPreview } from "../components/DocumentRendere
 import { cn } from "@/lib/utils";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
+import { generateQRDataUrl } from "@/lib/qr";
 import { RisitiMalipoPDF } from "@/components/documents/RisitiMalipoPDF";
 import { ChetiMwanafunziPDF } from "@/components/documents/ChetiMwanafunziPDF";
 import { ChetiMwanafunziLetterPDF } from "@/components/documents/ChetiMwanafunziLetterPDF";
@@ -485,7 +486,7 @@ export function Applications({
 
                         {/* ── TSID: 3 PDF downloads for Cheti cha Mwanafunzi ── */}
                         {app.status === "issued" && app.service_name?.toLowerCase().includes("mwanafunzi") && (() => {
-                          const useQr = qrDataUrl || undefined;
+                          const useQr = undefined; // QR generated async inside PDF component
                           return (
                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
                               <div className="flex items-center gap-2">

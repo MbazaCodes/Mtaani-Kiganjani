@@ -5,6 +5,7 @@
 import React from "react";
 import { Page, Text, View, Image, StyleSheet, Document } from "@react-pdf/renderer";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
+import { generateQRDataUrl } from "@/lib/qr";
 import { Application } from "@/lib/supabase";
 import { formatDate } from "./types";
 
@@ -139,6 +140,13 @@ const PURPOSE_FULL: Record<string, string> = {
 };
 
 export const ChetiMwanafunziLetterPDF: React.FC<Props> = ({ application, lang = "sw", qrDataUrl }) => {
+  const [internalQr, setInternalQr] = React.useState<string | undefined>(undefined);
+  React.useEffect(() => {
+    if (!qrDataUrl) {
+      generateQRDataUrl(application, "CHE").then(url => setInternalQr(url || undefined));
+    }
+  }, [application, qrDataUrl]);
+  const resolvedQr = qrDataUrl || internalQr;
   const fd = (application.form_data || {}) as Record<string, string>;
   const sw = lang !== "en";
 
@@ -276,9 +284,9 @@ export const ChetiMwanafunziLetterPDF: React.FC<Props> = ({ application, lang = 
         </View>
 
         {/* QR code */}
-        {qrDataUrl ? (
+        {resolvedQr ? (
           <View style={s.qrBox}>
-            <Image src={qrDataUrl} style={s.qrImg}/>
+            <Image src={resolvedQr} style={s.qrImg}/>
             <Text style={s.qrLabel}>Thibitisha / Verify</Text>
           </View>
         ) : null}
