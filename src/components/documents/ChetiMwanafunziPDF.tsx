@@ -7,7 +7,6 @@ import { Page, Text, View, Image, StyleSheet, Document } from "@react-pdf/render
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 import { Application } from "@/lib/supabase";
 import { formatDate } from "./types";
-import { ReceiptPage } from "./ReceiptPage";
 
 interface Props { application: Application; lang?: "sw" | "en"; qrDataUrl?: string; }
 
@@ -471,7 +470,6 @@ export const ChetiMwanafunziPDF: React.FC<Props> = ({ application, lang = "sw", 
         </View>
 
       </Page>
-      <ReceiptPage application={application} lang={lang} qrDataUrl={qrDataUrl}/>
     </Document>
   );
 };
