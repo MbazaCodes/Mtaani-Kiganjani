@@ -1,8 +1,6 @@
 /**
  * ChetiMwanafunziPDF — TSID Student ID Card
- * CR80: 85.60mm × 53.98mm
- * Scaled to fill A5 landscape page properly
- * Page 1 = Front, Page 2 = Back, Page 3 = Combined, Page 4 = Receipt
+ * Page 1: Front | Page 2: Back | Page 3: Combined A4 landscape | Page 4: Receipt
  */
 import React from "react";
 import { Page, Text, View, Image, StyleSheet, Document } from "@react-pdf/renderer";
@@ -13,393 +11,296 @@ import { ReceiptPage } from "./ReceiptPage";
 
 interface Props { application: Application; lang?: "sw" | "en"; qrDataUrl?: string; }
 
-// Scale card up to fill a landscape A5 page nicely
-// A5 landscape = 595 × 420pt. We render at 2× CR80 scale
-const CW = 486;  // 85.60mm × 2 × 2.835 ≈ 486pt
-const CH = 306;  // 53.98mm × 2 × 2.835 ≈ 306pt
+// Card rendered at ~2.5x CR80 so text is readable
+const CW = 530;
+const CH = 334;
 
-// Colors from spec
-const NAVY       = "#003366";
-const GREEN      = "#1B8F3A";
-const GREEN_L    = "#1A7A3A";
-const YELLOW     = "#F5C400";
-const RED        = "#D32F2F";
-const WHITE      = "#FFFFFF";
-const TEXT1      = "#111111";
-const TEXT2      = "#444444";
-const TEXT3      = "#777777";
-const BG_LGRAY   = "#F2F4F8";
-const BORDER_COL = "#E0E0E0";
+const NAVY  = "#003366";
+const GREEN = "#1A7A3A";
+const YELLOW= "#F5C400";
+const RED   = "#D32F2F";
+const WHITE = "#FFFFFF";
+const T1    = "#111111";
+const T2    = "#444444";
+const T3    = "#666666";
+const BGRAY = "#F0F4F8";
+const BORD  = "#DDDDDD";
 
 const s = StyleSheet.create({
-  // Single-card pages
   pageSingle: {
-    backgroundColor: "#c8d0d8",
-    padding: 0,
+    backgroundColor: "#b0bcc8",
     fontFamily: "Helvetica",
     alignItems: "center",
     justifyContent: "center",
+    padding: 20,
   },
-  // Combined page (landscape A4)
   pageCombined: {
-    backgroundColor: "#c8d0d8",
-    padding: 24,
+    backgroundColor: "#b0bcc8",
     fontFamily: "Helvetica",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 20,
+    padding: 20,
+    gap: 16,
   },
-  labelWrap: { alignItems: "center", marginBottom: 8 },
-  cardLabel: { fontSize: 11, fontWeight: "bold", color: "#4b5563", letterSpacing: 2 },
+  lbl: { fontSize: 10, fontWeight: "bold", color: "#4a5568", letterSpacing: 2, marginBottom: 6, textAlign: "center" },
 
-  // ═══ FRONT ═══
-  fCard: {
-    width: CW, height: CH,
-    backgroundColor: WHITE,
-    borderRadius: 10,
-    overflow: "hidden",
-    borderWidth: 2, borderColor: RED,
-  },
+  // ══ FRONT ══
+  fc: { width: CW, backgroundColor: WHITE, borderRadius: 8, overflow: "hidden", borderWidth: 2, borderColor: RED },
 
-  // Top strip
-  fTop: {
-    backgroundColor: NAVY,
-    flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 12, paddingVertical: 8, gap: 8,
-    height: 52,
-  },
-  fLogo: { width: 36, height: 36 },
-  fBrand: { flex: 1 },
-  fTsidWord: { fontSize: 22, fontWeight: "bold", color: WHITE, lineHeight: 1 },
-  fTsidSub:  { fontSize: 7, color: "#9ab8d8", letterSpacing: 0.6, lineHeight: 1.5 },
-  fFlag: { width: 40, height: 28, borderRadius: 3, overflow: "hidden" },
-  fFlagG: { flex: 1, backgroundColor: "#1eb53a" },
-  fFlagY: { flex: 1, backgroundColor: "#fcd116" },
-  fFlagB: { flex: 1, backgroundColor: "#00a3dd" },
+  // Header strip
+  fh: { backgroundColor: NAVY, flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 9, gap: 10, height: 58 },
+  fhLogo: { width: 38, height: 38 },
+  fhBrand: { flex: 1 },
+  fhTsid: { fontSize: 24, fontWeight: "bold", color: WHITE, lineHeight: 1 },
+  fhSub:  { fontSize: 7, color: "#90b8d8", letterSpacing: 0.6, lineHeight: 1.6 },
+  fhFlag: { width: 38, height: 26, borderRadius: 3, overflow: "hidden" },
+  fhFg: { flex: 1, backgroundColor: "#1eb53a" },
+  fhFy: { flex: 1, backgroundColor: "#fcd116" },
+  fhFb: { flex: 1, backgroundColor: "#00a3dd" },
 
-  // Body: 32% left | 68% right
-  fBody: { flexDirection: "row", flex: 1 },
+  // Body: LEFT photo col | RIGHT info col
+  fb: { flexDirection: "row", height: CH - 58 - 48 }, // subtract header and footer heights
 
-  // LEFT column
-  fLeft: {
-    width: CW * 0.33,
-    borderRightWidth: 1, borderRightColor: BORDER_COL, borderRightStyle: "dashed",
-    backgroundColor: BG_LGRAY,
-    paddingTop: 10, paddingHorizontal: 10,
+  // LEFT: photo + school
+  fl: {
+    width: 160,
+    backgroundColor: BGRAY,
+    borderRightWidth: 1, borderRightColor: BORD, borderRightStyle: "dashed",
+    paddingTop: 12, paddingHorizontal: 12,
     alignItems: "center",
   },
-  fPhotoBox: {
-    width: 80, height: 100,
-    borderWidth: 2, borderColor: GREEN_L,
+  flPhoto: {
+    width: 108, height: 136,
+    borderWidth: 2, borderColor: GREEN,
     borderRadius: 4, overflow: "hidden",
-    backgroundColor: "#D0DDD5",
+    backgroundColor: "#c8d8c8",
     alignItems: "center", justifyContent: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  fPhotoImg: { width: 80, height: 100, objectFit: "cover" },
-  fPhotoTxt: { fontSize: 8, color: "#888", textAlign: "center" },
-  fTsidLbl:  { fontSize: 6.5, fontWeight: "bold", color: TEXT3, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 2 },
-  fTsidNum:  {
-    fontSize: 9, fontWeight: "bold", color: RED,
-    fontFamily: "Courier", letterSpacing: 0.3,
-    borderBottomWidth: 1, borderBottomColor: RED,
-    paddingBottom: 3, marginBottom: 5, textAlign: "center",
-  },
-  fNameLbl: { fontSize: 6, fontWeight: "bold", color: TEXT3, textTransform: "uppercase", marginBottom: 2 },
-  fNameVal: { fontSize: 9, fontWeight: "bold", color: TEXT1, textAlign: "center", marginBottom: 6, lineHeight: 1.2 },
-  // 3-col mini grid
-  fMiniRow: { flexDirection: "row", width: "100%", gap: 2 },
-  fMiniCell: { flex: 1, alignItems: "center" },
-  fMiniLbl: { fontSize: 5, fontWeight: "bold", color: TEXT3, textTransform: "uppercase", textAlign: "center" },
-  fMiniVal: { fontSize: 6.5, fontWeight: "bold", color: TEXT1, textAlign: "center", lineHeight: 1.3 },
+  flPhotoImg: { width: 108, height: 136, objectFit: "cover" },
+  flPhotoTxt: { fontSize: 9, color: "#888", textAlign: "center" },
 
-  // RIGHT column
-  fRight: {
-    flex: 1,
-    backgroundColor: WHITE,
-    paddingTop: 10, paddingHorizontal: 10, paddingBottom: 6,
+  // School under photo
+  flSchoolIcon: {
+    width: 28, height: 28, backgroundColor: NAVY,
+    borderRadius: 4, alignItems: "center", justifyContent: "center", marginBottom: 4,
   },
-  // School badge
-  fSchoolBadge: {
-    backgroundColor: GREEN_L,
-    borderRadius: 4, padding: 7, marginBottom: 8,
-    flexDirection: "row", alignItems: "flex-start", gap: 7,
-  },
-  fSchoolIcon: {
-    width: 26, height: 26, backgroundColor: "#0F5020",
-    borderRadius: 4, alignItems: "center", justifyContent: "center",
-    flexShrink: 0,
-  },
-  fSchoolIconTxt: { fontSize: 14, color: WHITE },
-  fSchoolInfo: { flex: 1 },
-  fSchoolName: { fontSize: 8.5, fontWeight: "bold", color: WHITE, lineHeight: 1.35 },
-  fSchoolMeta: { fontSize: 6.5, color: "#aee8be", marginTop: 2 },
-  // Student info grid
-  fInfoGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 6 },
-  fInfoCell: { width: "50%", marginBottom: 5, paddingRight: 4 },
-  fInfoLbl: { fontSize: 5.5, fontWeight: "bold", color: TEXT3, textTransform: "uppercase", letterSpacing: 0.3 },
-  fInfoVal: { fontSize: 8, fontWeight: "bold", color: TEXT1, lineHeight: 1.2 },
-  fDivider: { height: 0.75, backgroundColor: BORDER_COL, marginVertical: 5 },
-  // Guardian
-  fGuardTitle: { fontSize: 6.5, fontWeight: "bold", color: GREEN_L, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 },
-  fGuardGrid:  { flexDirection: "row", flexWrap: "wrap" },
-  fGuardCell:  { width: "50%", marginBottom: 4, paddingRight: 4 },
-  fGuardLbl:   { fontSize: 5, fontWeight: "bold", color: TEXT3, textTransform: "uppercase", letterSpacing: 0.3 },
-  fGuardVal:   { fontSize: 7, fontWeight: "bold", color: TEXT1, lineHeight: 1.2 },
-  // Important
-  fImportBox: {
-    backgroundColor: "#FFF8E1",
-    borderLeftWidth: 3, borderLeftColor: YELLOW,
-    padding: 5, marginTop: 4,
-  },
-  fImportTitle: { fontSize: 6, fontWeight: "bold", color: "#7a5800", marginBottom: 2 },
-  fImportItem:  { fontSize: 5.5, color: TEXT2, marginBottom: 1.5, lineHeight: 1.4 },
+  flSchoolIconTxt: { fontSize: 14, color: WHITE },
+  flSchoolName: { fontSize: 8, fontWeight: "bold", color: NAVY, textAlign: "center", lineHeight: 1.3, marginBottom: 2 },
+  flSchoolMeta: { fontSize: 7, color: T3, textAlign: "center", lineHeight: 1.4 },
 
-  // Bottom bar
-  fBottomBar: {
-    backgroundColor: "rgba(26,122,58,0.05)",
+  // RIGHT: TSID + fields
+  fr: { flex: 1, paddingTop: 12, paddingHorizontal: 12, paddingBottom: 8 },
+
+  // TSID number at top
+  frTsidLbl: { fontSize: 7, fontWeight: "bold", color: T3, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 2 },
+  frTsidNum: {
+    fontSize: 14, fontWeight: "bold", color: RED,
+    fontFamily: "Courier", letterSpacing: 0.5,
+    borderBottomWidth: 1.5, borderBottomColor: RED,
+    paddingBottom: 4, marginBottom: 8,
+  },
+
+  // Field rows
+  frField: { marginBottom: 7 },
+  frLbl:   { fontSize: 6.5, fontWeight: "bold", color: T3, textTransform: "uppercase", letterSpacing: 0.5 },
+  frVal:   { fontSize: 11, fontWeight: "bold", color: T1, lineHeight: 1.2 },
+
+  // Divider
+  frDiv:   { height: 0.75, backgroundColor: BORD, marginVertical: 8 },
+
+  // Guardian section
+  frGTitle:{ fontSize: 7, fontWeight: "bold", color: GREEN, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 5 },
+  frGGrid: { flexDirection: "row", flexWrap: "wrap" },
+  frGCell: { width: "50%", marginBottom: 5, paddingRight: 4 },
+  frGLbl:  { fontSize: 6, fontWeight: "bold", color: T3, textTransform: "uppercase", letterSpacing: 0.3 },
+  frGVal:  { fontSize: 8.5, fontWeight: "bold", color: T1 },
+
+  // Important box
+  frImpBox: { backgroundColor: "#FFF8E1", borderLeftWidth: 3, borderLeftColor: YELLOW, padding: 6, marginTop: 6 },
+  frImpTitle: { fontSize: 7, fontWeight: "bold", color: "#7a5800", marginBottom: 3 },
+  frImpItem:  { fontSize: 6, color: T2, marginBottom: 2, lineHeight: 1.4 },
+
+  // QR in right col bottom
+  frQrBlock: { alignItems: "flex-end", marginTop: 4 },
+  frQrImg:   { width: 48, height: 48 },
+  frQrTxt:   { fontSize: 5.5, color: T3, textAlign: "right", marginTop: 2 },
+
+  // FOOTER BAR
+  ff: {
+    backgroundColor: "rgba(26,122,58,0.06)",
     borderTopWidth: 3, borderTopColor: YELLOW,
     flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 10, paddingVertical: 5, gap: 8,
-    height: 44,
+    paddingHorizontal: 12, paddingVertical: 6, gap: 10, height: 48,
   },
-  fQrBox:  { alignItems: "center" },
-  fQrImg:  { width: 30, height: 30 },
-  fQrTxt:  { fontSize: 4.5, color: TEXT3, textAlign: "center", marginTop: 1 },
-  fVerify: { flex: 1 },
-  fVerifyLbl: { fontSize: 5.5, fontWeight: "bold", color: TEXT3 },
-  fVerifyUrl: { fontSize: 7, fontWeight: "bold", color: GREEN_L },
-  fIssued: {},
-  fIssuedLbl: { fontSize: 5.5, fontWeight: "bold", color: TEXT3 },
-  fIssuedVal: { fontSize: 6.5, fontWeight: "bold", color: TEXT1 },
-  fLifelong: {
-    backgroundColor: RED, borderRadius: 2,
-    paddingHorizontal: 5, paddingVertical: 3,
-  },
-  fLifelongTxt: { fontSize: 5, fontWeight: "bold", color: WHITE, letterSpacing: 0.3, lineHeight: 1.5 },
+  ffVerify: { flex: 1 },
+  ffVerifyLbl: { fontSize: 6, fontWeight: "bold", color: T3 },
+  ffVerifyUrl: { fontSize: 8.5, fontWeight: "bold", color: GREEN },
+  ffIssued: {},
+  ffIssuedLbl: { fontSize: 6, fontWeight: "bold", color: T3 },
+  ffIssuedVal: { fontSize: 8, fontWeight: "bold", color: T1 },
+  ffBadge: { backgroundColor: RED, borderRadius: 3, paddingHorizontal: 6, paddingVertical: 4 },
+  ffBadgeTxt: { fontSize: 6, fontWeight: "bold", color: WHITE, letterSpacing: 0.3, lineHeight: 1.6 },
 
-  // ═══ BACK ═══
-  bCard: {
-    width: CW, height: CH,
-    backgroundColor: WHITE,
-    borderRadius: 10, overflow: "hidden",
-    borderWidth: 2, borderColor: RED,
-  },
-  bHeader: {
-    backgroundColor: NAVY,
-    paddingHorizontal: 16, paddingVertical: 12, height: 52,
-    justifyContent: "center",
-  },
-  bHeaderNum: { fontSize: 18, fontWeight: "bold", color: WHITE, fontFamily: "Courier", letterSpacing: 1 },
+  // Footer icons
+  ffIcons: { backgroundColor: NAVY, flexDirection: "row", justifyContent: "space-around", paddingVertical: 7 },
+  ffIcon: { alignItems: "center", gap: 3 },
+  ffIconCircle: { width: 22, height: 22, borderWidth: 1.5, borderColor: "#5a7fa0", borderRadius: 11, alignItems: "center", justifyContent: "center" },
+  ffIconTxt: { fontSize: 9, color: WHITE },
+  ffIconLabel: { fontSize: 6, color: "#8ab4d4", fontWeight: "bold", textAlign: "center", letterSpacing: 0.3, lineHeight: 1.4 },
+  ffColorBar: { flexDirection: "row", height: 6 },
+  ffBarG: { flex: 1, backgroundColor: "#1eb53a" },
+  ffBarY: { flex: 1, backgroundColor: "#fcd116" },
+  ffBarB: { flex: 1, backgroundColor: "#00a3dd" },
 
-  bBody: {
-    flex: 1, flexDirection: "row",
-    paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6, gap: 10,
-  },
-  bLeft: { flex: 1 },
+  // ══ BACK ══
+  bc: { width: CW, backgroundColor: WHITE, borderRadius: 8, overflow: "hidden", borderWidth: 2, borderColor: RED },
+  bh: { backgroundColor: NAVY, paddingHorizontal: 16, paddingVertical: 12, height: 58, justifyContent: "center" },
+  bhNum: { fontSize: 20, fontWeight: "bold", color: WHITE, fontFamily: "Courier", letterSpacing: 1 },
+
+  // Back body
+  bb: { flex: 1, flexDirection: "row", paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8, gap: 12 },
+  bbl: { flex: 1 },
   bSecTitle: {
-    fontSize: 8, fontWeight: "bold", color: GREEN_L,
+    fontSize: 8.5, fontWeight: "bold", color: GREEN,
     textTransform: "uppercase", letterSpacing: 0.8,
-    borderBottomWidth: 1, borderBottomColor: GREEN_L,
-    paddingBottom: 3, marginBottom: 6,
+    borderBottomWidth: 1, borderBottomColor: GREEN,
+    paddingBottom: 3, marginBottom: 7,
   },
-  bRow: { flexDirection: "row", marginBottom: 5 },
-  bLbl: { width: 90, fontSize: 6, fontWeight: "bold", color: TEXT3, textTransform: "uppercase", letterSpacing: 0.3 },
-  bVal: { flex: 1, fontSize: 8, fontWeight: "bold", color: TEXT1 },
-  bDivider: { height: 0.75, backgroundColor: "#c0ced8", marginVertical: 6 },
-  bImportBox: {
-    borderWidth: 0.75, borderColor: "#a0cca0",
-    backgroundColor: "#f4fff4", borderRadius: 3,
-    padding: 6, marginTop: 4,
-  },
-  bImportTitle: { fontSize: 6.5, fontWeight: "bold", color: GREEN_L, marginBottom: 3 },
-  bImportItem:  { fontSize: 5.5, color: TEXT2, marginBottom: 2, lineHeight: 1.5 },
+  bRow: { flexDirection: "row", marginBottom: 5.5 },
+  bLbl: { width: 100, fontSize: 7, fontWeight: "bold", color: T3, textTransform: "uppercase", letterSpacing: 0.3 },
+  bVal: { flex: 1, fontSize: 9, fontWeight: "bold", color: T1 },
+  bDiv: { height: 0.75, backgroundColor: "#c8d8e8", marginVertical: 7 },
+  bImpBox: { borderWidth: 0.75, borderColor: "#90c890", backgroundColor: "#f4fff4", borderRadius: 3, padding: 7, marginTop: 5 },
+  bImpTitle: { fontSize: 7.5, fontWeight: "bold", color: GREEN, marginBottom: 4 },
+  bImpItem:  { fontSize: 6.5, color: T2, marginBottom: 2.5, lineHeight: 1.5 },
 
   // Stamp
-  bRight: { width: 80, alignItems: "center", paddingTop: 8 },
-  bStamp: {
-    width: 70, height: 70,
-    borderRadius: 35,
-    borderWidth: 2, borderColor: "#2a4a7a", borderStyle: "dashed",
-    alignItems: "center", justifyContent: "center",
-  },
-  bStampSm:  { fontSize: 5, color: "#2a4a7a", textAlign: "center", letterSpacing: 0.3, lineHeight: 1.5 },
-  bStampBig: { fontSize: 14, fontWeight: "bold", color: "#2a4a7a" },
+  bbr: { width: 90, alignItems: "center", paddingTop: 10 },
+  bStamp: { width: 78, height: 78, borderRadius: 39, borderWidth: 2, borderColor: "#1a3a6a", borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  bStampSm: { fontSize: 5.5, color: "#1a3a6a", textAlign: "center", letterSpacing: 0.3, lineHeight: 1.5 },
+  bStampBig: { fontSize: 16, fontWeight: "bold", color: "#1a3a6a" },
 
   // Back footers
-  bFootTop: {
-    flexDirection: "row", justifyContent: "space-between",
-    paddingHorizontal: 14, paddingVertical: 6,
-    borderTopWidth: 0.75, borderTopColor: BORDER_COL,
-  },
-  bFootPortalLbl: { fontSize: 6.5, fontWeight: "bold", color: TEXT3, letterSpacing: 0.5 },
-  bFootPortalVal: { fontSize: 8, fontWeight: "bold", color: GREEN_L },
-  bFootIssuedLbl: { fontSize: 6.5, fontWeight: "bold", color: TEXT3, textAlign: "right" },
-  bFootIssuedVal: { fontSize: 8, fontWeight: "bold", color: TEXT1, textAlign: "right" },
-
-  bFootBottom: {
-    backgroundColor: NAVY, flexDirection: "row",
-    paddingHorizontal: 14, paddingVertical: 7,
-    justifyContent: "space-between", alignItems: "center",
-    height: 36,
-  },
-  bFootSecure:     { fontSize: 5.5, color: "#8ab4d8", flex: 1, lineHeight: 1.6 },
-  bFootCountrySub: { fontSize: 6, color: "#8ab4d8", textAlign: "right" },
-  bFootCountryMain:{ fontSize: 7.5, fontWeight: "bold", color: WHITE, textAlign: "right" },
+  bft: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 7, borderTopWidth: 0.75, borderTopColor: BORD },
+  bftPLbl: { fontSize: 7, fontWeight: "bold", color: T3 },
+  bftPVal: { fontSize: 9, fontWeight: "bold", color: GREEN },
+  bftILbl: { fontSize: 7, fontWeight: "bold", color: T3, textAlign: "right" },
+  bftIVal: { fontSize: 9, fontWeight: "bold", color: T1, textAlign: "right" },
+  bfb: { backgroundColor: NAVY, flexDirection: "row", paddingHorizontal: 14, paddingVertical: 8, justifyContent: "space-between", alignItems: "center", height: 40 },
+  bfbSec: { fontSize: 6.5, color: "#8ab4d8", flex: 1, lineHeight: 1.7 },
+  bfbCtryS: { fontSize: 7, color: "#8ab4d8", textAlign: "right" },
+  bfbCtryM: { fontSize: 9, fontWeight: "bold", color: WHITE, textAlign: "right" },
 });
 
 const EDU: Record<string, string> = {
-  CHEKECHEA: "PRE-PRIMARY", MSINGI: "PRIMARY SCHOOL",
-  SEKONDARI_O: "SECONDARY (O-LEVEL)", SEKONDARI_A: "SECONDARY (A-LEVEL)",
-  STASHAHADA: "DIPLOMA", SHAHADA: "UNIVERSITY DEGREE", UZAMILI: "MASTERS/PHD",
+  CHEKECHEA:"PRE-PRIMARY",MSINGI:"PRIMARY SCHOOL",SEKONDARI_O:"SECONDARY (O-LEVEL)",
+  SEKONDARI_A:"SECONDARY (A-LEVEL)",STASHAHADA:"DIPLOMA",SHAHADA:"UNIVERSITY DEGREE",UZAMILI:"MASTERS/PHD",
 };
 
-function getData(app: Application) {
-  const fd = (app.form_data || {}) as Record<string, string>;
+function gd(app: Application) {
+  const fd = (app.form_data||{}) as Record<string,string>;
   return {
-    studentName: (fd.student_name || `${fd.student_first || ""} ${fd.student_last || ""}`.trim()).toUpperCase(),
-    tsid:        fd.generated_student_id || app.application_number,
-    photo:       fd.student_photo || null,
-    dob:         fd.student_dob ? new Date(fd.student_dob).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "—",
-    gender:      fd.student_sex === "M" ? "MALE" : fd.student_sex === "F" ? "FEMALE" : "—",
-    nationality: (fd.nationality || "TANZANIAN").toUpperCase(),
-    school:      (fd.school_name || "—").toUpperCase(),
-    admNo:       fd.admission_number || fd.student_number || "",
-    region:      (fd.student_region || app.region || "—").toUpperCase(),
-    district:    (fd.student_district || app.district || "—").toUpperCase(),
-    level:       EDU[fd.education_level] || (fd.education_level || "—").toUpperCase(),
-    classYear:   fd.class_year === "OTHER" ? (fd.class_year_manual || "—") : (fd.class_year || "—"),
-    bloodGroup:  fd.blood_group || "—",
-    enrollDate:  fd.enrollment_date ? new Date(fd.enrollment_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : formatDate(app.created_at).toUpperCase(),
-    parentName:  (fd.parent_name || "—").toUpperCase(),
-    parentNida:  fd.parent_nida ? fd.parent_nida.replace(/^(\d{4})\d+(\d{3})$/, "$1***$2") : "—",
-    parentPhone: fd.parent_phone || "—",
-    parentRel:   fd.parent_relationship === "MAMA" ? "MOTHER" : fd.parent_relationship === "BABA" ? "FATHER" : (fd.parent_relationship || "GUARDIAN").toUpperCase(),
-    issueDate:   formatDate(app.created_at).toUpperCase(),
+    name:    (fd.student_name||`${fd.student_first||""} ${fd.student_last||""}`.trim()).toUpperCase(),
+    tsid:    fd.generated_student_id||app.application_number,
+    photo:   fd.student_photo||null,
+    dob:     fd.student_dob ? new Date(fd.student_dob).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase() : "—",
+    sex:     fd.student_sex==="M"?"MALE":fd.student_sex==="F"?"FEMALE":"—",
+    nat:     (fd.nationality||"TANZANIAN").toUpperCase(),
+    school:  (fd.school_name||"—").toUpperCase(),
+    admNo:   fd.admission_number||fd.student_number||"",
+    region:  (fd.student_region||app.region||"—").toUpperCase(),
+    district:(fd.student_district||app.district||"—").toUpperCase(),
+    level:   EDU[fd.education_level]||(fd.education_level||"—").toUpperCase(),
+    cls:     fd.class_year==="OTHER"?(fd.class_year_manual||"—"):(fd.class_year||"—"),
+    blood:   fd.blood_group||"—",
+    enroll:  fd.enrollment_date ? new Date(fd.enrollment_date).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase() : formatDate(app.created_at).toUpperCase(),
+    pName:   (fd.parent_name||"—").toUpperCase(),
+    pNida:   fd.parent_nida ? fd.parent_nida.replace(/^(\d{4})\d+(\d{3})$/,"$1***$2") : "—",
+    pPhone:  fd.parent_phone||"—",
+    pRel:    fd.parent_relationship==="MAMA"?"MOTHER":fd.parent_relationship==="BABA"?"FATHER":(fd.parent_relationship||"GUARDIAN").toUpperCase(),
+    issued:  formatDate(app.created_at).toUpperCase(),
   };
 }
 
-const Front: React.FC<{ d: ReturnType<typeof getData>; qr?: string }> = ({ d, qr }) => (
-  <View style={s.fCard}>
-    {/* Top strip */}
-    <View style={s.fTop}>
-      {TANZANIA_LOGO_BASE64 ? <Image src={TANZANIA_LOGO_BASE64} style={s.fLogo}/> : null}
-      <View style={s.fBrand}>
-        <Text style={s.fTsidWord}>TSID</Text>
-        <Text style={s.fTsidSub}>TANZANIA STUDENT IDENTIFICATION SYSTEM</Text>
-      </View>
-      <View style={s.fFlag}>
-        <View style={s.fFlagG}/><View style={s.fFlagY}/><View style={s.fFlagB}/>
-      </View>
+const F: React.FC<{d:ReturnType<typeof gd>;qr?:string}> = ({d,qr}) => (
+  <View style={s.fc}>
+    {/* Header */}
+    <View style={s.fh}>
+      {TANZANIA_LOGO_BASE64?<Image src={TANZANIA_LOGO_BASE64} style={s.fhLogo}/>:null}
+      <View style={s.fhBrand}><Text style={s.fhTsid}>TSID</Text><Text style={s.fhSub}>TANZANIA STUDENT IDENTIFICATION SYSTEM</Text></View>
+      <View style={s.fhFlag}><View style={s.fhFg}/><View style={s.fhFy}/><View style={s.fhFb}/></View>
     </View>
 
     {/* Body */}
-    <View style={s.fBody}>
-      {/* LEFT */}
-      <View style={s.fLeft}>
-        <View style={s.fPhotoBox}>
-          {d.photo ? <Image src={d.photo} style={s.fPhotoImg}/> : <Text style={s.fPhotoTxt}>{"[PHOTO]"}</Text>}
+    <View style={s.fb}>
+      {/* LEFT: photo + school */}
+      <View style={s.fl}>
+        <View style={s.flPhoto}>
+          {d.photo?<Image src={d.photo} style={s.flPhotoImg}/>:<Text style={s.flPhotoTxt}>{"[PHOTO]"}</Text>}
         </View>
-        <Text style={s.fTsidLbl}>TSID NUMBER</Text>
-        <Text style={s.fTsidNum}>{d.tsid}</Text>
-        <Text style={s.fNameLbl}>FULL NAME</Text>
-        <Text style={s.fNameVal}>{d.studentName}</Text>
-        <View style={s.fMiniRow}>
-          {[["DOB", d.dob], ["GENDER", d.gender], ["NATIONALITY", d.nationality]].map(([l, v]) => (
-            <View key={l} style={s.fMiniCell}>
-              <Text style={s.fMiniLbl}>{l}</Text>
-              <Text style={s.fMiniVal}>{v}</Text>
-            </View>
-          ))}
-        </View>
+        <View style={s.flSchoolIcon}><Text style={s.flSchoolIconTxt}>📚</Text></View>
+        <Text style={s.flSchoolName} numberOfLines={3}>{d.school}</Text>
+        {d.admNo?<Text style={s.flSchoolMeta}>ID: {d.admNo}</Text>:null}
+        <Text style={s.flSchoolMeta}>REGION: {d.region}</Text>
+        <Text style={s.flSchoolMeta}>DISTRICT: {d.district}</Text>
       </View>
 
-      {/* RIGHT */}
-      <View style={s.fRight}>
-        {/* School badge */}
-        <View style={s.fSchoolBadge}>
-          <View style={s.fSchoolIcon}><Text style={s.fSchoolIconTxt}>📚</Text></View>
-          <View style={s.fSchoolInfo}>
-            <Text style={s.fSchoolName}>{d.school}</Text>
-            <Text style={s.fSchoolMeta}>{d.admNo ? `SCHOOL ID: ${d.admNo}   ` : ""}{d.region} · {d.district}</Text>
-          </View>
-        </View>
-        {/* Student info */}
-        <View style={s.fInfoGrid}>
-          {[["Enrollment", d.enrollDate], ["Level", d.level], ["Blood Group", d.bloodGroup], ["Guardian Phone", d.parentPhone]].map(([l, v]) => (
-            <View key={l} style={s.fInfoCell}>
-              <Text style={s.fInfoLbl}>{l}</Text>
-              <Text style={s.fInfoVal}>{v}</Text>
-            </View>
-          ))}
-        </View>
-        <View style={s.fDivider}/>
-        {/* Guardian */}
-        <Text style={s.fGuardTitle}>PARENT / GUARDIAN</Text>
-        <View style={s.fGuardGrid}>
-          {[["Name", d.parentName], ["NIDA", d.parentNida], ["Relation", d.parentRel], ["Phone", d.parentPhone]].map(([l, v]) => (
-            <View key={l} style={s.fGuardCell}>
-              <Text style={s.fGuardLbl}>{l}</Text>
-              <Text style={s.fGuardVal}>{v}</Text>
-            </View>
-          ))}
-        </View>
-        {/* Important */}
-        <View style={s.fImportBox}>
-          <Text style={s.fImportTitle}>IMPORTANT</Text>
-          {["Property of Govt. of Tanzania.", "Valid nationwide.", "Report loss immediately.", "Not transferable."].map((t, i) => (
-            <Text key={i} style={s.fImportItem}>• {t}</Text>
-          ))}
+      {/* RIGHT: info */}
+      <View style={s.fr}>
+        <Text style={s.frTsidLbl}>TSID NUMBER</Text>
+        <Text style={s.frTsidNum}>{d.tsid}</Text>
+
+        {[["FULL NAME",d.name],["DATE OF BIRTH",d.dob],["GENDER",d.sex],["NATIONALITY",d.nat]].map(([l,v])=>(
+          <View key={l} style={s.frField}><Text style={s.frLbl}>{l}</Text><Text style={s.frVal}>{v}</Text></View>
+        ))}
+
+        {/* QR at bottom right */}
+        <View style={s.frQrBlock}>
+          {qr?<Image src={qr} style={s.frQrImg}/>:<View style={[s.frQrImg,{backgroundColor:"#dde8dd",alignItems:"center",justifyContent:"center"}]}><Text style={{fontSize:8,color:"#888"}}>QR</Text></View>}
+          <Text style={s.frQrTxt}>SCAN TO VERIFY</Text>
         </View>
       </View>
     </View>
 
-    {/* Bottom bar */}
-    <View style={s.fBottomBar}>
-      <View style={s.fQrBox}>
-        {qr ? <Image src={qr} style={s.fQrImg}/> : <View style={[s.fQrImg, { backgroundColor: "#dde8dd", alignItems: "center", justifyContent: "center" }]}><Text style={{ fontSize: 7, color: "#888" }}>QR</Text></View>}
-        <Text style={s.fQrTxt}>SCAN TO VERIFY</Text>
-      </View>
-      <View style={s.fVerify}>
-        <Text style={s.fVerifyLbl}>VERIFY AT</Text>
-        <Text style={s.fVerifyUrl}>verify.tsid.go.tz</Text>
-      </View>
-      <View style={s.fIssued}>
-        <Text style={s.fIssuedLbl}>ISSUED</Text>
-        <Text style={s.fIssuedVal}>{d.issueDate}</Text>
-      </View>
-      <View style={s.fLifelong}>
-        <Text style={s.fLifelongTxt}>{"LIFELONG ·\nNATIONAL ·\nSECURE"}</Text>
-      </View>
+    {/* Footer bottom bar */}
+    <View style={s.ff}>
+      <View style={s.ffVerify}><Text style={s.ffVerifyLbl}>VERIFY AT</Text><Text style={s.ffVerifyUrl}>verify.tsid.go.tz</Text></View>
+      <View style={s.ffIssued}><Text style={s.ffIssuedLbl}>ISSUED</Text><Text style={s.ffIssuedVal}>{d.issued}</Text></View>
+      <View style={s.ffBadge}><Text style={s.ffBadgeTxt}>{"LIFELONG ·\nNATIONAL ·\nSECURE"}</Text></View>
     </View>
+    <View style={s.ffIcons}>
+      {[["⛨","LIFELONG\nSTUDENT ID"],["✦","NATIONALY\nRECOGNIZED"],["✓","SECURE\n& VERIFIED"]].map(([ic,lbl],i)=>(
+        <View key={i} style={s.ffIcon}><View style={s.ffIconCircle}><Text style={s.ffIconTxt}>{ic}</Text></View><Text style={s.ffIconLabel}>{lbl}</Text></View>
+      ))}
+    </View>
+    <View style={s.ffColorBar}><View style={s.ffBarG}/><View style={s.ffBarY}/><View style={s.ffBarB}/></View>
   </View>
 );
 
-const Back: React.FC<{ d: ReturnType<typeof getData> }> = ({ d }) => (
-  <View style={s.bCard}>
-    <View style={s.bHeader}>
-      <Text style={s.bHeaderNum}>{d.tsid}</Text>
-    </View>
-    <View style={s.bBody}>
-      <View style={s.bLeft}>
+const B: React.FC<{d:ReturnType<typeof gd>}> = ({d}) => (
+  <View style={s.bc}>
+    <View style={s.bh}><Text style={s.bhNum}>{d.tsid}</Text></View>
+    <View style={s.bb}>
+      <View style={s.bbl}>
         <Text style={s.bSecTitle}>STUDENT INFORMATION</Text>
-        {[["DATE OF ENROLLMENT", d.enrollDate], ["CURRENT LEVEL", d.level], ["CLASS / YEAR", d.classYear], ["BLOOD GROUP", d.bloodGroup], ["PHONE (GUARDIAN)", d.parentPhone]].map(([l, v]) => (
+        {[["DATE OF ENROLLMENT",d.enroll],["CURRENT LEVEL",d.level],["CLASS / YEAR",d.cls],["BLOOD GROUP",d.blood],["PHONE (GUARDIAN)",d.pPhone]].map(([l,v])=>(
           <View key={l} style={s.bRow}><Text style={s.bLbl}>{l}</Text><Text style={s.bVal}>{v}</Text></View>
         ))}
-        <View style={s.bDivider}/>
+        <View style={s.bDiv}/>
         <Text style={s.bSecTitle}>PARENT / GUARDIAN</Text>
-        {[["NAME", d.parentName], ["NIDA NUMBER", d.parentNida], ["RELATIONSHIP", d.parentRel], ["PHONE", d.parentPhone]].map(([l, v]) => (
+        {[["NAME",d.pName],["NIDA NUMBER",d.pNida],["RELATIONSHIP",d.pRel],["PHONE",d.pPhone]].map(([l,v])=>(
           <View key={l} style={s.bRow}><Text style={s.bLbl}>{l}</Text><Text style={s.bVal}>{v}</Text></View>
         ))}
-        <View style={s.bImportBox}>
-          <Text style={s.bImportTitle}>IMPORTANT</Text>
-          {["This card is the property of the Government of Tanzania.", "It is valid for educational identification nationwide.", "Report loss of this card to your school immediately.", "This card is not transferable."].map((t, i) => (
-            <Text key={i} style={s.bImportItem}>• {t}</Text>
+        <View style={s.bImpBox}>
+          <Text style={s.bImpTitle}>IMPORTANT</Text>
+          {["This card is the property of the Government of Tanzania.","It is valid for educational identification nationwide.","Report loss of this card to your school immediately.","This card is not transferable."].map((t,i)=>(
+            <Text key={i} style={s.bImpItem}>• {t}</Text>
           ))}
         </View>
       </View>
-      <View style={s.bRight}>
+      <View style={s.bbr}>
         <View style={s.bStamp}>
           <Text style={s.bStampSm}>TANZANIA STUDENT</Text>
           <Text style={s.bStampBig}>TSID</Text>
@@ -407,52 +308,29 @@ const Back: React.FC<{ d: ReturnType<typeof getData> }> = ({ d }) => (
         </View>
       </View>
     </View>
-    <View style={s.bFootTop}>
-      <View>
-        <Text style={s.bFootPortalLbl}>🌐 VERIFICATION PORTAL</Text>
-        <Text style={s.bFootPortalVal}>verify.tsid.go.tz</Text>
-      </View>
-      <View>
-        <Text style={s.bFootIssuedLbl}>ISSUED ON</Text>
-        <Text style={s.bFootIssuedVal}>{d.issueDate}</Text>
-      </View>
+    <View style={s.bft}>
+      <View><Text style={s.bftPLbl}>🌐 VERIFICATION PORTAL</Text><Text style={s.bftPVal}>verify.tsid.go.tz</Text></View>
+      <View><Text style={s.bftILbl}>ISSUED ON</Text><Text style={s.bftIVal}>{d.issued}</Text></View>
     </View>
-    <View style={s.bFootBottom}>
-      <Text style={s.bFootSecure}>{"🔒 This card contains secure data.\nUnauthorized use is prohibited by law."}</Text>
-      <View>
-        <Text style={s.bFootCountrySub}>JAMHURI YA MUUNGANO</Text>
-        <Text style={s.bFootCountryMain}>WA TANZANIA</Text>
-      </View>
+    <View style={s.bfb}>
+      <Text style={s.bfbSec}>{"🔒 This card contains secure data.\nUnauthorized use is prohibited by law."}</Text>
+      <View><Text style={s.bfbCtryS}>JAMHURI YA MUUNGANO</Text><Text style={s.bfbCtryM}>WA TANZANIA</Text></View>
     </View>
   </View>
 );
 
-export const ChetiMwanafunziPDF: React.FC<Props> = ({ application, lang = "sw", qrDataUrl }) => {
-  const d = getData(application);
-  const qr = qrDataUrl || undefined;
-
-  // A5 landscape = [595, 420]. Card fits with padding
-  const cardPage = [CW + 48, CH + 48] as [number, number];
-
+export const ChetiMwanafunziPDF: React.FC<Props> = ({application,lang="sw",qrDataUrl}) => {
+  const d = gd(application);
+  const qr = qrDataUrl||undefined;
+  const W = CW+40, H = CH+40;
   return (
     <Document>
-      {/* Page 1: Front */}
-      <Page size={cardPage} style={s.pageSingle}>
-        <Front d={d} qr={qr}/>
+      <Page size={[W,H]} style={s.pageSingle}><F d={d} qr={qr}/></Page>
+      <Page size={[W,H]} style={s.pageSingle}><B d={d}/></Page>
+      <Page size={[W*2+56,H]} style={s.pageCombined}>
+        <View><Text style={s.lbl}>FRONT</Text><F d={d} qr={qr}/></View>
+        <View><Text style={s.lbl}>BACK</Text><B d={d}/></View>
       </Page>
-
-      {/* Page 2: Back */}
-      <Page size={cardPage} style={s.pageSingle}>
-        <Back d={d}/>
-      </Page>
-
-      {/* Page 3: Combined side-by-side on A4 landscape */}
-      <Page size={[842, 380]} style={s.pageCombined}>
-        <View style={s.labelWrap}><Text style={s.cardLabel}>FRONT</Text><Front d={d} qr={qr}/></View>
-        <View style={s.labelWrap}><Text style={s.cardLabel}>BACK</Text><Back d={d}/></View>
-      </Page>
-
-      {/* Page 4: Receipt */}
       <ReceiptPage application={application} lang={lang} qrDataUrl={qr}/>
     </Document>
   );
