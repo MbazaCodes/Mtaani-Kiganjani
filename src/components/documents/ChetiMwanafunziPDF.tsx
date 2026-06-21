@@ -1,475 +1,539 @@
 /**
  * ChetiMwanafunziPDF — TSID Student ID Card
- * Pixel-accurate match to official TSID reference design
+ * CR80 Standard: 85.60mm × 53.98mm = 242.6pt × 153pt at 72dpi
+ * Exact match to TSID sample design spec
+ * Pages: 1=Front, 2=Back, 3=Combined
  */
 import React from "react";
 import { Page, Text, View, Image, StyleSheet, Document } from "@react-pdf/renderer";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 import { Application } from "@/lib/supabase";
 import { formatDate } from "./types";
+import { ReceiptPage } from "./ReceiptPage";
 
 interface Props { application: Application; lang?: "sw" | "en"; qrDataUrl?: string; }
 
-// Portrait card: ~86mm wide × ~136mm tall at 72dpi
-const CW = 246;
-const CH = 390;
+// CR80 card dimensions at 72dpi
+const CW = 243; // 85.60mm
+const CH = 154; // 53.98mm
 
-// Colors from reference image
-const NAVY   = "#0d1f3c";   // dark navy header
-const NAVY2  = "#1a3a5c";   // medium navy stamp/icons
-const GREEN  = "#1a7a3c";   // section title green
-const WHITE  = "#ffffff";
-const LGRAY  = "#eef2f7";   // photo side background
-const MGRAY  = "#6b7280";   // label color
-const DGRAY  = "#111827";   // value color
-const BORDER = "#d1d9e0";
+// Official color palette from spec
+const NAVY        = "#003366";
+const GREEN       = "#1B8F3A";
+const GREEN_DARK  = "#0F4C24";
+const GREEN_LIGHT = "#1A7A3A";
+const YELLOW      = "#F5C400";
+const RED         = "#D32F2F";
+const WHITE       = "#FFFFFF";
+const TEXT_PRI    = "#111111";
+const TEXT_SEC    = "#444444";
+const TEXT_MUT    = "#777777";
+const BG_LIGHT    = "#F2F4F8";
+const BORDER_COL  = "#E0E0E0";
 
-const s = StyleSheet.create({
-  // Page: side by side
+const f = StyleSheet.create({
+  // ─── Page wrapper for each card page ──────────────────────────────────────
   page: {
-    backgroundColor: "#cfd8e3",
+    backgroundColor: "#c8d0d8",
+    padding: 28,
+    fontFamily: "Helvetica",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  combinedPage: {
+    backgroundColor: "#c8d0d8",
     padding: 24,
     fontFamily: "Helvetica",
     flexDirection: "row",
+    alignItems: "flex-start",
     justifyContent: "center",
-    gap: 28,
+    gap: 20,
   },
-  cardWrap: { alignItems: "center" },
-  cardLabel: { fontSize: 10, fontWeight: "bold", color: "#4b5563", letterSpacing: 2, marginBottom: 8 },
-
-  // ═══ FRONT CARD ═══
-  fCard: {
-    width: CW, backgroundColor: WHITE,
-    borderRadius: 12, overflow: "hidden",
-    borderWidth: 1, borderColor: "#c0ccd8",
+  cardLabel: {
+    fontSize: 9, fontWeight: "bold",
+    color: "#4b5563", letterSpacing: 2,
+    marginBottom: 6, textAlign: "center",
   },
 
-  // Header strip
-  fHeader: {
+  // ─── FRONT CARD ────────────────────────────────────────────────────────────
+  frontCard: {
+    width: CW, height: CH,
+    backgroundColor: WHITE,
+    borderRadius: 6,
+    overflow: "hidden",
+    borderWidth: 1.5, borderColor: RED,
+    // shadow via wrapping
+  },
+
+  // TOP STRIP: logo | TSID brand | flag
+  fTopStrip: {
     backgroundColor: NAVY,
-    paddingHorizontal: 12, paddingTop: 10, paddingBottom: 8,
-    flexDirection: "row", alignItems: "center", gap: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 7, paddingVertical: 5,
+    gap: 5,
   },
-  fLogoImg: { width: 28, height: 28 },
-  fBrandBox: { flex: 1 },
-  fBrandTSID: { fontSize: 20, fontWeight: "bold", color: WHITE, lineHeight: 1 },
-  fBrandSub:  { fontSize: 5, color: "#9ab8d8", letterSpacing: 0.5, lineHeight: 1.5 },
-  // TZ flag (3 horizontal stripes in a rectangle)
-  fFlag: { width: 30, height: 20, borderRadius: 3, overflow: "hidden" },
+  fLogo: { width: 20, height: 20 },
+  fBrand: { flex: 1 },
+  fTsidWord: { fontSize: 13, fontWeight: "bold", color: WHITE, letterSpacing: 1, lineHeight: 1 },
+  fTsidSub: { fontSize: 4.5, color: "#9ab8d8", letterSpacing: 0.5, lineHeight: 1.4 },
+  fFlag: { width: 24, height: 16, borderRadius: 2, overflow: "hidden" },
   fFlagG: { flex: 1, backgroundColor: "#1eb53a" },
   fFlagY: { flex: 1, backgroundColor: "#fcd116" },
   fFlagB: { flex: 1, backgroundColor: "#00a3dd" },
 
-  // Photo + Info row (main body)
+  // BODY: left col (32%) | right col (68%)
   fBody: { flexDirection: "row", flex: 1 },
 
-  // Left: photo column (gray background)
-  fPhotoCol: {
-    width: 104, backgroundColor: LGRAY,
-    paddingTop: 14, paddingBottom: 10,
-    paddingHorizontal: 8,
+  // ── LEFT COLUMN (32%) ──
+  fLeft: {
+    width: CW * 0.32,
+    borderRightWidth: 1, borderRightColor: BORDER_COL, borderRightStyle: "dashed",
+    paddingTop: 6, paddingHorizontal: 5,
     alignItems: "center",
+    backgroundColor: BG_LIGHT,
   },
-  fPhotoFrame: {
-    width: 88, height: 112, borderRadius: 6,
-    overflow: "hidden",
-    borderWidth: 1.5, borderColor: "#8fa8c0",
-  },
-  fPhotoImg:  { width: 88, height: 112, objectFit: "cover" },
-  fPhotoPlaceholder: {
-    width: 88, height: 112,
-    backgroundColor: "#c9d5e0",
+  fPhotoBox: {
+    width: 40, height: 52,
+    borderWidth: 1.5, borderColor: GREEN_LIGHT,
+    borderRadius: 2, overflow: "hidden",
+    backgroundColor: "#D8E4DC",
     alignItems: "center", justifyContent: "center",
+    marginBottom: 4,
   },
-  fPhotoPlaceholderTxt: { fontSize: 7, color: "#7a8fa0", textAlign: "center" },
+  fPhotoImg: { width: 40, height: 52, objectFit: "cover" },
+  fPhotoPlaceholder: { fontSize: 5, color: "#888", textAlign: "center" },
 
-  // Right: info column (white background)
-  fInfoCol: {
-    flex: 1, backgroundColor: WHITE,
-    paddingTop: 12, paddingHorizontal: 10,
-  },
-  fTsidNumLabel: {
-    fontSize: 6, color: MGRAY, fontWeight: "bold",
-    letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 2,
+  fTsidLabel: {
+    fontSize: 4.5, fontWeight: "bold", color: TEXT_MUT,
+    letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 1,
   },
   fTsidNum: {
-    fontSize: 12, fontWeight: "bold", color: GREEN,
+    fontSize: 6.5, fontWeight: "bold", color: RED,
     fontFamily: "Courier", letterSpacing: 0.3,
-    borderBottomWidth: 1.5, borderBottomColor: GREEN,
-    paddingBottom: 5, marginBottom: 8,
+    borderBottomWidth: 0.5, borderBottomColor: RED,
+    paddingBottom: 2, marginBottom: 3,
+    textAlign: "center",
   },
-  fField: { marginBottom: 6 },
-  fFieldLabel: {
-    fontSize: 5.5, color: MGRAY, fontWeight: "bold",
-    letterSpacing: 0.7, textTransform: "uppercase",
-  },
-  fFieldValue: {
-    fontSize: 9.5, fontWeight: "bold", color: DGRAY, lineHeight: 1.2,
+  fNameLabel: { fontSize: 4.5, fontWeight: "bold", color: TEXT_MUT, textTransform: "uppercase", marginBottom: 1 },
+  fNameVal:   { fontSize: 6, fontWeight: "bold", color: TEXT_PRI, textAlign: "center", marginBottom: 3, lineHeight: 1.2 },
+
+  // DOB / GENDER / NATIONALITY 3-col mini grid
+  fMiniGrid: { flexDirection: "row", gap: 2, width: "100%" },
+  fMiniCell: { flex: 1, alignItems: "center" },
+  fMiniLabel: { fontSize: 3.8, fontWeight: "bold", color: TEXT_MUT, textTransform: "uppercase", textAlign: "center" },
+  fMiniVal:   { fontSize: 5, fontWeight: "bold", color: TEXT_PRI, textAlign: "center", lineHeight: 1.2 },
+
+  // ── RIGHT COLUMN (68%) ──
+  fRight: {
+    flex: 1,
+    paddingTop: 5, paddingHorizontal: 6, paddingBottom: 4,
+    backgroundColor: WHITE,
   },
 
-  // School + QR section
-  fSchoolQR: {
-    flexDirection: "row", alignItems: "flex-start",
-    paddingHorizontal: 10, paddingTop: 10, paddingBottom: 8,
-    backgroundColor: WHITE,
-    borderTopWidth: 1, borderTopColor: BORDER,
+  // School badge (green header box)
+  fSchoolBadge: {
+    backgroundColor: GREEN_LIGHT,
+    borderRadius: 2, paddingHorizontal: 5, paddingVertical: 3,
+    marginBottom: 4, flexDirection: "row", alignItems: "center", gap: 4,
   },
-  fSchoolLeft: { flex: 1, flexDirection: "row", alignItems: "flex-start", gap: 8 },
   fSchoolIcon: {
-    width: 32, height: 32, backgroundColor: NAVY,
-    borderRadius: 6, alignItems: "center", justifyContent: "center",
+    width: 16, height: 16, backgroundColor: "#0F5020",
+    borderRadius: 2, alignItems: "center", justifyContent: "center",
+  },
+  fSchoolIconTxt: { fontSize: 8, color: WHITE },
+  fSchoolInfo: { flex: 1 },
+  fSchoolName: { fontSize: 6, fontWeight: "bold", color: WHITE, lineHeight: 1.3 },
+  fSchoolMeta: { fontSize: 4.5, color: "#a0e0b0", marginTop: 0.5 },
+
+  // Student info 2-col grid
+  fInfoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 1, marginBottom: 3 },
+  fInfoCell: { width: "48%", marginBottom: 2 },
+  fInfoLabel: { fontSize: 4.5, fontWeight: "bold", color: TEXT_MUT, textTransform: "uppercase", letterSpacing: 0.3 },
+  fInfoVal:   { fontSize: 6, fontWeight: "bold", color: TEXT_PRI },
+
+  // Divider
+  fDivider: { height: 0.5, backgroundColor: BORDER_COL, marginVertical: 3 },
+
+  // Guardian section
+  fGuardTitle: {
+    fontSize: 5, fontWeight: "bold", color: GREEN_LIGHT,
+    textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2,
+  },
+  fGuardGrid: { flexDirection: "row", flexWrap: "wrap", gap: 1 },
+  fGuardCell: { width: "48%", marginBottom: 1.5 },
+  fGuardLabel: { fontSize: 4, fontWeight: "bold", color: TEXT_MUT, textTransform: "uppercase", letterSpacing: 0.3 },
+  fGuardVal:   { fontSize: 5.5, fontWeight: "bold", color: TEXT_PRI },
+
+  // Important / warning box
+  fImportBox: {
+    backgroundColor: "#FFF8E1",
+    borderLeftWidth: 2, borderLeftColor: YELLOW,
+    paddingHorizontal: 4, paddingVertical: 2.5,
     marginTop: 2,
   },
-  fSchoolIconTxt: { fontSize: 15, color: WHITE },
-  fSchoolText: { flex: 1 },
-  fSchoolName:  { fontSize: 8, fontWeight: "bold", color: NAVY, lineHeight: 1.4 },
-  fSchoolMeta:  { fontSize: 6, color: MGRAY, marginTop: 1 },
-  // QR on right
+  fImportTitle: { fontSize: 4.5, fontWeight: "bold", color: "#7a5800", marginBottom: 1.5 },
+  fImportItem:  { fontSize: 4, color: TEXT_SEC, marginBottom: 1, lineHeight: 1.3 },
+
+  // BOTTOM BAR
+  fBottomBar: {
+    backgroundColor: "rgba(26, 122, 58, 0.05)",
+    borderTopWidth: 2, borderTopColor: YELLOW,
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 6, paddingVertical: 3, gap: 4,
+  },
   fQrWrap: { alignItems: "center" },
-  fQrImg:  { width: 64, height: 64, borderWidth: 2, borderColor: BORDER },
-  fQrTxt:  { fontSize: 5, color: MGRAY, letterSpacing: 0.5, marginTop: 3, textAlign: "center" },
-
-  // Footer icons
-  fFooterIcons: {
-    backgroundColor: NAVY, flexDirection: "row",
-    paddingHorizontal: 6, paddingVertical: 10,
-    justifyContent: "space-around",
+  fQrImg:  { width: 22, height: 22 },
+  fQrTxt:  { fontSize: 3.5, color: TEXT_MUT, textAlign: "center", letterSpacing: 0.3, marginTop: 1 },
+  fVerifyWrap: { flex: 1 },
+  fVerifyLabel: { fontSize: 4, color: TEXT_MUT, fontWeight: "bold" },
+  fVerifyUrl:   { fontSize: 5, color: GREEN_LIGHT, fontWeight: "bold" },
+  fIssuedWrap: {},
+  fIssuedLabel: { fontSize: 4, color: TEXT_MUT, fontWeight: "bold" },
+  fIssuedVal:   { fontSize: 4.5, color: TEXT_PRI, fontWeight: "bold" },
+  fLifelongBadge: {
+    backgroundColor: RED, borderRadius: 1.5,
+    paddingHorizontal: 3, paddingVertical: 1.5,
   },
-  fFooterItem: { alignItems: "center", gap: 3 },
-  fFooterIcon: { width: 20, height: 20, borderWidth: 1.5, borderColor: "#5a7fa0", borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  fFooterIconTxt: { fontSize: 8, color: WHITE },
-  fFooterTxt: {
-    fontSize: 5.5, color: "#8ab4d4", fontWeight: "bold",
-    textAlign: "center", letterSpacing: 0.3, lineHeight: 1.4,
-  },
-  // Color bar
-  fColorBar: { flexDirection: "row", height: 5 },
-  fBarG: { flex: 1, backgroundColor: "#1eb53a" },
-  fBarY: { flex: 1, backgroundColor: "#fcd116" },
-  fBarB: { flex: 1, backgroundColor: "#00a3dd" },
+  fLifelongTxt: { fontSize: 4, fontWeight: "bold", color: WHITE, letterSpacing: 0.3 },
 
-  // ═══ BACK CARD ═══
-  bCard: {
-    width: CW, backgroundColor: WHITE,
-    borderRadius: 12, overflow: "hidden",
-    borderWidth: 1, borderColor: "#c0ccd8",
+  // ─── BACK CARD ─────────────────────────────────────────────────────────────
+  backCard: {
+    width: CW, height: CH,
+    backgroundColor: WHITE,
+    borderRadius: 6, overflow: "hidden",
+    borderWidth: 1.5, borderColor: RED,
   },
 
-  // Back header — full navy strip with TSID number
+  // HEADER: full navy with TSID number
   bHeader: {
     backgroundColor: NAVY,
-    paddingHorizontal: 14, paddingVertical: 12,
+    paddingHorizontal: 10, paddingVertical: 7,
   },
   bHeaderNum: {
-    fontSize: 16, fontWeight: "bold", color: WHITE,
+    fontSize: 13, fontWeight: "bold", color: WHITE,
     fontFamily: "Courier", letterSpacing: 0.5,
   },
 
-  // Back body: two columns
+  // BACK BODY: left (info) + right (stamp)
   bBody: {
     flex: 1, flexDirection: "row",
-    paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8, gap: 10,
+    paddingHorizontal: 8, paddingTop: 6, paddingBottom: 4, gap: 6,
   },
   bLeft: { flex: 1 },
 
-  // Section title (green, underlined)
-  bSectionTitle: {
-    fontSize: 7.5, fontWeight: "bold", color: GREEN,
-    letterSpacing: 0.8, textTransform: "uppercase",
-    borderBottomWidth: 0.75, borderBottomColor: GREEN,
-    paddingBottom: 3, marginBottom: 7,
+  bSecTitle: {
+    fontSize: 5.5, fontWeight: "bold", color: GREEN_LIGHT,
+    textTransform: "uppercase", letterSpacing: 0.7,
+    borderBottomWidth: 0.5, borderBottomColor: GREEN_LIGHT,
+    paddingBottom: 1.5, marginBottom: 4,
   },
+  bRow: { flexDirection: "row", marginBottom: 3 },
+  bLabel: { width: 65, fontSize: 4.5, fontWeight: "bold", color: TEXT_MUT, textTransform: "uppercase", letterSpacing: 0.3 },
+  bVal:   { flex: 1, fontSize: 6, fontWeight: "bold", color: TEXT_PRI },
 
-  // Data rows
-  bRow: { flexDirection: "row", marginBottom: 5 },
-  bLabel: {
-    width: 82, fontSize: 6, color: MGRAY,
-    fontWeight: "bold", textTransform: "uppercase", letterSpacing: 0.3,
+  bDivider: { height: 0.5, backgroundColor: "#c8d8e0", marginVertical: 4 },
+
+  bImportBox: {
+    borderWidth: 0.5, borderColor: "#b0d8b0",
+    backgroundColor: "#f6fff6", borderRadius: 2,
+    padding: 4, marginTop: 3,
   },
-  bValue: { flex: 1, fontSize: 7.5, color: DGRAY, fontWeight: "bold" },
+  bImportTitle: { fontSize: 5, fontWeight: "bold", color: GREEN_LIGHT, marginBottom: 2.5 },
+  bImportItem:  { fontSize: 4.5, color: TEXT_SEC, marginBottom: 1.5, lineHeight: 1.4 },
 
-  // Divider between sections
-  bDivider: { height: 0.75, backgroundColor: "#dce4ed", marginVertical: 8 },
-
-  // Important box
-  bImportantBox: {
-    borderWidth: 0.75, borderColor: "#a3c4a3", borderRadius: 4,
-    padding: 8, marginTop: 8, backgroundColor: "#f8fff8",
-  },
-  bImportTitle: { fontSize: 7, fontWeight: "bold", color: GREEN, marginBottom: 5 },
-  bImportItem:  { fontSize: 5.5, color: MGRAY, marginBottom: 2.5, lineHeight: 1.4 },
-
-  // Right side: stamp circle
-  bRight: { width: 64, alignItems: "center", paddingTop: 6 },
+  // Right: stamp
+  bRight: { width: 52, alignItems: "center", paddingTop: 4, gap: 5 },
   bStamp: {
-    width: 62, height: 62, borderRadius: 31,
-    borderWidth: 1.5, borderColor: "#2a4a7a", borderStyle: "dashed",
+    width: 48, height: 48,
+    borderRadius: 24,
+    borderWidth: 1.5, borderColor: "#2a4a7a",
+    borderStyle: "dashed",
     alignItems: "center", justifyContent: "center",
   },
-  bStampTxtSm:  { fontSize: 4.5, color: "#2a4a7a", textAlign: "center", letterSpacing: 0.3 },
-  bStampTxtBig: { fontSize: 13, fontWeight: "bold", color: "#2a4a7a" },
+  bStampRow: { alignItems: "center" },
+  bStampSm: { fontSize: 3.8, color: "#2a4a7a", textAlign: "center", letterSpacing: 0.3, lineHeight: 1.4 },
+  bStampBig: { fontSize: 10, fontWeight: "bold", color: "#2a4a7a" },
 
-  // Back lower footer (two sections)
+  // BACK FOOTER: two-tone
   bFooterTop: {
     flexDirection: "row", justifyContent: "space-between",
-    paddingHorizontal: 14, paddingVertical: 8,
-    borderTopWidth: 0.75, borderTopColor: BORDER,
+    paddingHorizontal: 8, paddingVertical: 4,
+    borderTopWidth: 0.5, borderTopColor: BORDER_COL,
   },
-  bFootTopLeft: {},
-  bFootPortalLabel: { fontSize: 6, color: MGRAY, fontWeight: "bold", letterSpacing: 0.5 },
-  bFootPortalVal:   { fontSize: 7, color: GREEN, fontWeight: "bold" },
-  bFootTopRight: { alignItems: "flex-end" },
-  bFootIssuedLbl: { fontSize: 6, color: MGRAY, fontWeight: "bold" },
-  bFootIssuedVal: { fontSize: 7.5, color: DGRAY, fontWeight: "bold" },
+  bFootPortalLabel: { fontSize: 5, fontWeight: "bold", color: TEXT_MUT, letterSpacing: 0.4 },
+  bFootPortalVal:   { fontSize: 5.5, fontWeight: "bold", color: GREEN_LIGHT },
+  bFootIssuedLabel: { fontSize: 5, fontWeight: "bold", color: TEXT_MUT, textAlign: "right" },
+  bFootIssuedVal:   { fontSize: 6, fontWeight: "bold", color: TEXT_PRI, textAlign: "right" },
 
-  // Back bottom dark bar
   bFooterBottom: {
-    backgroundColor: NAVY, flexDirection: "row",
-    paddingHorizontal: 14, paddingVertical: 8,
-    justifyContent: "space-between", alignItems: "center",
+    backgroundColor: NAVY,
+    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    paddingHorizontal: 8, paddingVertical: 5,
   },
-  bFootSecure:  { fontSize: 5, color: "#7a9abb", flex: 1 },
-  bFootCountry: { alignItems: "flex-end" },
-  bFootCtryTxt: { fontSize: 6, color: "#8ab4d4", fontWeight: "bold" },
+  bFootSecure: { fontSize: 4, color: "#7a9abb", flex: 1, lineHeight: 1.5 },
+  bFootCountryTxt: { fontSize: 5, fontWeight: "bold", color: WHITE, textAlign: "right" },
+  bFootCountrySub: { fontSize: 4, color: "#8ab4d4", textAlign: "right" },
 });
 
-const EDU_SHORT: Record<string, string> = {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const EDU: Record<string, string> = {
   CHEKECHEA: "PRE-PRIMARY", MSINGI: "PRIMARY SCHOOL",
   SEKONDARI_O: "SECONDARY (O-LEVEL)", SEKONDARI_A: "SECONDARY (A-LEVEL)",
-  STASHAHADA: "DIPLOMA / CERTIFICATE", SHAHADA: "UNIVERSITY DEGREE",
-  UZAMILI: "MASTERS / PHD",
+  STASHAHADA: "DIPLOMA", SHAHADA: "UNIVERSITY DEGREE", UZAMILI: "MASTERS/PHD",
 };
 
-export const ChetiMwanafunziPDF: React.FC<Props> = ({ application, lang = "sw", qrDataUrl }) => {
+function extractData(application: Application) {
   const fd = (application.form_data || {}) as Record<string, string>;
+  return {
+    studentName: (fd.student_name || `${fd.student_first || ""} ${fd.student_last || ""}`.trim()).toUpperCase(),
+    tsid:        fd.generated_student_id || application.application_number,
+    photo:       fd.student_photo || null,
+    dob:         fd.student_dob
+      ? new Date(fd.student_dob).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()
+      : "—",
+    gender:      fd.student_sex === "M" ? "MALE" : fd.student_sex === "F" ? "FEMALE" : "—",
+    nationality: (fd.nationality || "TANZANIAN").toUpperCase(),
+    school:      (fd.school_name || "—").toUpperCase(),
+    admNo:       fd.admission_number || fd.student_number || "",
+    region:      (fd.student_region || application.region || "—").toUpperCase(),
+    district:    (fd.student_district || application.district || "—").toUpperCase(),
+    level:       EDU[fd.education_level] || (fd.education_level || "—").toUpperCase(),
+    classYear:   fd.class_year === "OTHER" ? (fd.class_year_manual || "—") : (fd.class_year || "—"),
+    bloodGroup:  fd.blood_group || "—",
+    enrollDate:  fd.enrollment_date
+      ? new Date(fd.enrollment_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()
+      : formatDate(application.created_at).toUpperCase(),
+    parentName:  (fd.parent_name || "—").toUpperCase(),
+    parentNida:  fd.parent_nida ? fd.parent_nida.replace(/(\d{4})\d+(\d{3})/, "$1***$2") : "—",
+    parentPhone: fd.parent_phone || "—",
+    parentRel:   fd.parent_relationship === "MAMA" ? "MOTHER"
+               : fd.parent_relationship === "BABA" ? "FATHER"
+               : (fd.parent_relationship || "GUARDIAN").toUpperCase(),
+    issueDate:   formatDate(application.created_at).toUpperCase(),
+  };
+}
 
-  const studentName = (fd.student_name || `${fd.student_first || ""} ${fd.student_last || ""}`.trim()).toUpperCase();
-  const tsid        = fd.generated_student_id || application.application_number;
-  const photo       = fd.student_photo || null;
-  const dob         = fd.student_dob
-    ? new Date(fd.student_dob).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()
-    : "—";
-  const gender      = fd.student_sex === "M" ? "MALE" : fd.student_sex === "F" ? "FEMALE" : "—";
-  const nationality = (fd.nationality || "TANZANIAN").toUpperCase();
-  const school      = (fd.school_name || "SCHOOL NAME").toUpperCase();
-  const region      = (fd.student_region || application.region || "—").toUpperCase();
-  const district    = (fd.student_district || application.district || "—").toUpperCase();
-  const admNo       = fd.admission_number || fd.student_number || "";
-  const level       = EDU_SHORT[fd.education_level] || (fd.education_level || "—").toUpperCase();
-  const classYear   = fd.class_year === "OTHER" ? (fd.class_year_manual || "—") : (fd.class_year || "—");
-  const bloodGroup  = fd.blood_group || "—";
-  const enrollDate  = fd.enrollment_date
-    ? new Date(fd.enrollment_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()
-    : formatDate(application.created_at).toUpperCase();
-  const parentName  = (fd.parent_name || "—").toUpperCase();
-  const parentNida  = fd.parent_nida || "—";
-  const parentPhone = fd.parent_phone || "—";
-  const parentRel   = fd.parent_relationship === "MAMA" ? "MOTHER"
-    : fd.parent_relationship === "BABA" ? "FATHER"
-    : (fd.parent_relationship || "GUARDIAN").toUpperCase();
-  const issueDate   = formatDate(application.created_at).toUpperCase();
+// ─── FRONT component ──────────────────────────────────────────────────────────
+const FrontCard: React.FC<{ d: ReturnType<typeof extractData>; qrDataUrl?: string }> = ({ d, qrDataUrl }) => (
+  <View style={f.frontCard}>
+
+    {/* TOP STRIP */}
+    <View style={f.fTopStrip}>
+      {TANZANIA_LOGO_BASE64 ? <Image src={TANZANIA_LOGO_BASE64} style={f.fLogo}/> : null}
+      <View style={f.fBrand}>
+        <Text style={f.fTsidWord}>TSID</Text>
+        <Text style={f.fTsidSub}>TANZANIA STUDENT{"\n"}IDENTIFICATION SYSTEM</Text>
+      </View>
+      <View style={f.fFlag}>
+        <View style={f.fFlagG}/><View style={f.fFlagY}/><View style={f.fFlagB}/>
+      </View>
+    </View>
+
+    {/* BODY */}
+    <View style={f.fBody}>
+
+      {/* LEFT 32% */}
+      <View style={f.fLeft}>
+        {/* Photo */}
+        <View style={f.fPhotoBox}>
+          {d.photo
+            ? <Image src={d.photo} style={f.fPhotoImg}/>
+            : <Text style={f.fPhotoPlaceholder}>{"[PHOTO]"}</Text>}
+        </View>
+        {/* TSID number */}
+        <Text style={f.fTsidLabel}>TSID NUMBER</Text>
+        <Text style={f.fTsidNum}>{d.tsid}</Text>
+        {/* Full name */}
+        <Text style={f.fNameLabel}>FULL NAME</Text>
+        <Text style={f.fNameVal}>{d.studentName}</Text>
+        {/* DOB / GENDER / NATIONALITY mini-grid */}
+        <View style={f.fMiniGrid}>
+          {[["DOB", d.dob], ["GENDER", d.gender], ["NATIONALITY", d.nationality]].map(([lbl, val]) => (
+            <View key={lbl} style={f.fMiniCell}>
+              <Text style={f.fMiniLabel}>{lbl}</Text>
+              <Text style={f.fMiniVal}>{val}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* RIGHT 68% */}
+      <View style={f.fRight}>
+        {/* School badge */}
+        <View style={f.fSchoolBadge}>
+          <View style={f.fSchoolIcon}><Text style={f.fSchoolIconTxt}>📚</Text></View>
+          <View style={f.fSchoolInfo}>
+            <Text style={f.fSchoolName} numberOfLines={2}>{d.school}</Text>
+            <Text style={f.fSchoolMeta}>
+              {d.admNo ? `ID: ${d.admNo}  ` : ""}{d.region} · {d.district}
+            </Text>
+          </View>
+        </View>
+
+        {/* Student info 2-col */}
+        <View style={f.fInfoGrid}>
+          {[["ENROLLMENT", d.enrollDate], ["LEVEL", d.level], ["BLOOD GROUP", d.bloodGroup], ["GUARDIAN PHONE", d.parentPhone]].map(([lbl, val]) => (
+            <View key={lbl} style={f.fInfoCell}>
+              <Text style={f.fInfoLabel}>{lbl}</Text>
+              <Text style={f.fInfoVal}>{val}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={f.fDivider}/>
+
+        {/* Guardian */}
+        <Text style={f.fGuardTitle}>PARENT / GUARDIAN</Text>
+        <View style={f.fGuardGrid}>
+          {[["NAME", d.parentName], ["NIDA", d.parentNida], ["RELATION", d.parentRel], ["PHONE", d.parentPhone]].map(([lbl, val]) => (
+            <View key={lbl} style={f.fGuardCell}>
+              <Text style={f.fGuardLabel}>{lbl}</Text>
+              <Text style={f.fGuardVal}>{val}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Important box */}
+        <View style={f.fImportBox}>
+          <Text style={f.fImportTitle}>IMPORTANT</Text>
+          {["Property of Govt. of Tanzania.", "Valid nationwide.", "Report loss immediately.", "Not transferable."].map((item, i) => (
+            <Text key={i} style={f.fImportItem}>• {item}</Text>
+          ))}
+        </View>
+      </View>
+    </View>
+
+    {/* BOTTOM BAR */}
+    <View style={f.fBottomBar}>
+      <View style={f.fQrWrap}>
+        {qrDataUrl
+          ? <Image src={qrDataUrl} style={f.fQrImg}/>
+          : <View style={[f.fQrImg, { backgroundColor: "#e0e8e0", alignItems: "center", justifyContent: "center" }]}>
+              <Text style={{ fontSize: 5, color: "#888" }}>QR</Text>
+            </View>}
+        <Text style={f.fQrTxt}>SCAN TO VERIFY</Text>
+      </View>
+      <View style={f.fVerifyWrap}>
+        <Text style={f.fVerifyLabel}>VERIFY AT</Text>
+        <Text style={f.fVerifyUrl}>verify.tsid.go.tz</Text>
+      </View>
+      <View style={f.fIssuedWrap}>
+        <Text style={f.fIssuedLabel}>ISSUED</Text>
+        <Text style={f.fIssuedVal}>{d.issueDate}</Text>
+      </View>
+      <View style={f.fLifelongBadge}>
+        <Text style={f.fLifelongTxt}>{"LIFELONG ·\nNATIONAL ·\nSECURE"}</Text>
+      </View>
+    </View>
+  </View>
+);
+
+// ─── BACK component ───────────────────────────────────────────────────────────
+const BackCard: React.FC<{ d: ReturnType<typeof extractData>; qrDataUrl?: string }> = ({ d }) => (
+  <View style={f.backCard}>
+    {/* HEADER */}
+    <View style={f.bHeader}>
+      <Text style={f.bHeaderNum}>{d.tsid}</Text>
+    </View>
+
+    {/* BODY */}
+    <View style={f.bBody}>
+      <View style={f.bLeft}>
+        {/* Student Information */}
+        <Text style={f.bSecTitle}>STUDENT INFORMATION</Text>
+        {[["DATE OF ENROLLMENT", d.enrollDate], ["CURRENT LEVEL", d.level], ["BLOOD GROUP", d.bloodGroup], ["PHONE (GUARDIAN)", d.parentPhone]].map(([lbl, val]) => (
+          <View key={lbl} style={f.bRow}>
+            <Text style={f.bLabel}>{lbl}</Text>
+            <Text style={f.bVal}>{val}</Text>
+          </View>
+        ))}
+        <View style={f.bDivider}/>
+        {/* Parent / Guardian */}
+        <Text style={f.bSecTitle}>PARENT / GUARDIAN</Text>
+        {[["NAME", d.parentName], ["NIDA NUMBER", d.parentNida], ["RELATIONSHIP", d.parentRel], ["PHONE", d.parentPhone]].map(([lbl, val]) => (
+          <View key={lbl} style={f.bRow}>
+            <Text style={f.bLabel}>{lbl}</Text>
+            <Text style={f.bVal}>{val}</Text>
+          </View>
+        ))}
+        {/* Important */}
+        <View style={f.bImportBox}>
+          <Text style={f.bImportTitle}>IMPORTANT</Text>
+          {["This card is the property of the Government of Tanzania.", "It is valid for educational identification nationwide.", "Report loss of this card to your school immediately.", "This card is not transferable."].map((item, i) => (
+            <Text key={i} style={f.bImportItem}>• {item}</Text>
+          ))}
+        </View>
+      </View>
+
+      {/* Stamp */}
+      <View style={f.bRight}>
+        <View style={f.bStamp}>
+          <View style={f.bStampRow}>
+            <Text style={f.bStampSm}>TANZANIA STUDENT</Text>
+            <Text style={f.bStampBig}>TSID</Text>
+            <Text style={f.bStampSm}>IDENTIFICATION{"\n"}SYSTEM</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+
+    {/* FOOTER TOP */}
+    <View style={f.bFooterTop}>
+      <View>
+        <Text style={f.bFootPortalLabel}>🌐 VERIFICATION PORTAL</Text>
+        <Text style={f.bFootPortalVal}>verify.tsid.go.tz</Text>
+      </View>
+      <View>
+        <Text style={f.bFootIssuedLabel}>ISSUED ON</Text>
+        <Text style={f.bFootIssuedVal}>{d.issueDate}</Text>
+      </View>
+    </View>
+
+    {/* FOOTER BOTTOM */}
+    <View style={f.bFooterBottom}>
+      <Text style={f.bFootSecure}>{"🔒 This card contains secure data.\nUnauthorized use is prohibited by law."}</Text>
+      <View>
+        <Text style={f.bFootCountrySub}>JAMHURI YA MUUNGANO</Text>
+        <Text style={f.bFootCountryTxt}>WA TANZANIA</Text>
+      </View>
+    </View>
+  </View>
+);
+
+// ─── Main Document ────────────────────────────────────────────────────────────
+export const ChetiMwanafunziPDF: React.FC<Props> = ({ application, lang = "sw", qrDataUrl }) => {
+  const d = extractData(application);
+  const qr = qrDataUrl || undefined;
 
   return (
     <Document>
-      <Page size="A4" style={s.page}>
-
-        {/* ════════ FRONT ════════ */}
-        <View style={s.cardWrap}>
-          <Text style={s.cardLabel}>FRONT</Text>
-          <View style={s.fCard}>
-
-            {/* Header */}
-            <View style={s.fHeader}>
-              {TANZANIA_LOGO_BASE64 ? <Image src={TANZANIA_LOGO_BASE64} style={s.fLogoImg}/> : null}
-              <View style={s.fBrandBox}>
-                <Text style={s.fBrandTSID}>TSID</Text>
-                <Text style={s.fBrandSub}>TANZANIA STUDENT{"\n"}IDENTIFICATION SYSTEM</Text>
-              </View>
-              <View style={s.fFlag}>
-                <View style={s.fFlagG}/><View style={s.fFlagY}/><View style={s.fFlagB}/>
-              </View>
-            </View>
-
-            {/* Photo + Info */}
-            <View style={s.fBody}>
-              {/* Left: photo */}
-              <View style={s.fPhotoCol}>
-                <View style={s.fPhotoFrame}>
-                  {photo
-                    ? <Image src={photo} style={s.fPhotoImg}/>
-                    : <View style={s.fPhotoPlaceholder}>
-                        <Text style={s.fPhotoPlaceholderTxt}>{"PICHA\nPHOTO"}</Text>
-                      </View>}
-                </View>
-              </View>
-
-              {/* Right: info */}
-              <View style={s.fInfoCol}>
-                <Text style={s.fTsidNumLabel}>TSID NUMBER</Text>
-                <Text style={s.fTsidNum}>{tsid}</Text>
-
-                <View style={s.fField}>
-                  <Text style={s.fFieldLabel}>FULL NAME</Text>
-                  <Text style={s.fFieldValue}>{studentName}</Text>
-                </View>
-                <View style={s.fField}>
-                  <Text style={s.fFieldLabel}>DATE OF BIRTH</Text>
-                  <Text style={s.fFieldValue}>{dob}</Text>
-                </View>
-                <View style={s.fField}>
-                  <Text style={s.fFieldLabel}>GENDER</Text>
-                  <Text style={s.fFieldValue}>{gender}</Text>
-                </View>
-                <View style={s.fField}>
-                  <Text style={s.fFieldLabel}>NATIONALITY</Text>
-                  <Text style={s.fFieldValue}>{nationality}</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* School + QR */}
-            <View style={s.fSchoolQR}>
-              <View style={s.fSchoolLeft}>
-                <View style={s.fSchoolIcon}>
-                  <Text style={s.fSchoolIconTxt}>📚</Text>
-                </View>
-                <View style={s.fSchoolText}>
-                  <Text style={s.fSchoolName}>{school}</Text>
-                  {admNo ? <Text style={s.fSchoolMeta}>SCHOOL ID: {admNo}</Text> : null}
-                  <Text style={s.fSchoolMeta}>REGION:   {region}</Text>
-                  <Text style={s.fSchoolMeta}>DISTRICT: {district}</Text>
-                </View>
-              </View>
-              <View style={s.fQrWrap}>
-                {qrDataUrl
-                  ? <Image src={qrDataUrl} style={s.fQrImg}/>
-                  : <View style={[s.fQrImg, { backgroundColor: LGRAY, alignItems: "center", justifyContent: "center" }]}>
-                      <Text style={{ fontSize: 7, color: MGRAY }}>QR CODE</Text>
-                    </View>}
-                <Text style={s.fQrTxt}>SCAN TO VERIFY</Text>
-              </View>
-            </View>
-
-            {/* Footer icons */}
-            <View style={s.fFooterIcons}>
-              {[
-                { icon: "⛨", label: "LIFELONG\nSTUDENT ID" },
-                { icon: "✦", label: "NATIONALY\nRECOGNIZED" },
-                { icon: "✓", label: "SECURE\n& VERIFIED" },
-              ].map((item, i) => (
-                <View key={i} style={s.fFooterItem}>
-                  <View style={s.fFooterIcon}>
-                    <Text style={s.fFooterIconTxt}>{item.icon}</Text>
-                  </View>
-                  <Text style={s.fFooterTxt}>{item.label}</Text>
-                </View>
-              ))}
-            </View>
-            <View style={s.fColorBar}>
-              <View style={s.fBarG}/><View style={s.fBarY}/><View style={s.fBarB}/>
-            </View>
-
-          </View>
-        </View>
-
-        {/* ════════ BACK ════════ */}
-        <View style={s.cardWrap}>
-          <Text style={s.cardLabel}>BACK</Text>
-          <View style={s.bCard}>
-
-            {/* Header */}
-            <View style={s.bHeader}>
-              <Text style={s.bHeaderNum}>{tsid}</Text>
-            </View>
-
-            {/* Body */}
-            <View style={s.bBody}>
-              {/* Left column */}
-              <View style={s.bLeft}>
-
-                {/* Student Information */}
-                <Text style={s.bSectionTitle}>STUDENT INFORMATION</Text>
-                {[
-                  ["DATE OF ENROLLMENT", enrollDate],
-                  ["CURRENT LEVEL",      level],
-                  ["CLASS / YEAR",       classYear],
-                  ["BLOOD GROUP",        bloodGroup],
-                  ["PHONE (GUARDIAN)",   parentPhone],
-                ].map(([label, value]) => (
-                  <View key={label} style={s.bRow}>
-                    <Text style={s.bLabel}>{label}</Text>
-                    <Text style={s.bValue}>{value}</Text>
-                  </View>
-                ))}
-
-                <View style={s.bDivider}/>
-
-                {/* Parent / Guardian */}
-                <Text style={s.bSectionTitle}>PARENT / GUARDIAN</Text>
-                {[
-                  ["NAME",         parentName],
-                  ["NIDA NUMBER",  parentNida],
-                  ["RELATIONSHIP", parentRel],
-                  ["PHONE",        parentPhone],
-                ].map(([label, value]) => (
-                  <View key={label} style={s.bRow}>
-                    <Text style={s.bLabel}>{label}</Text>
-                    <Text style={s.bValue}>{value}</Text>
-                  </View>
-                ))}
-
-                {/* Important */}
-                <View style={s.bImportantBox}>
-                  <Text style={s.bImportTitle}>IMPORTANT</Text>
-                  {[
-                    "This card is the property of the Government of Tanzania.",
-                    "It is valid for educational identification nationwide.",
-                    "Report loss of this card to your school immediately.",
-                    "This card is not transferable.",
-                  ].map((item, i) => (
-                    <Text key={i} style={s.bImportItem}>• {item}</Text>
-                  ))}
-                </View>
-              </View>
-
-              {/* Right: stamp circle */}
-              <View style={s.bRight}>
-                <View style={s.bStamp}>
-                  <Text style={s.bStampTxtSm}>TANZANIA STUDENT</Text>
-                  <Text style={s.bStampTxtBig}>TSID</Text>
-                  <Text style={s.bStampTxtSm}>IDENTIFICATION{"\n"}SYSTEM</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Footer top: portal + issued on */}
-            <View style={s.bFooterTop}>
-              <View style={s.bFootTopLeft}>
-                <Text style={s.bFootPortalLabel}>🌐  VERIFICATION PORTAL</Text>
-                <Text style={s.bFootPortalVal}>verify.tsid.go.tz</Text>
-              </View>
-              <View style={s.bFootTopRight}>
-                <Text style={s.bFootIssuedLbl}>ISSUED ON</Text>
-                <Text style={s.bFootIssuedVal}>{issueDate}</Text>
-              </View>
-            </View>
-
-            {/* Footer bottom: dark bar */}
-            <View style={s.bFooterBottom}>
-              <Text style={s.bFootSecure}>
-                🔒  This card contains secure data.{"\n"}
-                Unauthorized use is prohibited by law.
-              </Text>
-              <View style={s.bFootCountry}>
-                <Text style={s.bFootCtryTxt}>JAMHURI YA MUUNGANO</Text>
-                <Text style={[s.bFootCtryTxt, { color: WHITE, fontWeight: "bold" }]}>WA TANZANIA</Text>
-              </View>
-            </View>
-
-          </View>
-        </View>
-
+      {/* Page 1: Front only */}
+      <Page size="A6" style={f.page}>
+        <Text style={f.cardLabel}>FRONT</Text>
+        <FrontCard d={d} qrDataUrl={qr}/>
       </Page>
+
+      {/* Page 2: Back only */}
+      <Page size="A6" style={f.page}>
+        <Text style={f.cardLabel}>BACK</Text>
+        <BackCard d={d} qrDataUrl={qr}/>
+      </Page>
+
+      {/* Page 3: Combined printable (side by side on A5 landscape) */}
+      <Page size={[420, 210]} style={f.combinedPage}>
+        <View>
+          <Text style={f.cardLabel}>FRONT</Text>
+          <FrontCard d={d} qrDataUrl={qr}/>
+        </View>
+        <View>
+          <Text style={f.cardLabel}>BACK</Text>
+          <BackCard d={d} qrDataUrl={qr}/>
+        </View>
+      </Page>
+
+      {/* Page 4: Receipt */}
+      <ReceiptPage application={application} lang={lang} qrDataUrl={qr}/>
     </Document>
   );
 };
