@@ -741,7 +741,7 @@ export function Profile() {
         religious_affiliation: data.religious_affiliation || "",
         tribe: data.tribe || "",
       });
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching profile:", error);
 
       // React StrictMode can trigger duplicate effects in dev; show at most one toast until success.
@@ -772,7 +772,7 @@ export function Profile() {
         setDocuments(data);
         setFailedDocumentPreviews({});
       }
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching documents:", error);
     }
   };
@@ -790,7 +790,7 @@ export function Profile() {
 
       if (error) throw error;
       if (data) setPendingChanges(data);
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching pending changes:", error);
     }
   };
@@ -952,7 +952,7 @@ export function Profile() {
       setIsProfileImageBroken(false); // reset broken-image flag so new photo renders
       await fetchCompleteProfile();
       await refreshProfile(); // update user.photo_url in AuthContext
-    } catch (_error) {
+    } catch (error) {
       console.error("Error uploading photo:", error);
       showToast(
         lang === "sw" ? "Hitilafu imetokea wakati wa kupakia." : "Error occurred during upload.",
@@ -1035,7 +1035,7 @@ export function Profile() {
         documentInputRef.current.value = "";
       }
       await fetchDocuments();
-    } catch (_error) {
+    } catch (error) {
       console.error("Error uploading document:", error);
       showToast(
         lang === "sw"
@@ -1075,7 +1075,7 @@ export function Profile() {
       );
 
       await fetchDocuments();
-    } catch (_error) {
+    } catch (error) {
       console.error("Error deleting document:", error);
       showToast(
         lang === "sw"
@@ -1198,7 +1198,9 @@ export function Profile() {
       if (Object.keys(directUpdates).length > 0) {
         // Recalculate and persist profile_completion_pct so refreshes use the DB value
         const { getProfileCompletion } = await import("@/lib/verification");
-        const merged = { ...currentUser, ...directUpdates } as Parameters<typeof getProfileCompletion>[0];
+        const merged = { ...currentUser, ...directUpdates } as Parameters<
+          typeof getProfileCompletion
+        >[0];
         const pct = getProfileCompletion(merged);
         if (pct !== (currentUser?.profile_completion_pct ?? 0)) {
           directUpdates.profile_completion_pct = pct;

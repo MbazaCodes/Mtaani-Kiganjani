@@ -101,10 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = await fetchUserProfile(session.user.id);
       // Department membership detection
       if (profile) {
-
         if (profile.department_id) {
           profile.is_department_member = true;
-
         } else if (profile.role === "staff" || profile.role === "admin") {
           // PERF: Non-blocking dept check
           setTimeout(async () => {
@@ -119,17 +117,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               if (deptRow) {
                 profile.is_department_member = true;
                 profile.department_id = deptRow.department_id;
-
                 setUser({ ...profile });
-              } else {
-
               }
             } catch (e) {
               console.warn("[AUTH] Dept check exception:", e);
             }
           }, 0);
         }
-
       }
       setUser(profile);
     }

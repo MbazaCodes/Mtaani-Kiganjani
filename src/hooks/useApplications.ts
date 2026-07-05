@@ -67,7 +67,9 @@ export function useApplications(user: UserProfile | null) {
 
     const { data, error: fetchError } = await supabase
       .from("applications")
-      .select("id, application_number, service_id, service_name, status, created_at, updated_at, region, district, ward, street, office_registry_id, target_user_id, second_party_user_id, target_user_role, agreement_status, approved_at, payment_data, form_data")
+      .select(
+        "id, application_number, service_id, service_name, status, created_at, updated_at, region, district, ward, street, office_registry_id, target_user_id, second_party_user_id, target_user_role, agreement_status, approved_at, payment_data, form_data",
+      )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(100);
@@ -78,7 +80,7 @@ export function useApplications(user: UserProfile | null) {
     }
 
     if (data) {
-      const appsWithServices = data.map((app: Application) => {
+      const appsWithServices = (data as unknown as Application[]).map((app: Application) => {
         // Inject user's photo_url into form_data so PDF components can find it
         const formData = (app.form_data || {}) as Record<string, unknown>;
         if (user.photo_url && !formData.photo_url) {

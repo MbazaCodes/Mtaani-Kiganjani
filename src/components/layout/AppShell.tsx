@@ -13,12 +13,24 @@ import { getCurrencyForUser, type CurrencyCode } from "@/lib/currency";
 import type { ViewName } from "@/types";
 
 // PERF: Lazy-load these pages — they're only shown inside drawers/overlays
-const HelpPage = React.lazy(() => import("@/pages/HelpPage").then(m => ({ default: m.HelpPage })));
-const LegalPage = React.lazy(() => import("@/pages/LegalPage").then(m => ({ default: m.LegalPage })));
-const AboutPage = React.lazy(() => import("@/pages/AboutPage").then(m => ({ default: m.AboutPage })));
-const ServiceCharterPage = React.lazy(() => import("@/pages/ServiceCharterPage").then(m => ({ default: m.ServiceCharterPage })));
-const SecurityPolicyPage = React.lazy(() => import("@/pages/SecurityPolicyPage").then(m => ({ default: m.SecurityPolicyPage })));
-const PaymentGateway = React.lazy(() => import("@/components/PaymentGateway").then(m => ({ default: m.PaymentGateway })));
+const HelpPage = React.lazy(() =>
+  import("@/pages/HelpPage").then((m) => ({ default: m.HelpPage })),
+);
+const LegalPage = React.lazy(() =>
+  import("@/pages/LegalPage").then((m) => ({ default: m.LegalPage })),
+);
+const AboutPage = React.lazy(() =>
+  import("@/pages/AboutPage").then((m) => ({ default: m.AboutPage })),
+);
+const ServiceCharterPage = React.lazy(() =>
+  import("@/pages/ServiceCharterPage").then((m) => ({ default: m.ServiceCharterPage })),
+);
+const SecurityPolicyPage = React.lazy(() =>
+  import("@/pages/SecurityPolicyPage").then((m) => ({ default: m.SecurityPolicyPage })),
+);
+const PaymentGateway = React.lazy(() =>
+  import("@/components/PaymentGateway").then((m) => ({ default: m.PaymentGateway })),
+);
 
 /** Maps ViewName → URL path */
 export const VIEW_PATHS: Record<ViewName, string> = {
@@ -114,20 +126,22 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       <div className="flex flex-1 min-h-0">
         <Sidebar currentView={currentView} setView={setView} />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 pb-24 sm:pb-6">
-          <React.Suspense fallback={<div className="p-8 text-center text-stone-400">Loading...</div>}>
-          {currentView === "help_faq" ? (
-            <HelpPage lang={lang} />
-          ) : currentView === "legal" ? (
-            <LegalPage lang={lang} />
-          ) : currentView === "about" ? (
-            <AboutPage lang={lang} />
-          ) : currentView === "service_charter" ? (
-            <ServiceCharterPage lang={lang} />
-          ) : currentView === "security_policy" ? (
-            <SecurityPolicyPage lang={lang} />
-          ) : (
-            children
-          )}
+          <React.Suspense
+            fallback={<div className="p-8 text-center text-stone-400">Loading...</div>}
+          >
+            {currentView === "help_faq" ? (
+              <HelpPage lang={lang} />
+            ) : currentView === "legal" ? (
+              <LegalPage lang={lang} />
+            ) : currentView === "about" ? (
+              <AboutPage lang={lang} />
+            ) : currentView === "service_charter" ? (
+              <ServiceCharterPage lang={lang} />
+            ) : currentView === "security_policy" ? (
+              <SecurityPolicyPage lang={lang} />
+            ) : (
+              children
+            )}
           </React.Suspense>
           {/* Demonstration disclaimer footer */}
           <footer className="mt-8 pt-4 border-t border-stone-200">

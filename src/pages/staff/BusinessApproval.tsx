@@ -269,7 +269,7 @@ export const BusinessApproval: React.FC = () => {
         suspended: allRegs.filter((r) => r.status === "suspended").length,
         total: allRegs.length,
       });
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching registrations:", error);
       showToast(lang === "sw" ? "Hitilafu katika kupakia data" : "Error loading data", "error");
     } finally {
@@ -313,7 +313,7 @@ export const BusinessApproval: React.FC = () => {
         }),
       );
       setAgreements(enriched as AgreementRow[]);
-    } catch (_err) {
+    } catch (err) {
       console.error("fetch agreements", err);
     } finally {
       setLoadingAgreements(false);
@@ -345,7 +345,7 @@ export const BusinessApproval: React.FC = () => {
         }),
       );
       setAllApps(enriched as AppRow[]);
-    } catch (_err) {
+    } catch (err) {
       console.error("fetch all apps", err);
     } finally {
       setLoadingApps(false);
@@ -417,7 +417,7 @@ export const BusinessApproval: React.FC = () => {
 
       setSelectedRegistration(null);
       fetchRegistrations();
-    } catch (_error) {
+    } catch (error) {
       console.error("Approval error:", error);
       showToast(
         lang === "sw" ? "Hitilafu katika kuidhinisha" : "Error approving registration",
@@ -453,7 +453,7 @@ export const BusinessApproval: React.FC = () => {
       setRejectionReason("");
       setSelectedRegistration(null);
       fetchRegistrations();
-    } catch (_error) {
+    } catch (error) {
       console.error("Rejection error:", error);
       showToast(
         lang === "sw" ? "Hitilafu katika kukataa" : "Error rejecting registration",

@@ -21,9 +21,9 @@ const MAX_FILE_SIZE_MB = 10;
 export interface UploadedFile {
   type: string;
   name: string;
-  url: string;       // public URL — store this in form_data
+  url: string; // public URL — store this in form_data
   size: number;
-  path: string;      // storage path for deletion
+  path: string; // storage path for deletion
 }
 
 /**
@@ -37,19 +37,19 @@ export async function uploadFile(
   docType = "support",
 ): Promise<UploadedFile | null> {
   if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-    console.warn(`[fileStorage] File too large: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+    console.warn(
+      `[fileStorage] File too large: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`,
+    );
     return null;
   }
 
   const ext = file.name.split(".").pop() || "bin";
   const path = `${userId}/${applicationId}/${docType}-${Date.now()}.${ext}`;
 
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+  });
 
   if (error) {
     console.error("[fileStorage] Upload failed:", error.message);
@@ -78,12 +78,11 @@ export async function uploadFiles(
   docTypes: string[] = [],
 ): Promise<{ type: string; name: string; url?: string; dataUrl?: string; size: number }[]> {
   const results = await Promise.allSettled(
-    files.map((file, i) =>
-      uploadFile(file, userId, applicationId, docTypes[i] ?? "support"),
-    ),
+    files.map((file, i) => uploadFile(file, userId, applicationId, docTypes[i] ?? "support")),
   );
 
-  const uploaded: { type: string; name: string; url?: string; dataUrl?: string; size: number }[] = [];
+  const uploaded: { type: string; name: string; url?: string; dataUrl?: string; size: number }[] =
+    [];
 
   for (let i = 0; i < results.length; i++) {
     const result = results[i];

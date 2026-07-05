@@ -114,11 +114,16 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
   const sellerCitizenId = user?.citizen_id || fd.seller_citizen_id || "—";
 
   // Photos — check uploaded_documents for seller/buyer selfie, then fall back to profile
-  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string; url?: string }[];
-  const sellerSelfie = uploadedDocs.find(d => d.type === "seller_selfie" || d.type === "selfie");
-  const buyerSelfie  = uploadedDocs.find(d => d.type === "buyer_selfie");
-  const sellerPhotoRaw = sellerSelfie?.dataUrl || sellerSelfie?.url || user?.photo_url || fd.seller_photo_url || null;
-  const buyerPhotoRaw  = buyerSelfie?.dataUrl  || buyerSelfie?.url  || fd.buyer_photo_url  || null;
+  const uploadedDocs = (fd.uploaded_documents || []) as {
+    type?: string;
+    dataUrl?: string;
+    url?: string;
+  }[];
+  const sellerSelfie = uploadedDocs.find((d) => d.type === "seller_selfie" || d.type === "selfie");
+  const buyerSelfie = uploadedDocs.find((d) => d.type === "buyer_selfie");
+  const sellerPhotoRaw =
+    sellerSelfie?.dataUrl || sellerSelfie?.url || user?.photo_url || fd.seller_photo_url || null;
+  const buyerPhotoRaw = buyerSelfie?.dataUrl || buyerSelfie?.url || fd.buyer_photo_url || null;
 
   const assetType = String(fd.asset_type || "");
   const isRental = assetType.startsWith("KODI");
@@ -342,8 +347,14 @@ export const MakubalianoMauzianoPDF: React.FC<DocumentPDFProps> = ({
                     label={sw ? "Jina" : "Name"}
                     value={fd.second_party_name || fd.buyer_name || fd.tenant_name}
                   />
-                  <Row label="NIDA" value={fd.buyer_nida || fd.tenant_nida || fd.target_user_nida} />
-                  <Row label={sw ? "Raia ID" : "Cit. ID"} value={fd.second_party_citizen_id ?? ""} />
+                  <Row
+                    label="NIDA"
+                    value={fd.buyer_nida || fd.tenant_nida || fd.target_user_nida}
+                  />
+                  <Row
+                    label={sw ? "Raia ID" : "Cit. ID"}
+                    value={fd.second_party_citizen_id ?? ""}
+                  />
                   {fd.buyer_phone && <Row label={sw ? "Simu" : "Phone"} value={fd.buyer_phone} />}
                   {fd.buyer_ward && (
                     <Row

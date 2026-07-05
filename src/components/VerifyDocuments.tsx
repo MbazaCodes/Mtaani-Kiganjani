@@ -78,8 +78,7 @@ interface VerifiedDocument {
 }
 
 // Safe accessor for verified document fields
-const vf = (doc: Record<string, unknown> | null, key: string): string =>
-  String(doc?.[key] ?? "");
+const vf = (doc: Record<string, unknown> | null, key: string): string => String(doc?.[key] ?? "");
 
 // Document types for verification
 const DOCUMENT_TYPES = [
@@ -260,11 +259,7 @@ interface VerifyDocumentsProps {
   userRole?: UserRole;
 }
 
-export function VerifyDocuments({
-  lang,
-  onBack,
-  userRole = "citizen",
-}: VerifyDocumentsProps) {
+export function VerifyDocuments({ lang, onBack, userRole = "citizen" }: VerifyDocumentsProps) {
   const t = useTranslation(lang);
   const sw = lang === "sw";
   const L = (s: string, e: string) => (sw ? s : e);
@@ -279,7 +274,9 @@ export function VerifyDocuments({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "scanning" | "found" | "notfound">("idle");
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "scanning" | "found" | "notfound">(
+    "idle",
+  );
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -303,29 +300,26 @@ export function VerifyDocuments({
   // ── Upload & QR scan logic ────────────────────────────────────────────────
 
   /** Draw an image/canvas onto a hidden canvas and run jsQR over the pixels */
-  const scanImageForQR = useCallback(
-    async (dataUrl: string): Promise<string | null> => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
-          if (!ctx) return resolve(null);
-          ctx.drawImage(img, 0, 0);
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "dontInvert",
-          });
-          resolve(code ? code.data : null);
-        };
-        img.onerror = () => resolve(null);
-        img.src = dataUrl;
-      });
-    },
-    [],
-  );
+  const scanImageForQR = useCallback(async (dataUrl: string): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        resolve(code ? code.data : null);
+      };
+      img.onerror = () => resolve(null);
+      img.src = dataUrl;
+    });
+  }, []);
 
   /** Extract the application/reference number from a decoded QR payload string */
   const extractRefFromQR = (raw: string): string | null => {
@@ -360,7 +354,12 @@ export function VerifyDocuments({
 
       if (!isPDF && !isImage) {
         setUploadStatus("notfound");
-        setUploadError(L("Aina ya faili haikusuluhuliwa. Tumia PNG, JPG, au PDF.", "Unsupported file type. Use PNG, JPG, or PDF."));
+        setUploadError(
+          L(
+            "Aina ya faili haikusuluhuliwa. Tumia PNG, JPG, au PDF.",
+            "Unsupported file type. Use PNG, JPG, or PDF.",
+          ),
+        );
         return;
       }
 
@@ -458,7 +457,12 @@ export function VerifyDocuments({
       } catch (err) {
         console.error("File scan error:", err);
         setUploadStatus("notfound");
-        setUploadError(L("Hitilafu wakati wa kusoma faili. Jaribu tena.", "Error reading file. Please try again."));
+        setUploadError(
+          L(
+            "Hitilafu wakati wa kusoma faili. Jaribu tena.",
+            "Error reading file. Please try again.",
+          ),
+        );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -484,7 +488,10 @@ export function VerifyDocuments({
     [processFile],
   );
 
-  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragOver(true); };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
   const handleDragLeave = () => setIsDragOver(false);
 
   const clearUpload = () => {
@@ -598,7 +605,9 @@ export function VerifyDocuments({
       verificationCode: String(data.application_number ?? ""),
       status: String(data.status ?? ""),
       applicantMasked: maskName(String(user?.first_name ?? ""), String(user?.last_name ?? "")),
-      applicantFull: `${user?.first_name ?? ""} ${user?.middle_name ?? ""} ${user?.last_name ?? ""}`.replace(/\s+/g, " ").trim(),
+      applicantFull: `${user?.first_name ?? ""} ${user?.middle_name ?? ""} ${user?.last_name ?? ""}`
+        .replace(/\s+/g, " ")
+        .trim(),
       nidaNumber: String(user?.nida_number ?? ""),
       nidaMasked: maskNida(String(user?.nida_number ?? "")),
       phone: String(user?.phone ?? ""),
@@ -668,7 +677,9 @@ export function VerifyDocuments({
       verificationCode: String(data.citizen_id ?? upper),
       status: data.is_verified ? "verified" : "pending",
       applicantMasked: maskName(String(data.first_name ?? ""), String(data.last_name ?? "")),
-      applicantFull: `${data.first_name ?? ""} ${data.middle_name ?? ""} ${data.last_name ?? ""}`.replace(/\s+/g, " ").trim(),
+      applicantFull: `${data.first_name ?? ""} ${data.middle_name ?? ""} ${data.last_name ?? ""}`
+        .replace(/\s+/g, " ")
+        .trim(),
       nidaNumber: String(data.nida_number ?? ""),
       nidaMasked: maskNida(String(data.nida_number ?? "")),
       phone: String(data.phone ?? ""),
@@ -723,7 +734,9 @@ export function VerifyDocuments({
       verificationCode: String(data.nida_number ?? upper),
       status: "valid",
       applicantMasked: maskName(String(data.first_name ?? ""), String(data.last_name ?? "")),
-      applicantFull: `${data.first_name ?? ""} ${data.middle_name ?? ""} ${data.last_name ?? ""}`.replace(/\s+/g, " ").trim(),
+      applicantFull: `${data.first_name ?? ""} ${data.middle_name ?? ""} ${data.last_name ?? ""}`
+        .replace(/\s+/g, " ")
+        .trim(),
       nidaNumber: String(data.nida_number ?? ""),
       nidaMasked: maskNida(String(data.nida_number ?? "")),
       phone: String(data.phone ?? ""),
@@ -776,12 +789,30 @@ export function VerifyDocuments({
   // ── Status label helper ───────────────────────────────────────────────────
   const statusLabel = (status: string) => {
     const map: Record<string, [string, string]> = {
-      issued: [L("Imetolewa", "Issued"), "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"],
-      approved: [L("Imekubaliwa", "Approved"), "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"],
-      rejected: [L("Imekataliwa", "Rejected"), "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"],
-      verified: [L("Imethibitishwa", "Verified"), "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"],
-      valid: [L("Halali", "Valid"), "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"],
-      pending: [L("Inasubiri", "Pending"), "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"],
+      issued: [
+        L("Imetolewa", "Issued"),
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+      ],
+      approved: [
+        L("Imekubaliwa", "Approved"),
+        "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+      ],
+      rejected: [
+        L("Imekataliwa", "Rejected"),
+        "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+      ],
+      verified: [
+        L("Imethibitishwa", "Verified"),
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+      ],
+      valid: [
+        L("Halali", "Valid"),
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+      ],
+      pending: [
+        L("Inasubiri", "Pending"),
+        "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+      ],
     };
     const entry = map[status?.toLowerCase()];
     return entry
@@ -858,8 +889,8 @@ export function VerifyDocuments({
                       </p>
                       <p className="text-xs text-stone-400 dark:text-stone-500 hidden sm:block">
                         {L(
-                          (selectedDocument as typeof DOCUMENT_TYPES[number]).descriptionSw,
-                          (selectedDocument as typeof DOCUMENT_TYPES[number]).description,
+                          (selectedDocument as (typeof DOCUMENT_TYPES)[number]).descriptionSw,
+                          (selectedDocument as (typeof DOCUMENT_TYPES)[number]).description,
                         )}
                       </p>
                     </div>
@@ -941,7 +972,8 @@ export function VerifyDocuments({
                   className="w-full h-14 px-6 rounded-2xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all font-mono text-base uppercase tracking-wider"
                 />
                 <p className="text-xs text-stone-400 dark:text-stone-500 mt-1.5 pl-1">
-                  {L("Mfano:", "Example:")} <span className="font-mono">{selectedDocument.placeholder}</span>
+                  {L("Mfano:", "Example:")}{" "}
+                  <span className="font-mono">{selectedDocument.placeholder}</span>
                 </p>
               </div>
               <button
@@ -975,7 +1007,10 @@ export function VerifyDocuments({
                   {L("Pakia Nyaraka / Skena QR", "Upload & Scan QR")}
                 </h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400">
-                  {L("Pakia PDF au picha — QR Code itapatikana na kuthibitishwa moja kwa moja", "Upload PDF or image — QR Code will be detected and verified automatically")}
+                  {L(
+                    "Pakia PDF au picha — QR Code itapatikana na kuthibitishwa moja kwa moja",
+                    "Upload PDF or image — QR Code will be detected and verified automatically",
+                  )}
                 </p>
               </div>
             </div>
@@ -1003,11 +1038,22 @@ export function VerifyDocuments({
                     : "border-stone-200 dark:border-stone-700 hover:border-emerald-400 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10",
                 )}
               >
-                <div className={cn(
-                  "h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-all",
-                  isDragOver ? "bg-emerald-100 dark:bg-emerald-900/40 scale-110" : "bg-stone-50 dark:bg-stone-800",
-                )}>
-                  <Upload className={cn("h-8 w-8 transition-colors", isDragOver ? "text-emerald-600" : "text-stone-400 group-hover:text-emerald-600")} />
+                <div
+                  className={cn(
+                    "h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-all",
+                    isDragOver
+                      ? "bg-emerald-100 dark:bg-emerald-900/40 scale-110"
+                      : "bg-stone-50 dark:bg-stone-800",
+                  )}
+                >
+                  <Upload
+                    className={cn(
+                      "h-8 w-8 transition-colors",
+                      isDragOver
+                        ? "text-emerald-600"
+                        : "text-stone-400 group-hover:text-emerald-600",
+                    )}
+                  />
                 </div>
                 <p className="text-stone-900 dark:text-stone-100 font-bold mb-1">
                   {L("Buruta na uachie hapa", "Drag and drop here")}
@@ -1034,7 +1080,8 @@ export function VerifyDocuments({
                       {uploadedFile.name}
                     </p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
-                      {(uploadedFile.size / 1024).toFixed(1)} KB · {uploadedFile.type.split("/")[1]?.toUpperCase()}
+                      {(uploadedFile.size / 1024).toFixed(1)} KB ·{" "}
+                      {uploadedFile.type.split("/")[1]?.toUpperCase()}
                     </p>
                   </div>
                   <button
@@ -1213,7 +1260,9 @@ export function VerifyDocuments({
                     </p>
                     <div className="flex items-center gap-2 text-xs text-stone-400">
                       <Lock className="h-3 w-3 shrink-0" />
-                      <span>{L("Data imehifadhiwa kwa usalama", "Data secured with encryption")}</span>
+                      <span>
+                        {L("Data imehifadhiwa kwa usalama", "Data secured with encryption")}
+                      </span>
                     </div>
                     <div className="mt-2 pt-2 border-t border-stone-700">
                       <p className="text-xs text-stone-400 font-mono truncate">
@@ -1454,15 +1503,34 @@ export function VerifyDocuments({
                   {L("Mambo ya kuangalia:", "Things to check:")}
                 </p>
                 <ul className="text-sm text-amber-700 dark:text-amber-400 space-y-1.5 list-disc list-inside">
-                  <li>{L("Hakikisha ulichagua aina sahihi ya nyaraka", "Make sure you selected the correct document type")}</li>
-                  <li>{L("Angalia namba haina makosa ya uandishi", "Check the number has no typos")}</li>
+                  <li>
+                    {L(
+                      "Hakikisha ulichagua aina sahihi ya nyaraka",
+                      "Make sure you selected the correct document type",
+                    )}
+                  </li>
+                  <li>
+                    {L("Angalia namba haina makosa ya uandishi", "Check the number has no typos")}
+                  </li>
                   {selectedDocType === "ct_id" && (
-                    <li>{L("CT ID inaanza na 'CT' ikifuatiwa na namba (mfano: CT26A00001)", "CT ID starts with 'CT' followed by numbers (e.g., CT26A00001)")}</li>
+                    <li>
+                      {L(
+                        "CT ID inaanza na 'CT' ikifuatiwa na namba (mfano: CT26A00001)",
+                        "CT ID starts with 'CT' followed by numbers (e.g., CT26A00001)",
+                      )}
+                    </li>
                   )}
                   {selectedDocType === "application" && (
-                    <li>{L("Namba ya maombi inaanza na 'TZ-' (mfano: TZ-KIB-20260309-1234)", "Application number starts with 'TZ-' (e.g., TZ-KIB-20260309-1234)")}</li>
+                    <li>
+                      {L(
+                        "Namba ya maombi inaanza na 'TZ-' (mfano: TZ-KIB-20260309-1234)",
+                        "Application number starts with 'TZ-' (e.g., TZ-KIB-20260309-1234)",
+                      )}
+                    </li>
                   )}
-                  <li>{L("Ombi lazima liwe limewasilishwa", "Application must have been submitted")}</li>
+                  <li>
+                    {L("Ombi lazima liwe limewasilishwa", "Application must have been submitted")}
+                  </li>
                 </ul>
               </div>
 

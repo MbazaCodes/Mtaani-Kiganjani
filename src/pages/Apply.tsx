@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import type { AnyFormData, ApplicationDraft } from "@/types";
 import { motion } from "framer-motion";
-import { ArrowLeft, CreditCard, ShieldAlert, Briefcase, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CreditCard, ShieldAlert, Briefcase, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { TANZANIA_LOGO_URL } from "@/constants/services";

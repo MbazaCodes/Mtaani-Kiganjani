@@ -184,6 +184,8 @@ export interface ApplicationDraft {
   saved_at: string;
   last_saved?: string; // timestamp of last auto-save
   current_step?: number; // which form step was active when draft was saved
+  created_at?: string; // alias — set by Supabase on insert
+  updated_at?: string; // alias — set by Supabase on update
 }
 
 // ─── Staff signup data ─────────────────────────────────────────────────────────

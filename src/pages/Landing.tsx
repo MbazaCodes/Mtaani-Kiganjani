@@ -717,17 +717,21 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
       {/* ── Footer (OR-MUU 2014 §2.1.v — mawasiliano, muundo, mkataba wa huduma) ─── */}
       <footer className="bg-stone-900 text-white pt-14 pb-8 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-
           {/* Top grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-
             {/* Brand + about */}
             <div className="lg:col-span-1 space-y-4">
               <div className="flex items-center gap-3">
-                <img src={TANZANIA_LOGO_URL} alt="Nembo ya Tanzania" className="w-10 h-10 object-contain" />
+                <img
+                  src={TANZANIA_LOGO_URL}
+                  alt="Nembo ya Tanzania"
+                  className="w-10 h-10 object-contain"
+                />
                 <div>
                   <p className="font-black text-lg tracking-tight text-white">MTAANI KIGANJANI</p>
-                  <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">E-Mtaa Portal</p>
+                  <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">
+                    E-Mtaa Portal
+                  </p>
                 </div>
               </div>
               <p className="text-stone-400 text-sm leading-relaxed">
@@ -737,8 +741,12 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               </p>
               {/* eGA compliance badge */}
               <div className="flex flex-wrap gap-2 pt-1">
-                <span className="text-[9px] font-black bg-emerald-900 text-emerald-400 border border-emerald-700 px-2 py-1 rounded uppercase tracking-widest">PO-RALG / TAMISEMI</span>
-                <span className="text-[9px] font-black bg-stone-800 text-stone-400 border border-stone-600 px-2 py-1 rounded uppercase tracking-widest">eGA Compliant</span>
+                <span className="text-[9px] font-black bg-emerald-900 text-emerald-400 border border-emerald-700 px-2 py-1 rounded uppercase tracking-widest">
+                  PO-RALG / TAMISEMI
+                </span>
+                <span className="text-[9px] font-black bg-stone-800 text-stone-400 border border-stone-600 px-2 py-1 rounded uppercase tracking-widest">
+                  eGA Compliant
+                </span>
               </div>
             </div>
 
@@ -758,7 +766,10 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                   lang === "sw" ? "Makubaliano ya Mauzo/Pango" : "Sale/Rental Agreement",
                   lang === "sw" ? "Taarifa ya Mgogoro" : "Dispute Report",
                 ].map((s) => (
-                  <li key={s} className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors cursor-pointer">
+                  <li
+                    key={s}
+                    className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors cursor-pointer"
+                  >
                     <span className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
                     {s}
                   </li>
@@ -781,8 +792,12 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                   { label: "Serikali.go.tz", href: "https://www.serikali.go.tz" },
                 ].map((l) => (
                   <li key={l.href}>
-                    <a href={l.href} target="_blank" rel="noopener noreferrer"
-                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                    <a
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                    >
                       <ExternalLink size={11} className="shrink-0" />
                       {l.label}
                     </a>
@@ -797,15 +812,37 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               </h4>
               <ul className="space-y-2.5 text-sm text-stone-400">
                 {[
-                  { label: "RITA — Wakala wa Usajili, Ufilisi na Udhamini", href: "https://www.rita.go.tz" },
-                  { label: lang === "sw" ? "Idara ya Uhamiaji" : "Immigration Department", href: "https://www.immigration.go.tz" },
-                  { label: lang === "sw" ? "Jeshi la Polisi Tanzania" : "Tanzania Police Force", href: "https://www.polisi.go.tz" },
-                  { label: lang === "sw" ? "Wizara ya Mambo ya Ndani ya Nchi" : "Ministry of Home Affairs", href: "https://www.mhome.go.tz" },
-                  { label: lang === "sw" ? "Mahakama ya Tanzania" : "Judiciary of Tanzania", href: "https://www.judiciary.go.tz" },
+                  {
+                    label: "RITA — Wakala wa Usajili, Ufilisi na Udhamini",
+                    href: "https://www.rita.go.tz",
+                  },
+                  {
+                    label: lang === "sw" ? "Idara ya Uhamiaji" : "Immigration Department",
+                    href: "https://www.immigration.go.tz",
+                  },
+                  {
+                    label: lang === "sw" ? "Jeshi la Polisi Tanzania" : "Tanzania Police Force",
+                    href: "https://www.polisi.go.tz",
+                  },
+                  {
+                    label:
+                      lang === "sw"
+                        ? "Wizara ya Mambo ya Ndani ya Nchi"
+                        : "Ministry of Home Affairs",
+                    href: "https://www.mhome.go.tz",
+                  },
+                  {
+                    label: lang === "sw" ? "Mahakama ya Tanzania" : "Judiciary of Tanzania",
+                    href: "https://www.judiciary.go.tz",
+                  },
                 ].map((l) => (
                   <li key={l.href}>
-                    <a href={l.href} target="_blank" rel="noopener noreferrer"
-                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                    <a
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                    >
                       <ExternalLink size={11} className="shrink-0" />
                       {l.label}
                     </a>
@@ -820,15 +857,25 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               </h4>
               <ul className="space-y-2.5 text-sm text-stone-400">
                 {[
-                  { label: lang === "sw" ? "Ofisi ya Rais — MCIT" : "President's Office — MCIT", href: "https://www.mcit.go.tz" },
+                  {
+                    label: lang === "sw" ? "Ofisi ya Rais — MCIT" : "President's Office — MCIT",
+                    href: "https://www.mcit.go.tz",
+                  },
                   { label: "TCRA — Mamlaka ya Mawasiliano", href: "https://www.tcra.go.tz" },
                   { label: "COSTECH — Sayansi na Teknolojia", href: "https://www.costech.or.tz" },
                   { label: "TTCL — Tanzania Telecom", href: "https://www.ttcl.co.tz" },
-                  { label: lang === "sw" ? "Tume ya TEHAMA Tanzania" : "ICT Commission Tanzania", href: "https://www.ega.go.tz" },
+                  {
+                    label: lang === "sw" ? "Tume ya TEHAMA Tanzania" : "ICT Commission Tanzania",
+                    href: "https://www.ega.go.tz",
+                  },
                 ].map((l) => (
                   <li key={l.href}>
-                    <a href={l.href} target="_blank" rel="noopener noreferrer"
-                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                    <a
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                    >
                       <ExternalLink size={11} className="shrink-0" />
                       {l.label}
                     </a>
@@ -846,11 +893,18 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               <ul className="space-y-3 text-sm text-stone-400">
                 <li className="flex items-start gap-2">
                   <MapPin size={14} className="text-emerald-500 shrink-0 mt-0.5" />
-                  <span>Ofisi ya Rais — TAMISEMI<br />Mtaa wa Magogoni, Dodoma</span>
+                  <span>
+                    Ofisi ya Rais — TAMISEMI
+                    <br />
+                    Mtaa wa Magogoni, Dodoma
+                  </span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail size={14} className="text-emerald-500 shrink-0" />
-                  <a href="mailto:msaada@e-mtaatz.xyz" className="hover:text-emerald-400 transition-colors">
+                  <a
+                    href="mailto:msaada@e-mtaatz.xyz"
+                    className="hover:text-emerald-400 transition-colors"
+                  >
                     msaada@e-mtaatz.xyz
                   </a>
                 </li>
@@ -865,8 +919,10 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
               </ul>
 
               {/* Feedback link (OR-MUU §2.1.xi — sehemu ya mrejesho) */}
-              <a href="mailto:mrejesho@e-mtaatz.xyz"
-                className="inline-flex items-center gap-2 mt-2 px-3 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-colors">
+              <a
+                href="mailto:mrejesho@e-mtaatz.xyz"
+                className="inline-flex items-center gap-2 mt-2 px-3 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-colors"
+              >
                 <MessageSquare size={12} />
                 {lang === "sw" ? "Tuma Mrejesho" : "Send Feedback"}
               </a>
@@ -888,9 +944,15 @@ export function Landing({ onShowAuth, onShowVerify }: LandingProps) {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2 justify-center">
-                <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">ISO 9001:2015</span>
-                <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">eGA&#x2F;APA&#x2F;009</span>
-                <span className="text-[9px] font-black bg-emerald-900 text-emerald-400 px-2 py-1 rounded uppercase tracking-widest">Tanzania Digital</span>
+                <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">
+                  ISO 9001:2015
+                </span>
+                <span className="text-[9px] font-black bg-stone-800 text-stone-400 px-2 py-1 rounded uppercase tracking-widest">
+                  eGA&#x2F;APA&#x2F;009
+                </span>
+                <span className="text-[9px] font-black bg-emerald-900 text-emerald-400 px-2 py-1 rounded uppercase tracking-widest">
+                  Tanzania Digital
+                </span>
               </div>
             </div>
           </div>

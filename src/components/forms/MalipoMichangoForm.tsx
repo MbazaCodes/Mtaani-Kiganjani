@@ -595,8 +595,14 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
           <ul className="space-y-1.5">
             {[
               vals.category === "FAINI"
-                ? L("Faini yako imefutwa kutoka kwenye rekodi", "The fine has been cleared from your record")
-                : L("Malipo yamerekodiwa kwenye historia ya akaunti", "Payment recorded in your account history"),
+                ? L(
+                    "Faini yako imefutwa kutoka kwenye rekodi",
+                    "The fine has been cleared from your record",
+                  )
+                : L(
+                    "Malipo yamerekodiwa kwenye historia ya akaunti",
+                    "Payment recorded in your account history",
+                  ),
               L("Namba ya rejea imetumwa kwa SMS/email", "Reference number sent via SMS/email"),
               L("Tunzia namba ya rejea kwa usalama", "Keep this reference number safe"),
             ].map((item, i) => (

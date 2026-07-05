@@ -110,7 +110,7 @@ export function Applications({
       !!(
         app.paid_at ||
         (app.form_data as Record<string, unknown>)?.payment_data ||
-        (app.payment_data as Record<string, unknown>)?.transaction_id ||
+        (app.payment_data as unknown as Record<string, unknown>)?.transaction_id ||
         getFee(app) === 0
       ),
     [getFee],
@@ -317,7 +317,7 @@ export function Applications({
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-stone-800 text-sm truncate">{d.service_name}</p>
                 <p className="text-xs text-stone-500">
-                  {new Date(d.updated_at || d.created_at).toLocaleDateString()}
+                  {new Date(d.updated_at || d.created_at || d.saved_at).toLocaleDateString()}
                 </p>
               </div>
               <button
@@ -428,7 +428,11 @@ export function Applications({
                     >
                       <div className="p-4 space-y-4">
                         {/* Progress */}
-                        <StatusTimeline status={app.status} lang={lang} serviceName={app.service_name} />
+                        <StatusTimeline
+                          status={app.status}
+                          lang={lang}
+                          serviceName={app.service_name}
+                        />
 
                         {/* Staff feedback */}
                         {app.feedback && (
@@ -483,7 +487,10 @@ export function Applications({
                           )}
 
                         {/* ── DOCUMENT DOWNLOADS (issued + paid + Malipo paid) ── */}
-                        {(app.status === "issued" || (app.status === "paid" && (app.service_name?.toLowerCase().includes("malipo") || app.service_name?.toLowerCase().includes("michango")))) && (
+                        {(app.status === "issued" ||
+                          (app.status === "paid" &&
+                            (app.service_name?.toLowerCase().includes("malipo") ||
+                              app.service_name?.toLowerCase().includes("michango")))) && (
                           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
                             <p className="text-xs font-black text-emerald-700 uppercase tracking-widest">
                               {L("Hati Rasmi Yako", "Your Official Document")}

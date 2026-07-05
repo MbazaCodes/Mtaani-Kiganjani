@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-type Language = "en" | "sw";
+export type Language = "en" | "sw";
 type CurrencyCode = "TZS" | "USD" | "EUR" | "GBP";
 
 interface LanguageContextType {

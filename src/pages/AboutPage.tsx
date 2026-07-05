@@ -166,8 +166,23 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
     <div className="max-w-4xl mx-auto space-y-10 pb-10">
       {/* Back to Home */}
       <div className="pt-4">
-        <a href="/" className="inline-flex items-center gap-2 text-sm font-bold text-stone-500 hover:text-emerald-600 transition-colors group">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        <a
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-bold text-stone-500 hover:text-emerald-600 transition-colors group"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="group-hover:-translate-x-1 transition-transform"
+          >
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
           {L(lang, "Rudi Nyumbani", "Back to Home")}
         </a>
       </div>
@@ -177,7 +192,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
         <div className="absolute inset-0 opacity-10 bg-[url('/tz-coat-of-arms.png')] bg-no-repeat bg-right bg-contain" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
-            <img src="/tz-coat-of-arms.png" alt="Nembo ya Tanzania" className="w-12 h-12 object-contain" />
+            <img
+              src="/tz-coat-of-arms.png"
+              alt="Nembo ya Tanzania"
+              className="w-12 h-12 object-contain"
+            />
             <div>
               <p className="text-emerald-300 text-xs font-bold uppercase tracking-widest">
                 {sw ? "Jamhuri ya Muungano wa Tanzania" : "United Republic of Tanzania"}
@@ -197,7 +216,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
           </p>
           <div className="flex flex-wrap gap-2 mt-4">
             {["PO-RALG / TAMISEMI", "eGA Compliant", "eGA/APA/009", "ISO 9001:2015"].map((b) => (
-              <span key={b} className="text-[10px] font-black bg-white/10 border border-white/20 px-2 py-1 rounded uppercase tracking-wider">
+              <span
+                key={b}
+                className="text-[10px] font-black bg-white/10 border border-white/20 px-2 py-1 rounded uppercase tracking-wider"
+              >
                 {b}
               </span>
             ))}
@@ -251,11 +273,16 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
               value: "Kiswahili / English",
             },
           ].map((item) => (
-            <div key={item.label.en} className="flex flex-col gap-1 p-3 bg-stone-50 dark:bg-stone-800 rounded-xl">
+            <div
+              key={item.label.en}
+              className="flex flex-col gap-1 p-3 bg-stone-50 dark:bg-stone-800 rounded-xl"
+            >
               <span className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                 {sw ? item.label.sw : item.label.en}
               </span>
-              <span className="text-sm font-bold text-stone-900 dark:text-stone-100">{item.value}</span>
+              <span className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                {item.value}
+              </span>
             </div>
           ))}
         </div>
@@ -268,13 +295,31 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
           </h3>
           <ul className="space-y-2">
             {[
-              { sw: "Kutoa huduma za serikali ya mtaa kwa njia ya kidijitali", en: "Deliver local government services digitally" },
-              { sw: "Kupunguza foleni na usumbufu wa wananchi kwenye ofisi za kata", en: "Reduce queues and citizen inconvenience at ward offices" },
-              { sw: "Kuhifadhi kumbukumbu sahihi za nyaraka zote za kata", en: "Maintain accurate records of all ward documents" },
-              { sw: "Kuwezesha uwazi na uwajibikaji katika utawala wa mtaa", en: "Enable transparency and accountability in local governance" },
-              { sw: "Kutoa takwimu za mwenendo kwa viongozi wa halmashauri", en: "Provide trend analytics to council leadership" },
+              {
+                sw: "Kutoa huduma za serikali ya mtaa kwa njia ya kidijitali",
+                en: "Deliver local government services digitally",
+              },
+              {
+                sw: "Kupunguza foleni na usumbufu wa wananchi kwenye ofisi za kata",
+                en: "Reduce queues and citizen inconvenience at ward offices",
+              },
+              {
+                sw: "Kuhifadhi kumbukumbu sahihi za nyaraka zote za kata",
+                en: "Maintain accurate records of all ward documents",
+              },
+              {
+                sw: "Kuwezesha uwazi na uwajibikaji katika utawala wa mtaa",
+                en: "Enable transparency and accountability in local governance",
+              },
+              {
+                sw: "Kutoa takwimu za mwenendo kwa viongozi wa halmashauri",
+                en: "Provide trend analytics to council leadership",
+              },
             ].map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-emerald-800 dark:text-emerald-300">
+              <li
+                key={i}
+                className="flex items-start gap-2 text-sm text-emerald-800 dark:text-emerald-300"
+              >
                 <CheckCircle2 size={14} className="text-emerald-500 mt-0.5 shrink-0" />
                 {sw ? item.sw : item.en}
               </li>
@@ -318,7 +363,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
           },
         ].map((item) => (
           <div key={item.title.en} className={`rounded-2xl p-6 border ${item.bg}`}>
-            <div className={`w-10 h-10 ${item.color} text-white rounded-xl flex items-center justify-center mb-4`}>
+            <div
+              className={`w-10 h-10 ${item.color} text-white rounded-xl flex items-center justify-center mb-4`}
+            >
               {item.icon}
             </div>
             <h3 className="font-black text-stone-900 dark:text-stone-100 mb-2">
@@ -349,14 +396,20 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
 
         <div className="space-y-2">
           {ORG_NODES.map((node, i) => (
-            <div key={i} className="flex items-center gap-3" style={{ paddingLeft: `${node.level * 28}px` }}>
+            <div
+              key={i}
+              className="flex items-center gap-3"
+              style={{ paddingLeft: `${node.level * 28}px` }}
+            >
               {node.level > 0 && (
                 <div className="flex flex-col items-center shrink-0">
                   <div className="w-px h-4 bg-stone-300 dark:bg-stone-600" />
                   <ArrowRight size={12} className="text-stone-400 -ml-1" />
                 </div>
               )}
-              <div className={`flex-1 flex items-center gap-3 p-3 ${node.color} text-white rounded-xl`}>
+              <div
+                className={`flex-1 flex items-center gap-3 p-3 ${node.color} text-white rounded-xl`}
+              >
                 <div>
                   <p className="font-black text-sm">{sw ? node.title.sw : node.title.en}</p>
                   <p className="text-white/70 text-xs">{sw ? node.role.sw : node.role.en}</p>
@@ -369,13 +422,29 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
         {/* Internal system roles */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { role: { sw: "Raia", en: "Citizen" }, desc: { sw: "Omba huduma, lipa, pakua hati", en: "Apply, pay, download documents" }, color: "bg-stone-100 dark:bg-stone-800" },
-            { role: { sw: "Afisa wa Kata (Staff)", en: "Ward Officer (Staff)" }, desc: { sw: "Pitia na idhinisha maombi", en: "Review and approve applications" }, color: "bg-blue-100 dark:bg-blue-900/30" },
-            { role: { sw: "Msimamizi (Admin)", en: "Administrator (Admin)" }, desc: { sw: "Simamia mfumo na takwimu", en: "Manage system and analytics" }, color: "bg-emerald-100 dark:bg-emerald-900/30" },
+            {
+              role: { sw: "Raia", en: "Citizen" },
+              desc: { sw: "Omba huduma, lipa, pakua hati", en: "Apply, pay, download documents" },
+              color: "bg-stone-100 dark:bg-stone-800",
+            },
+            {
+              role: { sw: "Afisa wa Kata (Staff)", en: "Ward Officer (Staff)" },
+              desc: { sw: "Pitia na idhinisha maombi", en: "Review and approve applications" },
+              color: "bg-blue-100 dark:bg-blue-900/30",
+            },
+            {
+              role: { sw: "Msimamizi (Admin)", en: "Administrator (Admin)" },
+              desc: { sw: "Simamia mfumo na takwimu", en: "Manage system and analytics" },
+              color: "bg-emerald-100 dark:bg-emerald-900/30",
+            },
           ].map((r) => (
             <div key={r.role.en} className={`p-3 rounded-xl ${r.color}`}>
-              <p className="font-black text-sm text-stone-900 dark:text-stone-100">{sw ? r.role.sw : r.role.en}</p>
-              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">{sw ? r.desc.sw : r.desc.en}</p>
+              <p className="font-black text-sm text-stone-900 dark:text-stone-100">
+                {sw ? r.role.sw : r.role.en}
+              </p>
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
+                {sw ? r.desc.sw : r.desc.en}
+              </p>
             </div>
           ))}
         </div>
@@ -429,14 +498,22 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
         <div className="space-y-3">
           {MILESTONES.map((m, i) => (
             <div key={i} className="flex items-start gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-black ${
-                m.done ? "bg-emerald-600 text-white" : "bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400"
-              }`}>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-black ${
+                  m.done
+                    ? "bg-emerald-600 text-white"
+                    : "bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400"
+                }`}
+              >
                 {m.done ? "✓" : "○"}
               </div>
               <div className="flex-1 pb-3 border-b border-stone-100 dark:border-stone-800">
-                <span className="text-xs font-black text-stone-400 dark:text-stone-500 uppercase tracking-wider">{m.year}</span>
-                <p className={`text-sm font-bold mt-0.5 ${m.done ? "text-stone-900 dark:text-stone-100" : "text-stone-500 dark:text-stone-400"}`}>
+                <span className="text-xs font-black text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+                  {m.year}
+                </span>
+                <p
+                  className={`text-sm font-bold mt-0.5 ${m.done ? "text-stone-900 dark:text-stone-100" : "text-stone-500 dark:text-stone-400"}`}
+                >
                   {sw ? m.event.sw : m.event.en}
                 </p>
               </div>
@@ -489,13 +566,18 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
               value: sw ? "Inapatikana masaa 24 / siku 7" : "Available 24 hours / 7 days",
             },
           ].map((c) => (
-            <div key={c.label.en} className="flex items-start gap-3 p-3 bg-stone-50 dark:bg-stone-800 rounded-xl">
+            <div
+              key={c.label.en}
+              className="flex items-start gap-3 p-3 bg-stone-50 dark:bg-stone-800 rounded-xl"
+            >
               <div className="mt-0.5 shrink-0">{c.icon}</div>
               <div>
                 <p className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   {sw ? c.label.sw : c.label.en}
                 </p>
-                <p className="text-sm font-bold text-stone-900 dark:text-stone-100 mt-0.5">{c.value}</p>
+                <p className="text-sm font-bold text-stone-900 dark:text-stone-100 mt-0.5">
+                  {c.value}
+                </p>
               </div>
             </div>
           ))}
@@ -514,16 +596,30 @@ export const AboutPage: React.FC<AboutPageProps> = ({ lang }) => {
       <section className="bg-stone-900 dark:bg-stone-950 rounded-3xl p-8 text-white">
         <div className="flex items-center gap-3 mb-6">
           <Award size={20} className="text-amber-400" />
-          <h2 className="text-xl font-black">{sw ? "Viwango na Uthibitisho" : "Standards & Compliance"}</h2>
+          <h2 className="text-xl font-black">
+            {sw ? "Viwango na Uthibitisho" : "Standards & Compliance"}
+          </h2>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { name: "OR-MUU 2014", desc: { sw: "Mwongozo wa Tovuti za Serikali", en: "Government Website Guidelines" } },
-            { name: "eGA/APA/009 v2.0", desc: { sw: "Viwango vya Kiufundi vya Tovuti", en: "Technical Website Standards" } },
+            {
+              name: "OR-MUU 2014",
+              desc: { sw: "Mwongozo wa Tovuti za Serikali", en: "Government Website Guidelines" },
+            },
+            {
+              name: "eGA/APA/009 v2.0",
+              desc: { sw: "Viwango vya Kiufundi vya Tovuti", en: "Technical Website Standards" },
+            },
             { name: "ISO 9001:2015", desc: { sw: "Usimamizi wa Ubora", en: "Quality Management" } },
-            { name: "Sheria 2019", desc: { sw: "Sheria ya Serikali Mtandao", en: "eGovernment Act" } },
+            {
+              name: "Sheria 2019",
+              desc: { sw: "Sheria ya Serikali Mtandao", en: "eGovernment Act" },
+            },
           ].map((c) => (
-            <div key={c.name} className="bg-white/10 rounded-2xl p-4 text-center border border-white/10">
+            <div
+              key={c.name}
+              className="bg-white/10 rounded-2xl p-4 text-center border border-white/10"
+            >
               <p className="font-black text-emerald-400 text-sm">{c.name}</p>
               <p className="text-white/60 text-xs mt-1">{sw ? c.desc.sw : c.desc.en}</p>
             </div>

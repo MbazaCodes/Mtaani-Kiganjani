@@ -66,7 +66,10 @@ export function Header({ onMenuClick }: HeaderProps) {
             className="w-6 h-6 sm:w-12 sm:h-12 object-contain"
             referrerPolicy="no-referrer"
           />
-          <div className="h-8 sm:h-10 w-px bg-stone-200 dark:bg-stone-700 hidden sm:block" aria-hidden="true"></div>
+          <div
+            className="h-8 sm:h-10 w-px bg-stone-200 dark:bg-stone-700 hidden sm:block"
+            aria-hidden="true"
+          ></div>
           <div className="flex flex-col leading-none">
             <span className="text-sm sm:text-lg font-black tracking-tighter text-stone-900 dark:text-stone-100 flex items-center gap-1">
               E-MTAA
@@ -139,8 +142,24 @@ export function Header({ onMenuClick }: HeaderProps) {
         <button
           onClick={toggleDark}
           className="p-1.5 sm:p-2 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 hover:text-stone-700 dark:hover:text-stone-200 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 mr-0 sm:mr-2"
-          aria-label={isDark ? (lang === "sw" ? "Washa mwanga" : "Switch to light mode") : (lang === "sw" ? "Washa giza" : "Switch to dark mode")}
-          title={isDark ? (lang === "sw" ? "Mwanga" : "Light mode") : (lang === "sw" ? "Giza" : "Dark mode")}
+          aria-label={
+            isDark
+              ? lang === "sw"
+                ? "Washa mwanga"
+                : "Switch to light mode"
+              : lang === "sw"
+                ? "Washa giza"
+                : "Switch to dark mode"
+          }
+          title={
+            isDark
+              ? lang === "sw"
+                ? "Mwanga"
+                : "Light mode"
+              : lang === "sw"
+                ? "Giza"
+                : "Dark mode"
+          }
           type="button"
         >
           {isDark ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}

@@ -94,9 +94,14 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
   const sw = lang === "sw";
 
   // Photo: prop → uploaded selfie → profile photo_url → placeholder
-  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string; url?: string }[];
+  const uploadedDocs = (fd.uploaded_documents || []) as {
+    type?: string;
+    dataUrl?: string;
+    url?: string;
+  }[];
   const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
-  const photo = photoUrl || selfieDoc?.dataUrl || selfieDoc?.url || user?.photo_url || fd.photo_url || null;
+  const photo =
+    photoUrl || selfieDoc?.dataUrl || selfieDoc?.url || user?.photo_url || fd.photo_url || null;
 
   const institutions = Array.isArray(fd.institutions) ? (fd.institutions as any[]) : [];
   const firstInst = institutions[0] || {};
@@ -125,7 +130,6 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
   const subjectName =
     beneficiaryName ||
     (formatFullName(user) !== "N/A" ? formatFullName(user) : fd.applicant_name || "N/A");
-
 
   return (
     <Document>
@@ -211,13 +215,22 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
               </Text>
               {inst.department && !String(inst.department).includes("-") ? (
                 <Text style={ls.recipientLine}>{String(inst.department)}</Text>
-              ) : <View />}
+              ) : (
+                <View />
+              )}
               {inst.contact_person ? (
-                <Text style={ls.recipientLine}>{sw ? "Kwa: " : "Attn: "}{String(inst.contact_person)}</Text>
-              ) : <View />}
+                <Text style={ls.recipientLine}>
+                  {sw ? "Kwa: " : "Attn: "}
+                  {String(inst.contact_person)}
+                </Text>
+              ) : (
+                <View />
+              )}
               {inst.address ? (
                 <Text style={ls.recipientLine}>{String(inst.address)}</Text>
-              ) : <View />}
+              ) : (
+                <View />
+              )}
             </View>
 
             {/* Subject */}
@@ -276,15 +289,21 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
                 {isSelf ? (
                   <View style={s.infoRow}>
                     <Text style={s.infoLabel}>NIDA:</Text>
-                    <Text style={s.infoValue}>{user?.nida_number || fd.applicant_nida || "N/A"}</Text>
+                    <Text style={s.infoValue}>
+                      {user?.nida_number || fd.applicant_nida || "N/A"}
+                    </Text>
                   </View>
-                ) : <View />}
+                ) : (
+                  <View />
+                )}
                 {isSelf ? (
                   <View style={s.infoRow}>
                     <Text style={s.infoLabel}>{sw ? "Simu:" : "Phone:"}</Text>
                     <Text style={s.infoValue}>{user?.phone || fd.applicant_phone || "N/A"}</Text>
                   </View>
-                ) : <View />}
+                ) : (
+                  <View />
+                )}
               </View>
               <View style={s.colRight}>
                 <View style={s.infoRow}>
@@ -293,7 +312,9 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
                 </View>
                 <View style={s.infoRow}>
                   <Text style={s.infoLabel}>{sw ? "Wilaya:" : "District:"}</Text>
-                  <Text style={s.infoValue}>{user?.district || fd.applicant_district || "N/A"}</Text>
+                  <Text style={s.infoValue}>
+                    {user?.district || fd.applicant_district || "N/A"}
+                  </Text>
                 </View>
                 <View style={s.infoRow}>
                   <Text style={s.infoLabel}>{sw ? "Kata:" : "Ward:"}</Text>
@@ -315,7 +336,14 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
 
             {/* Signature + QR */}
             <Text style={ls.signoff}>{sw ? "Wenu Mwaminifu," : "Yours faithfully,"}</Text>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 10 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginTop: 10,
+              }}
+            >
               <View style={{ width: "55%" }}>
                 <OfficerSignatureBox
                   signature={weoSig}
@@ -334,17 +362,49 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
             </View>
 
             {/* Footer */}
-            <View style={{ marginTop: 14, borderTopWidth: 0.5, borderTopColor: "#c0c0c0", paddingTop: 5 }}>
-              <Text style={{ fontSize: 6, color: "#999999", fontWeight: "bold", textAlign: "center", textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 3 }}>
-                {sw ? "MAONYESHO PEKEE — Si mfumo rasmi wa serikali, haujaidhinishwa kwa matumizi rasmi" : "DEMONSTRATION ONLY — Not an official, approved government system"}
+            <View
+              style={{
+                marginTop: 14,
+                borderTopWidth: 0.5,
+                borderTopColor: "#c0c0c0",
+                paddingTop: 5,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 6,
+                  color: "#999999",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  textTransform: "uppercase",
+                  letterSpacing: 0.3,
+                  marginBottom: 3,
+                }}
+              >
+                {sw
+                  ? "MAONYESHO PEKEE — Si mfumo rasmi wa serikali, haujaidhinishwa kwa matumizi rasmi"
+                  : "DEMONSTRATION ONLY — Not an official, approved government system"}
               </Text>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Text style={{ fontSize: 7, color: "#6b6b6b", fontStyle: "italic", flex: 1 }}>
                   {sw
                     ? `Barua hii ni rasmi. Inafaa kwa ${inst.name || "taasisi iliyoainishwa"} pekee.`
                     : `This letter is valid only for ${inst.name || "the institution stated"}.`}
                 </Text>
-                <Text style={{ fontSize: 5.5, color: "#c0c0c0", fontFamily: "Courier", textAlign: "right" }}>
+                <Text
+                  style={{
+                    fontSize: 5.5,
+                    color: "#c0c0c0",
+                    fontFamily: "Courier",
+                    textAlign: "right",
+                  }}
+                >
                   {`ISSUED: ${formatDate(application.created_at)} | E-MTAA`}
                 </Text>
               </View>

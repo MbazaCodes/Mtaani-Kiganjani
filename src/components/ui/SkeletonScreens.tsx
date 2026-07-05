@@ -117,7 +117,9 @@ export function DashboardSkeleton() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SkeletonStatCard key={i} />
+        ))}
       </div>
 
       {/* Quick actions */}
@@ -169,7 +171,9 @@ export function ServicesSkeleton() {
       </div>
       {/* Service cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 9 }).map((_, i) => <SkeletonServiceCard key={i} />)}
+        {Array.from({ length: 9 }).map((_, i) => (
+          <SkeletonServiceCard key={i} />
+        ))}
       </div>
     </div>
   );
@@ -231,7 +235,9 @@ export function StaffDashboardSkeleton() {
       </div>
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SkeletonStatCard key={i} />
+        ))}
       </div>
       {/* Pending queue */}
       <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">

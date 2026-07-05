@@ -310,14 +310,24 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
                           {/* Inline Visa logo */}
                           <svg viewBox="0 0 780 500" className="h-4" aria-label="Visa">
-                            <path fill="#1A1F71" d="M293.2 348.7l33.4-195.7h53.4L346.6 348.7zM540.7 158.8c-10.6-4-27.2-8.3-47.9-8.3-52.8 0-90 26.6-90.2 64.7-.3 28.2 26.5 43.9 46.8 53.3 20.8 9.6 27.8 15.8 27.7 24.4-.1 13.2-16.6 19.2-31.9 19.2-21.3 0-32.6-3-50.1-10.2l-6.9-3.1-7.5 43.8c12.5 5.5 35.6 10.2 59.6 10.5 56.2 0 92.6-26.3 93-67.1.2-22.4-14.1-39.4-45-53.4-18.7-9.1-30.2-15.2-30.1-24.4 0-8.2 9.7-16.9 30.7-16.9 17.4-.3 30 3.5 39.8 7.5l4.8 2.3 7.2-42.3zM670.3 153h-41.3c-12.8 0-22.4 3.5-28 16.2l-79.3 179.5h56.2s9.2-24.2 11.3-29.5c6.1 0 60.8.1 68.6.1 1.6 6.9 6.5 29.4 6.5 29.4H717L670.3 153zm-66 180.5c4.4-11.3 21.5-55 21.5-55-.3.5 4.4-11.3 7.1-18.7l3.6 16.9s10.3 47.3 12.5 56.8h-44.7zM232.8 153l-52.2 133.5-5.6-27.1c-9.7-31.2-40-65.1-73.8-82l47.9 171.2 56.6-.1 84.2-195.5h-57.1z"/>
-                            <path fill="#F9A533" d="M131.7 153H47.9l-.7 4c65.3 15.9 108.4 54.4 126.3 100.5l-18.2-88.3c-3.1-12.3-12.5-15.9-23.6-16.2z"/>
+                            <path
+                              fill="#1A1F71"
+                              d="M293.2 348.7l33.4-195.7h53.4L346.6 348.7zM540.7 158.8c-10.6-4-27.2-8.3-47.9-8.3-52.8 0-90 26.6-90.2 64.7-.3 28.2 26.5 43.9 46.8 53.3 20.8 9.6 27.8 15.8 27.7 24.4-.1 13.2-16.6 19.2-31.9 19.2-21.3 0-32.6-3-50.1-10.2l-6.9-3.1-7.5 43.8c12.5 5.5 35.6 10.2 59.6 10.5 56.2 0 92.6-26.3 93-67.1.2-22.4-14.1-39.4-45-53.4-18.7-9.1-30.2-15.2-30.1-24.4 0-8.2 9.7-16.9 30.7-16.9 17.4-.3 30 3.5 39.8 7.5l4.8 2.3 7.2-42.3zM670.3 153h-41.3c-12.8 0-22.4 3.5-28 16.2l-79.3 179.5h56.2s9.2-24.2 11.3-29.5c6.1 0 60.8.1 68.6.1 1.6 6.9 6.5 29.4 6.5 29.4H717L670.3 153zm-66 180.5c4.4-11.3 21.5-55 21.5-55-.3.5 4.4-11.3 7.1-18.7l3.6 16.9s10.3 47.3 12.5 56.8h-44.7zM232.8 153l-52.2 133.5-5.6-27.1c-9.7-31.2-40-65.1-73.8-82l47.9 171.2 56.6-.1 84.2-195.5h-57.1z"
+                            />
+                            <path
+                              fill="#F9A533"
+                              d="M131.7 153H47.9l-.7 4c65.3 15.9 108.4 54.4 126.3 100.5l-18.2-88.3c-3.1-12.3-12.5-15.9-23.6-16.2z"
+                            />
                           </svg>
                           {/* Inline Mastercard logo */}
                           <svg viewBox="0 0 780 500" className="h-4" aria-label="Mastercard">
-                            <circle fill="#EB001B" cx="310" cy="250" r="120"/>
-                            <circle fill="#F79E1B" cx="470" cy="250" r="120"/>
-                            <path fill="#FF5F00" d="M370 152.7a170 170 0 0 1 0 194.6 170 170 0 0 1 0-194.6z" opacity=".95"/>
+                            <circle fill="#EB001B" cx="310" cy="250" r="120" />
+                            <circle fill="#F79E1B" cx="470" cy="250" r="120" />
+                            <path
+                              fill="#FF5F00"
+                              d="M370 152.7a170 170 0 0 1 0 194.6 170 170 0 0 1 0-194.6z"
+                              opacity=".95"
+                            />
                           </svg>
                         </div>
                       </div>
@@ -405,7 +415,11 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 className="py-12 text-center space-y-6"
               >
-                <motion.div className="h-20 w-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto" animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
+                <motion.div
+                  className="h-20 w-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto"
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
                   <CheckCircle2 className="h-12 w-12" />
                 </motion.div>
                 <div>

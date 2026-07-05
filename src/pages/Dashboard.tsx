@@ -364,24 +364,24 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
           const Icon = action.icon;
           const colorClasses: Record<string, { bg: string; icon: string; label: string }> = {
             emerald: {
-              bg: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
-              icon: 'text-emerald-600',
-              label: 'text-emerald-800',
+              bg: "bg-emerald-50 hover:bg-emerald-100 border-emerald-200",
+              icon: "text-emerald-600",
+              label: "text-emerald-800",
             },
             blue: {
-              bg: 'bg-blue-50 hover:bg-blue-100 border-blue-200',
-              icon: 'text-blue-600',
-              label: 'text-blue-800',
+              bg: "bg-blue-50 hover:bg-blue-100 border-blue-200",
+              icon: "text-blue-600",
+              label: "text-blue-800",
             },
             stone: {
-              bg: 'bg-stone-50 hover:bg-stone-100 border-stone-200',
-              icon: 'text-stone-600',
-              label: 'text-stone-800',
+              bg: "bg-stone-50 hover:bg-stone-100 border-stone-200",
+              icon: "text-stone-600",
+              label: "text-stone-800",
             },
             rose: {
-              bg: 'bg-rose-50 hover:bg-rose-100 border-rose-200',
-              icon: 'text-rose-600',
-              label: 'text-rose-800',
+              bg: "bg-rose-50 hover:bg-rose-100 border-rose-200",
+              icon: "text-rose-600",
+              label: "text-rose-800",
             },
           };
           const c = colorClasses[action.color] ?? colorClasses.stone;
@@ -443,7 +443,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
         lang={lang}
         onClose={() => setShowProfileModal(false)}
         onSaved={async (updated) => {
-          setLocalUser((prev) => ({ ...prev, ...updated }));
+          setLocalUser((prev) => (prev ? { ...prev, ...updated } : prev));
           setShowProfileModal(false);
           await refreshProfile();
         }}

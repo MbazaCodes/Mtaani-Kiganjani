@@ -269,7 +269,7 @@ export function AdminLogs() {
           setTotalPages(Math.ceil((count || 0) / itemsPerPage));
           calculateStats(data as ActivityLog[]);
         }
-      } catch (_error) {
+      } catch (error) {
         console.error("Error fetching logs:", error);
         showToast(lang === "sw" ? "Hitilafu kupakia kumbukumbu" : "Error loading logs", "error");
         setLogs([]);
@@ -388,7 +388,7 @@ export function AdminLogs() {
       if (data) {
         setLogs((prev) => [data as ActivityLog, ...prev.slice(0, -1)]);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching new log:", error);
     }
   };

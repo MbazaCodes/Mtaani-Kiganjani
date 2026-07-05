@@ -127,6 +127,9 @@ interface FormValues {
   // Consent
   seller_confirmed: boolean;
   terms_accepted: boolean;
+  // Photos
+  seller_photo: string;
+  buyer_photo: string;
 }
 
 export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
@@ -155,8 +158,6 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
   const [buyerSearching, setBuyerSearching] = useState(false);
   const [buyerError, setBuyerError] = useState("");
 
-  const [sellerPhoto, setSellerPhoto] = useState("");
-  const [buyerPhoto, setBuyerPhoto] = useState("");
   const [vals, setVals] = useState<FormValues>({
     buyer_search_term: "",
     buyer_search_type: "NIDA",
@@ -180,6 +181,8 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
     witness2_user_id: "",
     seller_confirmed: false,
     terms_accepted: false,
+    seller_photo: "",
+    buyer_photo: "",
   });
 
   const saleValue = parseFloat(vals.sale_price) || 0;
@@ -1065,7 +1068,10 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                   {L("Picha za Wahusika (Muhimu)", "Party Photos (Required for PDF)")}
                 </label>
                 <p className="text-xs text-stone-400 mb-3">
-                  {L("Picha zitaonekana kwenye hati ya makubaliano kama uthibitisho.", "Photos appear on the agreement document as verification.")}
+                  {L(
+                    "Picha zitaonekana kwenye hati ya makubaliano kama uthibitisho.",
+                    "Photos appear on the agreement document as verification.",
+                  )}
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1074,19 +1080,27 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                   <p className="text-xs font-bold text-stone-600 uppercase tracking-wide">
                     {L("Picha ya Muuzaji / Mpangishaji", "Seller / Landlord Photo")}
                   </p>
-                  {sellerPhoto ? (
+                  {vals.seller_photo ? (
                     <div className="relative">
-                      <img src={sellerPhoto} alt="seller" className="w-full h-28 object-cover rounded-lg" />
+                      <img
+                        src={vals.seller_photo}
+                        alt="seller"
+                        className="w-full h-28 object-cover rounded-lg"
+                      />
                       <button
                         type="button"
                         onClick={() => set("seller_photo", "")}
                         className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
-                      >✕</button>
+                      >
+                        ✕
+                      </button>
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-all">
                       <span className="text-2xl mb-1">📷</span>
-                      <span className="text-xs text-stone-400">{L("Bonyeza kupakia picha", "Click to upload photo")}</span>
+                      <span className="text-xs text-stone-400">
+                        {L("Bonyeza kupakia picha", "Click to upload photo")}
+                      </span>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -1108,19 +1122,27 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                   <p className="text-xs font-bold text-stone-600 uppercase tracking-wide">
                     {L("Picha ya Mnunuzi / Mpangaji", "Buyer / Tenant Photo")}
                   </p>
-                  {buyerPhoto ? (
+                  {vals.buyer_photo ? (
                     <div className="relative">
-                      <img src={buyerPhoto} alt="buyer" className="w-full h-28 object-cover rounded-lg" />
+                      <img
+                        src={vals.buyer_photo}
+                        alt="buyer"
+                        className="w-full h-28 object-cover rounded-lg"
+                      />
                       <button
                         type="button"
                         onClick={() => set("buyer_photo", "")}
                         className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
-                      >✕</button>
+                      >
+                        ✕
+                      </button>
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center h-28 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all">
                       <span className="text-2xl mb-1">📷</span>
-                      <span className="text-xs text-stone-400">{L("Bonyeza kupakia picha", "Click to upload photo")}</span>
+                      <span className="text-xs text-stone-400">
+                        {L("Bonyeza kupakia picha", "Click to upload photo")}
+                      </span>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"

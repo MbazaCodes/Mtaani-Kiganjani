@@ -97,7 +97,13 @@ const rs = StyleSheet.create({
     marginTop: 12,
     marginBottom: 0,
   },
-  distHeaderText: { fontSize: 8, fontWeight: "bold", color: "#374151", textTransform: "uppercase", letterSpacing: 0.5 },
+  distHeaderText: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: "#374151",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
   distSectionTitle: { fontSize: 8.5, fontWeight: "bold", color: "#1c1917", marginBottom: 2 },
   distRow: {
     flexDirection: "row",
@@ -118,7 +124,13 @@ const rs = StyleSheet.create({
   },
   distTotalLabel: { flex: 1, fontSize: 8.5, fontWeight: "bold", color: "#ffffff" },
   distTotalPct: { width: 36, fontSize: 8.5, color: "#d1fae5", textAlign: "right" },
-  distTotalAmt: { width: 72, fontSize: 8.5, fontWeight: "bold", color: "#ffffff", textAlign: "right" },
+  distTotalAmt: {
+    width: 72,
+    fontSize: 8.5,
+    fontWeight: "bold",
+    color: "#ffffff",
+    textAlign: "right",
+  },
 
   footer: {
     position: "absolute",
@@ -156,7 +168,13 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
   const sw = lang === "sw";
   const qr = qrDataUrl || generateQRCodeUrl(application, "RCP");
 
-  const amount = pd.amount || fd.total_fee || fd.service_fee || fd.amount || fd.payment_amount || getApplicationAmount(application);
+  const amount =
+    pd.amount ||
+    fd.total_fee ||
+    fd.service_fee ||
+    fd.amount ||
+    fd.payment_amount ||
+    getApplicationAmount(application);
   const receiptNo = pd.receipt_number || `RCP-${application.application_number}`;
 
   const TableRow = ({ label, value, alt }: { label: string; value: string; alt?: boolean }) => (
@@ -254,7 +272,14 @@ export const ReceiptPage: React.FC<ReceiptPageProps> = ({ application, lang, qrD
         </View>
       )}
       {amount === 0 && (
-        <View style={{ paddingHorizontal: 6, paddingVertical: 8, backgroundColor: "#f3f4f6", marginBottom: 10 }}>
+        <View
+          style={{
+            paddingHorizontal: 6,
+            paddingVertical: 8,
+            backgroundColor: "#f3f4f6",
+            marginBottom: 10,
+          }}
+        >
           <Text style={{ fontSize: 8, color: "#6b7280", fontStyle: "italic", textAlign: "center" }}>
             {sw ? "Huduma hii haina ada (bure)." : "This service has no fee (free of charge)."}
           </Text>

@@ -32,16 +32,18 @@ export function useLiveAppCount(): number | null {
 
     // Defer non-critical stat — don't block initial paint
     const timer = setTimeout(() => {
-      supabase
-        .from("applications")
-        .select("*", { count: "exact", head: true })
+      void Promise.resolve(
+        supabase.from("applications").select("*", { count: "exact", head: true }),
+      )
         .then(({ count: c }) => {
           if (c !== null) {
             _appCountCache = { value: c, fetchedAt: Date.now() };
             setCount(c);
           }
         })
-        .catch(() => {/* non-critical */});
+        .catch(() => {
+          /* non-critical */
+        });
     }, 4000);
 
     return () => clearTimeout(timer);
@@ -74,10 +76,7 @@ export function useSiteStats(): SiteStats | null {
 
     const timer = setTimeout(async () => {
       try {
-        const [
-          { count: totalApplications },
-          { count: totalUsers },
-        ] = await Promise.all([
+        const [{ count: totalApplications }, { count: totalUsers }] = await Promise.all([
           supabase.from("applications").select("*", { count: "exact", head: true }),
           supabase.from("users").select("*", { count: "exact", head: true }),
         ]);

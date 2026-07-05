@@ -21,9 +21,11 @@ export function ClonedApp() {
     if (typeof window !== "undefined") {
       const w = window as unknown as { Buffer?: unknown; global?: Window };
       if (!w.Buffer) {
-        import("buffer/").then(({ Buffer }) => {
-          w.Buffer = Buffer;
-        }).catch(() => {});
+        import("buffer/")
+          .then(({ Buffer }) => {
+            w.Buffer = Buffer;
+          })
+          .catch(() => {});
       }
       w.global = window;
     }
@@ -50,9 +52,7 @@ export function ClonedApp() {
   }, []);
 
   if (!mods) {
-    return (
-      <AppSplashSkeleton />
-    );
+    return <AppSplashSkeleton />;
   }
 
   const { App, LanguageProvider, AuthProvider, ToastProvider } = mods;

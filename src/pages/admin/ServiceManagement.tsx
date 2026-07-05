@@ -335,7 +335,7 @@ export function ServiceManagement() {
       } else {
         setServices(DEMO_SERVICES);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error("Exception in fetchServices:", error);
       showToast(lang === "sw" ? "Hitilafu ya mfumo" : "System error", "error");
       setServices(DEMO_SERVICES);

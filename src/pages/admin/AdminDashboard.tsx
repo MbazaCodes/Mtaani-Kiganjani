@@ -543,7 +543,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
       } catch (e) {
         console.warn("analytics fetch error:", e);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching dashboard stats:", error);
       showToast(lang === "sw" ? "Hitilafu kupakia takwimu" : "Error loading statistics", "error");
       // Initialize with zeros on error
@@ -624,7 +624,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
         }));
         setActivities(formattedActivities);
       }
-    } catch (_error) {
+    } catch (error) {
       console.error("Error fetching activities:", error);
       setActivities([]);
     }

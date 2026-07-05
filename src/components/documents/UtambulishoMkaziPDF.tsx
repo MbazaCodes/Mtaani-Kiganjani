@@ -24,9 +24,14 @@ export const UtambulishoMkaziPDF: React.FC<DocumentPDFProps> = ({
   const user = application.users;
   const fd = (application.form_data || {}) as Record<string, string | undefined>;
   // Photo: check uploaded_documents for selfie, then fallbacks
-  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string; url?: string }[];
+  const uploadedDocs = (fd.uploaded_documents || []) as {
+    type?: string;
+    dataUrl?: string;
+    url?: string;
+  }[];
   const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
-  const photo = photoUrl || selfieDoc?.dataUrl || selfieDoc?.url || user?.photo_url || fd.photo_url || null;
+  const photo =
+    photoUrl || selfieDoc?.dataUrl || selfieDoc?.url || user?.photo_url || fd.photo_url || null;
   const applicantSig = fd.applicant_signature;
   const weoSig = fd.weo_signature;
   const weoStamp = fd.weo_stamp;

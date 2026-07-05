@@ -98,7 +98,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Embed the citizen's profile photo into form_data so the certificate can
       // show it regardless of who downloads it (staff don't have the citizen's photo).
       if (user.photo_url && !(formData as Record<string, unknown>).photo_url) {
-        (formData as Record<string, unknown>).photo_url = (user as unknown as Record<string, unknown>)?.photo_url;
+        (formData as Record<string, unknown>).photo_url = (
+          user as unknown as Record<string, unknown>
+        )?.photo_url;
       }
       if (!(formData as Record<string, unknown>).applicant_name) {
         (formData as Record<string, unknown>).applicant_name =
@@ -116,7 +118,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // so applications in progress stay with this office even if the
       // citizen later changes address.
       let officeRegistryId: string | null =
-        ((user as Record<string, unknown>).assigned_office_id as string) ?? null;
+        ((user as unknown as Record<string, unknown>).assigned_office_id as string) ?? null;
       if (!officeRegistryId && user.region && user.district && user.ward && !user.is_diaspora) {
         try {
           const { data: oid } = await supabase.rpc("find_office_for_address", {
@@ -139,10 +141,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         application_number: applicationNumber,
         form_data: formData,
         // Malipo na Michango goes straight to paid — no staff approval needed
-        status: (selectedService.name.toLowerCase().includes("malipo") ||
-                 selectedService.name.toLowerCase().includes("michango"))
-          ? "paid" as const
-          : "submitted" as const,
+        status:
+          selectedService.name.toLowerCase().includes("malipo") ||
+          selectedService.name.toLowerCase().includes("michango")
+            ? ("paid" as const)
+            : ("submitted" as const),
         region: user.region,
         district: user.district,
         ward: user.ward,
@@ -199,8 +202,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
 
         // Compute final status: Malipo na Michango bypasses staff approval
-        const isMalipo = selectedService.name.toLowerCase().includes("malipo") ||
-                         selectedService.name.toLowerCase().includes("michango");
+        const isMalipo =
+          selectedService.name.toLowerCase().includes("malipo") ||
+          selectedService.name.toLowerCase().includes("michango");
         const finalStatus = isMalipo ? "paid" : "submitted";
 
         const { error, data: insertedApp } = await supabase

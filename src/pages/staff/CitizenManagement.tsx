@@ -54,7 +54,15 @@ export function StaffCitizenManagement() {
   const [filter, setFilter] = useState<"all" | "verified" | "unverified">("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCitizen, setSelectedCitizen] = useState<UserProfile | null>(null);
-  const [citizenApps, setCitizenApps] = useState<{id:string;service_name:string;status:string;created_at:string;application_number:string}[]>([]);
+  const [citizenApps, setCitizenApps] = useState<
+    {
+      id: string;
+      service_name: string;
+      status: string;
+      created_at: string;
+      application_number: string;
+    }[]
+  >([]);
   const [loadingApps, setLoadingApps] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<"citizens" | "profile-changes">("citizens");
@@ -107,7 +115,7 @@ export function StaffCitizenManagement() {
       }
 
       setPendingChanges(data || []);
-    } catch (_error) {
+    } catch (error) {
       console.error("Exception fetching profile changes:", error);
       setPendingChanges([]);
     } finally {
@@ -200,7 +208,9 @@ export function StaffCitizenManagement() {
       // photo_url is fetched on-demand when a citizen row is clicked (openCitizen)
       let query = supabase
         .from("users")
-        .select("id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, date_of_birth, place_of_birth, nationality")
+        .select(
+          "id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, date_of_birth, place_of_birth, nationality",
+        )
         .eq("role", "citizen")
         .order("created_at", { ascending: false })
         .limit(200);
@@ -283,7 +293,9 @@ export function StaffCitizenManagement() {
     ]);
     // Merge photo_url into selected citizen
     if (profileRes.data) {
-      setSelectedCitizen(prev => prev ? { ...prev, photo_url: profileRes.data.photo_url } : prev);
+      setSelectedCitizen((prev) =>
+        prev ? { ...prev, photo_url: profileRes.data.photo_url } : prev,
+      );
     }
     setCitizenApps(appsRes.data || []);
     setLoadingApps(false);
@@ -627,7 +639,11 @@ export function StaffCitizenManagement() {
                 </thead>
                 <tbody className="divide-y divide-stone-50">
                   {filteredCitizens.map((citizen) => (
-                    <tr key={citizen.id} onClick={() => openCitizen(citizen)} className="hover:bg-stone-50/50 transition-colors group cursor-pointer">
+                    <tr
+                      key={citizen.id}
+                      onClick={() => openCitizen(citizen)}
+                      className="hover:bg-stone-50/50 transition-colors group cursor-pointer"
+                    >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           {citizen.photo_url ? (
@@ -638,7 +654,8 @@ export function StaffCitizenManagement() {
                             />
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 font-bold shrink-0">
-                              {citizen.first_name?.[0]}{citizen.last_name?.[0]}
+                              {citizen.first_name?.[0]}
+                              {citizen.last_name?.[0]}
                             </div>
                           )}
                           <div>
@@ -686,7 +703,10 @@ export function StaffCitizenManagement() {
                         <div className="flex items-center justify-end gap-2">
                           {/* Confirm email button — always visible for unconfirmed citizens */}
                           <button
-                            onClick={(e) => { e.stopPropagation(); handleConfirmEmail(citizen); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleConfirmEmail(citizen);
+                            }}
                             disabled={confirmingId === citizen.id}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
                             title={
@@ -706,14 +726,20 @@ export function StaffCitizenManagement() {
                           {!citizen.is_verified && (
                             <>
                               <button
-                                onClick={(e) => { e.stopPropagation(); handleVerify(citizen.id); }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleVerify(citizen.id);
+                                }}
                                 className="p-2 hover:bg-emerald-50 rounded-lg transition-colors text-emerald-600"
                                 title={lang === "sw" ? "Hakiki akaunti" : "Verify account"}
                               >
                                 <Check size={18} />
                               </button>
                               <button
-                                onClick={(e) => { e.stopPropagation(); handleDecline(citizen.id); }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDecline(citizen.id);
+                                }}
                                 className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-600"
                                 title={lang === "sw" ? "Kataa" : "Decline"}
                               >

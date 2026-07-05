@@ -11,25 +11,26 @@ interface StatusTimelineProps {
 
 // Simplified steps for payment services (Malipo na Michango)
 const MALIPO_STEPS = (sw: boolean) => [
-  { key: "submitted", label: sw ? "Imewasilishwa" : "Submitted",   icon: FileText   },
-  { key: "paid",      label: sw ? "Imelipwa"      : "Paid",        icon: CreditCard },
-  { key: "issued",    label: sw ? "Imetolewa"     : "Issued",      icon: Award      },
+  { key: "submitted", label: sw ? "Imewasilishwa" : "Submitted", icon: FileText },
+  { key: "paid", label: sw ? "Imelipwa" : "Paid", icon: CreditCard },
+  { key: "issued", label: sw ? "Imetolewa" : "Issued", icon: Award },
 ];
 
 // Standard steps for other services
 const STANDARD_STEPS = (sw: boolean) => [
-  { key: "submitted",       label: sw ? "Imewasilishwa"    : "Submitted",       icon: FileText   },
-  { key: "under_review",    label: sw ? "Inakaguliwa"      : "Under Review",    icon: CheckCircle },
-  { key: "approved",        label: sw ? "Imeidhinishwa"    : "Approved",        icon: CheckCircle },
+  { key: "submitted", label: sw ? "Imewasilishwa" : "Submitted", icon: FileText },
+  { key: "under_review", label: sw ? "Inakaguliwa" : "Under Review", icon: CheckCircle },
+  { key: "approved", label: sw ? "Imeidhinishwa" : "Approved", icon: CheckCircle },
   { key: "pending_payment", label: sw ? "Inasubiri Malipo" : "Awaiting Payment", icon: CreditCard },
-  { key: "issued",          label: sw ? "Imetolewa"        : "Issued",          icon: Award      },
+  { key: "issued", label: sw ? "Imetolewa" : "Issued", icon: Award },
 ];
 
 const malipoStatusIndex = (status: string): number => {
   const map: Record<string, number> = {
     submitted: 0,
     paid: 1,
-    issued: 2, completed: 2,
+    issued: 2,
+    completed: 2,
     rejected: 0,
   };
   return map[status] ?? 0;
@@ -37,23 +38,31 @@ const malipoStatusIndex = (status: string): number => {
 
 const standardStatusIndex = (status: string): number => {
   const map: Record<string, number> = {
-    submitted: 0, pending: 0,
-    under_review: 1, reviewing: 1, pending_review: 1,
+    submitted: 0,
+    pending: 0,
+    under_review: 1,
+    reviewing: 1,
+    pending_review: 1,
     approved: 2,
     pending_payment: 3,
-    paid: 4, issued: 4, completed: 4,
+    paid: 4,
+    issued: 4,
+    completed: 4,
   };
   return map[status] ?? 0;
 };
 
 export const StatusTimeline: React.FC<StatusTimelineProps> = ({
-  status, lang, serviceName = "", agreementStatus,
+  status,
+  lang,
+  serviceName = "",
+  agreementStatus,
 }) => {
   const sw = lang === "sw";
-  const isMalipo = serviceName.toLowerCase().includes("malipo") ||
-                   serviceName.toLowerCase().includes("michango");
+  const isMalipo =
+    serviceName.toLowerCase().includes("malipo") || serviceName.toLowerCase().includes("michango");
 
-  const steps      = isMalipo ? MALIPO_STEPS(sw)      : STANDARD_STEPS(sw);
+  const steps = isMalipo ? MALIPO_STEPS(sw) : STANDARD_STEPS(sw);
   const currentIdx = isMalipo ? malipoStatusIndex(status) : standardStatusIndex(status);
   const isRejected = status === "rejected";
 
@@ -85,27 +94,31 @@ export const StatusTimeline: React.FC<StatusTimelineProps> = ({
           style={{ width: `${(currentIdx / (steps.length - 1)) * 100}%` }}
         />
         {steps.map((step, i) => {
-          const done   = i <= currentIdx;
+          const done = i <= currentIdx;
           const active = i === currentIdx;
-          const Icon   = step.icon;
+          const Icon = step.icon;
           return (
             <div
               key={step.key}
               className="flex flex-col items-center z-10 relative"
               style={{ width: `${100 / steps.length}%` }}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
-                done
-                  ? active
-                    ? "bg-emerald-600 border-emerald-600 ring-4 ring-emerald-100"
-                    : "bg-emerald-500 border-emerald-500"
-                  : "bg-white border-stone-300"
-              }`}>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
+                  done
+                    ? active
+                      ? "bg-emerald-600 border-emerald-600 ring-4 ring-emerald-100"
+                      : "bg-emerald-500 border-emerald-500"
+                    : "bg-white border-stone-300"
+                }`}
+              >
                 <Icon size={14} className={done ? "text-white" : "text-stone-400"} />
               </div>
-              <p className={`text-[9px] mt-1.5 text-center font-bold leading-tight ${
-                done ? (active ? "text-emerald-700" : "text-emerald-600") : "text-stone-400"
-              }`}>
+              <p
+                className={`text-[9px] mt-1.5 text-center font-bold leading-tight ${
+                  done ? (active ? "text-emerald-700" : "text-emerald-600") : "text-stone-400"
+                }`}
+              >
                 {step.label}
               </p>
             </div>
@@ -115,16 +128,26 @@ export const StatusTimeline: React.FC<StatusTimelineProps> = ({
 
       {/* Agreement sub-status */}
       {agreementStatus && status === "issued" && (
-        <div className={`mt-3 text-center text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1 ${
-          agreementStatus === "buyer_accepted" ? "bg-emerald-50 text-emerald-700" :
-          agreementStatus === "buyer_rejected" ? "bg-red-50 text-red-700" :
-          "bg-amber-50 text-amber-700"
-        }`}>
+        <div
+          className={`mt-3 text-center text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1 ${
+            agreementStatus === "buyer_accepted"
+              ? "bg-emerald-50 text-emerald-700"
+              : agreementStatus === "buyer_rejected"
+                ? "bg-red-50 text-red-700"
+                : "bg-amber-50 text-amber-700"
+          }`}
+        >
           {agreementStatus === "buyer_accepted"
-            ? sw ? "✅ Mnunuzi Amekubali" : "✅ Buyer Accepted"
+            ? sw
+              ? "✅ Mnunuzi Amekubali"
+              : "✅ Buyer Accepted"
             : agreementStatus === "buyer_rejected"
-              ? sw ? "❌ Mnunuzi Amekataa" : "❌ Buyer Rejected"
-              : sw ? "⏳ Inasubiri Mnunuzi" : "⏳ Awaiting Buyer"}
+              ? sw
+                ? "❌ Mnunuzi Amekataa"
+                : "❌ Buyer Rejected"
+              : sw
+                ? "⏳ Inasubiri Mnunuzi"
+                : "⏳ Awaiting Buyer"}
         </div>
       )}
     </div>

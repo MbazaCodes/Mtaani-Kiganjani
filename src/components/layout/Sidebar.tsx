@@ -102,8 +102,14 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
 
   // Communication folder — auto-open when any child view is active
   const commViews = [
-    "notifications", "announcements", "community_reports", "messages",
-    "citizen_support", "staff_tickets", "staff_announcements", "staff_reports",
+    "notifications",
+    "announcements",
+    "community_reports",
+    "messages",
+    "citizen_support",
+    "staff_tickets",
+    "staff_announcements",
+    "staff_reports",
     "help_faq",
   ];
   const [commOpen, setCommOpen] = useState(() => commViews.includes(currentView));
@@ -289,7 +295,12 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
       {/* ── Communication (collapsible folder) ── */}
       {(() => {
         // Build the child items visible to this role
-        const commItems: { icon: React.ReactNode; label: string; view: ViewName; active: boolean }[] = [];
+        const commItems: {
+          icon: React.ReactNode;
+          label: string;
+          view: ViewName;
+          active: boolean;
+        }[] = [];
 
         // Notifications — all roles
         commItems.push({
@@ -378,20 +389,23 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
                   : "text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
               }`}
             >
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                anyChildActive
-                  ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
-                  : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400"
-              }`}>
+              <div
+                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                  anyChildActive
+                    ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
+                    : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400"
+                }`}
+              >
                 <MessageCircle size={18} />
               </div>
               <span className="flex-1 text-left">
                 {lang === "sw" ? "Mawasiliano" : "Communication"}
               </span>
-              {commOpen
-                ? <ChevronDown size={14} className="shrink-0 opacity-60" />
-                : <ChevronRight size={14} className="shrink-0 opacity-60" />
-              }
+              {commOpen ? (
+                <ChevronDown size={14} className="shrink-0 opacity-60" />
+              ) : (
+                <ChevronRight size={14} className="shrink-0 opacity-60" />
+              )}
             </button>
 
             {/* Child items */}

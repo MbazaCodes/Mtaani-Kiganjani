@@ -70,15 +70,30 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
           { count: rejected },
         ] = await Promise.all([
           // By status
-          supabase.rpc("analytics_by_status").then((r) => r as { data: { status: string; count: number }[] | null, error: unknown }),
+          supabase
+            .rpc("analytics_by_status")
+            .then((r) => r as { data: { status: string; count: number }[] | null; error: unknown }),
           // By service
-          supabase.rpc("analytics_by_service").then((r) => r as { data: { service_name: string; count: number }[] | null, error: unknown }),
+          supabase
+            .rpc("analytics_by_service")
+            .then(
+              (r) =>
+                r as { data: { service_name: string; count: number }[] | null; error: unknown },
+            ),
           // Monthly (last 6 months)
-          supabase.rpc("analytics_monthly_trend").then((r) => r as { data: { month: string; count: number }[] | null, error: unknown }),
+          supabase
+            .rpc("analytics_monthly_trend")
+            .then((r) => r as { data: { month: string; count: number }[] | null; error: unknown }),
           // Totals via count queries (no rows fetched)
           supabase.from("applications").select("*", { count: "exact", head: true }),
-          supabase.from("applications").select("*", { count: "exact", head: true }).in("status", ["approved", "issued"]),
-          supabase.from("applications").select("*", { count: "exact", head: true }).eq("status", "rejected"),
+          supabase
+            .from("applications")
+            .select("*", { count: "exact", head: true })
+            .in("status", ["approved", "issued"]),
+          supabase
+            .from("applications")
+            .select("*", { count: "exact", head: true })
+            .eq("status", "rejected"),
         ]);
 
         // By service
@@ -98,7 +113,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ lang }) => {
 
         // By status
         if (statusRows) {
-          setByStatus(statusRows.map((r) => ({ name: r.status || "submitted", value: Number(r.count) })));
+          setByStatus(
+            statusRows.map((r) => ({ name: r.status || "submitted", value: Number(r.count) })),
+          );
         }
 
         // Monthly trend

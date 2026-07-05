@@ -30,22 +30,10 @@ ward,"Dar es Salaam Central",Dar es Salaam`;
 describe("buildHierarchyTree", () => {
   it("builds flat list into tree", () => {
     const offices = [
-      { id: "1", parent_id: null, name: "Regional" } as unknown as {
-        id: string;
-        parent_id: string | null;
-        name: string;
-      },
-      { id: "2", parent_id: "1", name: "District" } as unknown as {
-        id: string;
-        parent_id: string | null;
-        name: string;
-      },
-      { id: "3", parent_id: "2", name: "Ward" } as unknown as {
-        id: string;
-        parent_id: string | null;
-        name: string;
-      },
-    ];
+      { id: "1", parent_id: null, name: "Regional" },
+      { id: "2", parent_id: "1", name: "District" },
+      { id: "3", parent_id: "2", name: "Ward" },
+    ] as unknown as import("@/lib/officeRegistry").Office[];
     const tree = buildHierarchyTree(offices);
     expect(tree).toHaveLength(1);
     expect(tree[0].children).toHaveLength(1);
@@ -53,12 +41,8 @@ describe("buildHierarchyTree", () => {
   });
   it("roots orphaned nodes", () => {
     const offices = [
-      { id: "1", parent_id: "999", name: "Orphan" } as unknown as {
-        id: string;
-        parent_id: string | null;
-        name: string;
-      },
-    ];
+      { id: "1", parent_id: "999", name: "Orphan" },
+    ] as unknown as import("@/lib/officeRegistry").Office[];
     const tree = buildHierarchyTree(offices);
     expect(tree).toHaveLength(1);
     expect(tree[0].name).toBe("Orphan");

@@ -25,12 +25,20 @@ import { RefreshButton } from "@/components/ui/RefreshButton";
 import { generateQRDataUrl } from "@/lib/qr";
 
 // Lazy-load heavy PDF dependencies — only loaded when user clicks a receipt
-const PDFDownloadLink = lazy(() => import("@react-pdf/renderer").then((m) => ({ default: (m.PDFDownloadLink as unknown) as React.ComponentType<{
-    document: React.ReactElement;
-    fileName: string;
-    children: (p: { loading: boolean; error: Error | null }) => React.ReactNode;
-  }> })));
-const RisitiMalipoPDF = lazy(() => import("@/components/documents/RisitiMalipoPDF").then((m) => ({ default: (m.RisitiMalipoPDF as unknown) as React.ComponentType<Record<string, unknown>> })));
+const PDFDownloadLink = lazy(() =>
+  import("@react-pdf/renderer").then((m) => ({
+    default: m.PDFDownloadLink as unknown as React.ComponentType<{
+      document: React.ReactElement;
+      fileName: string;
+      children: (p: { loading: boolean; error: Error | null }) => React.ReactNode;
+    }>,
+  })),
+);
+const RisitiMalipoPDF = lazy(() =>
+  import("@/components/documents/RisitiMalipoPDF").then((m) => ({
+    default: m.RisitiMalipoPDF as unknown as React.ComponentType<Record<string, unknown>>,
+  })),
+);
 
 const PAGE_SIZE = 20;
 
@@ -146,9 +154,7 @@ const ReceiptDownloadButton: React.FC<{
       <PDFDownloadLink
         document={
           <RisitiMalipoPDF
-            application={
-              appForReceipt as unknown as Record<string, unknown>
-            }
+            application={appForReceipt as unknown as Record<string, unknown>}
             lang={lang as "sw" | "en"}
             qrDataUrl={qr || undefined}
           />
@@ -194,12 +200,7 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
     setVisibleCount(PAGE_SIZE);
 
     // Fire all 4 queries simultaneously
-    const [
-      appsRes,
-      paidAppsRes,
-      issuedRes,
-      outstandingRes,
-    ] = await Promise.all([
+    const [appsRes, paidAppsRes, issuedRes, outstandingRes] = await Promise.all([
       // 1. All user application IDs
       supabase.from("applications").select("id").eq("user_id", user.id),
       // 2. Paid/issued applications (for building payment records)
@@ -253,8 +254,7 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
         };
         const amount = getApplicationAmount(app);
         // Skip if already in payments table
-        if (finalPayments.find((p) => (p.application as { id?: string })?.id === app.id))
-          continue;
+        if (finalPayments.find((p) => (p.application as { id?: string })?.id === app.id)) continue;
         if (Number(amount) > 0) {
           finalPayments.push({
             id: app.id,
@@ -365,7 +365,10 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
         : payments,
     [payments, searchQuery],
   );
-  const visiblePayments = useMemo(() => allFilteredPayments.slice(0, visibleCount), [allFilteredPayments, visibleCount]);
+  const visiblePayments = useMemo(
+    () => allFilteredPayments.slice(0, visibleCount),
+    [allFilteredPayments, visibleCount],
+  );
   const hasMorePayments = visibleCount < allFilteredPayments.length;
 
   const filteredReceipts = useMemo(
@@ -610,7 +613,8 @@ export function MyPayments({ onPay }: MyPaymentsProps = {}) {
                   onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
                   className="w-full py-3 text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors"
                 >
-                  {L("Pakia Zaidi", "Load More")} ({allFilteredPayments.length - visibleCount} {L("zaidi", "remaining")})
+                  {L("Pakia Zaidi", "Load More")} ({allFilteredPayments.length - visibleCount}{" "}
+                  {L("zaidi", "remaining")})
                 </button>
               )}
             </div>

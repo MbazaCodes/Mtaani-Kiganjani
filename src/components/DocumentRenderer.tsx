@@ -124,9 +124,15 @@ function usePhotoBase64(rawPhoto: string | null | undefined): string | null {
   const [base64, setBase64] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (!rawPhoto) { setBase64(null); return; }
+    if (!rawPhoto) {
+      setBase64(null);
+      return;
+    }
     // Already base64 — use as-is
-    if (rawPhoto.startsWith("data:")) { setBase64(rawPhoto); return; }
+    if (rawPhoto.startsWith("data:")) {
+      setBase64(rawPhoto);
+      return;
+    }
     // External URL — fetch and convert
     urlToBase64(rawPhoto).then(setBase64);
   }, [rawPhoto]);
@@ -160,14 +166,18 @@ export const DocumentRenderer: React.FC<{
 
   // Resolve photo: prop chain matches what PDF components expect
   const fd = (application.form_data || {}) as Record<string, unknown>;
-  const uploadedDocs = (fd.uploaded_documents || []) as { type?: string; dataUrl?: string; url?: string }[];
+  const uploadedDocs = (fd.uploaded_documents || []) as {
+    type?: string;
+    dataUrl?: string;
+    url?: string;
+  }[];
   const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
   // selfie may be base64 (dataUrl) or Supabase Storage URL (url)
   const rawPhoto =
     selfieDoc?.dataUrl ||
     selfieDoc?.url ||
-    (application.users as Record<string, unknown> | null)?.photo_url as string | null ||
-    fd.photo_url as string | null ||
+    ((application.users as Record<string, unknown> | null)?.photo_url as string | null) ||
+    (fd.photo_url as string | null) ||
     null;
   // Convert URL → base64 if needed (react-pdf can't fetch external URLs)
   const photoUrl = usePhotoBase64(rawPhoto);
@@ -182,7 +192,14 @@ export const DocumentRenderer: React.FC<{
 
   return (
     <PDFDownloadLink
-      document={<Component application={application} lang={lang} qrDataUrl={qrDataUrl} photoUrl={photoUrl} />}
+      document={
+        <Component
+          application={application}
+          lang={lang}
+          qrDataUrl={qrDataUrl}
+          photoUrl={photoUrl}
+        />
+      }
       fileName={filename}
     >
       {({ loading }) => (
@@ -222,8 +239,8 @@ export const DocumentPreview: React.FC<{
   const selfieDoc = uploadedDocs.find((d) => d.type === "selfie");
   const photoUrl =
     selfieDoc?.dataUrl ||
-    (application.users as Record<string, unknown> | null)?.photo_url as string | null ||
-    fd.photo_url as string | null ||
+    ((application.users as Record<string, unknown> | null)?.photo_url as string | null) ||
+    (fd.photo_url as string | null) ||
     null;
 
   return (
@@ -280,7 +297,14 @@ export const DocumentPreview: React.FC<{
             </button>
           ) : (
             <PDFDownloadLink
-              document={<Component application={application} lang={lang} qrDataUrl={qrDataUrl} photoUrl={photoUrl} />}
+              document={
+                <Component
+                  application={application}
+                  lang={lang}
+                  qrDataUrl={qrDataUrl}
+                  photoUrl={photoUrl}
+                />
+              }
               fileName={filename}
             >
               {({ loading, error }) =>

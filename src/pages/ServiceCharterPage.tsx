@@ -91,7 +91,7 @@ const SERVICE_STANDARDS = [
     service: { sw: "Risiti ya Malipo", en: "Payment Receipt" },
     submitTime: { sw: "Papo hapo", en: "Immediate" },
     approvalTime: { sw: "Papo hapo baada ya malipo", en: "Immediately after payment" },
-    fee: (s: boolean) => L(s, "Bila ada", "Free"),
+    fee: (lang: string) => L(lang, "Bila ada", "Free"),
     availability: "24/7",
   },
 ];
@@ -150,13 +150,34 @@ const CITIZEN_RIGHTS = [
 
 // ─── Our commitments ─────────────────────────────────────────────────────────
 const OUR_COMMITMENTS = [
-  { sw: "Kujibu maombi yote ndani ya muda ulioainishwa", en: "Respond to all applications within stated timeframes" },
-  { sw: "Kutoa sababu wazi za ukataji wa maombi", en: "Provide clear reasons for rejected applications" },
-  { sw: "Kuhakikisha mfumo unapatikana masaa 24, siku 7", en: "Ensure system availability 24 hours, 7 days a week" },
-  { sw: "Kulinda data za wananchi kwa kiwango cha juu cha usalama", en: "Protect citizen data with the highest security standards" },
-  { sw: "Kuboresha mfumo kwa mujibu wa maoni ya watumiaji", en: "Continuously improve the system based on user feedback" },
-  { sw: "Kuhakikisha nyaraka zote zinaweza kuthibitishwa kwa QR code", en: "Ensure all documents are verifiable via QR code" },
-  { sw: "Kutoa taarifa za hali ya maombi kwa wakati halisi", en: "Provide real-time application status notifications" },
+  {
+    sw: "Kujibu maombi yote ndani ya muda ulioainishwa",
+    en: "Respond to all applications within stated timeframes",
+  },
+  {
+    sw: "Kutoa sababu wazi za ukataji wa maombi",
+    en: "Provide clear reasons for rejected applications",
+  },
+  {
+    sw: "Kuhakikisha mfumo unapatikana masaa 24, siku 7",
+    en: "Ensure system availability 24 hours, 7 days a week",
+  },
+  {
+    sw: "Kulinda data za wananchi kwa kiwango cha juu cha usalama",
+    en: "Protect citizen data with the highest security standards",
+  },
+  {
+    sw: "Kuboresha mfumo kwa mujibu wa maoni ya watumiaji",
+    en: "Continuously improve the system based on user feedback",
+  },
+  {
+    sw: "Kuhakikisha nyaraka zote zinaweza kuthibitishwa kwa QR code",
+    en: "Ensure all documents are verifiable via QR code",
+  },
+  {
+    sw: "Kutoa taarifa za hali ya maombi kwa wakati halisi",
+    en: "Provide real-time application status notifications",
+  },
   { sw: "Kufanya mafunzo ya watumishi kila robo mwaka", en: "Train staff every quarter" },
 ];
 
@@ -166,7 +187,6 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-10">
-
       {/* ── Header ── */}
       <div className="bg-gradient-to-br from-blue-800 to-emerald-900 rounded-3xl p-8 text-white">
         <div className="flex items-center gap-3 mb-4">
@@ -174,7 +194,9 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
             <FileCheck2 size={24} className="text-white" />
           </div>
           <div>
-            <p className="text-blue-300 text-xs font-bold uppercase tracking-widest">OR-MUU 2014 §2.1.v.d</p>
+            <p className="text-blue-300 text-xs font-bold uppercase tracking-widest">
+              OR-MUU 2014 §2.1.v.d
+            </p>
             <p className="text-white/70 text-xs">Mtaani Kiganjani — E-Mtaa Portal</p>
           </div>
         </div>
@@ -226,7 +248,10 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
             </thead>
             <tbody>
               {SERVICE_STANDARDS.map((s, i) => (
-                <tr key={i} className={`border-t border-stone-100 dark:border-stone-800 ${i % 2 === 1 ? "bg-stone-50 dark:bg-stone-800/50" : ""}`}>
+                <tr
+                  key={i}
+                  className={`border-t border-stone-100 dark:border-stone-800 ${i % 2 === 1 ? "bg-stone-50 dark:bg-stone-800/50" : ""}`}
+                >
                   <td className="px-4 py-3 font-bold text-stone-800 dark:text-stone-200">
                     {sw ? s.service.sw : s.service.en}
                   </td>
@@ -240,7 +265,7 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
                     </span>
                   </td>
                   <td className="px-4 py-3 font-bold text-stone-800 dark:text-stone-200">
-                    {typeof s.fee === "function" ? s.fee(sw) : s.fee}
+                    {typeof s.fee === "function" ? s.fee(lang) : s.fee}
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-xs font-black text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
@@ -272,7 +297,10 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
 
         <div className="space-y-2">
           {CITIZEN_RIGHTS.map((r, i) => (
-            <div key={i} className="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+            <div
+              key={i}
+              className="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden"
+            >
               <button
                 className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-stone-50 dark:hover:bg-stone-800 text-left transition-colors"
                 onClick={() => setOpenRight(openRight === i ? null : i)}
@@ -281,9 +309,11 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
                 <span className="flex-1 font-bold text-sm text-stone-800 dark:text-stone-200">
                   {sw ? r.title.sw : r.title.en}
                 </span>
-                {openRight === i
-                  ? <ChevronUp size={16} className="text-stone-400 shrink-0" />
-                  : <ChevronDown size={16} className="text-stone-400 shrink-0" />}
+                {openRight === i ? (
+                  <ChevronUp size={16} className="text-stone-400 shrink-0" />
+                ) : (
+                  <ChevronDown size={16} className="text-stone-400 shrink-0" />
+                )}
               </button>
               {openRight === i && (
                 <div className="px-4 pb-4 pt-1 border-t border-stone-100 dark:border-stone-800">
@@ -331,24 +361,35 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
             {
               step: "1",
               title: { sw: "Tumia Mfumo wa Msaada", en: "Use the Support System" },
-              desc: { sw: "Wasiliana kupitia 'Msaada' ndani ya E-Mtaa. Tunajibu ndani ya saa 24.", en: "Contact via 'Support' within E-Mtaa. We respond within 24 hours." },
+              desc: {
+                sw: "Wasiliana kupitia 'Msaada' ndani ya E-Mtaa. Tunajibu ndani ya saa 24.",
+                en: "Contact via 'Support' within E-Mtaa. We respond within 24 hours.",
+              },
               color: "bg-blue-600",
             },
             {
               step: "2",
               title: { sw: "Wasiliana na Afisa WEO", en: "Contact WEO Officer" },
-              desc: { sw: "Kama hujaridhika, wasiliana na Afisa Mtendaji wa Kata (WEO) wako moja kwa moja.", en: "If unsatisfied, contact your Ward Executive Officer (WEO) directly." },
+              desc: {
+                sw: "Kama hujaridhika, wasiliana na Afisa Mtendaji wa Kata (WEO) wako moja kwa moja.",
+                en: "If unsatisfied, contact your Ward Executive Officer (WEO) directly.",
+              },
               color: "bg-amber-600",
             },
             {
               step: "3",
               title: { sw: "Kata Rufaa kwa Halmashauri", en: "Appeal to Council" },
-              desc: { sw: "Kwa matatizo makubwa, wasiliana na Mkurugenzi wa Halmashauri kwa maandishi.", en: "For serious issues, contact the Council Director in writing." },
+              desc: {
+                sw: "Kwa matatizo makubwa, wasiliana na Mkurugenzi wa Halmashauri kwa maandishi.",
+                en: "For serious issues, contact the Council Director in writing.",
+              },
               color: "bg-red-600",
             },
           ].map((s) => (
             <div key={s.step} className="flex gap-4">
-              <div className={`w-8 h-8 ${s.color} text-white rounded-full flex items-center justify-center font-black text-sm shrink-0`}>
+              <div
+                className={`w-8 h-8 ${s.color} text-white rounded-full flex items-center justify-center font-black text-sm shrink-0`}
+              >
                 {s.step}
               </div>
               <div className="flex-1 pb-4 border-b border-stone-100 dark:border-stone-800 last:border-0">
@@ -364,12 +405,16 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
         </div>
 
         <div className="mt-4 flex gap-3">
-          <a href="mailto:mlalamiko@e-mtaatz.xyz"
-            className="flex-1 text-center py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-colors">
+          <a
+            href="mailto:mlalamiko@e-mtaatz.xyz"
+            className="flex-1 text-center py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-colors"
+          >
             {sw ? "Tuma Malalamiko" : "File Complaint"}
           </a>
-          <a href="mailto:msaada@e-mtaatz.xyz"
-            className="flex-1 text-center py-3 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-xl font-bold text-sm transition-colors">
+          <a
+            href="mailto:msaada@e-mtaatz.xyz"
+            className="flex-1 text-center py-3 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-xl font-bold text-sm transition-colors"
+          >
             {sw ? "Msaada wa Jumla" : "General Support"}
           </a>
         </div>
@@ -381,14 +426,22 @@ export const ServiceCharterPage: React.FC<ServiceCharterPageProps> = ({ lang }) 
           {sw ? "Imeidhinishwa na kutolewa na:" : "Approved and issued by:"}
         </p>
         <p className="font-black text-lg text-white">
-          {sw ? "Ofisi ya Rais — TAMISEMI / Mamlaka ya Serikali Mtandao" : "President's Office — TAMISEMI / eGovernment Authority"}
+          {sw
+            ? "Ofisi ya Rais — TAMISEMI / Mamlaka ya Serikali Mtandao"
+            : "President's Office — TAMISEMI / eGovernment Authority"}
         </p>
         <p className="text-emerald-400 text-sm font-bold mt-1">
-          {sw ? "Imesainiwa: Desemba 2024 · Inapitiwa: Kila Mwaka" : "Signed: December 2024 · Review: Annually"}
+          {sw
+            ? "Imesainiwa: Desemba 2024 · Inapitiwa: Kila Mwaka"
+            : "Signed: December 2024 · Review: Annually"}
         </p>
         <div className="flex justify-center gap-3 mt-4">
-          <span className="text-[10px] bg-white/10 border border-white/20 px-2 py-1 rounded font-black uppercase tracking-wider">OR-MUU 2014 §2.1.v.d</span>
-          <span className="text-[10px] bg-emerald-900 border border-emerald-700 px-2 py-1 rounded font-black uppercase tracking-wider text-emerald-400">eGA Compliant</span>
+          <span className="text-[10px] bg-white/10 border border-white/20 px-2 py-1 rounded font-black uppercase tracking-wider">
+            OR-MUU 2014 §2.1.v.d
+          </span>
+          <span className="text-[10px] bg-emerald-900 border border-emerald-700 px-2 py-1 rounded font-black uppercase tracking-wider text-emerald-400">
+            eGA Compliant
+          </span>
         </div>
       </section>
     </div>

@@ -188,7 +188,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const [loginId, setLoginId] = useState("");
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
   const [loginPwd, setLoginPwd] = useState("");
-  const [loginError, setLoginError] = useState<{ type: "credentials" | "notfound" | "other"; message: string } | null>(null);
+  const [loginError, setLoginError] = useState<{
+    type: "credentials" | "notfound" | "other";
+    message: string;
+  } | null>(null);
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
@@ -792,7 +795,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                           <TxtInput
                             type="email"
                             value={loginId}
-                            onChange={(e) => { setLoginId(e.target.value); setLoginError(null); }}
+                            onChange={(e) => {
+                              setLoginId(e.target.value);
+                              setLoginError(null);
+                            }}
                             placeholder="juma@mfano.co.tz"
                             icon={<Mail size={15} />}
                             required
@@ -827,7 +833,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                           <TxtInput
                             type={showPwd ? "text" : "password"}
                             value={loginPwd}
-                            onChange={(e) => { setLoginPwd(e.target.value); setLoginError(null); }}
+                            onChange={(e) => {
+                              setLoginPwd(e.target.value);
+                              setLoginError(null);
+                            }}
                             placeholder="••••••••"
                             icon={<Lock size={15} />}
                             required
@@ -911,7 +920,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                               </button>
                               <button
                                 type="button"
-                                onClick={() => { setLoginError(null); setMode("signup"); }}
+                                onClick={() => {
+                                  setLoginError(null);
+                                  setMode("signup");
+                                }}
                                 className="flex-1 h-9 bg-white dark:bg-stone-800 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                               >
                                 <UserPlus size={12} />
@@ -920,7 +932,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
                               {loginError.type === "credentials" && (
                                 <button
                                   type="button"
-                                  onClick={() => { setLoginError(null); setShowForgot(true); }}
+                                  onClick={() => {
+                                    setLoginError(null);
+                                    setShowForgot(true);
+                                  }}
                                   className="flex-1 h-9 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 rounded-xl text-xs font-bold transition-all"
                                 >
                                   {L("Nywila?", "Forgot?")}

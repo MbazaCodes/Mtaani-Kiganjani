@@ -254,15 +254,11 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
     // Realtime: re-fetch on any INSERT or UPDATE to applications
     const channel = supabase
       .channel("review_applications")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "applications" },
-        () => fetchApps(),
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "applications" }, () =>
+        fetchApps(),
       )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "applications" },
-        () => fetchApps(),
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "applications" }, () =>
+        fetchApps(),
       )
       .subscribe();
 
@@ -1161,17 +1157,35 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                     citizenTier === "EMAIL_VERIFIED";
                   if (alreadyVerified) {
                     const tierLabel: Record<string, [string, string]> = {
-                      NIDA_VERIFIED: [L("NIDA Imethibitishwa", "NIDA Verified"), "text-emerald-700"],
-                      PROFILE_COMPLETED: [L("Wasifu Umekamilika", "Profile Completed"), "text-emerald-700"],
+                      NIDA_VERIFIED: [
+                        L("NIDA Imethibitishwa", "NIDA Verified"),
+                        "text-emerald-700",
+                      ],
+                      PROFILE_COMPLETED: [
+                        L("Wasifu Umekamilika", "Profile Completed"),
+                        "text-emerald-700",
+                      ],
                       PHONE_VERIFIED: [L("Simu Imethibitishwa", "Phone Verified"), "text-blue-700"],
-                      EMAIL_VERIFIED: [L("Barua Pepe Imethibitishwa", "Email Verified"), "text-blue-700"],
-                      PENDING_OFFICE_VISIT: [L("Inasubiri Ziara ya Ofisi", "Pending Office Visit"), "text-amber-700"],
+                      EMAIL_VERIFIED: [
+                        L("Barua Pepe Imethibitishwa", "Email Verified"),
+                        "text-blue-700",
+                      ],
+                      PENDING_OFFICE_VISIT: [
+                        L("Inasubiri Ziara ya Ofisi", "Pending Office Visit"),
+                        "text-amber-700",
+                      ],
                     };
-                    const [tierText, tierColor] = tierLabel[citizenTier] ?? [citizenTier, "text-stone-600"];
+                    const [tierText, tierColor] = tierLabel[citizenTier] ?? [
+                      citizenTier,
+                      "text-stone-600",
+                    ];
                     return (
                       <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-2xl p-4 flex items-center gap-3">
                         <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center shrink-0">
-                          <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400" />
+                          <ShieldCheck
+                            size={18}
+                            className="text-emerald-600 dark:text-emerald-400"
+                          />
                         </div>
                         <div>
                           <p className="font-black text-emerald-800 dark:text-emerald-300 text-sm">
@@ -1183,7 +1197,9 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                               "No checklist needed. You can approve directly.",
                             )}
                           </p>
-                          <span className={`inline-block mt-1 text-[10px] font-black uppercase tracking-wider ${tierColor}`}>
+                          <span
+                            className={`inline-block mt-1 text-[10px] font-black uppercase tracking-wider ${tierColor}`}
+                          >
                             ✓ {tierText}
                           </span>
                         </div>
@@ -1292,13 +1308,16 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                 )}
 
                 {/* Fee */}
-                {Number((selected.form_data as unknown as Record<string, unknown>)?.total_fee ?? 0) > 0 && (
+                {Number(
+                  (selected.form_data as unknown as Record<string, unknown>)?.total_fee ?? 0,
+                ) > 0 && (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex justify-between items-center">
                     <span className="text-xs font-bold text-emerald-800">{L("Ada:", "Fee:")}</span>
                     <span className="text-lg font-black text-emerald-700">
                       TSh{" "}
                       {(
-                        (selected.form_data as unknown as Record<string, unknown>)?.total_fee as number
+                        (selected.form_data as unknown as Record<string, unknown>)
+                          ?.total_fee as number
                       ).toLocaleString()}
                     </span>
                   </div>
@@ -1516,7 +1535,8 @@ export function ApplicationReview({ lang }: ApplicationReviewProps) {
                     (selected.payment_data as unknown as Record<string, unknown>)?.transaction_id
                   );
                   const svcFee = (selected.services as { fee?: number })?.fee ?? 0;
-                  const frmFee = (selected.form_data as unknown as Record<string, unknown>)?.service_fee;
+                  const frmFee = (selected.form_data as unknown as Record<string, unknown>)
+                    ?.service_fee;
                   const eFee = svcFee > 0 ? svcFee : typeof frmFee === "number" ? frmFee : 0;
                   const needsPayment = eFee > 0 && !hasPaidCheck;
                   return (

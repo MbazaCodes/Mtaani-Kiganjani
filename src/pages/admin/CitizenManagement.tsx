@@ -140,7 +140,7 @@ export function CitizenManagement() {
       }
 
       setPendingChanges(data || []);
-    } catch (_error) {
+    } catch (error) {
       console.error("Exception fetching profile changes:", error);
       setPendingChanges([]);
     } finally {
@@ -236,7 +236,9 @@ export function CitizenManagement() {
     try {
       const { data, error } = await supabase
         .from("users")
-        .select("id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, date_of_birth, place_of_birth, nationality")
+        .select(
+          "id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, date_of_birth, place_of_birth, nationality",
+        )
         .eq("role", "citizen")
         .order("created_at", { ascending: false })
         .limit(500);
@@ -321,7 +323,9 @@ export function CitizenManagement() {
     try {
       const { data, error } = await supabase
         .from("users")
-        .select("id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, date_of_birth, place_of_birth, nationality, photo_url")
+        .select(
+          "id, first_name, middle_name, last_name, email, phone, nida_number, citizen_id, region, district, ward, street, is_verified, account_status, role, created_at, sex, occupation, date_of_birth, place_of_birth, nationality, photo_url",
+        )
         .eq("id", citizen.id)
         .maybeSingle();
       if (!error && data) {
@@ -724,7 +728,8 @@ export function CitizenManagement() {
                             />
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 font-bold shrink-0">
-                              {citizen.first_name?.[0]}{citizen.last_name?.[0]}
+                              {citizen.first_name?.[0]}
+                              {citizen.last_name?.[0]}
                             </div>
                           )}
                           <div>
@@ -1495,6 +1500,6 @@ export function CitizenManagement() {
       </AnimatePresence>
     </motion.div>
   );
-};
+}
 
 export default CitizenManagement;

@@ -73,15 +73,11 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
     // Supabase realtime: instant notification when a new application is inserted
     const channel = supabase
       .channel("staff_applications")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "applications" },
-        () => fetchData(),
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "applications" }, () =>
+        fetchData(),
       )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "applications" },
-        () => fetchData(),
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "applications" }, () =>
+        fetchData(),
       )
       .subscribe();
 
@@ -242,7 +238,9 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       // Fetch recent applications (without service join to avoid empty results)
       let query = supabase
         .from("applications")
-        .select("id, application_number, service_name, status, created_at, ward, district, region, form_data, payment_data")
+        .select(
+          "id, application_number, service_name, status, created_at, ward, district, region, form_data, payment_data",
+        )
         .order("created_at", { ascending: false });
 
       // Only filter by location if assigned - otherwise, staff can see all (small mtaa)
@@ -261,7 +259,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       const { data, error } = await query.limit(10);
 
       if (!error && data) {
-        setApplications(data);
+        setApplications(data as unknown as import("@/lib/supabase").Application[]);
       } else if (error) {
         console.error("Error fetching applications:", error);
       }

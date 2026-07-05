@@ -12,54 +12,126 @@ import { SessionTimeout } from "./components/SessionTimeout";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 
 // Public pages
-const Landing = React.lazy(() => import("./pages/Landing").then(m => ({ default: m.Landing })));
-const NotFound = React.lazy(() => import("./pages/NotFound").then(m => ({ default: m.NotFound })));
-const MachapishoPage = React.lazy(() => import("./pages/MachapishoPage").then(m => ({ default: m.MachapishoPage })));
-const AboutPage = React.lazy(() => import("./pages/AboutPage").then(m => ({ default: m.AboutPage })));
-const TaasisiPage = React.lazy(() => import("./pages/TaasisiPage").then(m => ({ default: m.TaasisiPage })));
-const KituoChaHabariPage = React.lazy(() => import("./pages/KituoChaHabariPage").then(m => ({ default: m.KituoChaHabariPage })));
-const HelpPage = React.lazy(() => import("./pages/HelpPage").then(m => ({ default: m.HelpPage })));
-const LegalPage = React.lazy(() => import("./pages/LegalPage").then(m => ({ default: m.LegalPage })));
-const EmailConfirm = React.lazy(() => import("./pages/EmailConfirm").then(m => ({ default: m.EmailConfirm })));
+const Landing = React.lazy(() => import("./pages/Landing").then((m) => ({ default: m.Landing })));
+const NotFound = React.lazy(() =>
+  import("./pages/NotFound").then((m) => ({ default: m.NotFound })),
+);
+const MachapishoPage = React.lazy(() =>
+  import("./pages/MachapishoPage").then((m) => ({ default: m.MachapishoPage })),
+);
+const AboutPage = React.lazy(() =>
+  import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })),
+);
+const TaasisiPage = React.lazy(() =>
+  import("./pages/TaasisiPage").then((m) => ({ default: m.TaasisiPage })),
+);
+const KituoChaHabariPage = React.lazy(() =>
+  import("./pages/KituoChaHabariPage").then((m) => ({ default: m.KituoChaHabariPage })),
+);
+const HelpPage = React.lazy(() =>
+  import("./pages/HelpPage").then((m) => ({ default: m.HelpPage })),
+);
+const LegalPage = React.lazy(() =>
+  import("./pages/LegalPage").then((m) => ({ default: m.LegalPage })),
+);
+const EmailConfirm = React.lazy(() =>
+  import("./pages/EmailConfirm").then((m) => ({ default: m.EmailConfirm })),
+);
 
 // Citizen pages
-const Dashboard = React.lazy(() => import("./pages/Dashboard").then(m => ({ default: m.Dashboard })));
-const Services = React.lazy(() => import("./pages/Services").then(m => ({ default: m.Services })));
-const Apply = React.lazy(() => import("./pages/Apply").then(m => ({ default: m.Apply })));
-const Applications = React.lazy(() => import("./pages/Applications").then(m => ({ default: m.Applications })));
-const Agreement = React.lazy(() => import("./pages/Agreement").then(m => ({ default: m.Agreement })));
-const Notifications = React.lazy(() => import("./pages/Notifications").then(m => ({ default: m.Notifications })));
-const Profile = React.lazy(() => import("./pages/Profile").then(m => ({ default: m.Profile })));
-const Auth = React.lazy(() => import("./pages/Auth").then(m => ({ default: m.Auth })));
-const VerifyDocuments = React.lazy(() => import("./components/VerifyDocuments").then(m => ({ default: m.VerifyDocuments })));
+const Dashboard = React.lazy(() =>
+  import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })),
+);
+const Services = React.lazy(() =>
+  import("./pages/Services").then((m) => ({ default: m.Services })),
+);
+const Apply = React.lazy(() => import("./pages/Apply").then((m) => ({ default: m.Apply })));
+const Applications = React.lazy(() =>
+  import("./pages/Applications").then((m) => ({ default: m.Applications })),
+);
+const Agreement = React.lazy(() =>
+  import("./pages/Agreement").then((m) => ({ default: m.Agreement })),
+);
+const Notifications = React.lazy(() =>
+  import("./pages/Notifications").then((m) => ({ default: m.Notifications })),
+);
+const Profile = React.lazy(() => import("./pages/Profile").then((m) => ({ default: m.Profile })));
+const Auth = React.lazy(() => import("./pages/Auth").then((m) => ({ default: m.Auth })));
+const VerifyDocuments = React.lazy(() =>
+  import("./components/VerifyDocuments").then((m) => ({ default: m.VerifyDocuments })),
+);
 
 // Admin pages
-const AdminDashboard = React.lazy(() => import("./pages/admin/AdminDashboard").then(m => ({ default: m.AdminDashboard })));
-const OfficeManagement = React.lazy(() => import("./pages/admin/OfficeManagement").then(m => ({ default: m.OfficeManagement })));
-const LocationManagement = React.lazy(() => import("./pages/admin/LocationManagement").then(m => ({ default: m.LocationManagement })));
-const ServiceManagement = React.lazy(() => import("./pages/admin/ServiceManagement").then(m => ({ default: m.ServiceManagement })));
-const AdminLogs = React.lazy(() => import("./pages/admin/AdminLogs").then(m => ({ default: m.AdminLogs })));
-const DepartmentManagement = React.lazy(() => import("./pages/admin/DepartmentManagement").then(m => ({ default: m.DepartmentManagement })));
-const DepartmentPortal = React.lazy(() => import("./pages/department/DepartmentPortal").then(m => ({ default: m.DepartmentPortal })));
-const CitizenSupport = React.lazy(() => import("./pages/CitizenSupport").then(m => ({ default: m.CitizenSupport })));
-const StaffTicketInbox = React.lazy(() => import("./pages/staff/StaffTicketInbox").then(m => ({ default: m.StaffTicketInbox })));
-const CommunityReporting = React.lazy(() => import("./pages/CommunityReporting").then(m => ({ default: m.CommunityReporting })));
-const StaffReportsInbox = React.lazy(() => import("./pages/staff/StaffReportsInbox").then(m => ({ default: m.StaffReportsInbox })));
-const Announcements = React.lazy(() => import("./pages/Announcements").then(m => ({ default: m.Announcements })));
-const MyPayments = React.lazy(() => import("./pages/MyPayments").then(m => ({ default: m.MyPayments })));
-const CommunicationsCenter = React.lazy(() => import("./pages/CommunicationsCenter").then(m => ({ default: m.CommunicationsCenter })));
-const CitizenManagement = React.lazy(() => import("./pages/admin/CitizenManagement").then(m => ({ default: m.CitizenManagement })));
+const AdminDashboard = React.lazy(() =>
+  import("./pages/admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard })),
+);
+const OfficeManagement = React.lazy(() =>
+  import("./pages/admin/OfficeManagement").then((m) => ({ default: m.OfficeManagement })),
+);
+const LocationManagement = React.lazy(() =>
+  import("./pages/admin/LocationManagement").then((m) => ({ default: m.LocationManagement })),
+);
+const ServiceManagement = React.lazy(() =>
+  import("./pages/admin/ServiceManagement").then((m) => ({ default: m.ServiceManagement })),
+);
+const AdminLogs = React.lazy(() =>
+  import("./pages/admin/AdminLogs").then((m) => ({ default: m.AdminLogs })),
+);
+const DepartmentManagement = React.lazy(() =>
+  import("./pages/admin/DepartmentManagement").then((m) => ({ default: m.DepartmentManagement })),
+);
+const DepartmentPortal = React.lazy(() =>
+  import("./pages/department/DepartmentPortal").then((m) => ({ default: m.DepartmentPortal })),
+);
+const CitizenSupport = React.lazy(() =>
+  import("./pages/CitizenSupport").then((m) => ({ default: m.CitizenSupport })),
+);
+const StaffTicketInbox = React.lazy(() =>
+  import("./pages/staff/StaffTicketInbox").then((m) => ({ default: m.StaffTicketInbox })),
+);
+const CommunityReporting = React.lazy(() =>
+  import("./pages/CommunityReporting").then((m) => ({ default: m.CommunityReporting })),
+);
+const StaffReportsInbox = React.lazy(() =>
+  import("./pages/staff/StaffReportsInbox").then((m) => ({ default: m.StaffReportsInbox })),
+);
+const Announcements = React.lazy(() =>
+  import("./pages/Announcements").then((m) => ({ default: m.Announcements })),
+);
+const MyPayments = React.lazy(() =>
+  import("./pages/MyPayments").then((m) => ({ default: m.MyPayments })),
+);
+const CommunicationsCenter = React.lazy(() =>
+  import("./pages/CommunicationsCenter").then((m) => ({ default: m.CommunicationsCenter })),
+);
+const CitizenManagement = React.lazy(() =>
+  import("./pages/admin/CitizenManagement").then((m) => ({ default: m.CitizenManagement })),
+);
 
 // Staff pages
-const StaffDashboard = React.lazy(() => import("./pages/staff/StaffDashboard").then(m => ({ default: m.StaffDashboard })));
-const CustomerSupport = React.lazy(() => import("./pages/staff/CustomerSupport").then(m => ({ default: m.CustomerSupport })));
-const ManualVerification = React.lazy(() => import("./pages/staff/ManualVerification").then(m => ({ default: m.ManualVerification })));
-const StaffCitizenManagement = React.lazy(() => import("./pages/staff/CitizenManagement").then(m => ({ default: m.StaffCitizenManagement })));
-const BusinessApproval = React.lazy(() => import("./pages/staff/BusinessApproval").then(m => ({ default: m.BusinessApproval })));
+const StaffDashboard = React.lazy(() =>
+  import("./pages/staff/StaffDashboard").then((m) => ({ default: m.StaffDashboard })),
+);
+const CustomerSupport = React.lazy(() =>
+  import("./pages/staff/CustomerSupport").then((m) => ({ default: m.CustomerSupport })),
+);
+const ManualVerification = React.lazy(() =>
+  import("./pages/staff/ManualVerification").then((m) => ({ default: m.ManualVerification })),
+);
+const StaffCitizenManagement = React.lazy(() =>
+  import("./pages/staff/CitizenManagement").then((m) => ({ default: m.StaffCitizenManagement })),
+);
+const BusinessApproval = React.lazy(() =>
+  import("./pages/staff/BusinessApproval").then((m) => ({ default: m.BusinessApproval })),
+);
 
 // Shared staff+admin
-const StaffManagement = React.lazy(() => import("./components/StaffManagement").then(m => ({ default: m.StaffManagement })));
-const ApplicationReview = React.lazy(() => import("./components/ApplicationReview").then(m => ({ default: m.ApplicationReview })));
+const StaffManagement = React.lazy(() =>
+  import("./components/StaffManagement").then((m) => ({ default: m.StaffManagement })),
+);
+const ApplicationReview = React.lazy(() =>
+  import("./components/ApplicationReview").then((m) => ({ default: m.ApplicationReview })),
+);
 
 // Apply page needs AppContext
 import { useAppContext } from "./context/AppContext";
@@ -70,7 +142,9 @@ let _HARDCODED_SERVICES: typeof import("./constants/services").HARDCODED_SERVICE
 function getHardcodedServices() {
   if (!_HARDCODED_SERVICES) {
     // Dynamic import cached after first load
-    import("./constants/services").then(m => { _HARDCODED_SERVICES = m.HARDCODED_SERVICES; });
+    import("./constants/services").then((m) => {
+      _HARDCODED_SERVICES = m.HARDCODED_SERVICES;
+    });
   }
   return _HARDCODED_SERVICES;
 }
@@ -94,9 +168,7 @@ function AuthenticatedRoot() {
 
 // Loading screen
 function LoadingScreen() {
-  return (
-    <AppSplashSkeleton />
-  );
+  return <AppSplashSkeleton />;
 }
 
 // Public landing with auth modal
@@ -190,8 +262,8 @@ function ApplicationsRoute() {
     setSelectedService,
     isLoading,
   } = useAppContext();
-  if (isLoading) return <ApplicationsSkeleton />;
   const navigate = useNavigate();
+  if (isLoading) return <ApplicationsSkeleton />;
 
   return (
     <Applications
@@ -270,9 +342,7 @@ function CitizensRoute() {
 
 // Page transition wrapper — pure CSS, no framer-motion needed
 const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="animate-[fade-in_0.15s_ease-out]">
-    {children}
-  </div>
+  <div className="animate-[fade-in_0.15s_ease-out]">{children}</div>
 );
 
 // Main router
@@ -485,433 +555,445 @@ export default function App() {
       <BrowserRouter>
         <AppProvider>
           <React.Suspense fallback={<AppSplashSkeleton />}>
-          <Routes>
-            {/* Public */}
-            <Route path="/" element={<PublicHome />} />
-            <Route
-              path="/verify"
-              element={
-                <div className="min-h-screen bg-stone-50">
-                  <div className="py-8 px-4 max-w-5xl mx-auto">
-                    <VerifyDocuments
-                      lang={lang}
-                      onBack={() => window.history.back()}
-                      userRole="citizen"
-                    />
-                  </div>
-                </div>
-              }
-            />
-
-            {/* Authenticated root: redirects by role */}
-            <Route
-              path="/app"
-              element={
-                <ProtectedRoute>
-                  <AuthenticatedRoot />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Citizen routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["citizen"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <DashboardRoute />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/services"
-              element={
-                <ProtectedRoute allowedRoles={["citizen"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <ServicesRoute />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/apply"
-              element={
-                <ProtectedRoute allowedRoles={["citizen"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <ApplyRoute />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/applications"
-              element={
-                <ProtectedRoute allowedRoles={["citizen"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <ApplicationsRoute />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <PageTransition>
-                      <Profile />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/agreement"
-              element={
-                <ProtectedRoute allowedRoles={["citizen"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <Agreement />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <PageTransition>
-                      <Notifications />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/verify-docs"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <PageTransition>
+            <Routes>
+              {/* Public */}
+              <Route path="/" element={<PublicHome />} />
+              <Route
+                path="/verify"
+                element={
+                  <div className="min-h-screen bg-stone-50">
+                    <div className="py-8 px-4 max-w-5xl mx-auto">
                       <VerifyDocuments
                         lang={lang}
                         onBack={() => window.history.back()}
                         userRole="citizen"
                       />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
+                    </div>
+                  </div>
+                }
+              />
 
-            {/* Staff routes */}
-            <Route
-              path="/staff"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <StaffDashboardRoute />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/staff/support"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <CustomerSupport />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/staff/verification"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <ManualVerification />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/staff/business"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <BusinessApproval />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/staff/review"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <ApplicationReview lang={lang} />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
+              {/* Authenticated root: redirects by role */}
+              <Route
+                path="/app"
+                element={
+                  <ProtectedRoute>
+                    <AuthenticatedRoot />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Admin routes */}
-            <Route
-              path="/support"
-              element={
-                <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
-                  <AppShell>
-                    <CitizenSupport />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
-                  <AppShell>
-                    <CommunityReporting />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
-                  <AppShell>
-                    <CommunicationsCenter />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payments"
-              element={
-                <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
-                  <AppShell>
-                    <MyPaymentsRoute />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/announcements"
-              element={
-                <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
-                  <AppShell>
-                    <Announcements />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/staff/announcements"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <Announcements isStaff />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/staff/reports"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <StaffReportsInbox />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/staff/tickets"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <StaffTicketInbox />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/department"
-              element={
-                <ProtectedRoute allowedRoles={["staff", "admin"]}>
-                  <AppShell>
-                    <DepartmentPortal />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <AdminDashboardRoute />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/offices"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <OfficeManagement />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/locations"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <LocationManagement />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/services"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <ServiceManagement />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/departments"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AppShell>
-                    <DepartmentManagement />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/logs"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <AdminLogs />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/staff"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <StaffManagement lang={lang} />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
+              {/* Citizen routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <DashboardRoute />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/services"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <ServicesRoute />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/apply"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <ApplyRoute />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/applications"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <ApplicationsRoute />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <PageTransition>
+                        <Profile />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agreement"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <Agreement />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <PageTransition>
+                        <Notifications />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/verify-docs"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <PageTransition>
+                        <VerifyDocuments
+                          lang={lang}
+                          onBack={() => window.history.back()}
+                          userRole="citizen"
+                        />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Shared: citizens: renders admin or staff version based on role */}
-            <Route
-              path="/citizens"
-              element={
-                <ProtectedRoute allowedRoles={["admin", "staff"]}>
-                  <AppShell>
-                    <PageTransition>
-                      <CitizensRoute />
-                    </PageTransition>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
+              {/* Staff routes */}
+              <Route
+                path="/staff"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <StaffDashboardRoute />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff/support"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <CustomerSupport />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff/verification"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <ManualVerification />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff/business"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <BusinessApproval />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff/review"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <ApplicationReview lang={lang} />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Email confirmation redirect */}
-            {/* Public info pages */}
-            <Route path="/taasisi" element={
-              <React.Suspense fallback={<AppSplashSkeleton />}>
-                <TaasisiPage lang={lang} />
-              </React.Suspense>
-            } />
-            <Route path="/about" element={
-              <React.Suspense fallback={<AppSplashSkeleton />}>
-                <AboutPage lang={lang} />
-              </React.Suspense>
-            } />
-            <Route path="/machapisho" element={
-              <React.Suspense fallback={<AppSplashSkeleton />}>
-                <MachapishoPage lang={lang} />
-              </React.Suspense>
-            } />
-            <Route path="/habari" element={
-              <React.Suspense fallback={<AppSplashSkeleton />}>
-                <KituoChaHabariPage lang={lang} />
-              </React.Suspense>
-            } />
-            <Route path="/confirm" element={<EmailConfirm />} />
+              {/* Admin routes */}
+              <Route
+                path="/support"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                    <AppShell>
+                      <CitizenSupport />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                    <AppShell>
+                      <CommunityReporting />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/messages"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                    <AppShell>
+                      <CommunicationsCenter />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payments"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                    <AppShell>
+                      <MyPaymentsRoute />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/announcements"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                    <AppShell>
+                      <Announcements />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff/announcements"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <Announcements isStaff />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff/reports"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <StaffReportsInbox />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff/tickets"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <StaffTicketInbox />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/department"
+                element={
+                  <ProtectedRoute allowedRoles={["staff", "admin"]}>
+                    <AppShell>
+                      <DepartmentPortal />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <AdminDashboardRoute />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/offices"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <OfficeManagement />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/locations"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <LocationManagement />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/services"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <ServiceManagement />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/departments"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AppShell>
+                      <DepartmentManagement />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/logs"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <AdminLogs />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/staff"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <StaffManagement lang={lang} />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Fallback */}
-            <Route
-              path="/help"
-              element={
-                <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
-                  <AppShell>
-                    <HelpPage lang={lang} />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/legal"
-              element={
-                <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
-                  <AppShell>
-                    <LegalPage lang={lang} />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              {/* Shared: citizens: renders admin or staff version based on role */}
+              <Route
+                path="/citizens"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "staff"]}>
+                    <AppShell>
+                      <PageTransition>
+                        <CitizensRoute />
+                      </PageTransition>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Email confirmation redirect */}
+              {/* Public info pages */}
+              <Route
+                path="/taasisi"
+                element={
+                  <React.Suspense fallback={<AppSplashSkeleton />}>
+                    <TaasisiPage lang={lang} />
+                  </React.Suspense>
+                }
+              />
+              <Route
+                path="/about"
+                element={
+                  <React.Suspense fallback={<AppSplashSkeleton />}>
+                    <AboutPage lang={lang} />
+                  </React.Suspense>
+                }
+              />
+              <Route
+                path="/machapisho"
+                element={
+                  <React.Suspense fallback={<AppSplashSkeleton />}>
+                    <MachapishoPage lang={lang} />
+                  </React.Suspense>
+                }
+              />
+              <Route
+                path="/habari"
+                element={
+                  <React.Suspense fallback={<AppSplashSkeleton />}>
+                    <KituoChaHabariPage lang={lang} />
+                  </React.Suspense>
+                }
+              />
+              <Route path="/confirm" element={<EmailConfirm />} />
+
+              {/* Fallback */}
+              <Route
+                path="/help"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                    <AppShell>
+                      <HelpPage lang={lang} />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/legal"
+                element={
+                  <ProtectedRoute allowedRoles={["citizen", "staff", "admin"]}>
+                    <AppShell>
+                      <LegalPage lang={lang} />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </React.Suspense>
         </AppProvider>
       </BrowserRouter>

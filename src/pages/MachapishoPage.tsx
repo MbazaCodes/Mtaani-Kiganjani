@@ -4,7 +4,15 @@
  * relevant to E-Mtaa and local government digital services in Tanzania.
  */
 import React from "react";
-import { FileText, Download, ExternalLink, BookOpen, Scale, Smartphone, Shield } from "lucide-react";
+import {
+  FileText,
+  Download,
+  ExternalLink,
+  BookOpen,
+  Scale,
+  Smartphone,
+  Shield,
+} from "lucide-react";
 
 interface MachapishoPageProps {
   lang?: string;
@@ -18,19 +26,28 @@ const publications = [
     items: [
       {
         title: { sw: "Sheria ya Serikali Mtandao, 2019", en: "Electronic Government Act, 2019" },
-        desc: { sw: "Sheria inayosimamia utoaji wa huduma za serikali kwa njia ya kidijitali Tanzania.", en: "Act governing the provision of government services through digital means in Tanzania." },
+        desc: {
+          sw: "Sheria inayosimamia utoaji wa huduma za serikali kwa njia ya kidijitali Tanzania.",
+          en: "Act governing the provision of government services through digital means in Tanzania.",
+        },
         href: "https://www.ega.go.tz/documents",
         type: "PDF",
       },
       {
         title: { sw: "Sheria ya Uhifadhi wa Data, 2022", en: "Personal Data Protection Act, 2022" },
-        desc: { sw: "Sheria inayolinda data za kibinafsi za wananchi katika mifumo ya kidijitali.", en: "Act protecting citizens' personal data in digital systems." },
+        desc: {
+          sw: "Sheria inayolinda data za kibinafsi za wananchi katika mifumo ya kidijitali.",
+          en: "Act protecting citizens' personal data in digital systems.",
+        },
         href: "https://www.tcra.go.tz",
         type: "PDF",
       },
       {
         title: { sw: "Sheria ya Serikali za Mitaa, Sura 287", en: "Local Government Act, Cap 287" },
-        desc: { sw: "Sheria mama inayosimamia utendaji wa Serikali za Mitaa Tanzania.", en: "Principal act governing the operations of Local Government Authorities in Tanzania." },
+        desc: {
+          sw: "Sheria mama inayosimamia utendaji wa Serikali za Mitaa Tanzania.",
+          en: "Principal act governing the operations of Local Government Authorities in Tanzania.",
+        },
         href: "https://www.tamisemi.go.tz",
         type: "PDF",
       },
@@ -42,20 +59,35 @@ const publications = [
     color: "blue",
     items: [
       {
-        title: { sw: "Mwongozo wa Kusimamia Tovuti za Serikali (OR-MUU, 2014)", en: "Government Website Management Guidelines (OR-MUU, 2014)" },
-        desc: { sw: "Mwongozo rasmi unaosimamia muundo, maudhui na utendaji wa tovuti zote za serikali Tanzania.", en: "Official guidelines governing the structure, content and operation of all Tanzanian government websites." },
+        title: {
+          sw: "Mwongozo wa Kusimamia Tovuti za Serikali (OR-MUU, 2014)",
+          en: "Government Website Management Guidelines (OR-MUU, 2014)",
+        },
+        desc: {
+          sw: "Mwongozo rasmi unaosimamia muundo, maudhui na utendaji wa tovuti zote za serikali Tanzania.",
+          en: "Official guidelines governing the structure, content and operation of all Tanzanian government websites.",
+        },
         href: "https://www.ega.go.tz/documents",
         type: "PDF",
       },
       {
         title: { sw: "Viwango vya eGA, 2025", en: "eGA Standards, 2025" },
-        desc: { sw: "Viwango vya kiufundi vya mifumo ya serikali mtandao ikiwemo usalama, upatikanaji na muundo.", en: "Technical standards for e-government systems including security, accessibility and architecture." },
+        desc: {
+          sw: "Viwango vya kiufundi vya mifumo ya serikali mtandao ikiwemo usalama, upatikanaji na muundo.",
+          en: "Technical standards for e-government systems including security, accessibility and architecture.",
+        },
         href: "https://www.ega.go.tz/standard/3",
         type: "WEB",
       },
       {
-        title: { sw: "Mwongozo wa Upatikanaji wa Huduma kwa Watu Wenye Ulemavu", en: "Accessibility Guidelines for Persons with Disabilities" },
-        desc: { sw: "Viwango vya kuhakikisha mifumo ya kidijitali inaweza kutumika na watu wote, ikiwemo wenye ulemavu.", en: "Standards ensuring digital systems are usable by everyone, including persons with disabilities." },
+        title: {
+          sw: "Mwongozo wa Upatikanaji wa Huduma kwa Watu Wenye Ulemavu",
+          en: "Accessibility Guidelines for Persons with Disabilities",
+        },
+        desc: {
+          sw: "Viwango vya kuhakikisha mifumo ya kidijitali inaweza kutumika na watu wote, ikiwemo wenye ulemavu.",
+          en: "Standards ensuring digital systems are usable by everyone, including persons with disabilities.",
+        },
         href: "https://www.ega.go.tz/documents",
         type: "PDF",
       },
@@ -67,14 +99,26 @@ const publications = [
     color: "purple",
     items: [
       {
-        title: { sw: "Ripoti ya Hali ya TEHAMA Tanzania, 2024", en: "Tanzania ICT Status Report, 2024" },
-        desc: { sw: "Tathmini ya hali ya matumizi ya teknolojia ya habari na mawasiliano nchini Tanzania.", en: "Assessment of the state of information and communication technology use in Tanzania." },
+        title: {
+          sw: "Ripoti ya Hali ya TEHAMA Tanzania, 2024",
+          en: "Tanzania ICT Status Report, 2024",
+        },
+        desc: {
+          sw: "Tathmini ya hali ya matumizi ya teknolojia ya habari na mawasiliano nchini Tanzania.",
+          en: "Assessment of the state of information and communication technology use in Tanzania.",
+        },
         href: "https://www.ega.go.tz/documents",
         type: "PDF",
       },
       {
-        title: { sw: "Mpango wa Maendeleo wa TEHAMA Tanzania, 2023–2028", en: "Tanzania ICT Development Plan, 2023–2028" },
-        desc: { sw: "Mpango wa miaka mitano wa kuendeleza matumizi ya teknolojia katika sekta zote nchini Tanzania.", en: "Five-year plan for advancing technology use across all sectors in Tanzania." },
+        title: {
+          sw: "Mpango wa Maendeleo wa TEHAMA Tanzania, 2023–2028",
+          en: "Tanzania ICT Development Plan, 2023–2028",
+        },
+        desc: {
+          sw: "Mpango wa miaka mitano wa kuendeleza matumizi ya teknolojia katika sekta zote nchini Tanzania.",
+          en: "Five-year plan for advancing technology use across all sectors in Tanzania.",
+        },
         href: "https://www.mcit.go.tz",
         type: "PDF",
       },
@@ -86,8 +130,14 @@ const publications = [
     color: "red",
     items: [
       {
-        title: { sw: "Mwongozo wa Usalama wa Mtandao wa Serikali", en: "Government Cybersecurity Framework" },
-        desc: { sw: "Mwongozo wa kulinda mifumo na data za serikali dhidi ya vitisho vya mtandao.", en: "Framework for protecting government systems and data against cyber threats." },
+        title: {
+          sw: "Mwongozo wa Usalama wa Mtandao wa Serikali",
+          en: "Government Cybersecurity Framework",
+        },
+        desc: {
+          sw: "Mwongozo wa kulinda mifumo na data za serikali dhidi ya vitisho vya mtandao.",
+          en: "Framework for protecting government systems and data against cyber threats.",
+        },
         href: "https://www.tcra.go.tz",
         type: "PDF",
       },
@@ -99,14 +149,26 @@ const publications = [
     color: "orange",
     items: [
       {
-        title: { sw: "Mfumo wa Malipo ya Serikali (GEPG)", en: "Government e-Payment Gateway (GEPG)" },
-        desc: { sw: "Mfumo rasmi wa malipo ya serikali mtandaoni, unaounganisha benki na watoa huduma wa simu.", en: "Official government online payment system connecting banks and mobile money providers." },
+        title: {
+          sw: "Mfumo wa Malipo ya Serikali (GEPG)",
+          en: "Government e-Payment Gateway (GEPG)",
+        },
+        desc: {
+          sw: "Mfumo rasmi wa malipo ya serikali mtandaoni, unaounganisha benki na watoa huduma wa simu.",
+          en: "Official government online payment system connecting banks and mobile money providers.",
+        },
         href: "https://gepg.go.tz",
         type: "WEB",
       },
       {
-        title: { sw: "Mfumo wa Utambulisho wa Taifa (NIDA)", en: "National Identification System (NIDA)" },
-        desc: { sw: "Mfumo wa utambulisho wa taifa unaotumika kuthibitisha utambulisho wa wananchi.", en: "National identification system used to verify citizens' identity in government services." },
+        title: {
+          sw: "Mfumo wa Utambulisho wa Taifa (NIDA)",
+          en: "National Identification System (NIDA)",
+        },
+        desc: {
+          sw: "Mfumo wa utambulisho wa taifa unaotumika kuthibitisha utambulisho wa wananchi.",
+          en: "National identification system used to verify citizens' identity in government services.",
+        },
         href: "https://www.nida.go.tz",
         type: "WEB",
       },
@@ -133,8 +195,18 @@ export function MachapishoPage({ lang = "sw" }: MachapishoPageProps) {
           href="/"
           className="inline-flex items-center gap-2 text-sm font-bold text-stone-500 hover:text-emerald-600 transition-colors group"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="group-hover:-translate-x-1 transition-transform"
+          >
+            <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
           {lang === "sw" ? "Rudi Nyumbani" : "Back to Home"}
         </a>
@@ -167,7 +239,9 @@ export function MachapishoPage({ lang = "sw" }: MachapishoPageProps) {
       {/* Publication categories */}
       {publications.map((cat, ci) => (
         <div key={ci} className="space-y-3">
-          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold ${colorMap[cat.color]}`}>
+          <div
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold ${colorMap[cat.color]}`}
+          >
             {cat.icon}
             {sw ? cat.category.sw : cat.category.en}
           </div>
@@ -181,9 +255,14 @@ export function MachapishoPage({ lang = "sw" }: MachapishoPageProps) {
                 className="flex items-start gap-4 p-4 bg-white border border-stone-100 rounded-2xl hover:border-emerald-200 hover:shadow-sm transition-all group"
               >
                 <div className="shrink-0 w-10 h-10 bg-stone-100 rounded-xl flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                  {item.type === "PDF"
-                    ? <Download size={18} className="text-stone-500 group-hover:text-emerald-600" />
-                    : <ExternalLink size={18} className="text-stone-500 group-hover:text-emerald-600" />}
+                  {item.type === "PDF" ? (
+                    <Download size={18} className="text-stone-500 group-hover:text-emerald-600" />
+                  ) : (
+                    <ExternalLink
+                      size={18}
+                      className="text-stone-500 group-hover:text-emerald-600"
+                    />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
