@@ -57,4 +57,3 @@ export function getReceiptDocument(): React.FC<DocumentPDFProps> {
 }
 
 export const AVAILABLE_PDF_SERVICES = Object.keys(SERVICE_DOCUMENTS);
-export { ChetiMwanafunziLetterPDF } from "./ChetiMwanafunziLetterPDF";

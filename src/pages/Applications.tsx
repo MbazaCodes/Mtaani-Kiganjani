@@ -40,8 +40,6 @@ import { cn } from "@/lib/utils";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { generateQRDataUrl } from "@/lib/qr";
 import { RisitiMalipoPDF } from "@/components/documents/RisitiMalipoPDF";
-import { ChetiMwanafunziPDF } from "@/components/documents/ChetiMwanafunziPDF";
-import { ChetiMwanafunziLetterPDF } from "@/components/documents/ChetiMwanafunziLetterPDF";
 
 interface ApplicationsProps {
   applications: Application[];
@@ -483,52 +481,6 @@ export function Applications({
                               </button>
                             </div>
                           )}
-
-                        {/* ── TSID: 3 PDF downloads for Cheti cha Mwanafunzi ── */}
-                        {app.status === "issued" && app.service_name?.toLowerCase().includes("mwanafunzi") && (() => {
-                          const useQr = undefined; // QR generated async inside PDF component
-                          return (
-                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
-                              <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center"><span className="text-white text-xs font-black">TSID</span></div>
-                                <div>
-                                  <p className="text-xs font-black text-blue-800 uppercase tracking-widest">{L("Hati za TSID", "TSID Documents")}</p>
-                                  <p className="text-[10px] text-blue-600">{L("Pakua hati zako 3 za TSID", "Download your 3 TSID documents")}</p>
-                                </div>
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                {/* 1. ID Card */}
-                                <PDFLink document={<ChetiMwanafunziPDF application={app} lang={lang} qrDataUrl={useQr}/>} fileName={`TSID-ID-${app.application_number}.pdf`}>
-                                  {({ loading }) => (
-                                    <button disabled={loading} className="flex items-center gap-2 px-4 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50 w-full">
-                                      {loading ? <RefreshCw size={14} className="animate-spin"/> : <span className="text-base">🪪</span>}
-                                      <span>{L("1. Kitambulisho cha Mwanafunzi (TSID ID Card)", "1. Student ID Card (TSID)")}</span>
-                                    </button>
-                                  )}
-                                </PDFLink>
-                                {/* 2. Introduction Letter */}
-                                <PDFLink document={<ChetiMwanafunziLetterPDF application={app} lang={lang} qrDataUrl={useQr}/>} fileName={`TSID-Letter-${app.application_number}.pdf`}>
-                                  {({ loading }) => (
-                                    <button disabled={loading} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50 w-full">
-                                      {loading ? <RefreshCw size={14} className="animate-spin"/> : <span className="text-base">📄</span>}
-                                      <span>{L("2. Barua ya Utambulisho (Introduction Letter)", "2. Student Introduction Letter")}</span>
-                                    </button>
-                                  )}
-                                </PDFLink>
-                                {/* 3. Receipt */}
-                                <PDFLink document={<RisitiMalipoPDF application={app} lang={lang} qrDataUrl={useQr}/>} fileName={`TSID-Receipt-${app.application_number}.pdf`}>
-                                  {({ loading }) => (
-                                    <button disabled={loading} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-blue-200 hover:bg-blue-50 text-blue-700 rounded-xl font-bold text-sm transition-all disabled:opacity-50 w-full">
-                                      {loading ? <RefreshCw size={14} className="animate-spin"/> : <span className="text-base">🧾</span>}
-                                      <span>{L("3. Risiti ya Malipo (Payment Receipt)", "3. Payment Receipt")}</span>
-                                    </button>
-                                  )}
-                                </PDFLink>
-                              </div>
-                              <p className="text-[10px] text-blue-500 text-center">{L("Hati zote 3 zimetiwa sahihi ya kidijitali na QR code ya uthibitisho", "All 3 documents are digitally signed with verification QR code")}</p>
-                            </div>
-                          );
-                        })()}
 
                         {/* ── DOCUMENT DOWNLOADS (issued + paid + Malipo paid) ── */}
                         {(app.status === "issued" || (app.status === "paid" && (app.service_name?.toLowerCase().includes("malipo") || app.service_name?.toLowerCase().includes("michango")))) && (

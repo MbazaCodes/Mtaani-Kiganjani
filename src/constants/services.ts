@@ -501,13 +501,6 @@ export const HARDCODED_SERVICES: Service[] = [
     created_at: new Date().toISOString(),
   },
   {
-    id: "15", name: "Cheti cha Mwanafunzi", name_en: "Student Identity Certificate",
-    description: "Cheti cha utambulisho wa mwanafunzi chenye namba ya taifa.", description_en: "Student identity certificate with national student number.",
-    fee: 2000, active: true, form_schema: [], validity_months: 12,
-    document_template: { document_type: "CHETI CHA MWANAFUNZI", header: { country: "JAMHURI YA MUUNGANO WA TANZANIA", office: "OFISI YA RAIS - TAMISEMI", logo_url: COAT_OF_ARMS_URL }, footer: "Cheti hiki kinaonyesha mwanafunzi amesajiliwa rasmi." },
-    created_at: new Date().toISOString(),
-  },
-  {
     id: "16", name: "Ombi la Ardhi ya Kijiji", name_en: "Village Land Allocation Request",
     description: "Ombi la mgao wa ardhi ya kijiji kutoka kwa baraza la kijiji au kata.", description_en: "Request village land allocation from village or ward council.",
     fee: 5000, active: true, form_schema: [], validity_months: 6,

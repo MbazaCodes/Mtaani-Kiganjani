@@ -23,7 +23,6 @@ import { UsajiliKikundiPDF } from "./documents/UsajiliKikundiPDF";
 import { OmbiMsaadaJamiiPDF } from "./documents/OmbiMsaadaJamiiPDF";
 import { UsajiliMifugoPDF } from "./documents/UsajiliMifugoPDF";
 import { ChetiUzawaPDF } from "./documents/ChetiUzawaPDF";
-import { ChetiMwanafunziPDF } from "./documents/ChetiMwanafunziPDF";
 import { OmbiArdhiKijijiPDF } from "./documents/OmbiArdhiKijijiPDF";
 import type { DocumentPDFProps } from "./documents/types";
 
@@ -85,8 +84,6 @@ function resolvePDF(application: Application): PDFFactory {
     return { Component: UsajiliMifugoPDF, code: "MF", filenamePrefix: "usajili-mifugo" };
   if (name.includes("UZAWA"))
     return { Component: ChetiUzawaPDF, code: "UZ", filenamePrefix: "cheti-uzawa" };
-  if (name.includes("MWANAFUNZI"))
-    return { Component: ChetiMwanafunziPDF, code: "MF2", filenamePrefix: "cheti-mwanafunzi" };
   if (name.includes("ARDHI"))
     return { Component: OmbiArdhiKijijiPDF, code: "AK", filenamePrefix: "ardhi-kijiji" };
 

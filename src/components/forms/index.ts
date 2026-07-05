@@ -30,7 +30,6 @@ import { UsajiliKikundiForm } from "./UsajiliKikundiForm";
 import { OmbiMsaadaJamiiForm } from "./OmbiMsaadaJamiiForm";
 import { UsajiliMifugoForm } from "./UsajiliMifugoForm";
 import { ChetiUzawaForm } from "./ChetiUzawaForm";
-import { ChetiMwanafunziForm } from "./ChetiMwanafunziForm";
 import { OmbiArdhiKijijiForm } from "./OmbiArdhiKijijiForm";
 import React from "react";
 import { FormProps } from "./types";
@@ -50,7 +49,6 @@ export const SERVICE_FORMS: Record<string, React.FC<FormProps>> = {
   "Ombi la Msaada wa Jamii": OmbiMsaadaJamiiForm,
   "Usajili wa Mifugo": UsajiliMifugoForm,
   "Cheti cha Uzawa": ChetiUzawaForm,
-  "Cheti cha Mwanafunzi": ChetiMwanafunziForm,
   "Ombi la Ardhi ya Kijiji": OmbiArdhiKijijiForm,
 };
 
