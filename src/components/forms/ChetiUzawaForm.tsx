@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { FormProps } from "./types";
+import { compressImage } from "@/lib/imageCompression";
 import { ProgressFill } from "../ui/ProgressFill";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 
@@ -168,9 +169,7 @@ export const ChetiUzawaForm: React.FC<FormProps> = ({
   };
 
   const handleDocUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => setHospitalDoc(reader.result as string);
-    reader.readAsDataURL(file);
+    compressImage(file).then((c) => setHospitalDoc(c));
   };
 
   const handleSubmit = async () => {

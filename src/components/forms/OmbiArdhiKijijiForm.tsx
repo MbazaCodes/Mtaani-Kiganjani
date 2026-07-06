@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { FormProps } from "./types";
+import { compressImage } from "@/lib/imageCompression";
 import { ProgressFill } from "../ui/ProgressFill";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
@@ -254,9 +255,7 @@ export const OmbiArdhiKijijiForm: React.FC<FormProps> = ({
   };
 
   const handleDocUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => setDocFile(reader.result as string);
-    reader.readAsDataURL(file);
+    compressImage(file).then((c) => setDocFile(c));
   };
 
   const handleSubmit = async () => {

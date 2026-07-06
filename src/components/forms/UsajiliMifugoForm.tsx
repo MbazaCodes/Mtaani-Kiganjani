@@ -17,6 +17,7 @@ import {
   X,
   Heart,
 } from "lucide-react";
+import { compressImage } from "@/lib/imageCompression";
 import { FormProps } from "./types";
 import { ProgressFill } from "../ui/ProgressFill";
 import { SignaturePad } from "@/components/ui/SignaturePad";
@@ -168,9 +169,7 @@ export const UsajiliMifugoForm: React.FC<FormProps> = ({
   };
 
   const handlePhotoUpload = (i: number, file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => setMifugo(i, "photo", reader.result as string);
-    reader.readAsDataURL(file);
+    compressImage(file).then((compressed) => setMifugo(i, "photo", compressed));
   };
 
   const handleSubmit = async () => {

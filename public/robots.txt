@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /staff/
+Disallow: /admin/
+Disallow: /department/
+Disallow: /profile
+Disallow: /applications
+Disallow: /payments
+Disallow: /notifications
+Disallow: /messages
+Disallow: /agreement
+Disallow: /apply
+Allow: /
+
+Sitemap: https://e-mtaatz.xyz/sitemap.xml

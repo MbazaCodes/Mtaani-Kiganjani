@@ -1,15 +1,34 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { supabase, Service, Application } from "@/lib/supabase";
+/**
+ * AppContext — Application-level state provider
+ *
+ * Orchestrates the three Zustand stores:
+ *   useApplyStore    → selectedService, selectedDraft
+ *   usePaymentStore  → payingApplication, payment handlers
+ *   useServicesStore → service catalogue, fee calculation
+ *
+ * This context layer adds:
+ *   - submitApplication (needs auth user + lang + toast — cross-store)
+ *   - fetchApplications (delegates to useApplications hook)
+ *   - isLoading
+ *
+ * All existing consumers (useAppContext()) continue to work unchanged.
+ * New code can also import stores directly for better tree-shaking.
+ */
+
+import React, { createContext, useContext, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
+import type { Service, Application } from "@/lib/supabase";
 import { logActivity } from "@/lib/activity-log";
 import type { AnyFormData, PaymentResult, ApplicationDraft } from "@/types";
-import { HARDCODED_SERVICES } from "@/constants/services";
 import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
-import { getApplicationAmount } from "@/lib/serviceFees";
 import { uploadFiles } from "@/lib/fileStorage";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useApplications } from "@/hooks/useApplications";
 import { useToast } from "@/context/ToastContext";
+import { useApplyStore } from "@/stores/useApplyStore";
+import { usePaymentStore } from "@/stores/usePaymentStore";
+import { useServicesStore } from "@/stores/useServicesStore";
 
 interface AppContextType {
   // Applications
@@ -17,13 +36,13 @@ interface AppContextType {
   drafts: ApplicationDraft[];
   fetchApplications: () => void;
   isLoading: boolean;
-  // Apply flow
+  // Apply flow (from useApplyStore)
   selectedService: Service | null;
   setSelectedService: (s: Service | null) => void;
   selectedDraft: ApplicationDraft | null;
   setSelectedDraft: (d: ApplicationDraft | null) => void;
   submitApplication: (formData: AnyFormData, files?: File[]) => Promise<void>;
-  // Payment flow
+  // Payment flow (from usePaymentStore)
   payingApplication: Application | null;
   handleInitiatePayment: (app: Application) => void;
   handlePaymentSuccess: (paymentData: PaymentResult) => Promise<void>;
@@ -39,23 +58,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { showToast } = useToast();
   const { applications, drafts, fetchApplications, loading: isLoading } = useApplications(user);
 
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [selectedDraft, setSelectedDraft] = useState<ApplicationDraft | null>(null);
-  const [payingApplication, setPayingApplication] = useState<Application | null>(null);
+  // ── Zustand stores ──────────────────────────────────────────────────────────
+  const { selectedService, selectedDraft, setSelectedService, setSelectedDraft } = useApplyStore();
+  const {
+    payingApplication,
+    handleInitiatePayment,
+    handleCancelPayment,
+    handlePaymentSuccess: _handlePaymentSuccess,
+  } = usePaymentStore();
+  const { getPaymentAmount } = useServicesStore();
 
-  const getPaymentAmount = useCallback((app: Application): number => {
-    const serviceFee = (app as Application & { services?: { fee?: number } }).services?.fee ?? 0;
-    const formServiceFee = app.form_data?.service_fee;
-    if (serviceFee > 0) return serviceFee;
-    if (typeof formServiceFee === "number" && formServiceFee > 0) return formServiceFee;
-    if (typeof formServiceFee === "string") {
-      const parsed = parseFloat(formServiceFee);
-      if (!isNaN(parsed) && parsed > 0) return parsed;
-    }
-    // Fall back to the canonical service fee lookup (covers all named services)
-    return getApplicationAmount(app);
-  }, []);
+  // ── Payment success — bridge store action with context dependencies ─────────
+  const handlePaymentSuccess = useCallback(
+    async (paymentData: PaymentResult) => {
+      await _handlePaymentSuccess(paymentData, user?.id, lang, showToast, fetchApplications);
+    },
+    [_handlePaymentSuccess, user?.id, lang, showToast, fetchApplications],
+  );
 
+  // ── Submit application ──────────────────────────────────────────────────────
   const submitApplication = useCallback(
     async (formData: AnyFormData, files?: File[]) => {
       if (!user || !selectedService) {
@@ -84,8 +105,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
       };
 
-      // Upload files to Supabase Storage (URL stored in form_data, not base64).
-      // Falls back to base64 for small files if storage bucket isn't configured.
+      // Upload files to storage (URL stored in form_data, not base64)
       if (files && files.length > 0) {
         const docTypes = (formData.document_types as string[] | undefined) ?? [];
         const tempAppId = "app-" + Math.random().toString(36).substring(7);
@@ -95,8 +115,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
-      // Embed the citizen's profile photo into form_data so the certificate can
-      // show it regardless of who downloads it (staff don't have the citizen's photo).
+      // Embed citizen photo so PDFs render correctly regardless of viewer
       if (user.photo_url && !(formData as Record<string, unknown>).photo_url) {
         (formData as Record<string, unknown>).photo_url = (
           user as unknown as Record<string, unknown>
@@ -114,9 +133,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const randomNum = Math.floor(1000 + Math.random() * 9000);
       const applicationNumber = `TZ-${getServiceCode(selectedService.name)}-${dateStr}-${randomNum}`;
 
-      // P2-T11: snapshot the citizen's assigned office at submission time
-      // so applications in progress stay with this office even if the
-      // citizen later changes address.
       let officeRegistryId: string | null =
         ((user as unknown as Record<string, unknown>).assigned_office_id as string) ?? null;
       if (!officeRegistryId && user.region && user.district && user.ward && !user.is_diaspora) {
@@ -133,6 +149,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
+      const isMalipo =
+        selectedService.name.toLowerCase().includes("malipo") ||
+        selectedService.name.toLowerCase().includes("michango");
+
       const newApp = {
         id: "app-" + Math.random().toString(36).substring(7),
         user_id: user.id,
@@ -140,12 +160,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         service_name: selectedService.name,
         application_number: applicationNumber,
         form_data: formData,
-        // Malipo na Michango goes straight to paid — no staff approval needed
-        status:
-          selectedService.name.toLowerCase().includes("malipo") ||
-          selectedService.name.toLowerCase().includes("michango")
-            ? ("paid" as const)
-            : ("submitted" as const),
+        status: isMalipo ? ("paid" as const) : ("submitted" as const),
         region: user.region,
         district: user.district,
         ward: user.ward,
@@ -196,16 +211,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           targetUserRole = formData.asset_type.includes("PANGO") ? "TENANT" : "BUYER";
         }
 
-        // Use service_id only if it's a real UUID (hardcoded services have ids like "1","2")
         const isRealUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
           selectedService.id ?? "",
         );
-
-        // Compute final status: Malipo na Michango bypasses staff approval
-        const isMalipo =
-          selectedService.name.toLowerCase().includes("malipo") ||
-          selectedService.name.toLowerCase().includes("michango");
-        const finalStatus = isMalipo ? "paid" : "submitted";
 
         const { error, data: insertedApp } = await supabase
           .from("applications")
@@ -215,7 +223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             service_name: selectedService.name ?? selectedService.name_en,
             application_number: applicationNumber,
             form_data: formData,
-            status: finalStatus,
+            status: isMalipo ? "paid" : "submitted",
             region: user.region ?? null,
             district: user.district ?? null,
             ward: user.ward ?? null,
@@ -259,6 +267,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return;
         }
 
+        // Notify counterparty for agreements
         if (sendForApproval && targetUserId && insertedApp) {
           const isRental = (formData.asset_type ?? "").includes("PANGO");
           try {
@@ -315,78 +324,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     },
     [user, selectedService, lang, showToast, fetchApplications],
   );
-
-  const handleInitiatePayment = useCallback((app: Application) => {
-    // For approved applications, always open payment gateway
-    // (fee may be 0 for free services — still show the confirmation flow)
-    setPayingApplication(app);
-  }, []);
-
-  const handlePaymentSuccess = useCallback(
-    async (paymentData: PaymentResult) => {
-      if (!payingApplication) return;
-      const paymentInfo = {
-        transaction_id: paymentData.transaction_id ?? `TXN-${Date.now()}`,
-        amount: paymentData.amount ?? 0,
-        payment_method: paymentData.payment_method ?? "unknown",
-        paid_at: paymentData.paid_at ?? new Date().toISOString(),
-      };
-
-      if (!IS_SUPABASE_CONFIGURED || user?.id.startsWith("demo-")) {
-        const existing: Application[] = JSON.parse(
-          localStorage.getItem("demo_applications") || "[]",
-        );
-        localStorage.setItem(
-          "demo_applications",
-          JSON.stringify(
-            existing.map((app) =>
-              app.id === payingApplication.id
-                ? {
-                    ...app,
-                    status: "issued",
-                    paid_at: new Date().toISOString(),
-                    issued_at: new Date().toISOString(),
-                    payment_data: paymentInfo,
-                  }
-                : app,
-            ),
-          ),
-        );
-        setPayingApplication(null);
-        fetchApplications();
-        showToast(lang === "sw" ? "Malipo yamepokelewa!" : "Payment received!", "success");
-        return;
-      }
-
-      const { error } = await supabase
-        .from("applications")
-        .update({
-          status: "issued",
-          issued_at: new Date().toISOString(),
-          form_data: { ...(payingApplication.form_data ?? {}), payment_data: paymentInfo },
-        })
-        .eq("id", payingApplication.id);
-
-      if (error) {
-        showToast(
-          lang === "sw" ? "Hitilafu wakati wa kusasisha malipo." : "Error updating payment.",
-          "error",
-        );
-        return;
-      }
-      setPayingApplication(null);
-      fetchApplications();
-      showToast(
-        lang === "sw"
-          ? "Malipo yamepokelewa! Inasubiri uthibitisho wa Mtumishi."
-          : "Payment received! Awaiting staff verification.",
-        "success",
-      );
-    },
-    [payingApplication, user, lang, showToast, fetchApplications],
-  );
-
-  const handleCancelPayment = useCallback(() => setPayingApplication(null), []);
 
   return (
     <AppContext.Provider

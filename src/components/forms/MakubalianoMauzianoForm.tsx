@@ -41,6 +41,7 @@ import { ProgressFill } from "../ui/ProgressFill";
 import { supabase } from "../../lib/supabase";
 import { createAgreementNotification, createNotification } from "../../lib/notifications";
 import { findAgreementCounterparty } from "../../lib/agreementLookup";
+import { compressImage } from "@/lib/imageCompression";
 
 // ─── Fee calculator ──────────────────────────────────────────────────────────
 const FEE_RATE = 0.03;
@@ -1108,9 +1109,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
-                          const reader = new FileReader();
-                          reader.onload = () => set("seller_photo", reader.result as string);
-                          reader.readAsDataURL(file);
+                          compressImage(file).then((c) => set("seller_photo", c));
                           e.target.value = "";
                         }}
                       />
@@ -1150,9 +1149,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
-                          const reader = new FileReader();
-                          reader.onload = () => set("buyer_photo", reader.result as string);
-                          reader.readAsDataURL(file);
+                          compressImage(file).then((c) => set("buyer_photo", c));
                           e.target.value = "";
                         }}
                       />

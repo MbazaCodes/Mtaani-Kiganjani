@@ -28,6 +28,7 @@ import {
   Star,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useDocumentExpiry } from "@/hooks/useDocumentExpiry";
 import { ApplicationChat } from "@/components/ApplicationChat";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { useLanguage } from "@/context/LanguageContext";
@@ -56,6 +57,9 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const [localUser, setLocalUser] = useState(user);
   const [pendingAgreements, setPendingAgreements] = useState(0);
   const [selectedDashApp, setSelectedDashApp] = useState<Application | null>(null);
+
+  // Check for expiring documents once per session — sends notifications
+  useDocumentExpiry(user);
 
   // Keep localUser in sync with auth context user (important on page refresh —
   // the auth user re-fetches from DB asynchronously after mount)
