@@ -13,6 +13,12 @@ export { MakubalianoMauzianoPDF } from "./MakubalianoMauzianoPDF";
 export { MakubalianoPangoPDF } from "./MakubalianoPangoPDF";
 export { RisitiMalipoPDF } from "./RisitiMalipoPDF";
 export { MgogoroMashauriPDF } from "./MgogoroMashauriPDF";
+export { KibariaBiasharaNdogoPDF } from "./KibariaBiasharaNdogoPDF";
+export { UsajiliKikundiPDF } from "./UsajiliKikundiPDF";
+export { OmbiMsaadaJamiiPDF } from "./OmbiMsaadaJamiiPDF";
+export { UsajiliMifugoPDF } from "./UsajiliMifugoPDF";
+export { ChetiUzawaPDF } from "./ChetiUzawaPDF";
+export { OmbiArdhiKijijiPDF } from "./OmbiArdhiKijijiPDF";
 
 export * from "./types";
 
@@ -25,6 +31,12 @@ import { MakubalianoMauzianoPDF } from "./MakubalianoMauzianoPDF";
 import { MakubalianoPangoPDF } from "./MakubalianoPangoPDF";
 import { RisitiMalipoPDF } from "./RisitiMalipoPDF";
 import { MgogoroMashauriPDF } from "./MgogoroMashauriPDF";
+import { KibariaBiasharaNdogoPDF } from "./KibariaBiasharaNdogoPDF";
+import { UsajiliKikundiPDF } from "./UsajiliKikundiPDF";
+import { OmbiMsaadaJamiiPDF } from "./OmbiMsaadaJamiiPDF";
+import { UsajiliMifugoPDF } from "./UsajiliMifugoPDF";
+import { ChetiUzawaPDF } from "./ChetiUzawaPDF";
+import { OmbiArdhiKijijiPDF } from "./OmbiArdhiKijijiPDF";
 import type { DocumentPDFProps } from "./types";
 import React from "react";
 
@@ -42,6 +54,12 @@ export const SERVICE_DOCUMENTS: Record<string, React.FC<DocumentPDFProps>> = {
   "Makubaliano ya Pango": MakubalianoPangoPDF,
   "Malipo na Michango": RisitiMalipoPDF,
   "Migogoro na Mashauri": MgogoroMashauriPDF,
+  "Kibari cha Biashara Ndogo": KibariaBiasharaNdogoPDF,
+  "Usajili wa Kikundi": UsajiliKikundiPDF,
+  "Ombi la Msaada wa Jamii": OmbiMsaadaJamiiPDF,
+  "Usajili wa Mifugo": UsajiliMifugoPDF,
+  "Cheti cha Uzawa": ChetiUzawaPDF,
+  "Ombi la Ardhi ya Kijiji": OmbiArdhiKijijiPDF,
 };
 
 export function getServiceDocument(serviceName: string): React.FC<DocumentPDFProps> | undefined {
