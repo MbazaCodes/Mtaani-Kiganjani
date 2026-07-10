@@ -5,9 +5,9 @@ import type { Database } from "./types";
 // ── Hard-coded fallback so the app always has a valid client ──────────────────
 // These are the public anon credentials — safe to embed in browser code.
 // They can be overridden by Vercel environment variables.
-const DEFAULT_SUPABASE_URL = "https://xuhilnejpqvbfukyhefi.supabase.co";
+const DEFAULT_SUPABASE_URL = "https://nkpdvtwjbngmvlolytvt.supabase.co";
 const DEFAULT_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1aGlsbmVqcHF2YmZ1a3loZWZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTU3NzYsImV4cCI6MjA5NjA3MTc3Nn0.EiSmwVGYDzdhj3Sqp3JfcFtHCv_dD2WOakaHcgX77AA";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5rcGR2dHdqYm5nbXZsb2x5dHZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MzQ5NTcsImV4cCI6MjA4ODMxMDk1N30.Ff0Il5KPklOiJ204tapFSGmtCaPM5_jWc85YSv-pXF4";
 
 function createSupabaseClient() {
   const SUPABASE_URL =
