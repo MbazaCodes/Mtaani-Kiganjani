@@ -467,7 +467,22 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       }
       onClose();
     } catch (_err) {
-      setLoginError({ type: "other", message: (_err as Error).message });
+      const msg = (_err as Error).message || "";
+      const isNetwork =
+        msg.includes("Failed to fetch") ||
+        msg.includes("NetworkError") ||
+        msg.includes("fetch") ||
+        msg.includes("network") ||
+        !navigator.onLine;
+      setLoginError({
+        type: "other",
+        message: isNetwork
+          ? L(
+              "Hakuna muunganiko wa mtandao. Hakikisha una internet kisha jaribu tena.",
+              "Network error. Please check your internet connection and try again.",
+            )
+          : msg,
+      });
     } finally {
       setLoading(false);
     }
@@ -483,7 +498,14 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       if (error) throw error;
       setForgotSent(true);
     } catch (err) {
-      showToast((err as Error).message, "error");
+      const msg = (err as Error).message || "";
+      const isNetwork = msg.includes("Failed to fetch") || msg.includes("fetch") || !navigator.onLine;
+      showToast(
+        isNetwork
+          ? L("Hakuna mtandao. Jaribu tena.", "Network error. Please try again.")
+          : msg,
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -493,6 +515,11 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const normaliseSignupError = (err: unknown): string => {
     const msg = (err as { message?: string })?.message ?? "";
     const status = (err as { status?: number })?.status;
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || !navigator.onLine)
+      return L(
+        "Hakuna muunganiko wa mtandao. Hakikisha una internet kisha jaribu tena.",
+        "Network error. Please check your internet connection and try again.",
+      );
     if (
       status === 429 ||
       msg.includes("rate limit") ||

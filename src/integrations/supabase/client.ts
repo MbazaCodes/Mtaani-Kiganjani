@@ -2,22 +2,24 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const SUPABASE_PUBLISHABLE_KEY =
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+// ── Hard-coded fallback so the app always has a valid client ──────────────────
+// These are the public anon credentials — safe to embed in browser code.
+// They can be overridden by Vercel environment variables.
+const DEFAULT_SUPABASE_URL = "https://xuhilnejpqvbfukyhefi.supabase.co";
+const DEFAULT_SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1aGlsbmVqcHF2YmZ1a3loZWZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTU3NzYsImV4cCI6MjA5NjA3MTc3Nn0.EiSmwVGYDzdhj3Sqp3JfcFtHCv_dD2WOakaHcgX77AA";
 
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
-      ...(!SUPABASE_PUBLISHABLE_KEY ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Vercel environment variables.`;
-    console.error(`[Supabase] ${message}`);
-    throw new Error(message);
-  }
+function createSupabaseClient() {
+  const SUPABASE_URL =
+    import.meta.env.VITE_SUPABASE_URL ||
+    (typeof process !== "undefined" ? process.env?.SUPABASE_URL : undefined) ||
+    DEFAULT_SUPABASE_URL;
+
+  const SUPABASE_PUBLISHABLE_KEY =
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    (typeof process !== "undefined" ? process.env?.SUPABASE_PUBLISHABLE_KEY : undefined) ||
+    DEFAULT_SUPABASE_KEY;
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
@@ -30,6 +32,14 @@ function createSupabaseClient() {
     },
     global: {
       headers: { "x-client-info": "e-mtaa-tz" },
+      fetch: (url, options) => {
+        // 10 second timeout on all Supabase requests
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 10000);
+        return fetch(url, { ...options, signal: controller.signal }).finally(() =>
+          clearTimeout(timer),
+        );
+      },
     },
   });
 }
@@ -44,3 +54,4 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
     return Reflect.get(_supabase, prop, receiver);
   },
 });
+

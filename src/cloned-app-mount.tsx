@@ -1,5 +1,11 @@
 import { useEffect, useState, type ComponentType } from "react";
 import { AppSplashSkeleton } from "@/components/ui/SkeletonScreens";
+import { diagnoseSupabase } from "@/lib/diagnoseSupabase";
+
+// Run connection diagnostic once at startup (background, non-blocking)
+if (typeof window !== "undefined") {
+  setTimeout(() => diagnoseSupabase(), 1000);
+}
 
 type AppShape = ComponentType<Record<string, never>>;
 
