@@ -16,7 +16,6 @@ import {
   AlertCircle,
   Clock,
   Shield,
-  ChevronDown,
   Eye,
   EyeOff,
   Mail,
@@ -31,7 +30,6 @@ import {
   BookOpen,
   Heart,
   Users,
-  Baby,
   Flag,
   FileText,
   CreditCard,
@@ -46,7 +44,6 @@ import {
   Download,
   Plus,
   FileImage,
-  FileBadge,
   PenTool,
   Stamp,
 } from "lucide-react";

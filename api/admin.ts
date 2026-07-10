@@ -10,12 +10,17 @@
  * stay server-side):
  *   SUPABASE_URL
  *   SUPABASE_SERVICE_ROLE_KEY
+ *
+ * SECURITY: We deliberately do NOT fall back to process.env.VITE_SUPABASE_*
+ * here. Variables prefixed with VITE_ are inlined into the browser bundle and
+ * would leak the service role key to every site visitor. If the server-only
+ * env vars are missing, this function fails loudly instead of silently
+ * exposing the key.
  */
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SERVICE_ROLE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 interface RequestBody {
   action: "createUser" | "resetPassword" | "confirmEmail" | "addDepartmentStaff";

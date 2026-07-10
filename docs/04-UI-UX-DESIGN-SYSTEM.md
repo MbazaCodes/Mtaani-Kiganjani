@@ -14,18 +14,18 @@ Mtaani Kiganjani's interface is designed for **Tanzania's mobile-first populatio
 
 ## Color Palette
 
-| Color | Hex | Usage |
-|-------|-----|-------|
+| Color           | Hex       | Usage                                           |
+| --------------- | --------- | ----------------------------------------------- |
 | **Emerald 600** | `#059669` | Primary actions, submit buttons, success states |
-| **Emerald 50** | `#ecfdf5` | Light backgrounds, success panels |
-| **Stone 700** | `#44403c` | Primary text |
-| **Stone 400** | `#a8a29e` | Secondary text, hints |
-| **Stone 200** | `#e7e5e3` | Borders, dividers |
-| **Red 500** | `#ef4444` | Errors, rejection, danger actions |
-| **Blue 600** | `#2563eb` | Information, links |
-| **Amber 500** | `#f59e0b` | Warnings, pending states |
-| **Purple 600** | `#7c3aed` | Accent (event permits) |
-| **White** | `#ffffff` | Card backgrounds |
+| **Emerald 50**  | `#ecfdf5` | Light backgrounds, success panels               |
+| **Stone 700**   | `#44403c` | Primary text                                    |
+| **Stone 400**   | `#a8a29e` | Secondary text, hints                           |
+| **Stone 200**   | `#e7e5e3` | Borders, dividers                               |
+| **Red 500**     | `#ef4444` | Errors, rejection, danger actions               |
+| **Blue 600**    | `#2563eb` | Information, links                              |
+| **Amber 500**   | `#f59e0b` | Warnings, pending states                        |
+| **Purple 600**  | `#7c3aed` | Accent (event permits)                          |
+| **White**       | `#ffffff` | Card backgrounds                                |
 
 The emerald-to-teal gradient reflects Tanzania's natural landscape and creates a distinctive, recognizable government brand.
 
@@ -33,14 +33,14 @@ The emerald-to-teal gradient reflects Tanzania's natural landscape and creates a
 
 ## Typography
 
-| Element | Size | Weight | Font |
-|---------|------|--------|------|
-| Page titles | 24px (text-2xl) | Bold (700) | System sans-serif |
-| Section headers | 14px (text-sm) | Bold (700) | Uppercase + tracking-wider |
-| Body text | 14px (text-sm) | Normal (400) | System sans-serif |
-| Form labels | 12px (text-xs) | Bold (700) | Uppercase + tracking-wider |
-| Helper text | 12px (text-xs) | Normal (400) | Stone-400 color |
-| Error messages | 12px (text-xs) | Normal (400) | Red-500 color |
+| Element         | Size            | Weight       | Font                       |
+| --------------- | --------------- | ------------ | -------------------------- |
+| Page titles     | 24px (text-2xl) | Bold (700)   | System sans-serif          |
+| Section headers | 14px (text-sm)  | Bold (700)   | Uppercase + tracking-wider |
+| Body text       | 14px (text-sm)  | Normal (400) | System sans-serif          |
+| Form labels     | 12px (text-xs)  | Bold (700)   | Uppercase + tracking-wider |
+| Helper text     | 12px (text-xs)  | Normal (400) | Stone-400 color            |
+| Error messages  | 12px (text-xs)  | Normal (400) | Red-500 color              |
 
 System font stack ensures fast loading without web font downloads.
 
@@ -49,12 +49,14 @@ System font stack ensures fast loading without web font downloads.
 ## Component Library
 
 ### Layout Components
+
 - **AppShell**: Sidebar (desktop) + bottom nav (mobile) + header
 - **Sidebar**: Collapsible navigation with role-based menu items
 - **MobileNav**: Fixed bottom tab bar for mobile (5 primary actions)
 - **ProtectedRoute**: Auth-gated wrapper with role checks
 
 ### Form Components
+
 - **Multi-step wizard**: Step indicator with progress percentage
 - **Field**: Labeled input wrapper with validation state
 - **Sel**: Select dropdown with search and error state
@@ -63,12 +65,14 @@ System font stack ensures fast loading without web font downloads.
 - **DynamicFormGenerator**: Schema-driven form renderer for configurable services
 
 ### Data Display
+
 - **StatCard**: Dashboard metric card with icon + value + label
 - **StatusBadge**: Color-coded application status indicator
 - **ApplicationProgressBar**: Visual pipeline from submission to issuance
 - **InfoItem**: Key-value display row
 
 ### PDF Documents
+
 - **9 document templates**: Each with Tanzania government letterhead, QR verification code, signature blocks, and official stamp placement
 - **CertificatePDFDocument**: Wrapper that resolves the correct template by service type
 
@@ -77,6 +81,7 @@ System font stack ensures fast loading without web font downloads.
 ## Layout Patterns
 
 ### Desktop (≥768px)
+
 ```
 ┌──────────┬────────────────────────────────────────┐
 │          │                                         │
@@ -92,6 +97,7 @@ System font stack ensures fast loading without web font downloads.
 ```
 
 ### Mobile (<768px)
+
 ```
 ┌────────────────────────────────┐
 │ Header (sticky)                │
@@ -110,6 +116,7 @@ System font stack ensures fast loading without web font downloads.
 ## Interaction Patterns
 
 ### Form Submission Flow
+
 1. **Select service** → Service card grid with descriptions and fees
 2. **Fill form** → Multi-step wizard with progress bar (Step 1 of 8)
 3. **Upload documents** → Drag-and-drop or tap with camera access
@@ -118,11 +125,13 @@ System font stack ensures fast loading without web font downloads.
 6. **Confirmation** → Success screen with application number
 
 ### Application Tracking
+
 - **Status timeline**: Visual progression with timestamps
 - **Detail slide-over panel**: Click a row → right panel shows full details
 - **Color-coded statuses**: Green (approved), amber (pending), red (rejected), blue (info)
 
 ### Payment Flow
+
 1. Select payment method (M-Pesa / TigoPesa / Airtel / Bank)
 2. Enter phone number or account details
 3. Mock processing with realistic feedback
@@ -132,11 +141,11 @@ System font stack ensures fast loading without web font downloads.
 
 ## Responsive Breakpoints
 
-| Breakpoint | Width | Adaptation |
-|-----------|-------|------------|
-| Mobile | < 640px | Single column, bottom nav, stacked cards |
-| Tablet | 640-1023px | 2-column grids, sidebar collapses |
-| Desktop | ≥ 1024px | Full sidebar, multi-column layouts |
+| Breakpoint | Width      | Adaptation                               |
+| ---------- | ---------- | ---------------------------------------- |
+| Mobile     | < 640px    | Single column, bottom nav, stacked cards |
+| Tablet     | 640-1023px | 2-column grids, sidebar collapses        |
+| Desktop    | ≥ 1024px   | Full sidebar, multi-column layouts       |
 
 ---
 

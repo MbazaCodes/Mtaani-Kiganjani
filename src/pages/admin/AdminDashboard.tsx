@@ -8,19 +8,14 @@ import {
   TrendingUp,
   FileText,
   CheckCircle,
-  AlertCircle,
   Shield,
   DollarSign,
   Clock,
-  Calendar,
   ArrowUpRight,
-  ArrowDownRight,
   Activity,
   Zap,
   Database,
   Globe,
-  Smartphone,
-  Laptop,
   BarChart3,
   PieChart,
   Percent,
@@ -28,7 +23,6 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { StatCard } from "@/components/ui/StatCard";
-import { AnalyticsCharts } from "@/components/AnalyticsCharts";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { cn } from "@/lib/utils";

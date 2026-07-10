@@ -499,11 +499,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       setForgotSent(true);
     } catch (err) {
       const msg = (err as Error).message || "";
-      const isNetwork = msg.includes("Failed to fetch") || msg.includes("fetch") || !navigator.onLine;
+      const isNetwork =
+        msg.includes("Failed to fetch") || msg.includes("fetch") || !navigator.onLine;
       showToast(
-        isNetwork
-          ? L("Hakuna mtandao. Jaribu tena.", "Network error. Please try again.")
-          : msg,
+        isNetwork ? L("Hakuna mtandao. Jaribu tena.", "Network error. Please try again.") : msg,
         "error",
       );
     } finally {

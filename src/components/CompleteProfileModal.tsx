@@ -11,14 +11,12 @@ import {
   X,
   User,
   Phone,
-  Mail,
   MapPin,
   Calendar,
   Shield,
   Loader2,
   CheckCircle2,
   AlertCircle,
-  ChevronDown,
   Globe2,
 } from "lucide-react";
 import PhoneInput from "react-phone-number-input";

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import type { AnyFormData } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -14,7 +13,6 @@ import {
   DollarSign,
   AlertCircle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/currency";
 // Safe form_data field accessor for JSX rendering
 const fd = (data: Record<string, unknown>, key: string): string => String(data?.[key] ?? "");

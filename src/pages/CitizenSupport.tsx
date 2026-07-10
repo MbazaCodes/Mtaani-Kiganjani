@@ -1,20 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Send,
-  Loader2,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  MessageSquare,
-  ChevronRight,
-  ChevronDown,
-  Paperclip,
-  ArrowLeft,
-  User,
-  Shield,
-  X,
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { Send, Loader2, MessageSquare, ChevronRight, ArrowLeft, User, Shield } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";

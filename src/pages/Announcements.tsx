@@ -6,14 +6,10 @@ import {
   Loader2,
   X,
   Clock,
-  AlertTriangle,
-  Bell,
-  Shield,
   MapPin,
   ChevronDown,
   ChevronRight,
   Trash2,
-  CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";

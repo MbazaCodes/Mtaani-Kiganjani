@@ -13,7 +13,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   CheckCircle2,
-  XCircle,
   Loader2,
   Shield,
   User,
@@ -25,8 +24,6 @@ import {
   Building2,
   ChevronDown,
   ChevronUp,
-  Camera,
-  Calendar,
   AlertCircle,
   ShieldCheck,
   BadgeCheck,
@@ -36,7 +33,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { createNotification } from "@/lib/notifications";
-import { getUserTier, getTierInfo } from "@/lib/verification";
+import { getUserTier } from "@/lib/verification";
 import { VerificationBadge } from "@/components/VerificationBadge";
 import { VerificationChecklist } from "@/components/VerificationChecklist";
 import { RefreshButton } from "@/components/ui/RefreshButton";

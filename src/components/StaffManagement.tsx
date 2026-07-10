@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { supabase, UserProfile, VirtualOffice } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Users,
   Plus,
   Search,
   Building2,
@@ -15,15 +14,12 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  ArrowRight,
-  Database,
   Trash2,
   DatabaseZap,
   Globe,
   UserPlus,
   Edit2,
   User,
-  Calendar,
   BadgeCheck,
   XCircle,
   KeyRound,

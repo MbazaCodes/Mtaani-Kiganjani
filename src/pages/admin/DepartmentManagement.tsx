@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronRight,
   Users,
-  Shield,
   MapPin,
   Phone,
   Mail,

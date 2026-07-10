@@ -24,7 +24,6 @@ import {
   Briefcase,
   BookOpen,
   Heart,
-  Navigation,
   Map,
   Flag,
   Fingerprint,

@@ -11,7 +11,6 @@ import {
   generateQRCodeUrl,
   formatFullName,
   formatDate,
-  formatCurrency,
 } from "./types";
 import { ApplicantSignatureBox, OfficerSignatureBox } from "./SignatureBlocks";
 import { ReceiptPage } from "./ReceiptPage";

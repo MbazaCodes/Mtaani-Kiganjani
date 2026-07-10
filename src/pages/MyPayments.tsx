@@ -12,7 +12,6 @@ import {
   Loader2,
   Calendar,
   FileText,
-  ChevronRight,
   CreditCard,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";

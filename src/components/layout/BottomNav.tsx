@@ -8,11 +8,9 @@ import {
   LayoutDashboard,
   Plus,
   FileText,
-  Bell,
   User,
   ClipboardList,
   Users,
-  BarChart2,
   CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";

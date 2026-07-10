@@ -30,8 +30,6 @@ import {
   MapPin,
   Calendar,
   Users,
-  Ruler,
-  DollarSign,
   Wrench,
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";

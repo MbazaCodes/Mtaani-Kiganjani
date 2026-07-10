@@ -12,25 +12,17 @@ import {
   FileText,
   Clock,
   CheckCircle,
-  CheckCircle2,
-  AlertCircle,
-  Building2,
   RefreshCw,
   ArrowRight,
   Bell,
   Briefcase,
   Plus,
-  DollarSign,
   Scale,
   ShieldCheck,
-  Eye,
-  Loader2,
   Star,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useDocumentExpiry } from "@/hooks/useDocumentExpiry";
-import { ApplicationChat } from "@/components/ApplicationChat";
-import { StatusTimeline } from "@/components/StatusTimeline";
 import { useLanguage } from "@/context/LanguageContext";
 import { StatCard } from "@/components/ui/StatCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";

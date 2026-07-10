@@ -10,7 +10,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import {
   Loader2,
-  CheckCircle,
   CheckCircle2,
   ArrowLeft,
   ArrowRight,
@@ -28,9 +27,6 @@ import {
   Check,
   Search,
   Home,
-  MapPin,
-  DollarSign,
-  Calendar,
   FileSignature,
   UserCheck,
   UserX,

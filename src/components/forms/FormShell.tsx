@@ -5,7 +5,6 @@
  */
 import React from "react";
 import { ChevronLeft, ChevronRight, CheckCircle, Loader2 } from "lucide-react";
-import { ProgressFill } from "../ui/ProgressFill";
 
 // ── CSS helpers ──────────────────────────────────────────────────────────────
 export const F = {

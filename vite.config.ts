@@ -34,7 +34,10 @@ export default defineConfig({
             return "react-vendor";
           }
           // Router
-          if (id.includes("node_modules/react-router-dom") || id.includes("node_modules/react-router/")) {
+          if (
+            id.includes("node_modules/react-router-dom") ||
+            id.includes("node_modules/react-router/")
+          ) {
             return "router";
           }
           // Supabase — auth + db, needed early
@@ -58,7 +61,10 @@ export default defineConfig({
             return "radix-ui";
           }
           // Form libraries
-          if (id.includes("node_modules/react-hook-form") || id.includes("node_modules/@hookform/")) {
+          if (
+            id.includes("node_modules/react-hook-form") ||
+            id.includes("node_modules/@hookform/")
+          ) {
             return "forms-vendor";
           }
           // Toast notifications
@@ -66,7 +72,11 @@ export default defineConfig({
             return "toast";
           }
           // PDF renderer — heavy, only loaded when user downloads a doc
-          if (id.includes("node_modules/@react-pdf/") || id.includes("node_modules/pdfkit") || id.includes("node_modules/fontkit")) {
+          if (
+            id.includes("node_modules/@react-pdf/") ||
+            id.includes("node_modules/pdfkit") ||
+            id.includes("node_modules/fontkit")
+          ) {
             return "pdf";
           }
           // Date utilities
@@ -78,7 +88,11 @@ export default defineConfig({
             return "validation";
           }
           // Admin pages — only staff/admin ever load these
-          if (id.includes("/pages/admin/") || id.includes("/pages/staff/") || id.includes("/pages/department/")) {
+          if (
+            id.includes("/pages/admin/") ||
+            id.includes("/pages/staff/") ||
+            id.includes("/pages/department/")
+          ) {
             return "admin-staff";
           }
           // Form components — only loaded on /apply route

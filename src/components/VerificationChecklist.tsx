@@ -12,7 +12,6 @@ import {
   FileText,
   Users,
   CheckCircle2,
-  Circle,
   ChevronDown,
   ChevronUp,
   Loader2,

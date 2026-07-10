@@ -3,17 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   HelpCircle,
-  FileText,
-  User,
-  Clock,
-  CheckCircle2,
-  XCircle,
   RefreshCw,
   MessageSquare,
   AlertCircle,
   Loader2,
-  ChevronRight,
-  ArrowLeft,
   CreditCard,
   ThumbsUp,
 } from "lucide-react";
@@ -24,7 +17,6 @@ import { useToast } from "@/context/ToastContext";
 import { createNotification } from "@/lib/notifications";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatCurrency } from "@/lib/currency";
-import { cn } from "@/lib/utils";
 
 export function CustomerSupport() {
   const { lang, currency } = useLanguage();

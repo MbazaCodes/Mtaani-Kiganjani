@@ -6,7 +6,6 @@ import {
   Smartphone,
   Building2,
   CheckCircle2,
-  AlertCircle,
   ArrowRight,
   X,
   Loader2,

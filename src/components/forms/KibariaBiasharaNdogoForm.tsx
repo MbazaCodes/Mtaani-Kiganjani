@@ -11,9 +11,7 @@ import {
   Eye,
   AlertCircle,
   Store,
-  MapPin,
   User,
-  Phone,
   Check,
   FileText,
 } from "lucide-react";

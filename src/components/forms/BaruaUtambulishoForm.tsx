@@ -20,8 +20,6 @@ import {
   Eye,
   FileCheck,
   User,
-  MapPin,
-  Briefcase,
   FileText,
   Building2,
   AlertCircle,
@@ -33,12 +31,8 @@ import {
   Plus,
   Trash2,
   CreditCard,
-  Hash,
-  Phone,
-  Mail,
   Check,
   Activity,
-  Calendar,
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { CATEGORIES } from "@/data/taasisi";

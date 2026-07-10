@@ -22,24 +22,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardCheck,
   Search,
-  Filter,
   Loader2,
   CheckCircle,
   XCircle,
   Clock,
   AlertCircle,
-  Eye,
-  X,
   User,
   FileText,
   Calendar,
   MapPin,
-  CreditCard,
   MessageSquare,
   RefreshCw,
   ChevronRight,
   ArrowLeft,
-  Download,
   Send,
   ShieldAlert,
   Banknote,
@@ -47,25 +42,19 @@ import {
   ShieldCheck,
   Inbox,
   ListFilter,
-  ChevronDown,
   Hash,
-  Phone,
-  Mail,
   ExternalLink,
   CheckCircle2,
-  AlertTriangle,
   FileCheck,
   DollarSign,
   ArrowUpRight,
 } from "lucide-react";
-import { supabase, Application, UserProfile } from "@/lib/supabase";
+import { supabase, Application } from "@/lib/supabase";
 import { logActivity } from "@/lib/activity-log";
 import { createNotification } from "@/lib/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { ApplicationChat } from "@/components/ApplicationChat";
-import { exportToCSV, flattenForExport } from "@/lib/export";
 import { CitizenProfileViewer } from "@/components/CitizenProfileViewer";
-import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SignaturePad } from "@/components/ui/SignaturePad";

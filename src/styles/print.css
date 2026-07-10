@@ -5,7 +5,12 @@
     background: #fff !important;
     line-height: 1.5;
   }
-  nav, header, footer, button, .no-print, aside {
+  nav,
+  header,
+  footer,
+  button,
+  .no-print,
+  aside {
     display: none !important;
   }
   @page {

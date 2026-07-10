@@ -18,20 +18,15 @@ import {
   Heart,
   Users,
   Calendar,
-  MapPin,
   Phone,
   User,
   AlertCircle,
   Shield,
-  Info,
   Upload,
   X,
   Edit2,
   FileText,
   Check,
-  Clock,
-  Home,
-  BookOpen,
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";

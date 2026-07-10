@@ -17,7 +17,6 @@ import {
   Megaphone,
   Wallet,
   Mail,
-  MessageSquare,
   UserCheck,
   Activity,
   X,

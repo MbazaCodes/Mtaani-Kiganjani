@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { SignaturePad } from "@/components/ui/SignaturePad";
-import { CertificatePDFDocument } from "@/components/DocumentRenderer";
 import { downloadAgreementPDF } from "@/lib/pdfDownload";
 import { ApplicationChat } from "@/components/ApplicationChat";
 /**
@@ -20,14 +19,11 @@ import { ApplicationChat } from "@/components/ApplicationChat";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Store,
-  Home,
   Users,
-  Building2,
   Briefcase,
   FileText,
   Download,
   Loader2,
-  CheckCircle2,
   CheckCircle,
   AlertCircle,
   Clock,
@@ -38,17 +34,11 @@ import {
   Eye,
   Edit2,
   Check,
-  MapPin,
-  Phone,
-  Mail,
-  Award,
   Plus,
   ShoppingCart,
   Key,
-  ExternalLink,
   RefreshCw,
   XCircle,
-  ShieldCheck,
   FileSignature,
   Shield,
   Info,
