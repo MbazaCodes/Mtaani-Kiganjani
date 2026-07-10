@@ -18,7 +18,7 @@ export async function diagnoseSupabase(): Promise<void> {
   _ran = true;
 
   const url =
-    import.meta.env.VITE_SUPABASE_URL || "https://nkpdvtwjbngmvlolytvt.supabase.co";
+    import.meta.env.VITE_SUPABASE_URL || "https://apaynuwvnqnxrigluvzo.supabase.co";
 
   console.group("[E-Mtaa Supabase] Connection Diagnostic");
   console.log("URL:", url);
