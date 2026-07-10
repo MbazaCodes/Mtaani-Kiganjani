@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import type { AnyFormData, ApplicationDraft } from "@/types";
+import type { ApplicationDraft } from "@/types";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, CreditCard, ShieldAlert, Briefcase, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";

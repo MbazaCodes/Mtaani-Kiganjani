@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   Search,
-  Filter,
   MoreVertical,
   Mail,
   Phone,

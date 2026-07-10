@@ -18,7 +18,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import type { AnyFormData, FormField } from "@/types";
+import type { FormField } from "@/types";
 
 interface UserProfile {
   id: string;

@@ -5,7 +5,7 @@ import React from "react";
 import { Page, Text, View, Image, StyleSheet, Document } from "@react-pdf/renderer";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 import { Application } from "@/lib/supabase";
-import { formatDate, generateQRCodeUrl } from "./types";
+import { formatDate } from "./types";
 import { ReceiptPage } from "./ReceiptPage";
 
 interface Props {

@@ -11,7 +11,6 @@ import {
   Shield,
   ShieldAlert,
   Phone,
-  Mail,
   Clock,
   CheckCircle2,
   Lock,

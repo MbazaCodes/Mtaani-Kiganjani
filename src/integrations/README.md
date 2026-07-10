@@ -45,12 +45,12 @@ if (result.ok) {
 
 ## Recommended sequence
 
-| Order | Integration | Why first |
-|-------|-------------|-----------|
-| 1 | **Payments (GePG)** | Unlocks the most value; lets the portal collect real fees |
-| 2 | **SMS** | Cheap, high-impact; notify citizens of status changes |
-| 3 | **NIDA** | Makes identity verification real (raises document trust) |
-| 4 | **TRA / Police** | Inter-agency data; enables the obligations/fines features |
+| Order | Integration         | Why first                                                 |
+| ----- | ------------------- | --------------------------------------------------------- |
+| 1     | **Payments (GePG)** | Unlocks the most value; lets the portal collect real fees |
+| 2     | **SMS**             | Cheap, high-impact; notify citizens of status changes     |
+| 3     | **NIDA**            | Makes identity verification real (raises document trust)  |
+| 4     | **TRA / Police**    | Inter-agency data; enables the obligations/fines features |
 
 ## Env var reference
 

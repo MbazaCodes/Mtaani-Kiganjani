@@ -23,6 +23,7 @@ Every service follows this standardized workflow:
 **Purpose**: Official proof that a citizen resides in a specific ward. Required for employment verification, school enrollment, opening bank accounts, and accessing public services.
 
 **Form fields** (8 steps):
+
 - Personal information (auto-filled from profile/NIDA)
 - Residence details (region, district, ward, street, house number)
 - Property information (ownership status, years at residence)
@@ -40,6 +41,7 @@ Every service follows this standardized workflow:
 **Purpose**: Authorization to conduct a burial ceremony, required by law before interment.
 
 **Form fields** (6 steps):
+
 - Deceased personal information (name, NIDA, date of birth, date of death)
 - Cause and place of death, hospital/morgue details
 - Burial location and date
@@ -56,6 +58,7 @@ Every service follows this standardized workflow:
 **Purpose**: Permission to hold public or private events (weddings, concerts, religious gatherings, political rallies).
 
 **Form fields**:
+
 - Event type (wedding, birthday, cultural, religious, concert, political, etc.)
 - Event name, expected guest count
 - Venue details (name, ward, district)
@@ -73,6 +76,7 @@ Every service follows this standardized workflow:
 **Purpose**: Approval for small-scale building works (renovations, extensions, fencing) that don't require full municipal planning permission.
 
 **Form fields**:
+
 - Property details (plot number, ownership status)
 - Construction type and description
 - Estimated cost and timeline
@@ -90,6 +94,7 @@ Every service follows this standardized workflow:
 **Purpose**: Official letter from the ward office introducing a citizen to institutions (employers, schools, banks, government offices, embassies).
 
 **Unique features**:
+
 - **Multi-institution support**: One application can generate separate letters for multiple institutions
 - **Application types**: Self, Minor (for children), On Behalf (for represented parties)
 - **Template-based**: Professional government letter format with addressee, body, and sign-off
@@ -103,6 +108,7 @@ Every service follows this standardized workflow:
 **Purpose**: Officially witnessed property/asset sale contract between a seller and buyer.
 
 **Form fields**:
+
 - Seller details (auto-filled from profile)
 - Buyer details (name, NIDA, phone)
 - Asset/property description, location, value
@@ -119,6 +125,7 @@ Every service follows this standardized workflow:
 **Purpose**: Officially witnessed tenancy/lease contract between a landlord and tenant.
 
 **Form fields** (9 steps):
+
 - Landlord details (auto-filled if landlord is the submitter)
 - Tenant details
 - Property description (address, room count, floor, amenities)
@@ -137,10 +144,12 @@ Every service follows this standardized workflow:
 **Purpose**: Filing community disputes and civil complaints for mediation by the ward office.
 
 **Two modes**:
+
 - **Dispute** (mgogoro): Between two named parties with witness support
 - **Community Issue** (tatizo la jamii): General community problem report
 
 **Form fields**:
+
 - Dispute type and description
 - Complainant details (auto-filled)
 - Respondent details (for disputes)
@@ -159,6 +168,7 @@ Every service follows this standardized workflow:
 **Types**: Security contribution, cleaning levy, development fund, water, electricity, other
 
 **Form fields**:
+
 - Contribution type and amount
 - Period (monthly/quarterly/annual)
 - Payment method preference
@@ -172,27 +182,27 @@ Every service follows this standardized workflow:
 
 Every approved application generates an official PDF with:
 
-| Element | Description |
-|---------|-------------|
+| Element                   | Description                                              |
+| ------------------------- | -------------------------------------------------------- |
 | **Government letterhead** | Tanzania coat of arms, "JAMHURI YA MUUNGANO WA TANZANIA" |
-| **Application number** | Unique reference (e.g., `TZ-MKZ-20260604-5380`) |
-| **Citizen photo** | Profile photo embedded in the document |
-| **Applicant signature** | Electronic signature drawn during application |
-| **Officer signature** | Ward Executive Officer's saved signature |
-| **Official stamp** | Ward office stamp uploaded by the officer |
-| **QR verification code** | Scannable code linking to verification endpoint |
-| **Bilingual content** | Swahili primary with English labels |
+| **Application number**    | Unique reference (e.g., `TZ-MKZ-20260604-5380`)          |
+| **Citizen photo**         | Profile photo embedded in the document                   |
+| **Applicant signature**   | Electronic signature drawn during application            |
+| **Officer signature**     | Ward Executive Officer's saved signature                 |
+| **Official stamp**        | Ward office stamp uploaded by the officer                |
+| **QR verification code**  | Scannable code linking to verification endpoint          |
+| **Bilingual content**     | Swahili primary with English labels                      |
 
 ---
 
 ## Payment Methods
 
-| Method | Provider | Process |
-|--------|----------|---------|
-| M-Pesa | Vodacom | Enter phone → USSD push → Confirm on phone |
-| TigoPesa | Tigo | Enter phone → USSD push → Confirm on phone |
-| Airtel Money | Airtel | Enter phone → USSD push → Confirm on phone |
-| NMB Bank | NMB | Enter account → Transfer reference |
-| CRDB Bank | CRDB | Enter account → Transfer reference |
+| Method       | Provider | Process                                    |
+| ------------ | -------- | ------------------------------------------ |
+| M-Pesa       | Vodacom  | Enter phone → USSD push → Confirm on phone |
+| TigoPesa     | Tigo     | Enter phone → USSD push → Confirm on phone |
+| Airtel Money | Airtel   | Enter phone → USSD push → Confirm on phone |
+| NMB Bank     | NMB      | Enter account → Transfer reference         |
+| CRDB Bank    | CRDB     | Enter account → Transfer reference         |
 
-*Currently simulated with realistic UI — production integration requires MNO API agreements.*
+_Currently simulated with realistic UI — production integration requires MNO API agreements._

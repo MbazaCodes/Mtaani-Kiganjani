@@ -17,14 +17,16 @@ export async function diagnoseSupabase(): Promise<void> {
   if (_ran) return;
   _ran = true;
 
-  const url =
-    import.meta.env.VITE_SUPABASE_URL || "https://apaynuwvnqnxrigluvzo.supabase.co";
+  const url = import.meta.env.VITE_SUPABASE_URL || "https://apaynuwvnqnxrigluvzo.supabase.co";
 
   console.group("[E-Mtaa Supabase] Connection Diagnostic");
   console.log("URL:", url);
   console.log("Online:", navigator.onLine);
   console.log("VITE_SUPABASE_URL set:", !!import.meta.env.VITE_SUPABASE_URL);
-  console.log("VITE_SUPABASE_PUBLISHABLE_KEY set:", !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+  console.log(
+    "VITE_SUPABASE_PUBLISHABLE_KEY set:",
+    !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  );
 
   try {
     // Test 1: Can we reach the Supabase health endpoint?

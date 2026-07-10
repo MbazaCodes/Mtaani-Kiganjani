@@ -10,7 +10,6 @@ import {
   FileCheck2,
   Clock,
   CheckCircle2,
-  XCircle,
   AlertCircle,
   ChevronDown,
   ChevronUp,

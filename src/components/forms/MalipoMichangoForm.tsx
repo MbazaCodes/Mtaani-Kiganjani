@@ -35,8 +35,6 @@ import {
   Trash2,
   HeartHandshake,
   ReceiptText,
-  User,
-  Calendar,
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";

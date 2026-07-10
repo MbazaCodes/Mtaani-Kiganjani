@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Mail,
   Send,
@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Search,
   Loader2,
-  ChevronRight,
   User,
   Shield,
   Building2,
@@ -15,8 +14,6 @@ import {
   Reply,
   Paperclip,
   X,
-  Clock,
-  CheckCircle2,
   FileText,
   Download,
   MessageSquare,

@@ -10,13 +10,11 @@
 import React, { useState, useRef, useCallback } from "react";
 import {
   Loader2,
-  CheckCircle,
   CheckCircle2,
   ArrowLeft,
   ArrowRight,
   Eye,
   FileCheck,
-  User,
   Users,
   AlertCircle,
   Shield,
@@ -29,10 +27,6 @@ import {
   Search,
   Home,
   Key,
-  Calendar,
-  Zap,
-  Droplet,
-  Wifi,
   UserCheck,
   UserX,
 } from "lucide-react";

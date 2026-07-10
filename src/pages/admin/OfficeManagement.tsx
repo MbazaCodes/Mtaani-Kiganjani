@@ -22,14 +22,11 @@ import {
   ChevronDown,
   List,
   Network,
-  Phone,
-  Mail,
   Hash,
   RotateCcw,
   FileUp,
   AlertTriangle,
   Tag,
-  User,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";

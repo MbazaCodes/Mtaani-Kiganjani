@@ -11,7 +11,7 @@ import {
   formatDate,
   formatCurrency,
 } from "./types";
-import { ApplicantSignatureBox, OfficerSignatureBox } from "./SignatureBlocks";
+import { OfficerSignatureBox } from "./SignatureBlocks";
 import { ReceiptPage } from "./ReceiptPage";
 import { TANZANIA_LOGO_BASE64 } from "@/constants/logo";
 

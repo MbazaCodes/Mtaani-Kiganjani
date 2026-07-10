@@ -24,16 +24,10 @@ import {
   Info,
   Loader2,
   RefreshCw,
-  MailOpen,
-  ExternalLink,
   Check,
   CheckCheck,
-  Trash2,
-  Inbox,
   FileSignature,
   ShieldAlert,
-  Clock,
-  X,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";

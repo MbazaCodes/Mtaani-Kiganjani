@@ -9,7 +9,6 @@ import {
   DocumentPDFProps,
   commonStyles as s,
   generateQRCodeUrl,
-  formatFullName,
   formatDate,
   formatCurrency,
 } from "./types";

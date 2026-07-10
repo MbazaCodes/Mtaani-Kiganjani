@@ -12,16 +12,9 @@ import {
   Clock,
   X,
   Search,
-  Filter,
   Eye,
   XCircle,
   CheckCircle,
-  ChevronDown,
-  Calendar,
-  MapPin,
-  Phone,
-  Mail,
-  Briefcase,
   Award,
   ExternalLink,
   RefreshCw,
@@ -31,7 +24,6 @@ import {
 import { supabase } from "@/lib/supabase";
 import { ApplicationChat } from "@/components/ApplicationChat";
 import { downloadAgreementPDF } from "@/lib/pdfDownload";
-import { CitizenProfileViewer } from "@/components/CitizenProfileViewer";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";

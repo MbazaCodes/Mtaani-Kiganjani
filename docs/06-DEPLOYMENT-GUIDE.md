@@ -29,6 +29,7 @@ cp .env.example .env
 ```
 
 Edit `.env`:
+
 ```env
 # CLIENT-SIDE (embedded in browser — safe)
 VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
@@ -55,9 +56,9 @@ In Supabase Dashboard → SQL Editor, run these in order:
 
 In Supabase Dashboard → Authentication → URL Configuration:
 
-| Setting | Value |
-|---------|-------|
-| Site URL | `http://localhost:5173` (dev) or your Vercel domain (prod) |
+| Setting       | Value                                                           |
+| ------------- | --------------------------------------------------------------- |
+| Site URL      | `http://localhost:5173` (dev) or your Vercel domain (prod)      |
 | Redirect URLs | `http://localhost:5173/**`, `https://your-domain.vercel.app/**` |
 
 ### 5. Start Development Server
@@ -77,6 +78,7 @@ The app will be available at `http://localhost:5173`.
 In Vercel Dashboard → New Project → Import `MbazaCodes/Mtaani-Kiganjani`.
 
 Vercel auto-detects the `vercel.json` configuration:
+
 - Framework: Vite
 - Build command: `npm run build`
 - Output directory: `dist`
@@ -85,21 +87,21 @@ Vercel auto-detects the `vercel.json` configuration:
 
 In Vercel → Project Settings → Environment Variables, add:
 
-| Variable | Scope | Value |
-|----------|-------|-------|
-| `VITE_SUPABASE_URL` | All | Your Supabase project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | All | Publishable key |
-| `VITE_SUPABASE_ANON_KEY` | All | Anonymous key |
-| `SUPABASE_URL` | All | Same Supabase URL (no VITE_ prefix) |
-| `SUPABASE_SERVICE_ROLE_KEY` | All | Service role key (no VITE_ prefix) |
+| Variable                        | Scope | Value                                |
+| ------------------------------- | ----- | ------------------------------------ |
+| `VITE_SUPABASE_URL`             | All   | Your Supabase project URL            |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | All   | Publishable key                      |
+| `VITE_SUPABASE_ANON_KEY`        | All   | Anonymous key                        |
+| `SUPABASE_URL`                  | All   | Same Supabase URL (no VITE\_ prefix) |
+| `SUPABASE_SERVICE_ROLE_KEY`     | All   | Service role key (no VITE\_ prefix)  |
 
 ### 3. Update Supabase Auth URLs
 
 In Supabase → Authentication → URL Configuration:
 
-| Setting | Value |
-|---------|-------|
-| **Site URL** | `https://mtaani-kiganjani-two.vercel.app` |
+| Setting           | Value                                        |
+| ----------------- | -------------------------------------------- |
+| **Site URL**      | `https://mtaani-kiganjani-two.vercel.app`    |
 | **Redirect URLs** | `https://mtaani-kiganjani-two.vercel.app/**` |
 
 ### 4. Deploy
@@ -129,22 +131,22 @@ Since there's no admin yet, create one directly in Supabase:
 
 ## Build Commands
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build |
+| Command           | Purpose                          |
+| ----------------- | -------------------------------- |
+| `npm run dev`     | Start development server         |
+| `npm run build`   | Production build                 |
 | `npm run preview` | Preview production build locally |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Run Prettier formatting |
+| `npm run lint`    | Run ESLint                       |
+| `npm run format`  | Run Prettier formatting          |
 
 ---
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|---------|
-| Stale dev server / errors | `Remove-Item -Recurse -Force node_modules\.vite` then `npm run dev` |
-| Multiple dev servers (port 5174+) | `taskkill /F /IM node.exe` then restart |
-| Email confirmation redirects to localhost | Set Site URL in Supabase Auth settings |
-| Admin actions fail (create user, etc.) | Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel env vars (no VITE_ prefix) |
-| PDF download crashes | Clear Vite cache, ensure `@react-pdf/renderer` in `optimizeDeps` |
+| Issue                                     | Solution                                                              |
+| ----------------------------------------- | --------------------------------------------------------------------- |
+| Stale dev server / errors                 | `Remove-Item -Recurse -Force node_modules\.vite` then `npm run dev`   |
+| Multiple dev servers (port 5174+)         | `taskkill /F /IM node.exe` then restart                               |
+| Email confirmation redirects to localhost | Set Site URL in Supabase Auth settings                                |
+| Admin actions fail (create user, etc.)    | Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel env vars (no VITE\_ prefix) |
+| PDF download crashes                      | Clear Vite cache, ensure `@react-pdf/renderer` in `optimizeDeps`      |

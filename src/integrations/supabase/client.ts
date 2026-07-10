@@ -1,21 +1,36 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-// ── New Supabase project credentials ─────────────────────────────────────────
-const DEFAULT_SUPABASE_URL = "https://apaynuwvnqnxrigluvzo.supabase.co";
-const DEFAULT_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwYXludXd2bnFueHJpZ2x1dnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDY2OTMsImV4cCI6MjA5OTI4MjY5M30.EIZzCdwcOaBgV2alnizzZIZszziS8HT4KNluUow7lfY";
-
-function createSupabaseClient() {
-  const SUPABASE_URL =
-    import.meta.env.VITE_SUPABASE_URL ||
-    DEFAULT_SUPABASE_URL;
-
-  const SUPABASE_KEY =
+// ── Public (anon / publishable) credentials ──────────────────────────────────
+// These are safe to expose to the browser — the anon key is designed to be
+// public and Supabase Row-Level Security is the actual security boundary.
+//
+// SECURITY: We deliberately do NOT hardcode fallback credentials. A previous
+// version of this file embedded a default URL + anon key, which meant a build
+// with missing env vars would silently ship pointing at the original Supabase
+// project — masking deploy misconfigurations and risking cross-project data
+// leaks. Now: if the env vars are missing, the app fails loudly so the
+// operator notices immediately.
+const REQUIRED_ENV = {
+  url: import.meta.env.VITE_SUPABASE_URL,
+  anonKey:
     import.meta.env.VITE_SUPABASE_ANON_KEY ||
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE ||
-    DEFAULT_SUPABASE_ANON_KEY;
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE,
+} as const;
+
+if (!REQUIRED_ENV.url || !REQUIRED_ENV.anonKey) {
+  // Surface the misconfiguration in the console for ops/debugging. The Supabase
+  // client below will still be constructed, but every call will fail; the
+  // AuthContext / ErrorBoundary already handle this gracefully.
+  console.error(
+    "[supabase] Missing required env vars. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (or VITE_SUPABASE_PUBLISHABLE) at build time.",
+  );
+}
+
+function createSupabaseClient() {
+  const SUPABASE_URL = REQUIRED_ENV.url ?? "";
+  const SUPABASE_KEY = REQUIRED_ENV.anonKey ?? "";
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_KEY, {
     auth: {

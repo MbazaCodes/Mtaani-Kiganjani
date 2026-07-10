@@ -28,13 +28,9 @@ import {
   Check,
   Search,
   UserCheck,
-  UserX,
   Users,
   Scale,
   Megaphone,
-  MapPin,
-  Calendar,
-  AlertTriangle,
   Gavel,
   Shield,
 } from "lucide-react";

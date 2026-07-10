@@ -2,16 +2,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Inbox,
-  Clock,
   CheckCircle2,
-  MessageSquare,
   ChevronRight,
   ChevronDown,
   Loader2,
   Send,
   MapPin,
-  User,
-  X,
   AlertTriangle,
   Image,
 } from "lucide-react";

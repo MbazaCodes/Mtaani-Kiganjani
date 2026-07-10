@@ -13,8 +13,14 @@
 
     <!-- ── Identity & SEO (OR-MUU 2014 §2.1 — nembo ya Taifa na utambulisho) ── -->
     <title>Mtaani Kiganjani (E-Mtaa) | Huduma za Serikali za Mitaa Tanzania</title>
-    <meta name="description" content="Mtaani Kiganjani — Mfumo rasmi wa kidijitali wa Serikali za Mitaa Tanzania. Omba vyeti, vibali, barua za utambulisho na huduma nyingine za serikali ya mtaa mkononi mwako. Powered by PO-RALG / TAMISEMI." />
-    <meta name="keywords" content="E-Mtaa, Serikali za Mitaa, Tanzania, TAMISEMI, PO-RALG, eGA, huduma za serikali, kibali, cheti, barua ya utambulisho, ombi, kata, halmashauri" />
+    <meta
+      name="description"
+      content="Mtaani Kiganjani — Mfumo rasmi wa kidijitali wa Serikali za Mitaa Tanzania. Omba vyeti, vibali, barua za utambulisho na huduma nyingine za serikali ya mtaa mkononi mwako. Powered by PO-RALG / TAMISEMI."
+    />
+    <meta
+      name="keywords"
+      content="E-Mtaa, Serikali za Mitaa, Tanzania, TAMISEMI, PO-RALG, eGA, huduma za serikali, kibali, cheti, barua ya utambulisho, ombi, kata, halmashauri"
+    />
     <meta name="author" content="Mamlaka ya Serikali Mtandao (eGA) / PO-RALG" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="Swahili" />
@@ -25,7 +31,10 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Mtaani Kiganjani (E-Mtaa)" />
     <meta property="og:title" content="Mtaani Kiganjani — Huduma za Serikali za Mitaa Tanzania" />
-    <meta property="og:description" content="Omba huduma za serikali ya mtaa mkononi mwako — vyeti, vibali, barua za utambulisho na zaidi." />
+    <meta
+      property="og:description"
+      content="Omba huduma za serikali ya mtaa mkononi mwako — vyeti, vibali, barua za utambulisho na zaidi."
+    />
     <meta property="og:image" content="/hero-image.png" />
     <meta property="og:url" content="https://e-mtaatz.xyz" />
     <meta property="og:locale" content="sw_TZ" />
@@ -54,9 +63,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Non-blocking font load: preload + media trick ensures fonts don't block render -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" /></noscript>
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    /></noscript>
 
     <!-- ── DNS prefetch for Supabase ── -->
     <link rel="dns-prefetch" href="https://supabase.co" />
@@ -70,7 +92,9 @@
       (function () {
         try {
           var t = localStorage.getItem("emtaa_theme");
-          var dark = t === "dark" || (!t || t === "system") && window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var dark =
+            t === "dark" ||
+            ((!t || t === "system") && window.matchMedia("(prefers-color-scheme: dark)").matches);
           if (dark) {
             document.documentElement.classList.add("dark");
             document.documentElement.style.colorScheme = "dark";

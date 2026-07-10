@@ -1,7 +1,7 @@
 # Mtaani Kiganjani — Tanzania Digital Local Government Services Portal
 
 > **"Huduma za Serikali ya Mtaa Kidijitali"**
-> *Empowering Citizens Through Digital Local Governance*
+> _Empowering Citizens Through Digital Local Governance_
 
 ---
 
@@ -11,12 +11,12 @@
 
 The system serves **three user roles** across the full service lifecycle:
 
-| Role | Swahili | Capabilities |
-|------|---------|-------------|
-| **Citizen** | Mwananchi | Apply for services, upload documents, sign electronically, track status, download certificates |
-| **Staff** | Afisa | Review applications, verify documents, approve/reject, manage citizens in their ward |
-| **Admin** | Msimamizi | Full system management, user creation, service configuration, audit logs, all-region access |
-| **Department** | Afisa wa Idara | Government department staff — receive escalated cases, review forwarded applications |
+| Role           | Swahili        | Capabilities                                                                                   |
+| -------------- | -------------- | ---------------------------------------------------------------------------------------------- |
+| **Citizen**    | Mwananchi      | Apply for services, upload documents, sign electronically, track status, download certificates |
+| **Staff**      | Afisa          | Review applications, verify documents, approve/reject, manage citizens in their ward           |
+| **Admin**      | Msimamizi      | Full system management, user creation, service configuration, audit logs, all-region access    |
+| **Department** | Afisa wa Idara | Government department staff — receive escalated cases, review forwarded applications           |
 
 ---
 
@@ -49,17 +49,17 @@ Mtaani Kiganjani provides:
 
 ## Services Offered (9 Digital Services)
 
-| # | Service (Swahili) | English | Description |
-|---|-------------------|---------|-------------|
-| 1 | Utambulisho wa Mkazi | Certificate of Residency | Official proof of residence in a ward |
-| 2 | Kibari cha Mazishi | Burial Permit | Authorization for burial ceremonies |
-| 3 | Kibari cha Sherehe | Event/Celebration Permit | Permission for weddings, parties, concerts |
-| 4 | Kibari cha Ujezi Mdogo | Minor Construction Permit | Approval for small-scale building works |
-| 5 | Barua ya Utambulisho | Introduction Letter | Official letter for employment, school, etc. |
-| 6 | Makubaliano ya Mauzo | Sales Agreement | Witnessed property/asset sale contract |
-| 7 | Makubaliano ya Pango | Rental Agreement | Witnessed tenancy/lease contract |
-| 8 | Mgogoro na Mashauri | Dispute Resolution | Filing and tracking community disputes |
-| 9 | Malipo na Michango | Payments & Contributions | Ward-level fees and community contributions |
+| #   | Service (Swahili)      | English                   | Description                                  |
+| --- | ---------------------- | ------------------------- | -------------------------------------------- |
+| 1   | Utambulisho wa Mkazi   | Certificate of Residency  | Official proof of residence in a ward        |
+| 2   | Kibari cha Mazishi     | Burial Permit             | Authorization for burial ceremonies          |
+| 3   | Kibari cha Sherehe     | Event/Celebration Permit  | Permission for weddings, parties, concerts   |
+| 4   | Kibari cha Ujezi Mdogo | Minor Construction Permit | Approval for small-scale building works      |
+| 5   | Barua ya Utambulisho   | Introduction Letter       | Official letter for employment, school, etc. |
+| 6   | Makubaliano ya Mauzo   | Sales Agreement           | Witnessed property/asset sale contract       |
+| 7   | Makubaliano ya Pango   | Rental Agreement          | Witnessed tenancy/lease contract             |
+| 8   | Mgogoro na Mashauri    | Dispute Resolution        | Filing and tracking community disputes       |
+| 9   | Malipo na Michango     | Payments & Contributions  | Ward-level fees and community contributions  |
 
 ---
 
@@ -80,4 +80,4 @@ Mtaani Kiganjani provides:
 
 ---
 
-*For detailed technical documentation, see the other files in this `docs/` folder.*
+_For detailed technical documentation, see the other files in this `docs/` folder._

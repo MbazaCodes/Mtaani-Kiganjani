@@ -1,5 +1,4 @@
 import { UserProfile } from "@/lib/supabase";
-import type { AnyFormData } from "@/types";
 
 export type FormLanguage = "sw" | "en";
 
