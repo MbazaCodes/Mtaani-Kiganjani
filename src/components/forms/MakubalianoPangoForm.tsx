@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";
+import { AddressFields } from "./AddressFields";
 import { ProgressFill } from "../ui/ProgressFill";
 import { supabase } from "../../lib/supabase";
 import { createAgreementNotification, createNotification } from "../../lib/notifications";
@@ -955,9 +956,9 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
             </Field>
             <Field
               name="property_address"
-              label={L("Anwani Kamili ya Nyumba", "Full Property Address")}
+              label={L("Mtaa / Namba ya Nyumba", "Street / House Number")}
               required
-              hint={L("Mtaa, Kata, Wilaya, Mkoa", "Street, Ward, District, Region")}
+              hint={L("Mfano: Makonde St, No. 12", "E.g. Makonde St, No. 12")}
             >
               <TI
                 name="property_address"
@@ -966,12 +967,29 @@ export const MakubalianoPangoForm: React.FC<FormProps> = ({
                   set("property_address", v);
                   clrErr("property_address");
                 }}
-                placeholder={L(
-                  "Mfano: Sinza B, Makonde St, No. 12, Kinondoni, Dar es Salaam",
-                  "E.g. Sinza B, Makonde St, No. 12, Kinondoni, Dar es Salaam",
-                )}
+                placeholder={L("Mtaa na namba ya nyumba", "Street and house number")}
               />
             </Field>
+            <AddressFields
+              lang={lang}
+              region={vals.property_region}
+              district={vals.property_district}
+              ward={vals.property_ward}
+              onRegion={(v) => {
+                set("property_region", v);
+                set("property_district", "");
+                set("property_ward", "");
+              }}
+              onDistrict={(v) => {
+                set("property_district", v);
+                set("property_ward", "");
+              }}
+              onWard={(v) => set("property_ward", v)}
+              errors={errors}
+              clearError={clrErr}
+              fieldPrefix="property"
+              autofillFrom={userProfile}
+            />
             <div className="grid grid-cols-2 gap-3">
               <Field
                 name="num_rooms"

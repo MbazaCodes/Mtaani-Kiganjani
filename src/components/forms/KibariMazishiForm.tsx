@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";
+import { AddressFields } from "./AddressFields";
 import { ProgressFill } from "../ui/ProgressFill";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -103,7 +104,9 @@ interface FormValues {
   burial_date: string;
   burial_time: string;
   burial_location: string;
+  burial_region: string;
   burial_district: string;
+  burial_ward: string;
   // Step 3 — Family
   representative_name: string;
   representative_phone: string;
@@ -161,7 +164,9 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
     burial_date: "",
     burial_time: "",
     burial_location: "",
+    burial_region: "",
     burial_district: "",
+    burial_ward: "",
     representative_name: `${userProfile?.first_name || ""} ${userProfile?.last_name || ""}`.trim(),
     representative_phone: userProfile?.phone || "",
     representative_relationship: "",
@@ -897,17 +902,20 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
                     placeholder={L("Jina la makaburi", "Cemetery name")}
                   />
                 </Field>
-                <Field
-                  name="burial_district"
-                  label={L("Wilaya / Kata ya Makaburi", "Cemetery District / Ward")}
-                >
-                  <TI
-                    name="burial_district"
-                    value={vals.burial_district}
-                    onChange={(v) => set("burial_district", v)}
-                    placeholder={L("Mfano: Kinondoni, Ilala", "E.g. Kinondoni, Ilala")}
-                  />
-                </Field>
+                <AddressFields
+                  lang={lang}
+                  region={vals.burial_region}
+                  district={vals.burial_district}
+                  ward={vals.burial_ward}
+                  onRegion={(v) => set("burial_region", v)}
+                  onDistrict={(v) => set("burial_district", v)}
+                  onWard={(v) => set("burial_ward", v)}
+                  errors={errors}
+                  clearError={clrErr}
+                  fieldPrefix="burial"
+                  venueMode={false}
+                  optional={true}
+                />
               </div>
             </div>
 

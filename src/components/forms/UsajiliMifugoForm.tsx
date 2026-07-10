@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { compressImage } from "@/lib/imageCompression";
 import { FormProps } from "./types";
+import { AddressFields } from "./AddressFields";
 import { ProgressFill } from "../ui/ProgressFill";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 
@@ -71,6 +72,7 @@ interface FormVals {
   owner_phone: string;
   owner_ward: string;
   owner_street: string;
+  owner_region: string;
   owner_district: string;
   location_description: string;
   mifugo: MifugoEntry[];
@@ -106,6 +108,7 @@ export const UsajiliMifugoForm: React.FC<FormProps> = ({
     owner_ward: userProfile?.ward || "",
     owner_street: userProfile?.street || "",
     owner_district: userProfile?.district || "",
+    owner_region: userProfile?.region || "",
     location_description: "",
     mifugo: [emptyMifugo()],
     identification_marks: "",
@@ -301,24 +304,32 @@ export const UsajiliMifugoForm: React.FC<FormProps> = ({
               {errors.owner_phone}
             </p>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className={lbl}>{L(lang, "Kata", "Ward")}</label>
-              <input
-                value={vals.owner_ward}
-                onChange={(e) => set("owner_ward", e.target.value)}
-                className={inputCls()}
-              />
-            </div>
-            <div>
-              <label className={lbl}>{L(lang, "Wilaya", "District")}</label>
-              <input
-                value={vals.owner_district}
-                onChange={(e) => set("owner_district", e.target.value)}
-                className={inputCls()}
-              />
-            </div>
-          </div>
+          <AddressFields
+            lang={lang === "sw" ? "sw" : "en"}
+            region={vals.owner_region}
+            district={vals.owner_district}
+            ward={vals.owner_ward}
+            onRegion={(v) => {
+              set("owner_region", v);
+              set("owner_district", "");
+              set("owner_ward", "");
+            }}
+            onDistrict={(v) => {
+              set("owner_district", v);
+              set("owner_ward", "");
+            }}
+            onWard={(v) => set("owner_ward", v)}
+            errors={errors}
+            clearError={(k) =>
+              setErrors((p) => {
+                const n = { ...p };
+                delete n[k];
+                return n;
+              })
+            }
+            fieldPrefix="owner"
+            autofillFrom={userProfile}
+          />
           <div>
             <label className={lbl}>
               {L(lang, "Mahali Mifugo Ilipo (Boma/Shamba)", "Livestock Location (Pen/Farm)")}

@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";
+import { AddressFields } from "./AddressFields";
 import { ProgressFill } from "../ui/ProgressFill";
 import { supabase } from "../../lib/supabase";
 
@@ -134,6 +135,7 @@ interface FormValues {
   issue_type: string;
   issue_location: string;
   issue_ward: string;
+  issue_region: string;
   issue_district: string;
   // Both
   incident_date: string;
@@ -242,6 +244,7 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
     issue_type: "",
     issue_location: "",
     issue_ward: userProfile?.ward || "",
+    issue_region: userProfile?.region || "",
     issue_district: userProfile?.district || "",
     incident_date: "",
     title: "",
@@ -1174,24 +1177,27 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
                     className={`${inputCls("issue_location")} resize-none`}
                   />
                 </Field>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field name="issue_ward" label={L("Kata", "Ward")}>
-                    <TI
-                      name="issue_ward"
-                      value={vals.issue_ward}
-                      onChange={(v) => set("issue_ward", v)}
-                      placeholder={L("Kata ya tatizo", "Ward of issue")}
-                    />
-                  </Field>
-                  <Field name="issue_district" label={L("Wilaya", "District")}>
-                    <TI
-                      name="issue_district"
-                      value={vals.issue_district}
-                      onChange={(v) => set("issue_district", v)}
-                      placeholder={L("Wilaya", "District")}
-                    />
-                  </Field>
-                </div>
+                <AddressFields
+                  lang={lang}
+                  region={vals.issue_region}
+                  district={vals.issue_district}
+                  ward={vals.issue_ward}
+                  onRegion={(v) => {
+                    set("issue_region", v);
+                    set("issue_district", "");
+                    set("issue_ward", "");
+                  }}
+                  onDistrict={(v) => {
+                    set("issue_district", v);
+                    set("issue_ward", "");
+                  }}
+                  onWard={(v) => set("issue_ward", v)}
+                  errors={errors}
+                  clearError={clrErr}
+                  fieldPrefix="issue"
+                  autofillFrom={userProfile}
+                  optional={true}
+                />
               </>
             )}
 

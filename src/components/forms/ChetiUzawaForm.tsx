@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { FormProps } from "./types";
+import { AddressFields } from "./AddressFields";
 import { compressImage } from "@/lib/imageCompression";
 import { ProgressFill } from "../ui/ProgressFill";
 import { SignaturePad } from "@/components/ui/SignaturePad";
@@ -301,6 +302,26 @@ export const ChetiUzawaForm: React.FC<FormProps> = ({
               </option>
             </select>
           </div>
+          <AddressFields
+            lang={lang === "sw" ? "sw" : "en"}
+            region={vals.parent_region}
+            district={vals.parent_district}
+            ward={vals.parent_ward}
+            onRegion={(v) => {
+              set("parent_region", v);
+              set("parent_district", "");
+              set("parent_ward", "");
+            }}
+            onDistrict={(v) => {
+              set("parent_district", v);
+              set("parent_ward", "");
+            }}
+            onWard={(v) => set("parent_ward", v)}
+            errors={errors}
+            clearError={clrErr}
+            fieldPrefix="parent"
+            autofillFrom={userProfile}
+          />
           <p className="text-xs font-black text-stone-400 uppercase tracking-widest pt-2">
             {L(lang, "Baba wa Mtoto", "Father")}
           </p>

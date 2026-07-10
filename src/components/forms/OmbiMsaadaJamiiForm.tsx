@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { FormProps } from "./types";
+import { AddressFields } from "./AddressFields";
 import { ProgressFill } from "../ui/ProgressFill";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 
@@ -53,6 +54,7 @@ interface FormVals {
   applicant_sex: string;
   applicant_ward: string;
   applicant_street: string;
+  applicant_region: string;
   applicant_district: string;
   assistance_type: string;
   assistance_other: string;
@@ -90,6 +92,7 @@ export const OmbiMsaadaJamiiForm: React.FC<FormProps> = ({
     applicant_sex: userProfile?.sex || "",
     applicant_ward: userProfile?.ward || "",
     applicant_street: userProfile?.street || "",
+    applicant_region: userProfile?.region || "",
     applicant_district: userProfile?.district || "",
     assistance_type: "",
     assistance_other: "",
@@ -290,24 +293,29 @@ export const OmbiMsaadaJamiiForm: React.FC<FormProps> = ({
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className={lbl}>{L(lang, "Kata", "Ward")}</label>
-              <input
-                value={vals.applicant_ward}
-                onChange={(e) => set("applicant_ward", e.target.value)}
-                className={inputCls()}
-              />
-            </div>
-            <div>
-              <label className={lbl}>{L(lang, "Mtaa", "Street")}</label>
-              <input
-                value={vals.applicant_street}
-                onChange={(e) => set("applicant_street", e.target.value)}
-                className={inputCls()}
-              />
-            </div>
-          </div>
+          <AddressFields
+            lang={lang === "sw" ? "sw" : "en"}
+            region={vals.applicant_region}
+            district={vals.applicant_district}
+            ward={vals.applicant_ward}
+            street={vals.applicant_street}
+            onRegion={(v) => {
+              set("applicant_region", v);
+              set("applicant_district", "");
+              set("applicant_ward", "");
+            }}
+            onDistrict={(v) => {
+              set("applicant_district", v);
+              set("applicant_ward", "");
+            }}
+            onWard={(v) => set("applicant_ward", v)}
+            onStreet={(v) => set("applicant_street", v)}
+            errors={errors}
+            clearError={clrErr}
+            fieldPrefix="applicant"
+            autofillFrom={userProfile}
+            showStreet={true}
+          />
         </div>
       )}
 

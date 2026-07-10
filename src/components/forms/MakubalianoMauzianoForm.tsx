@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";
+import { AddressFields } from "./AddressFields";
 import { ProgressFill } from "../ui/ProgressFill";
 import { supabase } from "../../lib/supabase";
 import { createAgreementNotification, createNotification } from "../../lib/notifications";
@@ -109,6 +110,9 @@ interface FormValues {
   asset_type: string;
   asset_description: string;
   asset_location: string;
+  asset_region: string;
+  asset_district: string;
+  asset_ward: string;
   asset_identifier: string; // plot no, reg plate, etc.
   sale_price: string;
   currency: string;
@@ -165,6 +169,9 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
     asset_type: "",
     asset_description: "",
     asset_location: "",
+    asset_region: "",
+    asset_district: "",
+    asset_ward: "",
     asset_identifier: "",
     sale_price: "",
     currency: "TZS",
@@ -961,25 +968,36 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
             </Field>
             <Field
               name="asset_location"
-              label={L(
-                "Mahali pa Mali (Kama Ni Ardhi/Nyumba)",
-                "Asset Location (If Land/Property)",
-              )}
-              hint={L(
-                "Anwani kamili: Kata, Mtaa, Namba ya Nyumba",
-                "Full address: Ward, Street, House Number",
-              )}
+              label={L("Mtaa / Maelezo ya Eneo (Hiari)", "Street / Location Details (Optional)")}
+              hint={L("Mfano: Namba ya nyumba, barabara", "E.g. House number, road name")}
             >
               <TI
                 name="asset_location"
                 value={vals.asset_location}
                 onChange={(v) => set("asset_location", v)}
-                placeholder={L(
-                  "Mfano: Sinza B, Dodoma Road, No. 45",
-                  "E.g. Sinza B, Dodoma Road, No. 45",
-                )}
+                placeholder={L("Mfano: No. 45, Dodoma Road", "E.g. No. 45, Dodoma Road")}
               />
             </Field>
+            <AddressFields
+              lang={lang}
+              region={vals.asset_region}
+              district={vals.asset_district}
+              ward={vals.asset_ward}
+              onRegion={(v) => {
+                set("asset_region", v);
+                set("asset_district", "");
+                set("asset_ward", "");
+              }}
+              onDistrict={(v) => {
+                set("asset_district", v);
+                set("asset_ward", "");
+              }}
+              onWard={(v) => set("asset_ward", v)}
+              errors={errors}
+              clearError={clrErr}
+              fieldPrefix="asset"
+              optional={true}
+            />
             <Field
               name="asset_identifier"
               label={L("Namba ya Utambulisho wa Mali (Hiari)", "Asset Identifier (Optional)")}

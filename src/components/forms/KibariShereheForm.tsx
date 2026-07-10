@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 import { FormProps, labels } from "./types";
+import { AddressFields } from "./AddressFields";
 import { ProgressFill } from "../ui/ProgressFill";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -112,6 +113,7 @@ interface FormValues {
   venue_address: string;
   venue_ward: string;
   venue_district: string;
+  venue_region: string;
   expected_guests: string;
   // Step 3 — Arrangements
   has_music: string;
@@ -173,6 +175,7 @@ export const KibariShereheForm: React.FC<FormProps> = ({
     venue_address: "",
     venue_ward: "",
     venue_district: "",
+    venue_region: "",
     expected_guests: "",
     has_music: "",
     music_details: "",
@@ -781,32 +784,30 @@ export const KibariShereheForm: React.FC<FormProps> = ({
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field
-                name="venue_ward"
-                label={L("Kata / Mtaa", "Ward / Street")}
-                required
-                hint={L("Kata au mtaa wa ukumbi", "Ward or street of venue")}
-              >
-                <TI
-                  name="venue_ward"
-                  value={vals.venue_ward}
-                  onChange={(v) => {
-                    set("venue_ward", v);
-                    clrErr("venue_ward");
-                  }}
-                  placeholder={L("Mfano: Kariakoo, Kinondoni", "E.g. Kariakoo, Kinondoni")}
-                />
-              </Field>
-              <Field name="venue_district" label={L("Wilaya (Hiari)", "District (Optional)")}>
-                <TI
-                  name="venue_district"
-                  value={vals.venue_district}
-                  onChange={(v) => set("venue_district", v)}
-                  placeholder={L("Mfano: Ilala, Ubungo", "E.g. Ilala, Ubungo")}
-                />
-              </Field>
-            </div>
+            <AddressFields
+              lang={lang}
+              region={vals.venue_region}
+              district={vals.venue_district}
+              ward={vals.venue_ward}
+              onRegion={(v) => {
+                set("venue_region", v);
+                set("venue_district", "");
+                set("venue_ward", "");
+              }}
+              onDistrict={(v) => {
+                set("venue_district", v);
+                set("venue_ward", "");
+              }}
+              onWard={(v) => {
+                set("venue_ward", v);
+                clrErr("venue_ward");
+              }}
+              errors={errors}
+              clearError={clrErr}
+              fieldPrefix="venue"
+              venueMode={true}
+              optional={false}
+            />
 
             <Field
               name="venue_address"

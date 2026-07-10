@@ -18,6 +18,7 @@ import {
   FileText,
 } from "lucide-react";
 import { FormProps } from "./types";
+import { AddressFields } from "./AddressFields";
 import { ProgressFill } from "../ui/ProgressFill";
 import { SignaturePad } from "@/components/ui/SignaturePad";
 
@@ -32,6 +33,8 @@ interface FormVals {
   business_type_other: string;
   business_activity: string;
   location_address: string;
+  region: string;
+  district: string;
   ward: string;
   street: string;
   employees_count: string;
@@ -76,6 +79,8 @@ export const KibariaBiasharaNdogoForm: React.FC<FormProps> = ({
     business_type_other: "",
     business_activity: "",
     location_address: "",
+    region: userProfile?.region || "",
+    district: userProfile?.district || "",
     ward: userProfile?.ward || "",
     street: userProfile?.street || "",
     employees_count: "1",
@@ -281,24 +286,31 @@ export const KibariaBiasharaNdogoForm: React.FC<FormProps> = ({
               )}
             />
           </div>
-          <div>
-            <label className={lbl}>{L(lang, "Anwani ya Biashara *", "Business Address *")}</label>
-            <input
-              value={vals.location_address}
-              onChange={(e) => {
-                set("location_address", e.target.value);
-                clrErr("location_address");
-              }}
-              className={inputCls("location_address")}
-              placeholder={L(lang, "Mtaa, Kata, Wilaya", "Street, Ward, District")}
-            />
-          </div>
-          {errors.location_address && (
-            <p className="text-red-500 text-xs flex items-center gap-1">
-              <AlertCircle size={11} />
-              {errors.location_address}
-            </p>
-          )}
+          <AddressFields
+            lang={lang === "sw" ? "sw" : "en"}
+            region={vals.region}
+            district={vals.district}
+            ward={vals.ward}
+            onRegion={(v) => {
+              set("region", v);
+              set("district", "");
+              set("ward", "");
+            }}
+            onDistrict={(v) => {
+              set("district", v);
+              set("ward", "");
+            }}
+            onWard={(v) => {
+              set("ward", v);
+              clrErr("ward");
+            }}
+            errors={errors}
+            clearError={clrErr}
+            autofillFrom={userProfile}
+            showStreet={true}
+            street={vals.location_address}
+            onStreet={(v) => set("location_address", v)}
+          />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={lbl}>
