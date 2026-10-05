@@ -397,7 +397,7 @@ export const MakubalianoMauzianoForm: React.FC<FormProps> = ({
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const ref = `SA-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000 + 100000)}`;
+      const ref = `TEMP-SA-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       await onSubmit(
         {
           ...vals,
