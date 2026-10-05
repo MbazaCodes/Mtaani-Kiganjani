@@ -132,8 +132,6 @@ export function CitizenSupport() {
     }
     setSubmitting(true);
     try {
-      const ticketNumber = `TK-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}${String(new Date().getDate()).padStart(2, "0")}-${Math.floor(Math.random() * 9000 + 1000)}`;
-
       // Check for auto-routing
       let assignedDepartmentId: string | null = null;
       try {
@@ -149,8 +147,9 @@ export function CitizenSupport() {
         // Routing table may not exist
       }
 
-      const { error } = await supabase.from("support_tickets").insert({
-        ticket_number: ticketNumber,
+      const { data: inserted, error } = await supabase
+        .from("support_tickets")
+        .insert({
         citizen_id: user.id,
         category,
         subject: subject.trim(),
@@ -160,10 +159,22 @@ export function CitizenSupport() {
         ward: user.ward || null,
         street: user.street || null,
         assigned_department_id: assignedDepartmentId,
-        status: assignedDepartmentId ? "assigned" : "submitted",
-      });
+          citizen_id: user.id,
+          category,
+          subject: subject.trim(),
+          description: description.trim(),
+          region: user.region || null,
+          district: user.district || null,
+          ward: user.ward || null,
+          street: user.street || null,
+          assigned_department_id: assignedDepartmentId,
+          status: assignedDepartmentId ? "assigned" : "submitted",
+        })
+        .select("id, ticket_number")
+        .single();
 
       if (error) throw error;
+      const ticketNumber = inserted.ticket_number;
 
       // Confirmation notification for citizen
       await supabase.from("notifications").insert({
