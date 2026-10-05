@@ -170,8 +170,6 @@ export function CommunityReporting() {
     }
     setSubmitting(true);
     try {
-      const reportNumber = `CR-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}${String(new Date().getDate()).padStart(2, "0")}-${Math.floor(Math.random() * 9000 + 1000)}`;
-
       // Auto-routing
       let deptId: string | null = null;
       try {
@@ -190,7 +188,6 @@ export function CommunityReporting() {
       const { data: inserted, error } = await supabase
         .from("community_reports")
         .insert({
-          report_number: reportNumber,
           citizen_id: user.id,
           title: title.trim(),
           description: description.trim(),
@@ -204,10 +201,11 @@ export function CommunityReporting() {
           assigned_department_id: deptId,
           status: deptId ? "assigned" : "submitted",
         })
-        .select("id")
+        .select("id, report_number")
         .single();
 
       if (error) throw error;
+      const reportNumber = inserted.report_number;
 
       // Upload photos
       if (inserted && photos.length > 0) {
