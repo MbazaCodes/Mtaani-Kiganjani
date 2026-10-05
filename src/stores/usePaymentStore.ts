@@ -70,12 +70,18 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
       return;
     }
 
+    if (!IS_SUPABASE_CONFIGURED) {
+      showToast(
+        lang === "sw" ? "Huduma ya malipo haijasanidiwa." : "Payment service is not configured.",
+        "error",
+      );
+      return;
+    }
+
     const { error } = await supabase
       .from("applications")
       .update({
-        status: "issued",
-        issued_at: new Date().toISOString(),
-        form_data: { ...(payingApplication.form_data ?? {}), payment_data: paymentInfo },
+        payment_data: paymentInfo,
       })
       .eq("id", payingApplication.id);
 
