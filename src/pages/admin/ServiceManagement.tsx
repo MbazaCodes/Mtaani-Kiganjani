@@ -267,7 +267,6 @@ export function ServiceManagement() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showSchemaModal, setShowSchemaModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [processing, setProcessing] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -297,7 +296,7 @@ export function ServiceManagement() {
     return services.filter((s) => s.active);
   }, [services]);
 
-  const inactiveServices = useMemo(() => {
+  const _inactiveServices = useMemo(() => {
     return services.filter((s) => !s.active);
   }, [services]);
 

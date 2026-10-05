@@ -159,15 +159,6 @@ export function CitizenSupport() {
           ward: user.ward || null,
           street: user.street || null,
           assigned_department_id: assignedDepartmentId,
-          citizen_id: user.id,
-          category,
-          subject: subject.trim(),
-          description: description.trim(),
-          region: user.region || null,
-          district: user.district || null,
-          ward: user.ward || null,
-          street: user.street || null,
-          assigned_department_id: assignedDepartmentId,
           status: assignedDepartmentId ? "assigned" : "submitted",
         })
         .select("id, ticket_number")

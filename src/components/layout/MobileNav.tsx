@@ -37,7 +37,7 @@ interface MobileNavProps {
 
 export function MobileNav({ isOpen, onClose, currentView, setView }: MobileNavProps) {
   const { user, signOut } = useAuth();
-  const { lang, t } = useLanguage();
+  const { lang, t: _t } = useLanguage();
 
   // Department membership: AuthContext flag + direct query fallback
   const [localDeptCheck, setLocalDeptCheck] = useState(false);

@@ -44,16 +44,16 @@ interface PendingProfileChange {
 }
 
 export function StaffCitizenManagement() {
-  const { lang, t } = useLanguage();
+  const { lang, t: _t } = useLanguage();
   const { showToast } = useToast();
   const { user: staffUser } = useAuth();
   const [citizens, setCitizens] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "verified" | "unverified">("all");
+  const [filter] = useState<"all" | "verified" | "unverified">("all");
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedCitizen, setSelectedCitizen] = useState<UserProfile | null>(null);
-  const [citizenApps, setCitizenApps] = useState<
+  const [, setSelectedCitizen] = useState<UserProfile | null>(null);
+  const [, setCitizenApps] = useState<
     {
       id: string;
       service_name: string;
@@ -62,7 +62,7 @@ export function StaffCitizenManagement() {
       application_number: string;
     }[]
   >([]);
-  const [loadingApps, setLoadingApps] = useState(false);
+  const [, setLoadingApps] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<"citizens" | "profile-changes">("citizens");
   const [pendingChanges, setPendingChanges] = useState<PendingProfileChange[]>([]);

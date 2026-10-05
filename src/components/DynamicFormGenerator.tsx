@@ -66,7 +66,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
   const [minorIdType, setMinorIdType] = useState<"birth_certificate" | "school_registration">(
     "birth_certificate",
   );
-  const [minorName, setMinorName] = useState("");
+  const [minorName] = useState("");
   const [minorIdNumber, setMinorIdNumber] = useState("");
   const [guardianIdType, setGuardianIdType] = useState("");
   const [guardianIdNumber, setGuardianIdNumber] = useState("");
@@ -182,7 +182,7 @@ export const DynamicFormGenerator: React.FC<DynamicFormProps> = ({
   const watchMonthlyRent = watch("monthly_rent");
   const watchPaymentPeriod = watch("payment_period");
   const watchSalePrice = watch("sale_price");
-  const watchAssetType = watch("asset_type");
+  const _watchAssetType = watch("asset_type");
   const watchTenantIsSelf = watch("tenant_is_self");
   const watchBuyerIsSelf = watch("buyer_is_self");
 

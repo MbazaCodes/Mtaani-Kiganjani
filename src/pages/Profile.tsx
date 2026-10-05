@@ -57,99 +57,6 @@ import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
 import { assignOfficeForAddress } from "@/lib/officeRegistry";
 
 // Types based on signup form
-interface UserProfile {
-  // Basic Info
-  id: string;
-  email: string;
-  role: "citizen" | "staff" | "admin";
-  is_verified: boolean;
-  photo_url?: string;
-
-  // Personal Information
-  first_name: string;
-  middle_name?: string;
-  last_name: string;
-  gender: "Me" | "Ke" | "Other";
-  date_of_birth?: string;
-  place_of_birth?: string;
-  birth_region?: string;
-  birth_district?: string;
-  marital_status?: "single" | "married" | "divorced" | "widowed";
-  occupation?: string;
-  education_level?: "none" | "primary" | "secondary" | "diploma" | "degree" | "masters" | "phd";
-
-  // Identity Information
-  nationality: string;
-  nida_number?: string;
-  id_type?:
-    | "birth_certificate"
-    | "voter_id"
-    | "driving_license"
-    | "zanzibar_id"
-    | "student_id"
-    | "employer_id"
-    | "refugee_id";
-  id_number?: string;
-  passport_number?: string;
-  voter_id_number?: string;
-  driving_license_number?: string;
-
-  // Contact Information
-  phone: string;
-  alternative_phone?: string;
-  email_address?: string;
-  alternative_email?: string;
-
-  // Residential Address
-  region: string;
-  district: string;
-  ward: string;
-  street: string;
-  house_number?: string;
-  postal_code?: string;
-  landmark?: string;
-
-  // Local Government Officials
-  mtaa_executive_officer?: string;
-  ward_councillor?: string;
-  ward_chairperson?: string;
-
-  // Diaspora Information
-  is_diaspora: boolean;
-  country_of_residence?: string;
-  city_of_residence?: string;
-  diaspora_region?: string; // Home region in Tanzania
-  diaspora_district?: string; // Home district in Tanzania
-  diaspora_ward?: string; // Home ward in Tanzania
-
-  // Emergency Contact
-  emergency_contact_name?: string;
-  emergency_contact_phone?: string;
-  emergency_contact_relation?: string;
-
-  // Staff/Work Information
-  assigned_region?: string;
-  assigned_district?: string;
-  office_id?: string;
-  employee_id?: string;
-  department?: string;
-  position?: string;
-  employment_date?: string;
-
-  // Additional Information
-  blood_group?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
-  disability_status?: "none" | "physical" | "visual" | "hearing" | "speech" | "multiple";
-  religious_affiliation?: string;
-  tribe?: string;
-
-  // Metadata
-  created_at: string;
-  updated_at: string;
-  last_login?: string;
-  account_status: "active" | "suspended" | "pending";
-  email_verified: boolean;
-  phone_verified: boolean;
-}
 
 interface PendingChange {
   id: string;
@@ -793,7 +700,7 @@ export function Profile() {
   };
 
   // Helper: update form data and mark dirty
-  const updateForm = (updates: Partial<FormData>) => {
+  const _updateForm = (updates: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
     setIsDirty(true);
   };
@@ -1091,7 +998,7 @@ export function Profile() {
   };
 
   // Get category label
-  const getCategoryLabel = (category: string) => {
+  const _getCategoryLabel = (category: string) => {
     const cat = DOCUMENT_CATEGORIES.find((c) => c.value === category);
     return cat ? cat.label[lang === "sw" ? "sw" : "en"] : category;
   };

@@ -72,7 +72,7 @@ export function Notifications() {
   const { user } = useAuth();
   const { lang } = useLanguage();
   const { showToast } = useToast();
-  const { setView } = useRouterView();
+  const { setView: _setView } = useRouterView();
   const L = (sw: string, en: string) => (lang === "sw" ? sw : en);
 
   const [tab, setTab] = useState<Tab>("all");

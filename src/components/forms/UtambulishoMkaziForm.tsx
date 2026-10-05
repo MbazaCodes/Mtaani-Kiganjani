@@ -83,7 +83,7 @@ const OCCUPATIONS = [
   { label: "Nyingine (Other)", value: "nyingine" },
 ];
 
-const APPLICATION_PURPOSES = [
+const _APPLICATION_PURPOSES = [
   { label: "Utambulisho wa Mtaa (Resident ID)", value: "UTAMBULISHO" },
   { label: "Kufungua Akaunti ya Benki (Bank Account)", value: "BENKI" },
   { label: "Maombi ya Ajira (Job Application)", value: "AJIRA" },

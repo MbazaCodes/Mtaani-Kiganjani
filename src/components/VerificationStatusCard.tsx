@@ -22,7 +22,6 @@ import {
 import { cn } from "@/lib/utils";
 import {
   type VerificationTier,
-  type TierInfo,
   getUserTier,
   getProfileCompletion,
   getTierInfo,

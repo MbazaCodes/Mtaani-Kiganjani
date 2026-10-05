@@ -2377,7 +2377,7 @@ export function Agreement() {
           </h2>
           {pendingRegs.map((reg) => {
             const meta = BIZ_TYPES.find((t) => t.value === reg.business_type)!;
-            const Icon = meta.icon;
+            const _Icon = meta.icon;
             return (
               <div key={reg.id} className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5">
                 <div className="flex items-start gap-3">

@@ -75,7 +75,7 @@ export function Sidebar({ currentView, setView }: SidebarProps) {
 
     const fetchActualRole = async (): Promise<void> => {
       try {
-        const { data, error } = await supabase.rpc("get_user_profile", {
+        const { data } = await supabase.rpc("get_user_profile", {
           user_id: session.user.id,
         });
 

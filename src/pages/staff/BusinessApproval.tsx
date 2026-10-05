@@ -178,7 +178,7 @@ export const BusinessApproval: React.FC = () => {
   const [agreements, setAgreements] = useState<AgreementRow[]>([]);
   const [loadingAgreements, setLoadingAgreements] = useState(false);
   const [selectedAgreement, setSelectedAgreement] = useState<AgreementRow | null>(null);
-  const [viewCitizenId, setViewCitizenId] = useState<string | null>(null);
+  const [, setViewCitizenId] = useState<string | null>(null);
   const [agrSearchQuery, setAgrSearchQuery] = useState("");
 
   // All applications state

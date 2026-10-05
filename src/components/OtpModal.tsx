@@ -9,16 +9,7 @@
  */
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  Phone,
-  Mail,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  RefreshCw,
-  ShieldCheck,
-} from "lucide-react";
+import { X, Phone, Mail, CheckCircle2, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface OtpModalProps {

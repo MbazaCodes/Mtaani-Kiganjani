@@ -138,7 +138,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
   const docRef = useRef<HTMLInputElement>(null);
   const [docErr, setDocErr] = useState("");
 
-  const today = new Date().toISOString().split("T")[0];
+  const _today = new Date().toISOString().split("T")[0];
 
   const [vals, setVals] = useState<FormValues>({
     deceased_full_name: "",

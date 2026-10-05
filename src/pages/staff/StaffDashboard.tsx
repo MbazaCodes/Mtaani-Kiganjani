@@ -31,8 +31,8 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
   const { lang } = useLanguage();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
-  const [ticketCount, setTicketCount] = useState(0);
-  const [reportCount, setReportCount] = useState(0);
+  const [, setTicketCount] = useState(0);
+  const [, setReportCount] = useState(0);
   const [stats, setStats] = useState({
     pending: 0,
     paid: 0,
@@ -197,7 +197,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         }
       }
 
-      const { data: allApps, error: statsError } = await statsQuery;
+      const { data: allApps, error: _statsError } = await statsQuery;
 
       // Also fetch pending business registrations count
       const { count: pendingBusinessCount } = await supabase

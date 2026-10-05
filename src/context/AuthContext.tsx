@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // PERF: Non-blocking dept check
           setTimeout(async () => {
             try {
-              const { data: deptRow, error: deptErr } = await supabase
+              const { data: deptRow, error: _deptErr } = await supabase
                 .from("department_users")
                 .select("department_id, role")
                 .eq("user_id", profile.id)
@@ -185,7 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setUser(null);
         }
-      } catch (error) {
+      } catch (_error) {
         if (!isMounted) return;
         setSession(null);
         setUser(null);

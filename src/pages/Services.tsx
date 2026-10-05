@@ -200,7 +200,7 @@ export function Services({ onSelectService }: ServicesProps) {
         ) : (
           filteredServices.map((service) => {
             const meta = SERVICE_META[service.name] || { icon: "📋", category: "other" };
-            const access = getServiceAccess(service.name, tier);
+            const _access = getServiceAccess(service.name, tier);
             const isInstant = tier === "NIDA_VERIFIED";
             return (
               <div

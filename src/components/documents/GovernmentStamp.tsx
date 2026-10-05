@@ -101,11 +101,7 @@ interface GovernmentStampProps {
   lang?: "sw" | "en";
 }
 
-export const GovernmentStamp: React.FC<GovernmentStampProps> = ({
-  date,
-  reference,
-  lang = "sw",
-}) => {
+export const GovernmentStamp: React.FC<GovernmentStampProps> = ({ date }) => {
   const stampDate = date ? new Date(date) : new Date();
   const dateStr = stampDate.toLocaleDateString("sw-TZ", {
     day: "2-digit",

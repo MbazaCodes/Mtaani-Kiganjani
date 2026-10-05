@@ -71,7 +71,7 @@ const toE164 = (phone: string) => {
   return `+255${d}`;
 };
 
-const isPhoneInput = (val: string) => /^[0-9+\s\-()]+$/.test(val.trim()) && val.trim().length > 5;
+const _isPhoneInput = (val: string) => /^[0-9+\s\-()]+$/.test(val.trim()) && val.trim().length > 5;
 
 const pwdStrength = (p: string) =>
   p.length >= 10 && /[A-Z]/.test(p) && /[0-9]/.test(p)

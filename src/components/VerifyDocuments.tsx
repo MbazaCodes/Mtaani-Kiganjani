@@ -260,7 +260,7 @@ interface VerifyDocumentsProps {
 }
 
 export function VerifyDocuments({ lang, onBack, userRole = "citizen" }: VerifyDocumentsProps) {
-  const t = useTranslation(lang);
+  const _t = useTranslation(lang);
   const sw = lang === "sw";
   const L = (s: string, e: string) => (sw ? s : e);
 
@@ -700,14 +700,14 @@ export function VerifyDocuments({ lang, onBack, userRole = "citizen" }: VerifyDo
   };
 
   // ── NIDA ──────────────────────────────────────────────────────────────────
-  const verifyNIDA = async (_searchTerm: string) => {
+  const _verifyNIDA = async (_searchTerm: string) => {
     setVerificationStatus("invalid");
     setErrorDetail(
       L("Uhakiki wa NIDA haupatikani kwa sasa.", "NIDA verification is currently unavailable."),
     );
   };
 
-  const verifyOtherDocument = async (_searchTerm: string) => {
+  const _verifyOtherDocument = async (_searchTerm: string) => {
     setVerificationStatus("invalid");
     setErrorDetail(
       L(

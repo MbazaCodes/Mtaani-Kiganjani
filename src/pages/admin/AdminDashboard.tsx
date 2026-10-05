@@ -93,15 +93,6 @@ interface ActivityItem {
   status?: "success" | "pending" | "error";
 }
 
-interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    color: string;
-  }[];
-}
-
 const INITIAL_STATS: DashboardStats = {
   totalUsers: 0,
   totalCitizens: 0,
@@ -155,7 +146,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
   // State management
   const [stats, setStats] = useState<DashboardStats>(INITIAL_STATS);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [timeRange, setTimeRange] = useState<"today" | "week" | "month" | "year">("month");
   const [activeTab, setActiveTab] = useState<"overview" | "analytics" | "reports">("overview");
@@ -204,7 +195,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
     return "w-1/12";
   };
 
-  const serviceColorClasses = [
+  const _serviceColorClasses = [
     "bg-emerald-500",
     "bg-blue-500",
     "bg-amber-500",
@@ -1396,7 +1387,7 @@ export function AdminDashboard({ setView }: { setView?: (view: string) => void }
                   rejected: 0,
                 };
                 const maxTotal = Math.max(1, ...Object.values(serviceCounts).map((c) => c.total));
-                const barWidth = (counts.total / maxTotal) * 100;
+                const _barWidth = (counts.total / maxTotal) * 100;
                 const serviceIcons = ["🪪", "🕊", "🎉", "🏗", "📝", "🤝", "🔑", "💰", "⚖"];
                 return (
                   <div key={service.id} className="group">

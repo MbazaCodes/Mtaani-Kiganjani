@@ -87,11 +87,6 @@ interface BuyerProfile {
   account_status: string;
 }
 
-interface WitnessInfo {
-  name: string;
-  phone: string;
-  nida: string;
-}
 interface UploadedDoc {
   file: File;
   preview: string;

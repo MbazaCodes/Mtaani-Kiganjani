@@ -159,7 +159,7 @@ export function AdminLogs() {
   const [autoRefresh, setAutoRefresh] = useState(false);
   const refreshInterval = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const uniqueUsers = useMemo(() => {
+  const _uniqueUsers = useMemo(() => {
     const users = new Map();
     logs.forEach((log) => {
       if (log.users) {
@@ -169,7 +169,7 @@ export function AdminLogs() {
     return Array.from(users.values());
   }, [logs]);
 
-  const uniqueResourceTypes = useMemo(() => {
+  const _uniqueResourceTypes = useMemo(() => {
     const types = new Set();
     logs.forEach((log) => {
       if (log.resource_type) {

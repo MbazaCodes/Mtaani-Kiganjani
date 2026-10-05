@@ -30,7 +30,7 @@ interface SecurityPolicyPageProps {
   lang: string;
 }
 
-const L = (lang: string, sw: string, en: string) => (lang === "sw" ? sw : en);
+const _L = (lang: string, sw: string, en: string) => (lang === "sw" ? sw : en);
 
 // ─── Password policy rules ───────────────────────────────────────────────────
 const PASSWORD_RULES = [

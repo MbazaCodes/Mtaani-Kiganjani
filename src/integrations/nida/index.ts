@@ -25,7 +25,7 @@ export async function verifyNida(nidaNumber: string): Promise<IntegrationResult<
 }
 
 /** LIVE — implement the real NIDA API call here when credentials are ready. */
-async function verifyNidaLive(nidaNumber: string): Promise<IntegrationResult<NidaVerification>> {
+async function verifyNidaLive(_nidaNumber: string): Promise<IntegrationResult<NidaVerification>> {
   // TODO: Replace with the real NIDA API request via a SERVER-SIDE route.
   //   const res = await fetch("/api/nida/verify", {
   //     method: "POST",

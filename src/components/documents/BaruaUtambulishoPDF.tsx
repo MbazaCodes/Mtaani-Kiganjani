@@ -110,7 +110,7 @@ export const BaruaUtambulishoPDF: React.FC<DocumentPDFProps> = ({
   // Resolve purpose for first institution: own purpose → global purpose → fallback
   const instPurpose = String(firstInst.purpose || globalPurpose || "");
   const instPurposeDetails = String(firstInst.purpose_details || fd.purpose_details || "");
-  const purposeLabel = PURPOSE_LABELS[instPurpose]
+  const _purposeLabel = PURPOSE_LABELS[instPurpose]
     ? PURPOSE_LABELS[instPurpose][sw ? "sw" : "en"]
     : instPurposeDetails || (sw ? "madhumuni rasmi" : "official purposes");
 

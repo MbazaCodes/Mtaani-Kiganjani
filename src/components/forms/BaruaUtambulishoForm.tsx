@@ -41,7 +41,7 @@ import { ProgressFill } from "../ui/ProgressFill";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const BASE_FEE = 3000;
+const _BASE_FEE = 3000;
 const MAX_INSTITUTIONS = 10;
 
 // Tiered flat fee: 1 = 3,000 / 2–4 = 5,000 / 5–10 = 10,000

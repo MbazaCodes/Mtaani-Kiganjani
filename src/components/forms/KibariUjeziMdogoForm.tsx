@@ -178,7 +178,7 @@ export const KibariUjeziMdogoForm: React.FC<FormProps> = ({
     data_confirmed: false,
   });
 
-  const districts = React.useMemo(
+  const _districts = React.useMemo(
     () =>
       vals.property_region
         ? (TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.map(
@@ -187,7 +187,7 @@ export const KibariUjeziMdogoForm: React.FC<FormProps> = ({
         : [],
     [vals.property_region],
   );
-  const wards = React.useMemo(
+  const _wards = React.useMemo(
     () =>
       vals.property_region && vals.property_district
         ? (TANZANIA_ADDRESS_DATA.find((r) => r.name === vals.property_region)?.districts.find(

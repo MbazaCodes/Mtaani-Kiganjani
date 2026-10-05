@@ -155,7 +155,7 @@ export const KibariShereheForm: React.FC<FormProps> = ({
   const docRef = useRef<HTMLInputElement>(null);
   const [docErr, setDocErr] = useState("");
 
-  const today = new Date().toISOString().split("T")[0];
+  const _today = new Date().toISOString().split("T")[0];
 
   const [vals, setVals] = useState<FormValues>({
     event_type: "",

@@ -40,7 +40,7 @@ interface StaffManagementProps {
 }
 
 export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
-  const t = useTranslation(lang);
+  const _t = useTranslation(lang);
   const { showToast } = useToast();
   const { user } = useAuth();
   const [staff, setStaff] = useState<UserProfile[]>([]);
@@ -89,7 +89,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
     ward: "",
     departmentId: "",
   });
-  const [departments, setDepartments] = useState<{ id: string; name: string; code: string }[]>([]);
+  const [, setDepartments] = useState<{ id: string; name: string; code: string }[]>([]);
 
   // Generate a default password when modal opens
   const generatePassword = () => {
@@ -239,7 +239,6 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
     try {
       // Find the selected office
       let officeId = "";
-      let officeName = "";
 
       if (officeLevel === "region") {
         const regionalOffice = offices.find(
@@ -247,7 +246,6 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
         );
         if (regionalOffice) {
           officeId = regionalOffice.id;
-          officeName = regionalOffice.name;
         }
       } else {
         const districtOffice = offices.find(
@@ -258,7 +256,6 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ lang }) => {
         );
         if (districtOffice) {
           officeId = districtOffice.id;
-          officeName = districtOffice.name;
         }
       }
 

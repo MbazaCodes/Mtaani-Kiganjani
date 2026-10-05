@@ -48,7 +48,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [localUser, setLocalUser] = useState(user);
   const [pendingAgreements, setPendingAgreements] = useState(0);
-  const [selectedDashApp, setSelectedDashApp] = useState<Application | null>(null);
+  const [, setSelectedDashApp] = useState<Application | null>(null);
 
   // Check for expiring documents once per session — sends notifications
   useDocumentExpiry(user);
@@ -90,7 +90,7 @@ export function Dashboard({ applications, setView, onRefresh }: DashboardProps) 
   const approved = applications.filter(
     (a) => a.status === "approved" || a.status === "issued",
   ).length;
-  const rejected = applications.filter((a) => a.status === "rejected").length;
+  const _rejected = applications.filter((a) => a.status === "rejected").length;
   const recent = applications.slice(0, 5);
 
   // Module 2-4 stats
