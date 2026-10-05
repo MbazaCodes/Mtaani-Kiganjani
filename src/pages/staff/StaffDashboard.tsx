@@ -15,7 +15,7 @@ import {
   Search,
 } from "lucide-react";
 import { supabase, Application } from "@/lib/supabase";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { StatCard } from "@/components/ui/StatCard";
@@ -93,7 +93,7 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       // Fetch stats
       const isConfigured = IS_SUPABASE_CONFIGURED;
 
-      if (!isConfigured || user?.id.startsWith("demo-")) {
+      if (IS_DEMO_MODE && (!isConfigured || user?.id.startsWith("demo-"))) {
         const demoApps = JSON.parse(localStorage.getItem("demo_applications") || "[]");
 
         // Filter by location if staff has assigned region/district
@@ -169,6 +169,12 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
         setLoading(false);
         return;
       }
+      if (!isConfigured) {
+        setApplications([]);
+        setStats((prev) => ({ ...prev, pending: 0, paid: 0, returned: 0, approved: 0, total: 0, revenue: 0 }));
+        return;
+      }
+
       let statsQuery = supabase
         .from("applications")
         .select("status, service_name, form_data, payment_data");
