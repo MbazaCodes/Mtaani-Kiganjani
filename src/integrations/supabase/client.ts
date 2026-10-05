@@ -1,10 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-const DEFAULT_URL = "https://apaynuwvnqnxrigluvzo.supabase.co";
-const DEFAULT_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwYXludXd2bnFueHJpZ2x1dnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDY2OTMsImV4cCI6MjA5OTI4MjY5M30.EIZzCdwcOaBgV2alnizzZIZszziS8HT4KNluUow7lfY";
-
 const USE_LOCAL = import.meta.env.VITE_USE_LOCAL_SERVER === "true";
 const LOCAL_URL = import.meta.env.VITE_LOCAL_SERVER_URL || "http://localhost:3001";
 
@@ -30,12 +26,17 @@ function createSupabaseClient() {
     });
   }
 
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || DEFAULT_URL;
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
   const SUPABASE_KEY =
     import.meta.env.VITE_SUPABASE_ANON_KEY ||
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE ||
-    DEFAULT_KEY;
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE;
+
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    throw new Error(
+      "Supabase is not configured. Set VITE_SUPABASE_URL and a publishable/anon key.",
+    );
+  }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
