@@ -133,9 +133,8 @@ export function LocationManagement() {
     setLoading(true);
     try {
       if (IS_DEMO_MODE && !isSupabaseConfigured) {
-        // Simulate API delay
         await new Promise((resolve) => setTimeout(resolve, 500));
-        setLocations([]);
+        setLocations(DEMO_LOCATIONS);
         return;
       }
 
@@ -167,7 +166,7 @@ export function LocationManagement() {
     } catch (error) {
       console.error("Exception in fetchLocations:", error);
       showToast(lang === "sw" ? "Hitilafu ya mfumo" : "System error", "error");
-      setLocations(DEMO_LOCATIONS);
+      setLocations([]);
     } finally {
       setLoading(false);
     }
