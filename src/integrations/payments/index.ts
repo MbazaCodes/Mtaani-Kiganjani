@@ -3,8 +3,7 @@
  * =================================================
  * Processes a real payment and returns a transaction + receipt.
  *
- * STATUS: STUB (mock). Records a "completed" payment locally without moving
- *         real money until enabled.
+ * STATUS: SIMULATION ONLY. No external payment provider is contacted and no\n *         settlement is represented as complete.
  *
  * TO GO LIVE (recommended order):
  *   1. GePG (Government e-Payment Gateway) — the official route for government
@@ -19,8 +18,7 @@
  *   3. Implement `processPaymentLive()` + a webhook/callback handler to
  *      confirm payment asynchronously (most gateways are async).
  *
- * IMPORTANT: In mock mode, "PAID" is a status only — no money moves. Do not
- * treat mock receipts as real financial records.
+ * IMPORTANT: Simulation results are non-authoritative and must never be used\n * as proof of settlement or to issue an official document.
  */
 import { INTEGRATIONS } from "../config";
 import type { IntegrationResult, PaymentRequest, PaymentResult } from "../types";
@@ -35,18 +33,18 @@ export async function processPayment(
 }
 
 async function processPaymentMock(req: PaymentRequest): Promise<IntegrationResult<PaymentResult>> {
-  // Demo: instantly "complete" the payment without moving money.
+  // Explicit simulation: no money moves and no settlement is asserted.
   const now = new Date().toISOString();
   return {
     ok: true,
     source: "mock",
     data: {
-      transactionId: `MOCK-${Date.now()}`,
-      receiptNumber: `RCP-${req.applicationId.slice(0, 8).toUpperCase()}`,
-      status: "completed",
+      transactionId: `SIM-${crypto.randomUUID().toUpperCase()}`,
+      receiptNumber: `SIM-RCP-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+      status: "simulated",
       amount: req.amount,
       paidAt: now,
-      method: "E-Mtaa (Demo)",
+      method: "E-Mtaa Payment Simulation",
     },
   };
 }
