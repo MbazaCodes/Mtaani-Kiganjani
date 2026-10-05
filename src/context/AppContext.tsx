@@ -20,7 +20,7 @@ import { supabase } from "@/lib/supabase";
 import type { Service, Application } from "@/lib/supabase";
 import { logActivity } from "@/lib/activity-log";
 import type { AnyFormData, PaymentResult, ApplicationDraft } from "@/types";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { uploadFiles } from "@/lib/fileStorage";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -169,7 +169,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         created_at: new Date().toISOString(),
       };
 
-      if (!IS_SUPABASE_CONFIGURED || user.id.startsWith("demo-")) {
+      if (IS_DEMO_MODE && (!IS_SUPABASE_CONFIGURED || user.id.startsWith("demo-"))) {
         const existing: Application[] = JSON.parse(
           localStorage.getItem("demo_applications") || "[]",
         );
@@ -181,6 +181,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           "success",
         );
         fetchApplications();
+        return;
+      }
+
+      if (!IS_SUPABASE_CONFIGURED) {
+        showToast(
+          lang === "sw"
+            ? "Huduma ya maombi haijasanidiwa. Hakuna ombi lililotumwa."
+            : "Application service is not configured. Nothing was submitted.",
+          "error",
+        );
         return;
       }
 
@@ -246,7 +256,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             "Failed to fetch",
             "net::",
           ].some((s) => error.message?.includes(s));
-          if (isNetworkError) {
+          if (isNetworkError && IS_DEMO_MODE) {
             const existing: Application[] = JSON.parse(
               localStorage.getItem("demo_applications") || "[]",
             );
@@ -305,7 +315,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ["ERR_NAME_NOT_RESOLVED", "NetworkError", "Failed to fetch"].some((s) =>
             e.message?.includes(s),
           );
-        if (isNetworkError) {
+        if (isNetworkError && IS_DEMO_MODE) {
           const existing: Application[] = JSON.parse(
             localStorage.getItem("demo_applications") || "[]",
           );
