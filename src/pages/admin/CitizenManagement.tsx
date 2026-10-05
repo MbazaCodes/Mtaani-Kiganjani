@@ -30,7 +30,7 @@ import {
   Hash,
 } from "lucide-react";
 import { supabase, UserProfile } from "@/lib/supabase";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { cn } from "@/lib/utils";
@@ -350,7 +350,11 @@ export function CitizenManagement() {
     try {
       const isConfigured = IS_SUPABASE_CONFIGURED;
 
-      if (!isConfigured) {
+      if (!isConfigured && !IS_DEMO_MODE) {
+        throw new Error(lang === "sw" ? "Huduma ya wananchi haijasanidiwa." : "Citizen service is not configured.");
+      }
+
+      if (IS_DEMO_MODE && !isConfigured) {
         // Demo mode - update localStorage
         const demoCitizens = JSON.parse(localStorage.getItem("demo_citizens") || "[]");
         const updated = demoCitizens.map((c: import("@/lib/supabase").UserProfile) =>
@@ -410,7 +414,7 @@ export function CitizenManagement() {
     try {
       const isConfigured = IS_SUPABASE_CONFIGURED;
 
-      if (!isConfigured) {
+      if (IS_DEMO_MODE && !isConfigured) {
         const demoCitizens = JSON.parse(localStorage.getItem("demo_citizens") || "[]");
         const updated = demoCitizens.filter(
           (c: import("@/lib/supabase").UserProfile) => c.id !== citizenId,
