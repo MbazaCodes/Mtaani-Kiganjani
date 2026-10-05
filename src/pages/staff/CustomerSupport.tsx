@@ -11,7 +11,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import { supabase, Application } from "@/lib/supabase";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { createNotification } from "@/lib/notifications";
@@ -41,7 +41,7 @@ export function CustomerSupport() {
       const isConfigured = IS_SUPABASE_CONFIGURED;
       const term = searchTerm.trim();
 
-      if (!isConfigured || term.toUpperCase().startsWith("EMT-")) {
+      if (IS_DEMO_MODE && (!isConfigured || term.toUpperCase().startsWith("EMT-"))) {
         const demoApps = JSON.parse(localStorage.getItem("demo_applications") || "[]");
         const found = demoApps.find(
           (app: import("@/lib/supabase").Application) =>
@@ -67,6 +67,14 @@ export function CustomerSupport() {
           setLoading(false);
           return;
         }
+      }
+
+      if (!isConfigured) {
+        throw new Error(
+          lang === "sw"
+            ? "Huduma ya msaada haijasanidiwa."
+            : "Customer support backend is not configured.",
+        );
       }
 
       // Try searching by application_number first
