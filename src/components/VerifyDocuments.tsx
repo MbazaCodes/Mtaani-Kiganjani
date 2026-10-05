@@ -703,10 +703,7 @@ export function VerifyDocuments({ lang, onBack, userRole = "citizen" }: VerifyDo
   const verifyNIDA = async (_searchTerm: string) => {
     setVerificationStatus("invalid");
     setErrorDetail(
-      L(
-        "Uhakiki wa NIDA haupatikani kwa sasa.",
-        "NIDA verification is currently unavailable.",
-      ),
+      L("Uhakiki wa NIDA haupatikani kwa sasa.", "NIDA verification is currently unavailable."),
     );
   };
 

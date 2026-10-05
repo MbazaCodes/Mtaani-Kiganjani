@@ -20,7 +20,9 @@ function createSupabaseClient() {
           const localUrl = url.toString();
           const controller = new AbortController();
           const timer = setTimeout(() => controller.abort(), 15000);
-          return fetch(localUrl, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+          return fetch(localUrl, { ...options, signal: controller.signal }).finally(() =>
+            clearTimeout(timer),
+          );
         },
       },
     });
@@ -50,7 +52,9 @@ function createSupabaseClient() {
       fetch: (url, options) => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 15000);
-        return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+        return fetch(url, { ...options, signal: controller.signal }).finally(() =>
+          clearTimeout(timer),
+        );
       },
     },
   });

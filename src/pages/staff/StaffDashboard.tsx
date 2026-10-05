@@ -171,7 +171,15 @@ export function StaffDashboard({ setView }: StaffDashboardProps) {
       }
       if (!isConfigured) {
         setApplications([]);
-        setStats((prev) => ({ ...prev, pending: 0, paid: 0, returned: 0, approved: 0, total: 0, revenue: 0 }));
+        setStats((prev) => ({
+          ...prev,
+          pending: 0,
+          paid: 0,
+          returned: 0,
+          approved: 0,
+          total: 0,
+          revenue: 0,
+        }));
         return;
       }
 

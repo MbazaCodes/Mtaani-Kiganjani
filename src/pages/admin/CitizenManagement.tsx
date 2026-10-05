@@ -351,7 +351,11 @@ export function CitizenManagement() {
       const isConfigured = IS_SUPABASE_CONFIGURED;
 
       if (!isConfigured && !IS_DEMO_MODE) {
-        throw new Error(lang === "sw" ? "Huduma ya wananchi haijasanidiwa." : "Citizen service is not configured.");
+        throw new Error(
+          lang === "sw"
+            ? "Huduma ya wananchi haijasanidiwa."
+            : "Citizen service is not configured.",
+        );
       }
 
       if (IS_DEMO_MODE && !isConfigured) {

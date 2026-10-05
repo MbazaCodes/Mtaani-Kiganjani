@@ -14,7 +14,10 @@ export async function diagnoseSupabase(): Promise<void> {
 
   console.group("[E-Mtaa] Connection Diagnostic");
   console.log("Mode:", isLocal ? "LOCAL SERVER" : "SUPABASE CLOUD");
-  console.log("URL:", isLocal ? (import.meta.env.VITE_LOCAL_SERVER_URL || "http://localhost:3001") : url);
+  console.log(
+    "URL:",
+    isLocal ? import.meta.env.VITE_LOCAL_SERVER_URL || "http://localhost:3001" : url,
+  );
   console.log("Online:", navigator.onLine);
 
   if (!isLocal && !url) {

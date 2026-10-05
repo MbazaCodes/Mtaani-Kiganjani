@@ -20,7 +20,11 @@ export async function lookupPoliceRecords(
     return lookupPoliceRecordsLive(identifier);
   }
   void identifier;
-  return { ok: false, source: "disabled", error: "Police/TPF integration is currently unavailable." };
+  return {
+    ok: false,
+    source: "disabled",
+    error: "Police/TPF integration is currently unavailable.",
+  };
 }
 
 async function lookupPoliceRecordsLive(

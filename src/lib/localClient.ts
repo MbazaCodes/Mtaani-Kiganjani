@@ -4,8 +4,7 @@
  * Set VITE_USE_LOCAL_SERVER=true + VITE_LOCAL_SERVER_URL=http://localhost:3001
  */
 
-const BASE_URL =
-  import.meta.env.VITE_LOCAL_SERVER_URL || "http://localhost:3001";
+const BASE_URL = import.meta.env.VITE_LOCAL_SERVER_URL || "http://localhost:3001";
 
 let _token: string | null = localStorage.getItem("emtaa_token");
 
@@ -41,27 +40,68 @@ class QueryBuilder {
   private _body: unknown;
   private _single = false;
 
-  constructor(table: string) { this._table = table; }
-  eq(col: string, val: unknown) { this._filters.push(`${col}=eq.${val}`); return this; }
-  neq(col: string, val: unknown) { this._filters.push(`${col}=neq.${val}`); return this; }
-  ilike(col: string, val: string) { this._filters.push(`${col}=ilike.${val}`); return this; }
-  limit(n: number) { this._limit = n; return this; }
-  range(from: number, to: number) { this._offset = from; this._limit = to - from + 1; return this; }
+  constructor(table: string) {
+    this._table = table;
+  }
+  eq(col: string, val: unknown) {
+    this._filters.push(`${col}=eq.${val}`);
+    return this;
+  }
+  neq(col: string, val: unknown) {
+    this._filters.push(`${col}=neq.${val}`);
+    return this;
+  }
+  ilike(col: string, val: string) {
+    this._filters.push(`${col}=ilike.${val}`);
+    return this;
+  }
+  limit(n: number) {
+    this._limit = n;
+    return this;
+  }
+  range(from: number, to: number) {
+    this._offset = from;
+    this._limit = to - from + 1;
+    return this;
+  }
   order(col: string, opts?: { ascending?: boolean }) {
     this._order = `${col}.${opts?.ascending === false ? "desc" : "asc"}`;
     return this;
   }
-  select(_cols = "*") { return this; }
-  single() { this._single = true; return this; }
-  maybeSingle() { this._single = true; return this; }
-  insert(data: unknown) { this._method = "POST"; this._body = data; return this; }
-  update(data: unknown) { this._method = "PATCH"; this._body = data; return this; }
-  upsert(data: unknown) { this._method = "POST"; this._body = data; return this; }
-  delete() { this._method = "DELETE"; return this; }
+  select(_cols = "*") {
+    return this;
+  }
+  single() {
+    this._single = true;
+    return this;
+  }
+  maybeSingle() {
+    this._single = true;
+    return this;
+  }
+  insert(data: unknown) {
+    this._method = "POST";
+    this._body = data;
+    return this;
+  }
+  update(data: unknown) {
+    this._method = "PATCH";
+    this._body = data;
+    return this;
+  }
+  upsert(data: unknown) {
+    this._method = "POST";
+    this._body = data;
+    return this;
+  }
+  delete() {
+    this._method = "DELETE";
+    return this;
+  }
 
   async then(
     resolve: (v: { data: unknown; error: unknown }) => void,
-    reject: (e: unknown) => void
+    reject: (e: unknown) => void,
   ) {
     try {
       const params = new URLSearchParams();
@@ -99,22 +139,44 @@ export const localClient = {
       try {
         const data = await apiFetch("POST", "/auth/v1/token", { email, password });
         setToken(data.access_token);
-        return { data: { session: { access_token: data.access_token, user: data.user }, user: data.user }, error: null };
+        return {
+          data: { session: { access_token: data.access_token, user: data.user }, user: data.user },
+          error: null,
+        };
       } catch (err) {
         return { data: { session: null, user: null }, error: err };
       }
     },
-    signUp: async ({ email, password, options }: { email: string; password: string; options?: { data?: Record<string, unknown> } }) => {
+    signUp: async ({
+      email,
+      password,
+      options,
+    }: {
+      email: string;
+      password: string;
+      options?: { data?: Record<string, unknown> };
+    }) => {
       try {
-        const data = await apiFetch("POST", "/auth/v1/signup", { email, password, data: options?.data });
+        const data = await apiFetch("POST", "/auth/v1/signup", {
+          email,
+          password,
+          data: options?.data,
+        });
         setToken(data.access_token);
-        return { data: { session: { access_token: data.access_token, user: data.user }, user: data.user }, error: null };
+        return {
+          data: { session: { access_token: data.access_token, user: data.user }, user: data.user },
+          error: null,
+        };
       } catch (err) {
         return { data: { session: null, user: null }, error: err };
       }
     },
     signOut: async () => {
-      try { await apiFetch("POST", "/auth/v1/logout"); } catch { /* noop */ }
+      try {
+        await apiFetch("POST", "/auth/v1/logout");
+      } catch {
+        /* noop */
+      }
       setToken(null);
       return { error: null };
     },

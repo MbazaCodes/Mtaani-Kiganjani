@@ -279,7 +279,8 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       if (error) throw error;
       updOtp({ sent: true, loading: false, open: true });
     } catch (err) {
-      const message = err instanceof Error ? err.message : L("SMS OTP haipatikani.", "SMS OTP is unavailable.");
+      const message =
+        err instanceof Error ? err.message : L("SMS OTP haipatikani.", "SMS OTP is unavailable.");
       updOtp({ sent: false, loading: false, open: false, error: message });
       showToast(message, "error");
     }
@@ -288,7 +289,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const verifySmsOtp = async (code: string) => {
     updOtp({ loading: true, error: null });
     if (!IS_SUPABASE_CONFIGURED) {
-      updOtp({ loading: false, error: L("Huduma ya OTP haijasanidiwa.", "OTP service is not configured.") });
+      updOtp({
+        loading: false,
+        error: L("Huduma ya OTP haijasanidiwa.", "OTP service is not configured."),
+      });
       return;
     }
     try {
@@ -332,7 +336,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       if (error) throw error;
       updEmailOtp({ sent: true, loading: false, open: true });
     } catch (err) {
-      const message = err instanceof Error ? err.message : L("Email OTP haipatikani.", "Email OTP is unavailable.");
+      const message =
+        err instanceof Error
+          ? err.message
+          : L("Email OTP haipatikani.", "Email OTP is unavailable.");
       updEmailOtp({ sent: false, loading: false, open: false, error: message });
       showToast(message, "error");
     }
@@ -341,7 +348,10 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const verifyEmailOtp = async (code: string) => {
     updEmailOtp({ loading: true, error: null });
     if (!IS_SUPABASE_CONFIGURED) {
-      updEmailOtp({ loading: false, error: L("Huduma ya OTP haijasanidiwa.", "OTP service is not configured.") });
+      updEmailOtp({
+        loading: false,
+        error: L("Huduma ya OTP haijasanidiwa.", "OTP service is not configured."),
+      });
       return;
     }
     try {
@@ -568,7 +578,9 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   // ── Citizen self-signup uses Supabase Auth directly ───────────────────────
   const signUpCitizen = async (email: string, password: string, meta: Record<string, unknown>) => {
     if (!IS_SUPABASE_CONFIGURED) {
-      throw new Error(L("Usajili haujapatikana kwa sasa.", "Registration is currently unavailable."));
+      throw new Error(
+        L("Usajili haujapatikana kwa sasa.", "Registration is currently unavailable."),
+      );
     }
     const { data, error } = await supabase.auth.signUp({
       email,

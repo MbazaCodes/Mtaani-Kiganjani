@@ -66,7 +66,10 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
       );
       set({ payingApplication: null });
       onDone();
-      showToast(lang === "sw" ? "Uigaji wa malipo umekamilika" : "Payment simulation completed", "success");
+      showToast(
+        lang === "sw" ? "Uigaji wa malipo umekamilika" : "Payment simulation completed",
+        "success",
+      );
       return;
     }
 

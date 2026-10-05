@@ -321,7 +321,9 @@ export function ServiceManagement() {
       if (!isSupabaseConfigured) {
         setServices([]);
         showToast(
-          lang === "sw" ? "Huduma za uzalishaji hazijasanidiwa" : "Production services are not configured",
+          lang === "sw"
+            ? "Huduma za uzalishaji hazijasanidiwa"
+            : "Production services are not configured",
           "error",
         );
         return;
