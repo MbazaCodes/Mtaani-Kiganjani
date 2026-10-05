@@ -9,13 +9,19 @@ export async function diagnoseSupabase(): Promise<void> {
   if (_ran) return;
   _ran = true;
 
-  const url = import.meta.env.VITE_SUPABASE_URL || "https://apaynuwvnqnxrigluvzo.supabase.co";
+  const url = import.meta.env.VITE_SUPABASE_URL || "";
   const isLocal = import.meta.env.VITE_USE_LOCAL_SERVER === "true";
 
   console.group("[E-Mtaa] Connection Diagnostic");
   console.log("Mode:", isLocal ? "LOCAL SERVER" : "SUPABASE CLOUD");
   console.log("URL:", isLocal ? (import.meta.env.VITE_LOCAL_SERVER_URL || "http://localhost:3001") : url);
   console.log("Online:", navigator.onLine);
+
+  if (!isLocal && !url) {
+    console.warn("Supabase cloud URL is not configured.");
+    console.groupEnd();
+    return;
+  }
 
   if (!isLocal) {
     try {
