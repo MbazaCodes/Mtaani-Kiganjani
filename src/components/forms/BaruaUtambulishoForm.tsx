@@ -687,7 +687,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const ref = `IL-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000 + 100000)}`;
+      const ref = `TEMP-IL-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const files = docs.map((d) => d.file);
       const payload: Record<string, unknown> = {
         ...vals,
@@ -928,7 +928,7 @@ export const BaruaUtambulishoForm: React.FC<FormProps> = ({
         </div>
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-left space-y-3 max-w-sm mx-auto">
           <p className="text-xs font-black text-emerald-700 uppercase tracking-wider">
-            {L("Namba ya Maombi", "Application Reference")}
+            {L("Rejea ya Muda", "Temporary Reference")}
           </p>
           <p className="text-2xl font-black text-emerald-800 font-mono">{appRef}</p>
           <div className="space-y-2 pt-2 border-t border-emerald-200">
