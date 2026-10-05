@@ -272,21 +272,23 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const sendSmsOtp = async () => {
     updOtp({ loading: true, error: null });
     try {
-      if (IS_SUPABASE_CONFIGURED) {
-        const { error } = await supabase.auth.signInWithOtp({ phone: toE164(cPhone) });
-        if (error) throw error;
+      if (!IS_SUPABASE_CONFIGURED) {
+        throw new Error(L("Huduma ya OTP haijasanidiwa.", "OTP service is not configured."));
       }
+      const { error } = await supabase.auth.signInWithOtp({ phone: toE164(cPhone) });
+      if (error) throw error;
       updOtp({ sent: true, loading: false, open: true });
-    } catch {
-      updOtp({ sent: true, loading: false, open: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : L("SMS OTP haipatikani.", "SMS OTP is unavailable.");
+      updOtp({ sent: false, loading: false, open: false, error: message });
+      showToast(message, "error");
     }
   };
 
   const verifySmsOtp = async (code: string) => {
     updOtp({ loading: true, error: null });
-    if (code === "123456" || !IS_SUPABASE_CONFIGURED) {
-      updOtp({ verified: true, open: false, loading: false });
-      showToast(L("Simu imethibitishwa!", "Phone verified!"), "success");
+    if (!IS_SUPABASE_CONFIGURED) {
+      updOtp({ loading: false, error: L("Huduma ya OTP haijasanidiwa.", "OTP service is not configured.") });
       return;
     }
     try {
@@ -323,21 +325,23 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
   const sendEmailOtp = async () => {
     updEmailOtp({ loading: true, error: null });
     try {
-      if (IS_SUPABASE_CONFIGURED) {
-        const { error } = await supabase.auth.signInWithOtp({ email: dEmail });
-        if (error) throw error;
+      if (!IS_SUPABASE_CONFIGURED) {
+        throw new Error(L("Huduma ya OTP haijasanidiwa.", "OTP service is not configured."));
       }
+      const { error } = await supabase.auth.signInWithOtp({ email: dEmail });
+      if (error) throw error;
       updEmailOtp({ sent: true, loading: false, open: true });
-    } catch {
-      updEmailOtp({ sent: true, loading: false, open: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : L("Email OTP haipatikani.", "Email OTP is unavailable.");
+      updEmailOtp({ sent: false, loading: false, open: false, error: message });
+      showToast(message, "error");
     }
   };
 
   const verifyEmailOtp = async (code: string) => {
     updEmailOtp({ loading: true, error: null });
-    if (code === "123456" || !IS_SUPABASE_CONFIGURED) {
-      updEmailOtp({ verified: true, open: false, loading: false });
-      showToast(L("Barua pepe imethibitishwa!", "Email verified!"), "success");
+    if (!IS_SUPABASE_CONFIGURED) {
+      updEmailOtp({ loading: false, error: L("Huduma ya OTP haijasanidiwa.", "OTP service is not configured.") });
       return;
     }
     try {
@@ -561,44 +565,19 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
       Object.entries(obj).filter(([, v]) => v !== null && v !== undefined && v !== ""),
     );
 
-  // ── Sign up via Edge Function (bypasses IP rate limit) ────────────────────
-  const signUpViaEdge = async (email: string, password: string, meta: Record<string, unknown>) => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    try {
-      const res = await fetch(`${supabaseUrl}/functions/v1/register-user`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-            import.meta.env.VITE_SUPABASE_ANON_KEY ||
-            "") as string,
-        },
-        body: JSON.stringify({ email, password, meta }),
-      });
-      const json = await res.json();
-      if (res.status === 429) throw Object.assign(new Error("429"), { status: 429 });
-      if (!res.ok) throw new Error(json.error ?? "Signup failed");
-      // Edge fn created user — sign them in immediately for session
-      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInErr) throw signInErr;
-      return signInData.user;
-    } catch (edgeErr: unknown) {
-      const em = (edgeErr as { message?: string })?.message ?? "";
-      // Don't fall back on 429 — just propagate it
-      if (em.includes("429") || (edgeErr as { status?: number })?.status === 429) throw edgeErr;
-      // Edge function not deployed — fall back to direct signup
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: meta, emailRedirectTo: `${window.location.origin}/confirm` },
-      });
-      if (error) throw error;
-      if (data.user?.identities?.length === 0) throw new Error("EMAIL_EXISTS");
-      return data.user;
+  // ── Citizen self-signup uses Supabase Auth directly ───────────────────────
+  const signUpCitizen = async (email: string, password: string, meta: Record<string, unknown>) => {
+    if (!IS_SUPABASE_CONFIGURED) {
+      throw new Error(L("Usajili haujapatikana kwa sasa.", "Registration is currently unavailable."));
     }
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: meta, emailRedirectTo: `${window.location.origin}/confirm` },
+    });
+    if (error) throw error;
+    if (data.user?.identities?.length === 0) throw new Error("EMAIL_EXISTS");
+    return data.user;
   };
 
   // ── Citizen signup ────────────────────────────────────────────────────────
@@ -618,12 +597,12 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
         phone: toE164(cPhone),
         is_diaspora: false,
         role: "citizen",
-        verification_level: "PHONE_VERIFIED",
+        verification_level: otp.verified ? "PHONE_VERIFIED" : "UNVERIFIED",
         account_status: "ACTIVE",
-        is_verified: true,
+        is_verified: otp.verified,
         profile_complete: false,
       });
-      const user = await signUpViaEdge(cEmail.trim().toLowerCase(), cPwd, meta);
+      const user = await signUpCitizen(cEmail.trim().toLowerCase(), cPwd, meta);
       if (!user) throw new Error(L("Usajili umeshindwa.", "Signup failed."));
       fetchUserProfile(user.id).catch(() => {});
       showToast(
@@ -655,12 +634,12 @@ export function Auth({ mode, onClose, onSuccess, setMode, isDiaspora = false }: 
         last_name: dLast.trim().toUpperCase(),
         is_diaspora: true,
         role: "citizen",
-        verification_level: "EMAIL_VERIFIED",
+        verification_level: emailOtp.verified ? "EMAIL_VERIFIED" : "UNVERIFIED",
         account_status: "ACTIVE",
-        is_verified: true,
+        is_verified: emailOtp.verified,
         profile_complete: false,
       });
-      const user = await signUpViaEdge(dEmail.trim().toLowerCase(), dPwd, meta);
+      const user = await signUpCitizen(dEmail.trim().toLowerCase(), dPwd, meta);
       if (!user) throw new Error(L("Usajili umeshindwa.", "Signup failed."));
       fetchUserProfile(user.id).catch(() => {});
       showToast(
