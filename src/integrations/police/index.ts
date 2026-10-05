@@ -19,13 +19,8 @@ export async function lookupPoliceRecords(
   if (INTEGRATIONS.police.enabled) {
     return lookupPoliceRecordsLive(identifier);
   }
-  return lookupPoliceRecordsMock(identifier);
-}
-
-async function lookupPoliceRecordsMock(
-  _identifier: string,
-): Promise<IntegrationResult<PoliceRecord[]>> {
-  return { ok: true, source: "mock", data: [] };
+  void identifier;
+  return { ok: false, source: "disabled", error: "Police/TPF integration is currently unavailable." };
 }
 
 async function lookupPoliceRecordsLive(
