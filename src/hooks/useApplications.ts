@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase, Application, UserProfile } from "@/lib/supabase";
 import type { ApplicationDraft } from "@/types";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { HARDCODED_SERVICES } from "@/constants/services";
 
 const getServiceById = (serviceId: string) => {
@@ -26,7 +26,7 @@ export function useApplications(user: UserProfile | null) {
 
     const isConfigured = IS_SUPABASE_CONFIGURED;
 
-    if (!isConfigured || (user.id && user.id.startsWith("demo-"))) {
+    if (IS_DEMO_MODE && (!isConfigured || (user.id && user.id.startsWith("demo-")))) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       const demoApps = JSON.parse(localStorage.getItem("demo_applications") || "[]");
       const userApps = demoApps
@@ -61,6 +61,14 @@ export function useApplications(user: UserProfile | null) {
         }
       }
       setDrafts(userDrafts);
+      setLoading(false);
+      return;
+    }
+
+    if (!isConfigured) {
+      setApplications([]);
+      setDrafts([]);
+      setError("Application service is not configured.");
       setLoading(false);
       return;
     }
