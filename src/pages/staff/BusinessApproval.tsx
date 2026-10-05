@@ -344,46 +344,29 @@ export const BusinessApproval: React.FC = () => {
     }
   };
 
-  // Generate business ID
-  const generateBusinessId = async (businessType: BusinessType): Promise<string> => {
-    const prefix = businessType === "seller" ? "SL" : businessType === "landlord" ? "LL" : "BR";
-    const year = new Date().getFullYear();
-    const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-
-    // Get count for sequence
-    const { count } = await supabase
-      .from("business_registrations")
-      .select("*", { count: "exact", head: true })
-      .eq("business_type", businessType)
-      .not("business_id", "is", null);
-
-    const seq = ((count || 0) + 1).toString().padStart(5, "0");
-    return `${prefix}${year}${letter}${seq}`;
-  };
-
   // Approve registration
   const handleApprove = async () => {
     if (!selectedRegistration || !user) return;
 
     setProcessing(true);
     try {
-      // Generate business ID
-      const businessId = await generateBusinessId(selectedRegistration.business_type);
-
-      // Update registration
-      const { error: regError } = await supabase
+      // Database trigger generates the authoritative business ID on approval.
+      const { data: approvedRegistration, error: regError } = await supabase
         .from("business_registrations")
         .update({
           status: "approved",
-          business_id: businessId,
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString(),
           approved_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
-        .eq("id", selectedRegistration.id);
+        .eq("id", selectedRegistration.id)
+        .select("business_id")
+        .single();
 
       if (regError) throw regError;
+      const businessId = approvedRegistration.business_id;
+      if (!businessId) throw new Error("Database did not generate a business ID.");
 
       // Update user's business ID
       const updateField =
