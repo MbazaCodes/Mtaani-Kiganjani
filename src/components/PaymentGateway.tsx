@@ -63,7 +63,7 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
 
   const handlePayment = async () => {
     setStep("processing");
-    // Mock processing delay
+    // Simulated processing only — no external PSP is contacted.
     await new Promise((resolve) => setTimeout(resolve, 2500));
 
     const mockPaymentData = {
@@ -73,9 +73,12 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
         method === "mobile" ? mobileProvider : method === "bank" ? bankProvider : "card",
       card_brand:
         method === "card" ? (cardDetails.number.startsWith("4") ? "Visa" : "Mastercard") : null,
-      transaction_id: `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      transaction_id: `SIM-${crypto.randomUUID().toUpperCase()}`,
+      is_simulation: true,
+      settlement_status: "simulated",
+      provider: "simulation",
       paid_at: new Date().toISOString(),
-      status: "completed",
+      status: "simulated",
     };
 
     setPaymentResult(mockPaymentData);
@@ -427,8 +430,8 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                   </h4>
                   <p className="text-stone-500">
                     {lang === "sw"
-                      ? "Asante, maombi yako yamepokelewa rasmi."
-                      : "Thank you, your application has been officially received."}
+                      ? "Huu ni uigaji wa malipo tu. Hakuna mtoa huduma wa malipo aliyeshughulikia muamala huu."
+                      : "This is a payment simulation only. No external payment provider processed this transaction."}
                   </p>
                 </div>
 
