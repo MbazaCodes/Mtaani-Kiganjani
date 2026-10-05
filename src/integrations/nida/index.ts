@@ -21,21 +21,7 @@ export async function verifyNida(nidaNumber: string): Promise<IntegrationResult<
   if (INTEGRATIONS.nida.enabled) {
     return verifyNidaLive(nidaNumber);
   }
-  return verifyNidaMock(nidaNumber);
-}
-
-/** MOCK — demonstration mode. Treats any 20-digit NIDA as structurally valid. */
-async function verifyNidaMock(nidaNumber: string): Promise<IntegrationResult<NidaVerification>> {
-  const clean = (nidaNumber || "").replace(/\D/g, "");
-  return {
-    ok: true,
-    source: "mock",
-    data: {
-      nidaNumber,
-      verified: clean.length === 20,
-      // No real personal data is returned in mock mode.
-    },
-  };
+  return { ok: false, source: "disabled", error: "NIDA verification is currently unavailable." };
 }
 
 /** LIVE — implement the real NIDA API call here when credentials are ready. */
