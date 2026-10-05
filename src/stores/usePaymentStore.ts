@@ -12,7 +12,7 @@ import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
 import type { Application } from "@/lib/supabase";
 import type { PaymentResult } from "@/types";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 
 interface PaymentState {
   payingApplication: Application | null;
@@ -39,14 +39,17 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
     if (!payingApplication) return;
 
     const paymentInfo = {
-      transaction_id: paymentData.transaction_id ?? `TXN-${Date.now()}`,
+      transaction_id: paymentData.transaction_id ?? `SIM-${crypto.randomUUID().toUpperCase()}`,
       amount: paymentData.amount ?? 0,
       payment_method: paymentData.payment_method ?? "unknown",
-      paid_at: paymentData.paid_at ?? new Date().toISOString(),
+      simulated_at: paymentData.paid_at ?? new Date().toISOString(),
+      is_simulation: true,
+      settlement_status: "simulated",
+      provider: "simulation",
     };
 
     // Demo / offline mode
-    if (!IS_SUPABASE_CONFIGURED || userId?.startsWith("demo-")) {
+    if (IS_DEMO_MODE && (!IS_SUPABASE_CONFIGURED || userId?.startsWith("demo-"))) {
       const existing: Application[] = JSON.parse(localStorage.getItem("demo_applications") || "[]");
       localStorage.setItem(
         "demo_applications",
@@ -55,8 +58,6 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
             app.id === payingApplication.id
               ? {
                   ...app,
-                  status: "issued",
-                  paid_at: new Date().toISOString(),
                   payment_data: paymentInfo,
                 }
               : app,
@@ -65,7 +66,7 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
       );
       set({ payingApplication: null });
       onDone();
-      showToast(lang === "sw" ? "Malipo yamepokelewa!" : "Payment received!", "success");
+      showToast(lang === "sw" ? "Uigaji wa malipo umekamilika" : "Payment simulation completed", "success");
       return;
     }
 
