@@ -20,7 +20,7 @@ import {
   MinusCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { cn } from "@/lib/utils";
@@ -305,7 +305,7 @@ export function ServiceManagement() {
   const fetchServices = useCallback(async () => {
     setLoading(true);
     try {
-      if (!isSupabaseConfigured) {
+      if (IS_DEMO_MODE && !isSupabaseConfigured) {
         // Demo mode - load from localStorage or use defaults
         await new Promise((resolve) => setTimeout(resolve, 500));
         const savedServices = localStorage.getItem("demo_services");
@@ -318,6 +318,15 @@ export function ServiceManagement() {
         return;
       }
 
+      if (!isSupabaseConfigured) {
+        setServices([]);
+        showToast(
+          lang === "sw" ? "Huduma za uzalishaji hazijasanidiwa" : "Production services are not configured",
+          "error",
+        );
+        return;
+      }
+
       const { data, error } = await supabase
         .from("services")
         .select("*")
@@ -326,7 +335,7 @@ export function ServiceManagement() {
       if (error) {
         console.error("Error fetching services:", error);
         showToast(lang === "sw" ? "Hitilafu kupakia huduma" : "Error loading services", "error");
-        setServices(DEMO_SERVICES);
+        setServices([]);
         return;
       }
 
@@ -434,7 +443,7 @@ export function ServiceManagement() {
         form_schema: formData.form_schema || [],
       };
 
-      if (!isSupabaseConfigured) {
+      if (IS_DEMO_MODE && !isSupabaseConfigured) {
         // Demo mode - save to localStorage
         await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -518,7 +527,7 @@ export function ServiceManagement() {
     setProcessing(true);
 
     try {
-      if (!isSupabaseConfigured) {
+      if (IS_DEMO_MODE && !isSupabaseConfigured) {
         // Demo mode - remove from localStorage
         await new Promise((resolve) => setTimeout(resolve, 300));
         const updatedServices = services.filter((service) => service.id !== id);
@@ -550,7 +559,7 @@ export function ServiceManagement() {
     setProcessing(true);
 
     try {
-      if (!isSupabaseConfigured) {
+      if (IS_DEMO_MODE && !isSupabaseConfigured) {
         // Demo mode - update localStorage
         await new Promise((resolve) => setTimeout(resolve, 300));
         const updatedServices = services.map((service) =>
