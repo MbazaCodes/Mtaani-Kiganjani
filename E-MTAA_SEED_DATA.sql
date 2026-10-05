@@ -166,81 +166,15 @@ INSERT INTO public.services (id, name, name_en, description, description_en, for
 ON CONFLICT (name) DO NOTHING;
 
 -- ================================================
--- PART 3: LOCATIONS (Tanzania Regions + Sample Districts)
+-- PART 3: LOCATIONS — INTENTIONALLY NOT SEEDED HERE
 -- ================================================
--- Regions
-INSERT INTO public.locations (id, name, level, code) VALUES
-('loc-reg-01', 'Dar es Salaam',    'region', 'DSM'),
-('loc-reg-02', 'Dodoma',           'region', 'DOD'),
-('loc-reg-03', 'Arusha',           'region', 'ARU'),
-('loc-reg-04', 'Mwanza',           'region', 'MWA'),
-('loc-reg-05', 'Mbeya',            'region', 'MBY'),
-('loc-reg-06', 'Morogoro',         'region', 'MRG'),
-('loc-reg-07', 'Tanga',            'region', 'TNG'),
-('loc-reg-08', 'Iringa',           'region', 'IRG'),
-('loc-reg-09', 'Moshi',            'region', 'MSH'),
-('loc-reg-10', 'Kilimanjaro',      'region', 'KLM'),
-('loc-reg-11', 'Geita',            'region', 'GEI'),
-('loc-reg-12', 'Mara',             'region', 'MAR'),
-('loc-reg-13', 'Kagera',           'region', 'KGR'),
-('loc-reg-14', 'Kigoma',           'region', 'KGM'),
-('loc-reg-15', 'Tabora',           'region', 'TAB'),
-('loc-reg-16', 'Rukwa',            'region', 'RKW'),
-('loc-reg-17', 'Katavi',           'region', 'KTV'),
-('loc-reg-18', 'Singida',          'region', 'SNG'),
-('loc-reg-19', 'Njombe',           'region', 'NJB'),
-('loc-reg-20', 'Lindi',            'region', 'LND'),
-('loc-reg-21', 'Mtwara',           'region', 'MTW'),
-('loc-reg-22', 'Ruvuma',           'region', 'RVM'),
-('loc-reg-23', 'Pwani',            'region', 'PWN'),
-('loc-reg-24', 'Kaskazini Unguja', 'region', 'KUJ'),
-('loc-reg-25', 'Kusini Unguja',    'region', 'KSU'),
-('loc-reg-26', 'Mjini Magharibi',  'region', 'MJM'),
-('loc-reg-27', 'Kaskazini Pemba',  'region', 'KPM'),
-('loc-reg-28', 'Kusini Pemba',     'region', 'KSP'),
-('loc-reg-29', 'Simiyu',           'region', 'SMY'),
-('loc-reg-30', 'Songwe',           'region', 'SGW'),
-('loc-reg-31', 'Shinyanga',        'region', 'SHN')
-ON CONFLICT DO NOTHING;
-
--- Districts (Dar es Salaam municipalities)
-INSERT INTO public.locations (id, name, level, parent_id, code) VALUES
-('loc-dsm-01', 'Ilala',             'district', 'loc-reg-01', 'DSM-ILA'),
-('loc-dsm-02', 'Kinondoni',         'district', 'loc-reg-01', 'DSM-KIN'),
-('loc-dsm-03', 'Temeke',            'district', 'loc-reg-01', 'DSM-TEM'),
-('loc-dsm-04', 'Ubungo',            'district', 'loc-reg-01', 'DSM-UBG'),
-('loc-dsm-05', 'Kigamboni',         'district', 'loc-reg-01', 'DSM-KIG'),
-('loc-dsm-06', 'Kivukoni',          'district', 'loc-reg-01', 'DSM-KVK'),
-('loc-dsm-07', 'Ndugumbi',          'district', 'loc-reg-01', 'DSM-NDG'),
--- Dodoma districts
-('loc-dod-01', 'Dodoma Mjini',      'district', 'loc-reg-02', 'DOD-MJN'),
-('loc-dod-02', 'Dodoma Vijijini',   'district', 'loc-reg-02', 'DOD-VIJ'),
-('loc-dod-03', 'Bahi',              'district', 'loc-reg-02', 'DOD-BAH'),
-('loc-dod-04', 'Kondoa',            'district', 'loc-reg-02', 'DOD-KND'),
--- Arusha districts
-('loc-aru-01', 'Arusha Mjini',      'district', 'loc-reg-03', 'ARU-MJN'),
-('loc-aru-02', 'Arusha Vijijini',   'district', 'loc-reg-03', 'ARU-VIJ'),
-('loc-aru-03', 'Meru',              'district', 'loc-reg-03', 'ARU-MER'),
-('loc-aru-04', 'Karatu',            'district', 'loc-reg-03', 'ARU-KRT'),
--- Mwanza districts
-('loc-mwa-01', 'Ilemela',           'district', 'loc-reg-04', 'MWA-ILE'),
-('loc-mwa-02', 'Nyamagana',         'district', 'loc-reg-04', 'MWA-NYM'),
-('loc-mwa-03', 'Kwimba',            'district', 'loc-reg-04', 'MWA-KWM'),
--- Mbeya districts
-('loc-mby-01', 'Mbeya Mjini',       'district', 'loc-reg-05', 'MBY-MJN'),
-('loc-mby-02', 'Mbeya Vijijini',    'district', 'loc-reg-05', 'MBY-VIJ'),
--- Morogoro districts
-('loc-mrg-01', 'Morogoro Mjini',    'district', 'loc-reg-06', 'MRG-MJN'),
-('loc-mrg-02', 'Morogoro Vijijini', 'district', 'loc-reg-06', 'MRG-VIJ'),
--- Tanga districts
-('loc-tng-01', 'Tanga Mjini',       'district', 'loc-reg-07', 'TNG-MJN'),
-('loc-tng-02', 'Tanga Vijijini',    'district', 'loc-reg-07', 'TNG-VIJ'),
--- Iringa districts
-('loc-irg-01', 'Iringa Mjini',      'district', 'loc-reg-08', 'IRG-MJN'),
-('loc-irg-02', 'Iringa Vijijini',   'district', 'loc-reg-08', 'IRG-VIJ')
-ON CONFLICT DO NOTHING;
-
+-- Production location reference data must come from an authoritative Tanzania
+-- administrative dataset. The previous block mixed valid names with sample/
+-- misclassified entries and has been removed rather than silently inventing fixes.
+-- See docs/LOCATION_DATA.md before importing Region → District/Council → Ward
+-- → Village/Mtaa reference data.
 -- ================================================
+
 -- PART 4: OFFICES (sample ward offices)
 -- ================================================
 INSERT INTO public.offices (name, code, region, district, ward, phone, email, address, active) VALUES
