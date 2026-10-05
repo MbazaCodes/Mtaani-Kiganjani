@@ -97,8 +97,8 @@ export const usePaymentStore = create<PaymentState>((set, get) => ({
     onDone();
     showToast(
       lang === "sw"
-        ? "Malipo yamepokelewa! Inasubiri uthibitisho wa Mtumishi."
-        : "Payment received! Awaiting staff verification.",
+        ? "Uigaji wa malipo umehifadhiwa. Huu si uthibitisho wa malipo halisi."
+        : "Payment simulation saved. This is not proof of real payment settlement.",
       "success",
     );
   },
