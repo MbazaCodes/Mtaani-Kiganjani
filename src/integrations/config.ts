@@ -3,14 +3,10 @@
  * =========================
  * Central feature-flag switchboard for all external government integrations.
  *
- * Each integration is OFF by default and returns mock/demo data until you:
- *   1. Obtain the API credentials / access agreement
- *   2. Add the credentials to your environment (.env / Vercel env vars)
- *   3. Flip the flag below to `true`
- *   4. Implement the real API call in the matching src/integrations/<name>/index.ts
- *
- * While a flag is `false`, the app uses the safe mock implementation so the
- * UI keeps working in demonstration mode.
+ * Each government/external integration is OFF by default. Disabled integrations
+ * must fail clearly; production must never synthesize a successful verification
+ * or delivery result. Enable a flag only after a real server-side provider/API
+ * implementation and credentials are in place.
  *
  * To enable an integration, set the corresponding VITE_ env var to "true"
  * (e.g. VITE_ENABLE_NIDA=true) OR change the default here.
