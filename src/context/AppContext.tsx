@@ -89,26 +89,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return;
       }
 
-      const getServiceCode = (name: string): string => {
-        const u = name.toUpperCase();
-        if (u.includes("MKAZI")) return "MKZ";
-        if (u.includes("UTAMBULISHO")) return "UTB";
-        if (u.includes("TUKIO")) return "KIB";
-        if (u.includes("MAZISHI")) return "MAZ";
-        if (u.includes("MAUZIANO")) return "MUZ";
-        if (u.includes("PANGISHA") || u.includes("PANGO")) return "PNG";
-        return (
-          name
-            .replace(/[^A-Z]/gi, "")
-            .substring(0, 3)
-            .toUpperCase() || "APP"
-        );
-      };
-
       // Upload files to storage (URL stored in form_data, not base64)
       if (files && files.length > 0) {
         const docTypes = (formData.document_types as string[] | undefined) ?? [];
-        const tempAppId = "app-" + Math.random().toString(36).substring(7);
+        const tempAppId = `upload-${crypto.randomUUID()}`;
         const uploaded = await uploadFiles(files, user.id, tempAppId, docTypes);
         if (uploaded.length > 0) {
           (formData as Record<string, unknown>).uploaded_documents = uploaded;
@@ -128,10 +112,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             .trim();
       }
 
-      const now = new Date();
-      const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
-      const randomNum = Math.floor(1000 + Math.random() * 9000);
-      const applicationNumber = `TZ-${getServiceCode(selectedService.name)}-${dateStr}-${randomNum}`;
+      const demoApplicationNumber = `DEMO-TZ-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
       let officeRegistryId: string | null =
         ((user as unknown as Record<string, unknown>).assigned_office_id as string) ?? null;
@@ -154,11 +135,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectedService.name.toLowerCase().includes("michango");
 
       const newApp = {
-        id: "app-" + Math.random().toString(36).substring(7),
+        id: `demo-app-${crypto.randomUUID()}`,
         user_id: user.id,
         service_id: selectedService.id,
         service_name: selectedService.name,
-        application_number: applicationNumber,
+        application_number: demoApplicationNumber,
         form_data: formData,
         status: isMalipo ? ("paid" as const) : ("submitted" as const),
         region: user.region,
@@ -289,8 +270,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   : `${isRental ? "Rental Agreement" : "Sales Agreement"} - Approval Required`,
               message:
                 lang === "sw"
-                  ? `Umechaguliwa kama ${isRental ? "Mpangaji" : "Mnunuzi"} katika makubaliano (${applicationNumber}).`
-                  : `You have been selected as ${isRental ? "Tenant" : "Buyer"} in agreement (${applicationNumber}).`,
+                  ? `Umechaguliwa kama ${isRental ? "Mpangaji" : "Mnunuzi"} katika makubaliano (${insertedApp.application_number}).`
+                  : `You have been selected as ${isRental ? "Tenant" : "Buyer"} in agreement (${insertedApp.application_number}).`,
               type: "info",
             });
           } catch {
@@ -301,7 +282,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logActivity(user.id, "submit_application", {
           applicationId: insertedApp?.id,
           service: newApp.service_name,
-          number: newApp.application_number,
+          number: insertedApp?.application_number,
         });
         showToast(
           lang === "sw" ? "Maombi yametumwa kikamilifu!" : "Application submitted successfully!",
