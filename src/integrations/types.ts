@@ -7,8 +7,8 @@
  */
 
 export type IntegrationResult<T> =
-  | { ok: true; data: T; source: "live" | "mock" }
-  | { ok: false; error: string; source: "live" | "mock" };
+  | { ok: true; data: T; source: "live" | "mock" | "disabled" }
+  | { ok: false; error: string; source: "live" | "mock" | "disabled" };
 
 /** NIDA verification result */
 export interface NidaVerification {
@@ -55,7 +55,7 @@ export interface PaymentRequest {
 export interface PaymentResult {
   transactionId: string;
   receiptNumber: string;
-  status: "completed" | "pending" | "failed";
+  status: "completed" | "pending" | "failed" | "simulated";
   amount: number;
   paidAt: string;
   method: string;
