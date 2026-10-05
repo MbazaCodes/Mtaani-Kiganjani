@@ -1,9 +1,10 @@
 # Integrations
 
 This folder holds all external government/service integrations for Mtaani Kiganjani.
-Every integration ships **disabled** and returns safe **mock data**, so the app
-runs fully in demonstration mode. When you obtain real API access, flip a flag
-and implement one function — nothing else in the app needs to change.
+Government/external integrations ship **disabled**. Disabled NIDA, TRA, Police
+and SMS integrations fail clearly instead of manufacturing successful results.
+Payments are the temporary exception: an explicitly labelled simulation remains
+available until a real provider is connected.
 
 ## How it works
 
@@ -19,14 +20,15 @@ src/integrations/
 └── sms/             ← transactional SMS
 ```
 
-Each integration exposes a single public function that auto-routes:
+Each integration exposes a single public function. Real integrations route only
+when explicitly enabled; otherwise unavailable integrations return a disabled error:
 
 ```ts
 import { verifyNida } from "@/integrations";
 
 const result = await verifyNida("1988...0129");
 if (result.ok) {
-  // result.data.verified, result.source === "mock" | "live"
+  // result.data.verified, result.source === "live"
 }
 ```
 
@@ -81,6 +83,7 @@ VITE_SMS_SENDER_ID=E-MTAA
 
 ## Demonstration mode
 
-While all flags are `false`, the app shows a "DEMONSTRATION ONLY" disclaimer in
-the UI footer and on every generated PDF. Once real integrations are live you
-can use `ANY_INTEGRATION_LIVE` from `config.ts` to adjust that messaging.
+Application demo behavior is opt-in with `VITE_DEMO_MODE=true`. Production must
+use `VITE_DEMO_MODE=false` and must not fall back to fake operational records
+because a network/backend dependency is unavailable. Payment simulation remains
+separately labelled and non-authoritative.
