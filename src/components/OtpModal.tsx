@@ -2,7 +2,6 @@
  * OtpModal — Reusable OTP popup
  *
  * - Shows a centred modal overlay with 6 individual digit boxes
- * - Default placeholder: 123456 (dev/demo mode)
  * - Supports phone (SMS) and email channels
  * - Confirm button triggers onVerify(code)
  * - Resend triggers onResend()
@@ -37,7 +36,6 @@ export interface OtpModalProps {
   lang?: string;
 }
 
-const DEFAULT_OTP = "123456";
 const DIGIT_COUNT = 6;
 
 export const OtpModal: React.FC<OtpModalProps> = ({
@@ -61,11 +59,9 @@ export const OtpModal: React.FC<OtpModalProps> = ({
   const [resendCooldown, setResendCooldown] = useState(0);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Pre-fill with default 123456 placeholder when modal opens
   useEffect(() => {
     if (open) {
-      setDigits(DEFAULT_OTP.split(""));
-      // focus first box after a tick
+      setDigits(Array(DIGIT_COUNT).fill(""));
       setTimeout(() => inputRefs.current[0]?.focus(), 80);
     } else {
       setDigits(Array(DIGIT_COUNT).fill(""));
@@ -131,7 +127,7 @@ export const OtpModal: React.FC<OtpModalProps> = ({
 
   const handleResend = () => {
     if (resendCooldown > 0 || loading) return;
-    setDigits(DEFAULT_OTP.split(""));
+    setDigits(Array(DIGIT_COUNT).fill(""));
     setResendCooldown(30);
     onResend();
   };
@@ -215,12 +211,6 @@ export const OtpModal: React.FC<OtpModalProps> = ({
                 </div>
 
                 {/* Dev/demo hint */}
-                <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-                  <ShieldCheck size={13} className="text-amber-600 shrink-0" />
-                  <p className="text-[11px] text-amber-700 font-medium">
-                    {L("Demo: Namba ya default ni 123456", "Demo mode: default code is 123456")}
-                  </p>
-                </div>
 
                 {/* Lockout state */}
                 {isLocked ? (
@@ -253,7 +243,7 @@ export const OtpModal: React.FC<OtpModalProps> = ({
                           onChange={(e) => handleDigitChange(idx, e.target.value)}
                           onKeyDown={(e) => handleKeyDown(idx, e)}
                           onFocus={(e) => e.target.select()}
-                          placeholder={DEFAULT_OTP[idx]}
+                          placeholder="•"
                           className={cn(
                             "w-11 h-14 text-center text-2xl font-black font-mono rounded-xl border-2 outline-none transition-all",
                             digits[idx]
