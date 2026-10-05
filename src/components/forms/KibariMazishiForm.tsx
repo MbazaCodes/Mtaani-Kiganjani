@@ -297,7 +297,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const ref = `BP-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000 + 100000)}`;
+      const ref = `TEMP-BP-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const files = docs.map((d) => d.file);
       await onSubmit(
         {
@@ -527,7 +527,7 @@ export const KibariMazishiForm: React.FC<FormProps> = ({
         </div>
         <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5 text-left space-y-3 max-w-sm mx-auto">
           <p className="text-xs font-black text-stone-600 uppercase tracking-wider">
-            {L("Namba ya Maombi", "Application Reference")}
+            {L("Rejea ya Muda", "Temporary Reference")}
           </p>
           <p className="text-2xl font-black text-stone-800 font-mono">{appRef}</p>
           <div className="space-y-2 pt-2 border-t border-stone-200">
