@@ -339,15 +339,11 @@ export function ServiceManagement() {
         return;
       }
 
-      if (data && data.length > 0) {
-        setServices(data);
-      } else {
-        setServices(DEMO_SERVICES);
-      }
+      setServices(data || []);
     } catch (error) {
       console.error("Exception in fetchServices:", error);
       showToast(lang === "sw" ? "Hitilafu ya mfumo" : "System error", "error");
-      setServices(DEMO_SERVICES);
+      setServices([]);
     } finally {
       setLoading(false);
     }
