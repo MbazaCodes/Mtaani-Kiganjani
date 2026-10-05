@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { supabase, UserProfile } from "@/lib/supabase";
 import { adminConfirmUserEmail } from "@/lib/supabase-admin";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -75,6 +75,7 @@ export function StaffCitizenManagement() {
     lastName: "",
     email: "",
     phone: "",
+    password: "",
     nidaNumber: "",
     sex: "Me",
     region: "",
@@ -368,10 +369,10 @@ export function StaffCitizenManagement() {
     try {
       const isConfigured = IS_SUPABASE_CONFIGURED;
 
-      if (!isConfigured) {
+      if (IS_DEMO_MODE && !isConfigured) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         const citizen: UserProfile = {
-          id: "demo-" + Math.random().toString(36).substring(7),
+          id: `demo-${crypto.randomUUID()}`,
           first_name: newCitizen.firstName.toUpperCase(),
           middle_name: newCitizen.middleName.toUpperCase(),
           last_name: newCitizen.lastName.toUpperCase(),
@@ -385,7 +386,7 @@ export function StaffCitizenManagement() {
           street: newCitizen.street,
           role: "citizen",
           account_status: "active",
-          is_verified: true, // Staff created citizens are verified by default
+          is_verified: false,
         };
 
         const existing = JSON.parse(localStorage.getItem("demo_citizens") || "[]");
@@ -399,6 +400,7 @@ export function StaffCitizenManagement() {
           lastName: "",
           email: "",
           phone: "",
+          password: "",
           nidaNumber: "",
           sex: "Me",
           region: "",
@@ -413,12 +415,75 @@ export function StaffCitizenManagement() {
         return;
       }
 
-      // In real mode, we'd probably use a service role or a specific function to create users
-      // For now, we'll simulate the insert into the users table
-      // Note: Supabase Auth requires a user to be created in auth.users first.
-      // In a real app, this would be an Edge Function.
-      throw new Error(
-        "Manual registration requires backend integration (Edge Functions). Please use Demo Mode for this feature.",
+      if (!isConfigured) {
+        throw new Error(
+          lang === "sw"
+            ? "Huduma ya usajili haijasanidiwa."
+            : "Citizen registration service is not configured.",
+        );
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error(lang === "sw" ? "Ingia tena ili kuendelea." : "Please sign in again.");
+      }
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const apiKey = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+        import.meta.env.VITE_SUPABASE_ANON_KEY ||
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE ||
+        "") as string;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/register-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: apiKey,
+        },
+        body: JSON.stringify({
+          email: newCitizen.email,
+          password: newCitizen.password,
+          first_name: newCitizen.firstName,
+          last_name: newCitizen.lastName,
+          phone: newCitizen.phone,
+          nida_number: newCitizen.nidaNumber,
+          region: newCitizen.region,
+          district: newCitizen.district,
+          ward: newCitizen.ward,
+          street: newCitizen.street,
+        }),
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(
+          result?.error?.message ||
+            (lang === "sw" ? "Usajili umeshindwa." : "Citizen registration failed."),
+        );
+      }
+
+      setShowAddModal(false);
+      setNewCitizen({
+        firstName: "",
+        middleName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        password: "",
+        nidaNumber: "",
+        sex: "Me",
+        region: "",
+        district: "",
+        ward: "",
+        street: "",
+      });
+      await fetchCitizens();
+      showToast(
+        lang === "sw" ? "Mwananchi amesajiliwa kikamilifu!" : "Citizen registered successfully!",
+        "success",
       );
     } catch (error: unknown) {
       const _e = error as { message?: string };
@@ -859,6 +924,19 @@ export function StaffCitizenManagement() {
                       onChange={(e) => setNewCitizen({ ...newCitizen, email: e.target.value })}
                       className="w-full h-12 px-4 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
                       aria-label={lang === "sw" ? "Barua Pepe" : "Email"}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-stone-500 uppercase tracking-widest ml-1">
+                      {lang === "sw" ? "Nywila ya Muda" : "Temporary Password"}
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={newCitizen.password}
+                      onChange={(e) => setNewCitizen({ ...newCitizen, password: e.target.value })}
+                      className="w-full h-12 px-4 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
                     />
                   </div>
                   <div className="space-y-2">
