@@ -14,7 +14,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { IS_SUPABASE_CONFIGURED } from "@/lib/config";
+import { IS_DEMO_MODE, IS_SUPABASE_CONFIGURED } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { TANZANIA_ADDRESS_DATA } from "@/lib/addressData";
@@ -132,10 +132,19 @@ export function LocationManagement() {
   const fetchLocations = useCallback(async () => {
     setLoading(true);
     try {
-      if (!isSupabaseConfigured) {
+      if (IS_DEMO_MODE && !isSupabaseConfigured) {
         // Simulate API delay
         await new Promise((resolve) => setTimeout(resolve, 500));
-        setLocations(DEMO_LOCATIONS);
+        setLocations([]);
+        return;
+      }
+
+      if (!isSupabaseConfigured) {
+        setLocations([]);
+        showToast(
+          lang === "sw" ? "Huduma ya maeneo haijasanidiwa" : "Location service is not configured",
+          "error",
+        );
         return;
       }
 
@@ -150,11 +159,11 @@ export function LocationManagement() {
       if (error) {
         console.error("Error fetching locations:", error);
         showToast(lang === "sw" ? "Hitilafu kupakia maeneo" : "Error loading locations", "error");
-        setLocations(DEMO_LOCATIONS);
+        setLocations([]);
         return;
       }
 
-      setLocations(data && data.length > 0 ? data : DEMO_LOCATIONS);
+      setLocations(data || []);
     } catch (error) {
       console.error("Exception in fetchLocations:", error);
       showToast(lang === "sw" ? "Hitilafu ya mfumo" : "System error", "error");
@@ -206,7 +215,7 @@ export function LocationManagement() {
     setProcessing(true);
 
     try {
-      if (!isSupabaseConfigured) {
+      if (IS_DEMO_MODE && !isSupabaseConfigured) {
         // Demo mode - save to localStorage
         await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -288,7 +297,7 @@ export function LocationManagement() {
     setProcessing(true);
 
     try {
-      if (!isSupabaseConfigured) {
+      if (IS_DEMO_MODE && !isSupabaseConfigured) {
         // Demo mode - remove from state
         await new Promise((resolve) => setTimeout(resolve, 300));
         setLocations((prev) => prev.filter((l) => l.id !== id));
