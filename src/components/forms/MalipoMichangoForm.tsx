@@ -324,7 +324,7 @@ export const MalipoMichangoForm: React.FC<FormProps> = ({
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const ref = `PY-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000 + 100000)}`;
+      const ref = `TEMP-PY-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const files = proofDoc ? [proofDoc.file] : [];
       await onSubmit(
         {
