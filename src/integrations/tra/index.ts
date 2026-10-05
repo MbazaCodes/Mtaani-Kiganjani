@@ -19,14 +19,8 @@ export async function lookupTraObligations(
   if (INTEGRATIONS.tra.enabled) {
     return lookupTraObligationsLive(tinOrNida);
   }
-  return lookupTraObligationsMock(tinOrNida);
-}
-
-async function lookupTraObligationsMock(
-  _tinOrNida: string,
-): Promise<IntegrationResult<TraObligation[]>> {
-  // Demo: no real obligations in mock mode.
-  return { ok: true, source: "mock", data: [] };
+  void tinOrNida;
+  return { ok: false, source: "disabled", error: "TRA integration is currently unavailable." };
 }
 
 async function lookupTraObligationsLive(
