@@ -212,9 +212,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             user_id: user.id,
             service_id: isRealUuid ? selectedService.id : null,
             service_name: selectedService.name ?? selectedService.name_en,
-            application_number: applicationNumber,
             form_data: formData,
-            status: isMalipo ? "paid" : "submitted",
+            status: "submitted",
             region: user.region ?? null,
             district: user.district ?? null,
             ward: user.ward ?? null,
@@ -225,7 +224,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             target_user_nida: sendForApproval ? (formData.target_user_nida ?? null) : null,
             target_user_role: sendForApproval ? targetUserRole : null,
             agreement_status: sendForApproval && targetUserId ? "pending" : null,
-            approved_at: isMalipo ? new Date().toISOString() : null,
+            approved_at: null,
           })
           .select()
           .single();
