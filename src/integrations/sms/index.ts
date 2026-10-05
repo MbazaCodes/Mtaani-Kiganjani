@@ -22,20 +22,8 @@ export async function sendSms(msg: SmsMessage): Promise<IntegrationResult<SmsRes
   if (INTEGRATIONS.sms.enabled) {
     return sendSmsLive(msg);
   }
-  return sendSmsMock(msg);
-}
-
-async function sendSmsMock(msg: SmsMessage): Promise<IntegrationResult<SmsResult>> {
-  // Demo: do not actually send. (No console noise in production.)
   void msg;
-  return {
-    ok: true,
-    source: "mock",
-    data: {
-      messageId: `MOCK-SMS-${Date.now()}`,
-      status: "queued",
-    },
-  };
+  return { ok: false, source: "disabled", error: "SMS delivery is currently unavailable." };
 }
 
 async function sendSmsLive(msg: SmsMessage): Promise<IntegrationResult<SmsResult>> {
