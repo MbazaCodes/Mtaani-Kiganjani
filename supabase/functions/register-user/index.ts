@@ -9,7 +9,9 @@ type RegisterUserBody = {
   email?: string;
   password?: string;
   first_name?: string;
+  middle_name?: string;
   last_name?: string;
+  sex?: string;
   phone?: string;
   nida_number?: string;
   region?: string;
@@ -113,7 +115,9 @@ Deno.serve(async (req) => {
     id: created.user.id,
     email,
     first_name: firstName,
+    middle_name: body.middle_name?.trim() || null,
     last_name: lastName,
+    sex: body.sex?.trim() || null,
     phone,
     nida_number: body.nida_number?.trim() || null,
     region: body.region?.trim() || null,
