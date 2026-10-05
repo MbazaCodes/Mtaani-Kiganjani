@@ -17,7 +17,7 @@ function createSupabaseClient() {
       global: {
         headers: { "x-client-info": "e-mtaa-local" },
         fetch: (url, options) => {
-          const localUrl = url.toString().replace(DEFAULT_URL, LOCAL_URL);
+          const localUrl = url.toString();
           const controller = new AbortController();
           const timer = setTimeout(() => controller.abort(), 15000);
           return fetch(localUrl, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
