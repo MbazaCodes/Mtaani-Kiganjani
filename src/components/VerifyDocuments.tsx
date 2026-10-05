@@ -281,7 +281,7 @@ export function VerifyDocuments({ lang, onBack, userRole = "citizen" }: VerifyDo
   const [isDragOver, setIsDragOver] = useState(false);
 
   const hasFullAccess = userRole === "admin" || userRole === "staff";
-  const availableDocTypes = hasFullAccess ? DOCUMENT_TYPES : PUBLIC_DOCUMENT_TYPES;
+  const availableDocTypes = PUBLIC_DOCUMENT_TYPES;
   const selectedDocument =
     availableDocTypes.find((d) => d.id === selectedDocType) || availableDocTypes[0];
 
@@ -515,10 +515,14 @@ export function VerifyDocuments({ lang, onBack, userRole = "citizen" }: VerifyDo
         await verifyEMtaaApplication(trimmed);
       } else if (selectedDocType === "ct_id") {
         await verifyCTID(trimmed);
-      } else if (selectedDocType === "nida") {
-        await verifyNIDA(trimmed);
       } else {
-        await verifyOtherDocument(trimmed);
+        setVerificationStatus("invalid");
+        setErrorDetail(
+          L(
+            "Uhakiki wa nyaraka za nje haupatikani kwa sasa.",
+            "External document verification is currently unavailable.",
+          ),
+        );
       }
     } catch (err) {
       console.error("VerifyDocuments error:", err);
@@ -696,94 +700,24 @@ export function VerifyDocuments({ lang, onBack, userRole = "citizen" }: VerifyDo
   };
 
   // ── NIDA ──────────────────────────────────────────────────────────────────
-  const verifyNIDA = async (searchTerm: string) => {
-    const upper = searchTerm.toUpperCase();
-
-    const { data, error } = await supabase
-      .from("users")
-      .select(
-        "id,citizen_id,first_name,middle_name,last_name,nida_number,phone,email,region,district,ward,street,is_verified,created_at,date_of_birth,gender",
-      )
-      .eq("nida_number", upper)
-      .maybeSingle();
-
-    if (error) {
-      console.error("NIDA query error:", error);
-      setVerificationStatus("invalid");
-      setErrorDetail(L("Hitilafu ya mfumo: " + error.message, "System error: " + error.message));
-      return;
-    }
-
-    if (!data) {
-      setVerificationStatus("invalid");
-      setErrorDetail(
-        L(
-          `NIDA "${upper}" haijapatikana kwenye mfumo wetu.`,
-          `NIDA "${upper}" not found in our system.`,
-        ),
-      );
-      return;
-    }
-
-    setVerificationStatus("verified");
-    setVerifiedDocument({
-      documentType: "nida",
-      type: L("Kitambulisho cha Taifa (NIDA)", "National ID (NIDA)"),
-      name: L("NIDA", "National ID"),
-      issueDate: data.created_at ? new Date(data.created_at).toLocaleDateString() : "—",
-      verificationCode: String(data.nida_number ?? upper),
-      status: "valid",
-      applicantMasked: maskName(String(data.first_name ?? ""), String(data.last_name ?? "")),
-      applicantFull: `${data.first_name ?? ""} ${data.middle_name ?? ""} ${data.last_name ?? ""}`
-        .replace(/\s+/g, " ")
-        .trim(),
-      nidaNumber: String(data.nida_number ?? ""),
-      nidaMasked: maskNida(String(data.nida_number ?? "")),
-      phone: String(data.phone ?? ""),
-      phoneMasked: maskPhone(String(data.phone ?? "")),
-      email: String(data.email ?? ""),
-      region: String(data.region ?? ""),
-      district: String(data.district ?? ""),
-      ward: String(data.ward ?? ""),
-      street: String(data.street ?? ""),
-      dateOfBirth: String(data.date_of_birth ?? ""),
-      gender: String(data.gender ?? ""),
-      citizenId: String(data.citizen_id ?? ""),
-    });
+  const verifyNIDA = async (_searchTerm: string) => {
+    setVerificationStatus("invalid");
+    setErrorDetail(
+      L(
+        "Uhakiki wa NIDA haupatikani kwa sasa.",
+        "NIDA verification is currently unavailable.",
+      ),
+    );
   };
 
-  // ── Other government documents (simulated) ────────────────────────────────
-  const verifyOtherDocument = async (searchTerm: string) => {
-    await new Promise((r) => setTimeout(r, 1200));
-
-    if (searchTerm.length < 5) {
-      setVerificationStatus("invalid");
-      setErrorDetail(
-        L("Namba ni fupi sana. Angalia tena.", "Number is too short. Please check again."),
-      );
-      return;
-    }
-
-    const docType = DOCUMENT_TYPES.find((d) => d.id === selectedDocType);
-    setVerificationStatus("verified");
-    setVerifiedDocument({
-      documentType: selectedDocType,
-      type: L(docType?.nameSw ?? "", docType?.name ?? ""),
-      name: docType?.name ?? "Unknown Document",
-      issueDate: new Date(Date.now() - Math.random() * 31536000000 * 3).toLocaleDateString(),
-      verificationCode: searchTerm.toUpperCase(),
-      status: "valid",
-      applicantMasked: "J*** M***",
-      applicantFull: "John Mwangi Doe",
-      nidaNumber: "19850101-12345-00001-00",
-      nidaMasked: maskNida("19850101-12345-00001-00"),
-      phone: "+255754123456",
-      phoneMasked: maskPhone("+255754123456"),
-      region: "Dar es Salaam",
-      district: "Kinondoni",
-      ward: "Mikocheni",
-      isSimulated: true,
-    });
+  const verifyOtherDocument = async (_searchTerm: string) => {
+    setVerificationStatus("invalid");
+    setErrorDetail(
+      L(
+        "Uhakiki wa nyaraka za nje haupatikani kwa sasa.",
+        "External document verification is currently unavailable.",
+      ),
+    );
   };
 
   // ── Status label helper ───────────────────────────────────────────────────
