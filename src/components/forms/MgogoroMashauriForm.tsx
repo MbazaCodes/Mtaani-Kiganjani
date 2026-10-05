@@ -416,7 +416,7 @@ export const MgogoroMashauriForm: React.FC<FormProps> = ({
     setSubmitting(true);
     try {
       const prefix = isCitizenDispute ? "DS" : "CI"; // Dispute or Community Issue
-      const ref = `${prefix}-${new Date().getFullYear()}-${Math.floor(Math.random() * 900000 + 100000)}`;
+      const ref = `TEMP-${prefix}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const files = docs.map((d) => d.file);
       await onSubmit(
         {
