@@ -17,6 +17,10 @@ import { getUserTier, getServiceAccess } from "@/lib/verification";
 import { VerificationBadge } from "@/components/VerificationBadge";
 import { cn } from "@/lib/utils";
 
+const IntroduceGuest = React.lazy(() =>
+  import("./IntroduceGuest").then((m) => ({ default: m.IntroduceGuest })),
+);
+
 interface ServicesProps {
   onSelectService: (service: Service) => void;
   onRefresh?: () => void;
@@ -63,6 +67,7 @@ const SERVICE_META: Record<
 };
 
 const CATEGORIES = [
+  { id: "free", sw: "Huduma za Bure", en: "Free Services", icon: "🏠" },
   { id: "all", sw: "Zote", en: "All", icon: "📋" },
   { id: "permits", sw: "Vibali", en: "Permits", icon: "📜" },
   { id: "documents", sw: "Nyaraka", en: "Documents & ID", icon: "📄" },
@@ -78,6 +83,7 @@ export function Services({ onSelectService }: ServicesProps) {
   const L = (sw: string, en: string) => (lang === "sw" ? sw : en);
   const tier = getUserTier(user);
 
+  const [showGuest, setShowGuest] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
@@ -105,6 +111,13 @@ export function Services({ onSelectService }: ServicesProps) {
     if (service.fee > 0) return formatCurrency(service.fee, displayCurrency);
     return L("Bure / Kinachobadilika", "Free / Variable");
   };
+
+  if (showGuest)
+    return (
+      <React.Suspense fallback={<p>Loading...</p>}>
+        <IntroduceGuest onBack={() => setShowGuest(false)} />
+      </React.Suspense>
+    );
 
   return (
     <motion.div
@@ -157,8 +170,31 @@ export function Services({ onSelectService }: ServicesProps) {
         ))}
       </div>
 
+      {(activeCategory === "all" || activeCategory === "free") &&
+        (!searchQuery.trim() ||
+          "introduce guest tambulisha mgeni free bure".includes(searchQuery.toLowerCase())) && (
+          <button
+            onClick={() => setShowGuest(true)}
+            className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-left space-y-2"
+          >
+            <span className="text-xs font-bold text-emerald-700">
+              {L("Huduma za Bure", "Free Services")}
+            </span>
+            <h3 className="text-lg font-black">🏠 {L("Tambulisha Mgeni", "Introduce Guest")}</h3>
+            <p className="text-sm">
+              {L(
+                "Hifadhi taarifa za mgeni nyumbani kwako kwa kumbukumbu za serikali ya mtaa. Hakuna idhini inayohitajika.",
+                "File details of a guest staying at your premises for local government reference. No approval required.",
+              )}
+            </p>
+            <span className="text-sm font-bold text-emerald-800">
+              {L("Tambulisha Mgeni →", "Introduce Guest →")}
+            </span>
+          </button>
+        )}
+
       {/* Verification tier banner — speed info only, no locking */}
-      {tier !== "NIDA_VERIFIED" && (
+      {activeCategory !== "free" && tier !== "NIDA_VERIFIED" && (
         <div className="rounded-xl p-3.5 flex items-start gap-3 border bg-blue-50 border-blue-200">
           <Clock size={16} className="shrink-0 mt-0.5 text-blue-500" />
           <div className="flex-1">
@@ -176,7 +212,7 @@ export function Services({ onSelectService }: ServicesProps) {
         </div>
       )}
 
-      {tier === "NIDA_VERIFIED" && (
+      {activeCategory !== "free" && tier === "NIDA_VERIFIED" && (
         <div className="rounded-xl p-3 bg-emerald-50 border border-emerald-200 flex items-center gap-2.5">
           <Zap size={14} className="text-emerald-600 shrink-0" />
           <p className="text-xs font-bold text-emerald-700">
@@ -191,7 +227,8 @@ export function Services({ onSelectService }: ServicesProps) {
 
       {/* Service Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        {filteredServices.length === 0 ? (
+        {filteredServices.length === 0 &&
+        activeCategory === "free" ? null : filteredServices.length === 0 ? (
           <div className="col-span-2 bg-white rounded-2xl border border-stone-200 p-8 text-center">
             <p className="text-stone-500 font-bold">
               {L("Hakuna huduma zinazolingana", "No matching services")}

@@ -87,7 +87,7 @@ interface Media {
   media_type: string;
 }
 
-export function StaffReportsInbox() {
+function CommunityReportsInbox() {
   const { user } = useAuth();
   const { lang } = useLanguage();
   const { showToast } = useToast();
@@ -514,5 +514,30 @@ export function StaffReportsInbox() {
         </div>
       )}
     </motion.div>
+  );
+}
+
+const GuestRegister = React.lazy(() =>
+  import("../IntroduceGuest").then((m) => ({ default: m.IntroduceGuest })),
+);
+export function StaffReportsInbox() {
+  const [guests, setGuests] = useState(false);
+  const { lang } = useLanguage();
+  if (guests)
+    return (
+      <React.Suspense fallback={<p>Loading...</p>}>
+        <GuestRegister register onBack={() => setGuests(false)} />
+      </React.Suspense>
+    );
+  return (
+    <div className="space-y-4">
+      <button
+        onClick={() => setGuests(true)}
+        className="rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white"
+      >
+        {lang === "sw" ? "Rejesta ya Wageni" : "Guest Register"}
+      </button>
+      <CommunityReportsInbox />
+    </div>
   );
 }
